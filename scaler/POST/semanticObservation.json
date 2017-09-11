@@ -1,0 +1,68 @@
+[
+  {
+    "id": "semObs1",
+    "virtualSensorId": "vSensor1",
+    "timestamp": "2017-06-06 02:01:01",
+    "typeId": "location",
+    "semanticEntityId": "user1",
+    "payload": {
+      "location": "2100"
+    }
+
+  },
+  {
+    "id": "semObs2",
+    "virtualSensorId": "vSensor1",
+    "timestamp": "2017-06-06 03:01:01",
+    "typeId": "location",
+    "semanticEntityId": "user2",
+    "payload": {
+      "location": "2200"
+    }
+
+  },
+  {
+    "id": "semObs3",
+    "virtualSensorId": "vSensor1",
+    "timestamp": "2017-06-06 03:03:01",
+    "typeId": "location",
+    "semanticEntityId": "user3",
+    "payload": {
+      "location": "1100"
+    }
+
+  },
+  {
+    "id": "semObs4",
+    "virtualSensorId": "vSensor1",
+    "timestamp": "2017-06-06 01:01:01",
+    "typeId": "location",
+    "semanticEntityId": "user1",
+    "payload": {
+      "location": "1200"
+    }
+
+  },
+  {
+    "id": "semObs5",
+    "virtualSensorId": "vSensor1",
+    "timestamp": "2017-06-06 04:01:01",
+    "typeId": "location",
+    "semanticEntityId": "user2",
+    "payload": {
+      "location": "1100"
+    }
+
+  },
+  {
+    "id": "semObs6",
+    "virtualSensorId": "vSensor1",
+    "timestamp": "2017-06-06 01:10:01",
+    "typeId": "location",
+    "semanticEntityId": "user3",
+    "payload": {
+      "location": "3100"
+    }
+
+  }
+]

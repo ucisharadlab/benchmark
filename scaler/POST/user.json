@@ -1,0 +1,101 @@
+[
+  {
+    "id": "admin",
+    "name": "Admin",
+    "googleAuthToken": "a9a41d99-1557-45a0-aed0-3aca3e0fd36a",
+    "emailId": "admin@uci.edu",
+    "groupIds": []
+  },
+  {
+    "id": "user1",
+    "name": "Peeyush Gupta",
+    "googleAuthToken": "b9a41d99-1557-45a0-aed0-3aca3e0fd36a",
+    "emailId": "peeyush@uci.edu",
+    "groupIds": ["ISG"]
+  },
+  {
+    "id": "user2",
+    "name": "Dhrub",
+    "googleAuthToken": "81ba6c8b-4f7d-4e7b-9a27-fcc052a1a868",
+    "emailId": "dhrub@uci.edu",
+    "groupIds": ["ISG"]
+  },
+  {
+    "id": "user3",
+    "name": "Primal",
+    "googleAuthToken": "53682347-f287-4666-9c19-d3d9f804fd39",
+    "emailId": "primal@uci.edu",
+    "groupIds": ["ISG"]
+  },
+  {
+    "id": "user4",
+    "name": "Roberto",
+    "googleAuthToken": "b1ba6c8b-4f7d-4e7b-9a27-fcc052a1a868",
+    "emailId": "roberto@uci.edu",
+    "groupIds": ["ISG"]
+  },
+  {
+    "id": "user5",
+    "name": "Joyce",
+    "googleAuthToken": "a1ba6c8b-4f7d-4e7b-9a27-fcc052a1a868",
+    "emailId": "joyce@uci.edu",
+    "groupIds": ["ISG"]
+  },
+  {
+    "id": "user6",
+    "name": "Sameera",
+    "googleAuthToken": "11ba6c8b-4f7d-4e7b-9a27-fcc052a1a868",
+    "emailId": "sameera@uci.edu",
+    "groupIds": ["ISG"]
+  },
+  {
+    "id": "user7",
+    "name": "Sumaya",
+    "googleAuthToken": "21ba6c8b-4f7d-4e7b-9a27-fcc052a1a868",
+    "emailId": "sumaya@uci.edu",
+    "groupIds": ["ISG"]
+  },
+  {
+    "id": "user8",
+    "name": "Sharad",
+    "googleAuthToken": "31ba6c8b-4f7d-4e7b-9a27-fcc052a1a868",
+    "emailId": "sharad@uci.edu",
+    "groupIds": ["ISG"]
+  },
+  {
+    "id": "user9",
+    "name": "Nalini",
+    "googleAuthToken": "41ba6c8b-4f7d-4e7b-9a27-fcc052a1a868",
+    "emailId": "nalini@uci.edu",
+    "groupIds": ["ISG"]
+  },
+  {
+    "id": "user10",
+    "name": "Alfred",
+    "googleAuthToken": "51ba6c8b-4f7d-4e7b-9a27-fcc052a1a868",
+    "emailId": "alfred@uci.edu",
+    "groupIds": ["ISG"]
+  },
+  {
+    "id": "user11",
+    "name": "abdul",
+    "googleAuthToken": "61ba6c8b-4f7d-4e7b-9a27-fcc052a1a868",
+    "emailId": "abdul@uci.edu",
+    "groupIds": ["ISG"]
+  },
+  {
+    "id": "user12",
+    "name": "Shantanu",
+    "googleAuthToken": "71ba6c8b-4f7d-4e7b-9a27-fcc052a1a868",
+    "emailId": "shantanu@uci.edu",
+    "groupIds": ["ISG"]
+  },
+  {
+    "id": "user13",
+    "name": "Nisha",
+    "googleAuthToken": "91ba6c8b-4f7d-4e7b-9a27-fcc052a1a868",
+    "emailId": "nisha@uci.edu",
+    "groupIds": ["ISG"]
+  }
+
+]

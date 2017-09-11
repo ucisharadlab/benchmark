@@ -1,0 +1,23 @@
+[
+  {
+    "id": "location",
+    "name": "Location",
+    "description": "Location Semantic Observation",
+    "payloadSchema": "[{\"location\": \"STRING\"}]"
+
+  },
+  {
+    "id": "temperature",
+    "name": "Temperature",
+    "description": "Temperature Semantic Observation",
+    "payloadSchema": "[{\"energy\": \"INTEGER\"}]"
+
+  },
+  {
+  "id": "occupancy",
+  "name": "Occupancy",
+  "description": "Occupancy Semantic Observation",
+  "payloadSchema": "[{\"occupancy\": \"INTEGER\"}]"
+  }
+
+]

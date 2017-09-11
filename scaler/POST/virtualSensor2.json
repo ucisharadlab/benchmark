@@ -1,0 +1,9 @@
+{
+  "id": "vSensor2",
+  "name": "WiFiToOccupancy",
+  "description": "Converting WiFi Data to Occupancy",
+  "language": "java",
+  "typeId": "WiFiToLocation",
+  "projectName": "WiFiToPresence"
+
+}

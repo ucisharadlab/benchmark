@@ -1,0 +1,9 @@
+{
+  "id": "vSensor1",
+  "name": "WiFiToPresence",
+  "description": "Converting WiFi Data to Presence",
+  "language": "java",
+  "typeId": "WiFiToLocation",
+  "projectName": "WiFiToPresence"
+
+}

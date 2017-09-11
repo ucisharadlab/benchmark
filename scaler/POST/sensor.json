@@ -1,0 +1,832 @@
+[
+  {
+    "id" :"3141_clwa_1100",
+    "name" : "3141_clwa_1100 ",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "1100",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3141_clwa_1100", "entitiesCovered" : [ "1100"]}
+  },
+  {
+    "id" :"3141_clwa_1200",
+    "name" : "3141_clwa_1200",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "1200",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3141_clwa_1200", "entitiesCovered" : [ "1200"]}
+  },
+  {
+    "id" :"3141_clwa_1300",
+    "name" : "3141_clwa_1300",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "1300",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3141_clwa_1300", "entitiesCovered" : [ "1300"]}
+  },
+  {
+    "id" :"3141_clwa_1412",
+    "name" : "3141_clwa_1412",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "1412",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3141_clwa_1412", "entitiesCovered" : [ "1412"]}
+  },
+  {
+    "id" :"3141_clwa_1420",
+    "name" : "3141_clwa_1420",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "1420",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3141_clwa_1420", "entitiesCovered" : [ "1420"]}
+  },
+  {
+    "id" :"3141_clwa_1422",
+    "name" : "3141_clwa_1422",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "1422",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3141_clwa_1422", "entitiesCovered" : [ "1422"]}
+  },
+  {
+    "id" :"3141_clwa_1423",
+    "name" : "3141_clwa_1423",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "1423",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3141_clwa_1423", "entitiesCovered" : [ "1423"]}
+  },
+  {
+    "id" :"3141_clwa_1425",
+    "name" : "3141_clwa_1425",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "1425",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3141_clwa_1425", "entitiesCovered" : [ "1425"]}
+  },
+  {
+    "id" :"3141_clwa_1427",
+    "name" : "3141_clwa_1427",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "1427",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3141_clwa_1427", "entitiesCovered" : [ "1427"]}
+  },
+  {
+    "id" :"3141_clwa_1429",
+    "name" : "3141_clwa_1429",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "1429",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3141_clwa_1429", "entitiesCovered" : [ "1429"]}
+  },
+  {
+    "id" :"3141_clwa_1431",
+    "name" : "3141_clwa_1431",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "1431",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3141_clwa_1431", "entitiesCovered" : [ "1431"]}
+  },
+  {
+    "id" :"3141_clwa_1433",
+    "name" : "3141_clwa_1433",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "1433",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3141_clwa_1433", "entitiesCovered" : [ "1433"]}
+  },
+  {
+    "id" :"3141_clwa_1500",
+    "name" : "3141_clwa_1500",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "1500",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3141_clwa_1500", "entitiesCovered" : [ "1500"]}
+  },
+  {
+    "id" :"3141_clwa_1600",
+    "name" : "3141_clwa_1600",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "1600",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3141_clwa_1600", "entitiesCovered" : [ "1600"]}
+  },
+  {
+    "id" :"3141_clwb_1100",
+    "name" : "3141_clwb_1100",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "1100",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3141_clwb_1100", "entitiesCovered" : [ "1100"]}
+  },
+  {
+    "id" :"3141_clwb_1200",
+    "name" : "3141_clwb_1200",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "1200",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3141_clwb_1200", "entitiesCovered" : [ "1200"]}
+  },
+  {
+    "id" :"3141_clwb_1300",
+    "name" : "3141_clwb_1300",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "1300",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3141_clwb_1300", "entitiesCovered" : [ "1300"]}
+  },
+  {
+    "id" :"3141_clwb_1600",
+    "name" : "3141_clwb_1600",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "1600",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3141_clwb_1600", "entitiesCovered" : [ "1600"]}
+  },
+  {
+    "id" :"3141_clwc_1100",
+    "name" : "3141_clwc_1100",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "1100",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3141_clwc_1100", "entitiesCovered" : [ "1100"]}
+  },
+  {
+    "id" :"3141_clwd_1100",
+    "name" : "3141_clwd_1100",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "1100",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3141_clwd_1100", "entitiesCovered" : [ "1100"]}
+  },
+  {
+    "id" :"3141_clwe_1100",
+    "name" : "3141_clwe_1100",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "1100",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3141_clwe_1100", "entitiesCovered" : [ "1100"]}
+  },
+  {
+    "id" :"3142_clwa_2019",
+    "name" : "3142_clwa_2019",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "2019",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3142_clwa_2019", "entitiesCovered" : [ "2019"]}
+  },
+  {
+    "id" :"3142_clwa_2039",
+    "name" : "3142_clwa_2039",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "2039",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3142_clwa_2039", "entitiesCovered" : [ "2039"]}
+  },
+  {
+    "id" :"3142_clwa_2051",
+    "name" : "3142_clwa_2051",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "2051",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3142_clwa_2051", "entitiesCovered" : [ "2051"]}
+  },
+  {
+    "id" :"3142_clwa_2059",
+    "name" : "3142_clwa_2059",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "2059",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3142_clwa_2059", "entitiesCovered" : [ "2059"]}
+  },
+  {
+    "id" :"3142_clwa_2065",
+    "name" : "3142_clwa_2065",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "2065",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3142_clwa_2065", "entitiesCovered" : [ "2065"]}
+  },
+  {
+    "id" :"3142_clwa_2099",
+    "name" : "3142_clwa_2099",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "2099",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3142_clwa_2099", "entitiesCovered" : [ "2099"]}
+  },
+  {
+    "id" :"3142_clwa_2209",
+    "name" : "3142_clwa_2209",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "2209",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3142_clwa_2209", "entitiesCovered" : [ "2209"]}
+  },
+  {
+    "id" :"3142_clwa_2219",
+    "name" : "3142_clwa_2219",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "2219",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3142_clwa_2219", "entitiesCovered" : [ "2219"]}
+  },
+  {
+    "id" :"3142_clwa_2231",
+    "name" : "3142_clwa_2231",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "2231",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3142_clwa_2231", "entitiesCovered" : [ "2231"]}
+  },
+  {
+    "id" :"3143_clwa_3019",
+    "name" : "3143_clwa_3019",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "3019",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3143_clwa_3019", "entitiesCovered" : [ "3019"]}
+  },
+  {
+    "id" :"3143_clwa_3039",
+    "name" : "3143_clwa_3039",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "3039",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3143_clwa_3039", "entitiesCovered" : [ "3039"]}
+  },
+  {
+    "id" :"3143_clwa_3051",
+    "name" : "3143_clwa_3051",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "3051",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3143_clwa_3051", "entitiesCovered" : [ "3051"]}
+  },
+  {
+    "id" :"3143_clwa_3059",
+    "name" : "3143_clwa_3059",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "3059",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3143_clwa_3059", "entitiesCovered" : [ "3059"]}
+  },
+  {
+    "id" :"3143_clwa_3065",
+    "name" : "3143_clwa_3065",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "3065",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3143_clwa_3065", "entitiesCovered" : [ "3065"]}
+  },
+  {
+    "id" :"3143_clwa_3099",
+    "name" : "3143_clwa_3099",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "3099",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3143_clwa_3099", "entitiesCovered" : [ "3099"]}
+  },
+  {
+    "id" :"3143_clwa_3209",
+    "name" : "3143_clwa_3209",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "3209",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3143_clwa_3209", "entitiesCovered" : [ "3209"]}
+  },
+  {
+    "id" :"3143_clwa_3219",
+    "name" : "3143_clwa_3219",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "3219",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3143_clwa_3219", "entitiesCovered" : [ "3219"]}
+  },
+  {
+    "id" :"3143_clwa_3231",
+    "name" : "3143_clwa_3231",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "3231",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3143_clwa_3231", "entitiesCovered" : [ "3231"]}
+  },
+  {
+    "id" :"3144_clwa_4019",
+    "name" : "3144_clwa_4019",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "4019",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3144_clwa_4019", "entitiesCovered" : [ "4019"]}
+  },
+  {
+    "id" :"3144_clwa_4039",
+    "name" : "3144_clwa_4039",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "4039",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3144_clwa_4039", "entitiesCovered" : [ "4039"]}
+  },
+  {
+    "id" :"3144_clwa_4051",
+    "name" : "3144_clwa_4051",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "4051",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3144_clwa_4051", "entitiesCovered" : [ "4051"]}
+  },
+  {
+    "id" :"3144_clwa_4059",
+    "name" : "3144_clwa_4059",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "4059",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3144_clwa_4059", "entitiesCovered" : [ "4059"]}
+  },
+  {
+    "id" :"3144_clwa_4065",
+    "name" : "3144_clwa_4065",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "4065",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3144_clwa_4065", "entitiesCovered" : [ "4065"]}
+  },
+  {
+    "id" :"3144_clwa_4099",
+    "name" : "3144_clwa_4099",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "4099",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3144_clwa_4099", "entitiesCovered" : [ "4099"]}
+  },
+  {
+    "id" :"3144_clwa_4209",
+    "name" : "3144_clwa_4209",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "4209",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3144_clwa_4209", "entitiesCovered" : [ "4209"]}
+  },
+  {
+    "id" :"3144_clwa_4219",
+    "name" : "3144_clwa_4219",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "4219",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3144_clwa_4219", "entitiesCovered" : [ "4219"]}
+  },
+  {
+    "id" :"3144_clwa_4231",
+    "name" : "3144_clwa_4231",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "4231",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3144_clwa_4231", "entitiesCovered" : [ "4231"]}
+  },
+  {
+    "id" :"3145_clwa_5019",
+    "name" : "3145_clwa_5019",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "5019",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3145_clwa_5019", "entitiesCovered" : [ "5019"]}
+  },
+  {
+    "id" :"3145_clwa_5039",
+    "name" : "3145_clwa_5039",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "5039",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3145_clwa_5039", "entitiesCovered" : [ "5039"]}
+  },
+  {
+    "id" :"3145_clwa_5051",
+    "name" : "3145_clwa_5051",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "5051",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3145_clwa_5051", "entitiesCovered" : [ "5051"]}
+  },
+  {
+    "id" :"3145_clwa_5059",
+    "name" : "3145_clwa_5059",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "5059",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3145_clwa_5059", "entitiesCovered" : [ "5059"]}
+  },
+  {
+    "id" :"3145_clwa_5065",
+    "name" : "3145_clwa_5065",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "5065",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3145_clwa_5065", "entitiesCovered" : [ "5065"]}
+  },
+  {
+    "id" :"3145_clwa_5099",
+    "name" : "3145_clwa_5099",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "5099",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3145_clwa_5099", "entitiesCovered" : [ "5099"]}
+  },
+  {
+    "id" :"3145_clwa_5209",
+    "name" : "3145_clwa_5209",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "5209",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3145_clwa_5209", "entitiesCovered" : [ "5209"]}
+  },
+  {
+    "id" :"3145_clwa_5219",
+    "name" : "3145_clwa_5219",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "5219",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3145_clwa_5219", "entitiesCovered" : [ "5219"]}
+  },
+  {
+    "id" :"3145_clwa_5231",
+    "name" : "3145_clwa_5231",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "5231",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3145_clwa_5231", "entitiesCovered" : [ "5231"]}
+  },
+  {
+    "id" :"3146_clwa_6011",
+    "name" : "3146_clwa_6011",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "6011",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3146_clwa_6011", "entitiesCovered" : [ "6011"]}
+  },
+  {
+    "id" :"3146_clwa_6029",
+    "name" : "3146_clwa_6029",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "6029",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3146_clwa_6029", "entitiesCovered" : [ "6029"]}
+  },
+  {
+    "id" :"3146_clwa_6049",
+    "name" : "3146_clwa_6049",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "6049",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3146_clwa_6049", "entitiesCovered" : [ "6049"]}
+  },
+  {
+    "id" :"3146_clwa_6122",
+    "name" : "3146_clwa_6122",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "6215",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3146_clwa_6122", "entitiesCovered" : [ "6215"]}
+  },
+  {
+    "id" :"3146_clwa_6131",
+    "name" : "3146_clwa_6131",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "6213",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3146_clwa_6131", "entitiesCovered" : [ "6213"]}
+  },
+  {
+    "id" :"3146_clwa_6217",
+    "name" : "3146_clwa_6217",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "6218",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3146_clwa_6217", "entitiesCovered" : [ "6218"]}
+  },
+  {
+    "id" :"3146_clwa_6219",
+    "name" : "3146_clwa_6219",
+    "typeId" : "WiFiAP",
+    "infraStructureId" : "6219",
+    "ownerId": "admin",
+    "config" : { "port" : "", "ip" : ""},
+    "coverage" : { "id" : "coverage_3146_clwa_6219", "entitiesCovered" : [ "6219"]}
+  },
+  {
+    "id": "wemo_01",
+    "name": "wemo_01",
+    "typeId": "WeMo",
+    "infraStructureId": "2059",
+    "ownerId": "user2",
+    "config": {
+      "protocol": "udmp",
+      "collectionTime": 5
+    },
+    "coverage": {
+      "id": "coverage_wemo-01",
+      "entitiesCovered" : ["2059"]
+    }
+  },
+  {
+    "id": "wemo_02",
+    "name": "wemo_01",
+    "typeId": "WeMo",
+    "infraStructureId": "2099",
+    "ownerId": "user3",
+    "config": {
+      "protocol": "udmp",
+      "collectionTime": 5
+    },
+    "coverage": {
+      "id": "coverage_wemo-02",
+      "entitiesCovered" : ["2099"]
+    }
+  },
+  {
+    "id": "wemo_03",
+    "name": "wemo_03",
+    "typeId": "WeMo",
+    "infraStructureId": "2061",
+    "ownerId": "user4",
+    "config": {
+      "protocol": "udmp",
+      "collectionTime": 5
+    },
+    "coverage": {
+      "id": "coverage_wemo-03",
+      "entitiesCovered" : ["2061"]
+    }
+  },
+  {
+    "id": "wemo_04",
+    "name": "wemo_04",
+    "typeId": "WeMo",
+    "infraStructureId": "2069",
+    "ownerId": "user5",
+    "config": {
+      "protocol": "udmp",
+      "collectionTime": 5
+    },
+    "coverage": {
+      "id": "coverage_wemo-04",
+      "entitiesCovered" : ["2069"]
+    }
+  },
+  {
+    "id": "wemo_05",
+    "name": "wemo_05",
+    "typeId": "WeMo",
+    "infraStructureId": "2051",
+    "ownerId": "user6",
+    "config": {
+      "protocol": "udmp",
+      "collectionTime": 5
+    },
+    "coverage": {
+      "id": "coverage_wemo-05",
+      "entitiesCovered" : ["2051"]
+    }
+  },
+  {
+    "id": "wemo_06",
+    "name": "wemo_06",
+    "typeId": "WeMo",
+    "infraStructureId": "2089",
+    "ownerId": "user7",
+    "config": {
+      "protocol": "udmp",
+      "collectionTime": 5
+    },
+    "coverage": {
+      "id": "coverage_wemo-06",
+      "entitiesCovered" : ["2089"]
+    }
+  },
+  {
+    "id": "wemo_07",
+    "name": "wemo_07",
+    "typeId": "WeMo",
+    "infraStructureId": "2081",
+    "ownerId": "user8",
+    "config": {
+      "protocol": "udmp",
+      "collectionTime": 5
+    },
+    "coverage": {
+      "id": "coverage_wemo-07",
+      "entitiesCovered" : ["2081"]
+    }
+  },
+  {
+    "id": "wemo_08",
+    "name": "wemo_08",
+    "typeId": "WeMo",
+    "infraStructureId": "2088",
+    "ownerId": "user9",
+    "config": {
+      "protocol": "udmp",
+      "collectionTime": 5
+    },
+    "coverage": {
+      "id": "coverage_wemo-08",
+      "entitiesCovered" : ["2088"]
+    }
+  },
+  {
+    "id": "wemo_09",
+    "name": "wemo_09",
+    "typeId": "WeMo",
+    "infraStructureId": "2092",
+    "ownerId": "user10",
+    "config": {
+      "protocol": "udmp",
+      "collectionTime": 5
+    },
+    "coverage": {
+      "id": "coverage_wemo-09",
+      "entitiesCovered" : ["2092"]
+    }
+  },
+  {
+    "id": "wemo_10",
+    "name": "wemo_10",
+    "typeId": "WeMo",
+    "infraStructureId": "2086",
+    "ownerId": "user11",
+    "config": {
+      "protocol": "udmp",
+      "collectionTime": 5
+    },
+    "coverage": {
+      "id": "coverage_wemo-10",
+      "entitiesCovered" : ["2086"]
+    }
+  },
+  {
+    "id": "emeter1",
+    "name": "EnergyMeter1",
+    "typeId": "EnergyMeter",
+    "infraStructureId": "2086",
+    "ownerId": "admin",
+    "config": {
+    },
+    "coverage": {
+      "id": "coverage_emeter_1",
+      "entitiesCovered" : ["2086"]
+    }
+  },
+  {
+    "id": "emeter2",
+    "name": "EnergyMeter2",
+    "typeId": "EnergyMeter",
+    "infraStructureId": "1100",
+    "ownerId": "admin",
+    "config": {
+    },
+    "coverage": {
+      "id": "coverage_emeter_2",
+      "entitiesCovered" : ["1100"]
+    }
+  },
+  {
+    "id": "emeter3",
+    "name": "EnergyMeter3",
+    "typeId": "EnergyMeter",
+    "infraStructureId": "1422",
+    "ownerId": "admin",
+    "config": {
+    },
+    "coverage": {
+      "id": "coverage_emeter_3",
+      "entitiesCovered" : ["1422"]
+    }
+  },
+  {
+    "id": "emeter4",
+    "name": "EnergyMeter4",
+    "typeId": "EnergyMeter",
+    "infraStructureId": "2032",
+    "ownerId": "admin",
+    "config": {
+    },
+    "coverage": {
+      "id": "coverage_emeter_4",
+      "entitiesCovered" : ["2032"]
+    }
+  },
+  {
+    "id": "emeter5",
+    "name": "EnergyMeter5",
+    "typeId": "EnergyMeter",
+    "infraStructureId": "3042",
+    "ownerId": "admin",
+    "config": {
+    },
+    "coverage": {
+      "id": "coverage_emeter_5",
+      "entitiesCovered" : ["3042"]
+    }
+  },
+  {
+    "id": "emeter6",
+    "name": "EnergyMeter6",
+    "typeId": "EnergyMeter",
+    "infraStructureId": "3084",
+    "ownerId": "admin",
+    "config": {
+    },
+    "coverage": {
+      "id": "coverage_emeter_6",
+      "entitiesCovered" : ["3084"]
+    }
+  },
+  {
+    "id": "emeter7",
+    "name": "EnergyMeter7",
+    "typeId": "EnergyMeter",
+    "infraStructureId": "4028",
+    "ownerId": "admin",
+    "config": {
+    },
+    "coverage": {
+      "id": "coverage_emeter_7",
+      "entitiesCovered" : ["4028"]
+    }
+  },
+  {
+    "id": "emeter8",
+    "name": "EnergyMeter8",
+    "typeId": "EnergyMeter",
+    "infraStructureId": "4013",
+    "ownerId": "admin",
+    "config": {
+    },
+    "coverage": {
+      "id": "coverage_emeter_8",
+      "entitiesCovered" : ["4013"]
+    }
+  }
+]

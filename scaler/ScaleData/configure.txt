@@ -1,0 +1,12 @@
+Description of sensorTypes: double (real value), int (counter), trajectory
+sensorType: trajectory
+timeScaleNum: 40
+timeScaleNoise: 0.01
+speedScaleNum: 1
+speedScaleNoise: 0.01
+deviceScaleNum: 6
+deviceScaleNoise: 0.01
+personNum: 3
+timeInterval: 5
+inputFilename: trajectoryMap.json
+outputFilename: trajectoryObs.json

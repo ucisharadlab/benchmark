@@ -1,0 +1,30 @@
+[
+  {
+    "area": "A",
+    "connectivity": ["B", "D"]
+  },
+  {
+    "area": "B",
+    "connectivity": ["A", "C", "E"]
+  },
+  {
+    "area": "C",
+    "connectivity": ["B", "F"]
+  },
+  {
+    "area": "D",
+    "connectivity": ["A", "E", "G"]
+  },
+  {
+    "area": "E",
+    "connectivity": ["B", "D", "F", "G"]
+  },
+  {
+    "area": "F",
+    "connectivity": ["C", "E"]
+  },
+  {
+    "area": "G",
+    "connectivity": ["D", "E"]
+  }
+]
