@@ -1,0 +1,277 @@
+DROP DATAVERSE TippersDB IF EXISTS;
+CREATE DATAVERSE TippersDB;
+
+Use TippersDB;
+
+/* Open types being used */
+CREATE TYPE PayloadType AS {
+};
+
+CREATE TYPE ConfigType AS {
+};
+
+CREATE TYPE SemanticEntityType AS {
+	id: string
+};
+
+
+/* Types related to infrastructure */
+CREATE TYPE LocationType AS  closed{
+    id: string,
+	x: double,
+	y: double,
+	z: double
+};
+
+CREATE TYPE RegionType AS closed{
+    id: string,
+	name: string?,
+	floor: double,
+	geometry: [LocationType]
+};
+
+CREATE TYPE InfrastructureTypeType AS{
+	id: string,
+	name: string,
+	description: string
+};
+
+CREATE TYPE InfrastructureType AS closed {
+	id: string,
+	name: string,
+	type_: InfrastructureTypeType,
+	region: RegionType
+};
+
+/* Types related to users */
+CREATE TYPE UserGroupType AS closed {
+	id: string,
+	name: string,
+	description: string
+};
+
+CREATE TYPE UserType AS closed {
+    id: string,
+	name: string,
+	googleAuthToken: string,
+	emailId: string,
+	groups: [UserGroupType]
+};
+
+
+/* Types related to applications */
+CREATE TYPE ApplicationType AS {
+	id: string,
+    name: string,
+	description: string,
+	developer: UserType,
+	config: ConfigType?
+};
+
+
+
+/** related to platforms**/
+CREATE TYPE PlatformTypeType AS{
+    id: string,
+    name: string,
+    description: string
+};
+
+CREATE TYPE PlatformType As{
+    id: string,
+    name: string?,
+    owner: UserType?,
+    type_: PlatformTypeType?
+};
+
+
+/** related to sensors **/
+CREATE TYPE ObservationTypeType AS {
+	id: string,
+    name: string,
+	description: string,
+	payloadSchema: string
+};
+
+CREATE TYPE SensorTypeType AS {
+	id: string,
+	description: string,
+	mobility: string,
+	captureFun: string,
+	observationType: ObservationTypeType
+};
+
+CREATE TYPE SensorCoverageType AS  {
+    id: string,
+	radius: double,
+	entitiesCovered: [InfrastructureType]
+};
+
+CREATE TYPE SensorDriverType AS {
+	id: string,
+	name: string,
+	description: string,
+	sourceFileLocation: string,
+	compiledCodeLocation: string,
+	language: string,
+	projectName: string,
+	compileDirectory: string,
+	executeDirectory: string,
+	compileCommand: string,
+	executeCommand: string,
+	type_: SensorTypeType
+};
+
+CREATE TYPE SensorType As {
+    id: string,
+    name: string,
+    sensorType: SensorTypeType,
+    infrastructure: InfrastructureType,
+    owner: UserType,
+    coverage: SensorCoverageType,
+    sensorConfig: string
+};
+
+CREATE TYPE ObservationType AS {
+	id: string,
+	sensor: SensorType,
+	payload: PayloadType,
+	timeStamp: datetime
+};
+
+/** related to virtual sensors **/
+CREATE TYPE SemanticObservationTypeType AS{
+    id:string,
+    name:string,
+    description:string,
+    payloadSchema: string
+};
+
+CREATE TYPE VirtualSensorTypeType  AS {
+    id: string,
+    name: string,
+    description: string,
+    inputType: ObservationTypeType,
+    semanticObservationType: SemanticObservationTypeType
+};
+
+CREATE TYPE VirtualSensorType AS {
+	id: string,
+	name: string,
+	description: string?,
+	sourceFileLocation: string?,
+	compiledCodeLocation: string?,
+	language: string?,
+	projectName: string?,
+	compileDirectory: string?,
+	executeDirectory: string,
+	compileCommand: string?,
+	executeCommand: string?,
+	config: ConfigType?
+};
+
+/** related to semantic observations **/
+
+CREATE TYPE SemanticObservationType AS {
+    id: string,
+    payload: PayloadType,
+    timeStamp: datetime,
+    semanticEntity: SemanticEntityType,
+    virtualSensor: VirtualSensorType,
+    type_: SemanticObservationTypeType
+};
+
+/* Types related to requests */
+CREATE TYPE RequestType AS {
+	id: string,
+    requestTime: datetime,
+	startTime: datetime,
+	endTime: datetime,
+	repeatsEvery: int?,
+	user: UserType,
+	sensor: SensorType?,
+	virtualSensor: VirtualSensorType?
+};
+
+CREATE TYPE ActiveRequestType AS {
+	id: string,
+    request: RequestType,
+	status: string
+};
+
+
+/* Creating Datasets */
+CREATE DATASET Application(ApplicationType)
+PRIMARY KEY id;
+
+CREATE DATASET Location(LocationType)
+PRIMARY KEY id;
+
+CREATE DATASET Region(RegionType)
+PRIMARY KEY id;
+
+CREATE DATASET Infrastructure(InfrastructureType)
+PRIMARY KEY id;
+
+CREATE DATASET InfrastructureType(InfrastructureTypeType)
+PRIMARY KEY id;
+
+CREATE DATASET UserGroup(UserGroupType)
+PRIMARY KEY id;
+
+CREATE DATASET User(UserType)
+PRIMARY KEY id;
+
+CREATE DATASET SemanticEntity(SemanticEntityType)
+PRIMARY KEY id;
+
+CREATE DATASET PlatformType(PlatformTypeType)
+PRIMARY KEY id;
+
+CREATE DATASET Platform(PlatformType)
+PRIMARY KEY id;
+
+CREATE DATASET SensorType(SensorTypeType)
+PRIMARY KEY id;
+
+CREATE DATASET SensorDriver(SensorDriverType)
+PRIMARY KEY id;
+
+CREATE DATASET SensorCoverage(SensorCoverageType)
+PRIMARY KEY id;
+
+CREATE DATASET Sensor(SensorType)
+PRIMARY KEY id;
+
+CREATE DATASET VirtualSensorType(VirtualSensorTypeType)
+PRIMARY KEY id;
+
+CREATE DATASET VirtualSensor(VirtualSensorType)
+PRIMARY KEY id;
+
+CREATE DATASET ObservationType(ObservationTypeType)
+PRIMARY KEY id;
+
+CREATE DATASET Observation(ObservationType)
+PRIMARY KEY id;
+
+CREATE DATASET SemanticObservationType(SemanticObservationTypeType)
+PRIMARY KEY id;
+
+CREATE DATASET SemanticObservation(SemanticObservationType)
+PRIMARY KEY id;
+
+CREATE DATASET Request(RequestType)
+PRIMARY KEY id;
+
+CREATE DATASET ActiveRequest(ActiveRequestType)
+PRIMARY KEY id;
+
+
+
+
+
+
+
+
+
