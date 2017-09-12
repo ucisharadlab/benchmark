@@ -1,3 +1,5 @@
+package edu.uci.ics.tippers.scaler.query;
+
 import java.time.LocalDate;
 import java.util.List;
 

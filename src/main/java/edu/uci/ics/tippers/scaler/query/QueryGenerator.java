@@ -1,3 +1,5 @@
+package edu.uci.ics.tippers.scaler.query;
+
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;

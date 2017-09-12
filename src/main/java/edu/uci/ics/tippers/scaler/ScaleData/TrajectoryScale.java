@@ -1,4 +1,4 @@
-// Scale for trajectory data
+package edu.uci.ics.tippers.scaler.ScaleData;// Scale for trajectory data
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;

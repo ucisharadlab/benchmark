@@ -1,4 +1,4 @@
-// Scale for counter data (int)
+package edu.uci.ics.tippers.scaler.ScaleData;// Scale for real value data
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -17,13 +17,13 @@ import org.json.simple.parser.ParseException;
 
 import com.google.gson.stream.JsonWriter;
 
-// Counter Scale is for integers
-public class CounterScale {
+// Scale for real number data
+public class RealValueScale {
 	private String outputFilename;
 	private Helper helper;
 	
 	// Constructor
-	public CounterScale() {
+	public RealValueScale() {
 		outputFilename = "simulatedObs.json";
 		helper = new Helper();
 	}
@@ -34,17 +34,17 @@ public class CounterScale {
 	
 	// Temporal scaling -- where we extend the data from same sensors for a long time
 	public void timeScale(double timeScaleNoise, int extendDays) throws FileNotFoundException {
-		// parse temperatureObs file
-		CounterObsParser counterObs = new CounterObsParser();
-		counterObs.parseData(this.outputFilename);
-		List<String> sensorTypeIds = counterObs.getTypeIds();
+		// parse real value observation file
+		RealValObsParser realValObs = new RealValObsParser();
+		realValObs.parseData(this.outputFilename);
+		List<String> sensorTypeIds = realValObs.getTypeIds();
 		String sensorType = sensorTypeIds.get(0);
-		List<String> sensorIds = counterObs.getSensorIds();
-		List<Integer> payloads = counterObs.getPayloads();
-        List<String> timestamps = counterObs.getTimestamps();
-        int obsSpeed = counterObs.getObsSpeed();
-        int recordDays = counterObs.getRecordDays();
-        String payloadName = counterObs.getPayloadName();
+		List<String> sensorIds = realValObs.getSensorIds();
+		List<Double> payloads = realValObs.getPayloads();
+        List<String> timestamps = realValObs.getTimestamps();
+        int obsSpeed = realValObs.getObsSpeed();
+        int recordDays = realValObs.getRecordDays();
+        String payloadName = realValObs.getPayloadName();
 		int sensorSize = sensorIds.size();  
         
         // write data to file
@@ -62,7 +62,7 @@ public class CounterScale {
 			  for (int i = 0; i < obsSpeed; ++i) { 
 				  String timestamp = timestamps.get(i);
 				  for (int j = 0; j < sensorSize; ++j) {
-					  int payload = payloads.get(pastObs+i*sensorSize+j);
+					  double payload = payloads.get(pastObs+i*sensorSize+j);
 					  jsonWriter = helpWriteToFile(jsonWriter, sensorType, timestamp, payload, sensorIds.get(j), payloadName);
 					  System.out.println("TimeScale" + count++); // debug
 				  }
@@ -75,7 +75,7 @@ public class CounterScale {
 			  for (int i = 0; i < obsSpeed; ++i) {
 				  String timestamp = helper.timeAddDays(timestamps.get(i), pastDays);
 				  for (int j = 0; j < sensorSize; ++j) {
-					  int payload = getRandAroundPayload(payloads.get(i*sensorSize+j), timeScaleNoise);
+					  double payload = getRandAroundPayload(payloads.get(i*sensorSize+j), timeScaleNoise);
 					  jsonWriter = helpWriteToFile(jsonWriter, sensorType, timestamp, payload, sensorIds.get(j), payloadName);
 					  System.out.println("TimeScale" + count++); // debug
 				  }
@@ -101,16 +101,16 @@ public class CounterScale {
     	and add more between two nearby timestamps for each sensor */
 	public void speedScale(int speedScaleNum, double speedScaleNoise) throws FileNotFoundException {
 		// parse temperatureObs file
-		CounterObsParser counterObs = new CounterObsParser();
-		counterObs.parseData(this.outputFilename);
-		List<String> sensorTypeIds = counterObs.getTypeIds();
+		RealValObsParser realValObs = new RealValObsParser();
+		realValObs.parseData(this.outputFilename);
+		List<String> sensorTypeIds = realValObs.getTypeIds();
 		String sensorType = sensorTypeIds.get(0);
-		List<String> sensorIds = counterObs.getSensorIds();
-		List<Integer> payloads = counterObs.getPayloads();
-        List<String> timestamps = counterObs.getTimestamps();
-        int recordDays = counterObs.getRecordDays();
-        String payloadName = counterObs.getPayloadName();
-        int obsSpeed = counterObs.getObsSpeed();
+		List<String> sensorIds = realValObs.getSensorIds();
+		List<Double> payloads = realValObs.getPayloads();
+        List<String> timestamps = realValObs.getTimestamps();
+        int recordDays = realValObs.getRecordDays();
+        int obsSpeed = realValObs.getObsSpeed();
+        String payloadName = realValObs.getPayloadName();
         
         int sensorSize = sensorIds.size();
         int scaleSpeed = obsSpeed * speedScaleNum;
@@ -128,7 +128,7 @@ public class CounterScale {
 			  for (int i = 0; i < obsSpeed-1; ++i) {  
 				  // original observations
 				  for (int j = 0; j < sensorSize; ++j) {
-					  int payload = payloads.get(j+i*sensorSize);
+					  double payload = payloads.get(j+i*sensorSize);
 					  jsonWriter = helpWriteToFile(jsonWriter, sensorType, timestamp, payload, sensorIds.get(j), payloadName);
 					  System.out.println("SpeedScale" + count++); // debug
 				  }
@@ -139,7 +139,7 @@ public class CounterScale {
 				  for (int k = 0; k < speedScaleNum - 1; ++k) {
 					  for (int j = 0; j < sensorSize; ++j) {
 						  // get random temperature
-						  int payload = getRandBetweenPayloads(payloads.get(i*sensorSize+j), payloads.get(i*sensorSize+j+sensorSize), speedScaleNoise);
+						  double payload = getRandBetweenPayloads(payloads.get(i*sensorSize+j), payloads.get(i*sensorSize+j+sensorSize), speedScaleNoise);
 						  jsonWriter = helpWriteToFile(jsonWriter, sensorType, timestamp, payload, sensorIds.get(j), payloadName);
 						  System.out.println("SpeedScale" + count++); // debug
 					  }
@@ -149,22 +149,24 @@ public class CounterScale {
 			  
 			  // handle the end timestamps for all sensors
 			  for (int j = 0; j < sensorSize; ++j) {
-				  int payload = payloads.get((obsSpeed-1)*sensorSize + j); 
+				  double payload = payloads.get((obsSpeed-1)*sensorSize + j); 
 				  jsonWriter = helpWriteToFile(jsonWriter, sensorType, timestamp, payload, sensorIds.get(j), payloadName);
 				  System.out.println("SpeedScale" + count++); // debug
 			  }
+			  
 			  
 			  // add simulated observations between two observations for each sensor
 			  for (int k = 0; k < speedScaleNum - 1; ++k) {
 				  timestamp = helper.increaseTime(timestamp, scaleSpeed); // increase time based on the observation speed
 				  for (int j = 0; j < sensorSize; ++j) {
 					  // get random temperature
-					  int payload = getRandAroundPayload(payloads.get((obsSpeed-1)*sensorSize + j), speedScaleNoise);
+					  double payload = getRandAroundPayload(payloads.get((obsSpeed-1)*sensorSize + j), speedScaleNoise);
 					  jsonWriter = helpWriteToFile(jsonWriter, sensorType, timestamp, payload, sensorIds.get(j), payloadName);
 					  System.out.println("SpeedScale" + count++); // debug
 				  } 
 			  }
 		  }
+		  
     	  jsonWriter.endArray(); // close the JSON array
     	  
     	} catch (IOException e) {
@@ -181,17 +183,17 @@ public class CounterScale {
 	
 	// device scaling -- when we scale number of devices
 	public void deviceScale(int scaleNum, double deviceScaleNoise, String simulatedName) throws FileNotFoundException {
-		// parse temperatureObs file
-		CounterObsParser counterObs = new CounterObsParser();
-		counterObs.parseData(this.outputFilename);
-		List<String> sensorTypeIds = counterObs.getTypeIds();
+		// parse real value observation file
+		RealValObsParser realValObs = new RealValObsParser();
+		realValObs.parseData(this.outputFilename);
+		List<String> sensorTypeIds = realValObs.getTypeIds();
 		String sensorType = sensorTypeIds.get(0);
-		List<String> sensorIds = counterObs.getSensorIds();
-		List<Integer> payloads = counterObs.getPayloads();
-        List<String> timestamps = counterObs.getTimestamps();
-        int recordDays = counterObs.getRecordDays();
-        String payloadName = counterObs.getPayloadName();
-        int obsSpeed = counterObs.getObsSpeed();
+		List<String> sensorIds = realValObs.getSensorIds();
+		List<Double> payloads = realValObs.getPayloads();
+        List<String> timestamps = realValObs.getTimestamps();
+        int obsSpeed = realValObs.getObsSpeed();
+        int recordDays = realValObs.getRecordDays();
+        String payloadName = realValObs.getPayloadName();
         
 		Random rand = new Random(); // set up random seed
 		int sensorSize = sensorIds.size();
@@ -212,7 +214,7 @@ public class CounterScale {
 				  String timestamp = timestamps.get(m*obsSpeed+i);
 				  
 				  for (int j = 0; j < scaledSensorSize; ++j) {
-					  int payload = 0;
+					  double payload = 0.0;
 					  if (j < sensorSize) {
 						  payload = payloads.get(pastObs+i*sensorSize+j);
 					  } else {
@@ -241,8 +243,8 @@ public class CounterScale {
 	}
 	
 	
-	// Helper function to help write data to json file
-	public JsonWriter helpWriteToFile(JsonWriter jsonWriter, String sensorType, String timestamp, int payload, String sensorId, String payloadName) {
+	// edu.uci.ics.tippers.scaler.ScaleData.Helper function to help write data to json file
+	public JsonWriter helpWriteToFile(JsonWriter jsonWriter, String sensorType, String timestamp, double payload, String sensorId, String payloadName) {
 		try {
 			jsonWriter.beginObject();
 			jsonWriter.name("typeId");
@@ -267,50 +269,56 @@ public class CounterScale {
 	}
 	
 	
-	// Get random payload based on real payload within certain percent of noise
-	public int getRandAroundPayload(int payload, double scaleNoise) {
+	// Get random payload from orignal payload by adding some percent of noise
+	public double  getRandAroundPayload(double payload, double scaleNoise) {
 		Random rand = new Random(); // set up random seed
-		int min = (int) (payload * (1 - scaleNoise));
-		int max = (int) (payload * (1 + scaleNoise));
-		return rand.nextInt(max-min+1) + min;
+		double min = payload * (1 - scaleNoise);
+		double max = payload * (1 + scaleNoise);
+		double result = min + (max - min) * rand.nextDouble();
+		result = (double)Math.round(result * 10000d) / 10000d;
+		return result;
 	}
 	
 	
 	// Generate random number between two real payloads within certain percent of range
-	public int getRandBetweenPayloads(int payload1, int payload2, double scaleNoise) {
+	public double getRandBetweenPayloads(double payload1, double payload2, double scaleNoise) {
 		Random rand = new Random();
+		double min = 0.0;
+		double max = 0.0;
 		if (payload1 < payload2) {
-			int min = (int) (payload1 * (1 - scaleNoise));
-			int max = (int) (payload2 * (1 + scaleNoise));
-			return rand.nextInt(max-min+1) + min;
+			min = payload1 * (1 - scaleNoise);
+			max = payload2 * (1 + scaleNoise);
 		} else {
-			int min = (int) (payload2 * (1 - scaleNoise));
-			int max = (int) (payload2 * (1 + scaleNoise));
-			return rand.nextInt(max-min+1) + min;
+			min = payload2 * (1 - scaleNoise);
+			max = payload2 * (1 + scaleNoise);
 		}
+		
+		double result = min + (max - min) * rand.nextDouble();
+		result = (double)Math.round(result * 10000d) / 10000d;
+		return result;
 	}
 
 }
 
-
-//Counter observation parsing class
-class CounterObsParser 
+//Parse an observation file that has payload as real number
+class RealValObsParser
 {
 	private List<String> typeIds;
 	private List<String> sensorIds;
 	private List<String> timestamps;
-	private List<Integer> payloads;
+	private List<Double> payloads;
 	private int obsCount; // total number of observation
 	private int obsSpeed; // observation count per day and per sensor
 	private Helper helper;
 	private String payloadName; // Set<String> keys = posts.keyset();
 	private List<String> keyList; // sequence: payload, typeId, timestamp, sensorId
 	
-	public CounterObsParser() {
+	// Constructor
+	public RealValObsParser() {
 		this.typeIds = new ArrayList<String>();
 		this.sensorIds = new ArrayList<String>();
 		this.timestamps = new ArrayList<String>();
-		this.payloads = new ArrayList<Integer>();
+		this.payloads = new ArrayList<Double>();
 		this.obsCount = 0;
 		this.obsSpeed = 0;
 		helper = new Helper();
@@ -384,11 +392,10 @@ class CounterObsParser
 
 			// get payload
          JSONObject payloadObj = (JSONObject) observation.get(keyList.get(0));
-         Integer payload = (int) (long) payloadObj.get(this.payloadName);
+         double payload = (double) payloadObj.get(this.payloadName);
          this.payloads.add(payload);      
 		}
 	}
-	
 	
 	// return type Ids
 	public List<String> getTypeIds() {
@@ -400,8 +407,7 @@ class CounterObsParser
 		return this.sensorIds;
 	}
 	
-	// return payloads
-	public List<Integer> getPayloads() {
+	public List<Double> getPayloads() {
 		return this.payloads;
 	}
 	

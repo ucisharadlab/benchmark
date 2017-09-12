@@ -1,4 +1,4 @@
-// Author: Fangfang Fu
+package edu.uci.ics.tippers.scaler.ScaleData;// Author: Fangfang Fu
 // Date: 8/2/2017
 // Description: Scaling data with three methods
 // 1.Temporal scaling -- where we extend the data from same sensors for a long time

@@ -1,3 +1,5 @@
+package edu.uci.ics.tippers.scaler.query;
+
 // Author: Fangfang Fu
 // Date: 7/15/2017
 
