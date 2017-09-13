@@ -1,5 +1,6 @@
 package edu.uci.ics.tippers.connection.asterixdb;
 
+import edu.uci.ics.tippers.connection.BaseConnectionManager;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -20,15 +21,16 @@ import java.util.Properties;
 /**
  * Created by peeyush on 29/8/17.
  */
-public class ConnectionManager {
-    private static final Logger LOGGER = Logger.getLogger(ConnectionManager.class);
-    private static ConnectionManager _instance = new ConnectionManager();
+public class AsterixDBConnectionManager extends BaseConnectionManager {
+
+    private static final Logger LOGGER = Logger.getLogger(AsterixDBConnectionManager.class);
+    private static AsterixDBConnectionManager _instance = new AsterixDBConnectionManager();
     private Properties props;
     private static String SERVER;
     private static String PORT;
     private static String DATAVERSE;
 
-    private ConnectionManager() {
+    private AsterixDBConnectionManager() {
         try {
             InputStream inputStream = getClass().getClassLoader().getResourceAsStream("/asterixdb/asterixdb.properties");
             props = new Properties();
@@ -43,7 +45,7 @@ public class ConnectionManager {
         }
     }
 
-    public static ConnectionManager getInstance() {
+    public static AsterixDBConnectionManager getInstance() {
         return _instance;
     }
 
@@ -55,15 +57,13 @@ public class ConnectionManager {
 
         List<NameValuePair> params = new ArrayList<NameValuePair>(2);
         params.add(new BasicNameValuePair("statement", query));
-//        params.add(new BasicNameValuePair("query-language", "SQLPP"));
-//        params.add(new BasicNameValuePair("output-format", "CLEAN_JSON"));
-//        params.add(new BasicNameValuePair("execute-query", "true"));
 
         try {
             httpPost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
+
 
         CloseableHttpResponse response = null;
         try {

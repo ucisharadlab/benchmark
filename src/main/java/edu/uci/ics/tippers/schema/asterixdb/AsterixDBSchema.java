@@ -1,6 +1,6 @@
 package edu.uci.ics.tippers.schema.asterixdb;
 
-import edu.uci.ics.tippers.connection.asterixdb.ConnectionManager;
+import edu.uci.ics.tippers.connection.asterixdb.AsterixDBConnectionManager;
 import edu.uci.ics.tippers.schema.BaseSchema;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -11,11 +11,11 @@ import java.io.InputStream;
 
 public class AsterixDBSchema extends BaseSchema {
 
-    private String SCHEMA_FILE = "/asterixdb/schema/mapping1.sqlpp";
+    private String CREATE_SCHEMA_FILE = "/asterixdb/schema/mapping1/create.sqlpp";
+    private String DROP_SCHEMA_FILE = "/asterixdb/schema/mapping1/drop.sqlpp";
 
-    @Override
-    public void createSchema() {
-        InputStream inputStream = AsterixDBSchema.class.getClassLoader().getResourceAsStream(SCHEMA_FILE);
+    private  void runSQLPPFile(String file) {
+        InputStream inputStream = AsterixDBSchema.class.getClassLoader().getResourceAsStream(file);
         String queryString = null;
         try {
             queryString = IOUtils.toString(inputStream, "UTF-8");
@@ -23,7 +23,7 @@ public class AsterixDBSchema extends BaseSchema {
             e.printStackTrace();
         }
 
-        HttpResponse response = ConnectionManager.getInstance().sendQuery(queryString);
+        HttpResponse response = AsterixDBConnectionManager.getInstance().sendQuery(queryString);
         try {
             System.out.println(EntityUtils.toString(response.getEntity()));
         } catch (IOException e) {
@@ -32,8 +32,13 @@ public class AsterixDBSchema extends BaseSchema {
     }
 
     @Override
-    public void dropSchema() {
+    public void createSchema() {
+        runSQLPPFile(CREATE_SCHEMA_FILE);
+    }
 
+    @Override
+    public void dropSchema() {
+        runSQLPPFile(DROP_SCHEMA_FILE);
     }
 
 }
