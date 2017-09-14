@@ -11,7 +11,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-// Parse the observation.json file
+// Parse the observationWiFi.json file
 public class Observation {
 	private List<String> timestamps;
 
@@ -24,7 +24,7 @@ public class Observation {
         JSONArray observations = new JSONArray();
         try {
             JSONParser parser = new JSONParser();
-            observations = (JSONArray) parser.parse(new FileReader("../POST/observation.json"));
+            observations = (JSONArray) parser.parse(new FileReader("../POST/observationWiFi.json"));
         } catch (FileNotFoundException ex) {
             System.err.println("File not found");
         } catch (IOException ex) {
