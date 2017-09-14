@@ -1,5 +1,6 @@
 package edu.uci.ics.tippers.query.asterixdb;
 
+import edu.uci.ics.tippers.common.Database;
 import edu.uci.ics.tippers.connection.asterixdb.AsterixDBConnectionManager;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.query.BaseQueryManager;
@@ -14,6 +15,7 @@ import java.util.Date;
 import java.util.List;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class AsterixDBQueryManager extends BaseQueryManager{
@@ -24,6 +26,16 @@ public class AsterixDBQueryManager extends BaseQueryManager{
     public AsterixDBQueryManager(int mapping, boolean writeOutput){
         super(mapping, writeOutput);
         connectionManager = AsterixDBConnectionManager.getInstance();
+    }
+
+    @Override
+    public Database getDatabase() {
+        return Database.ASTERIXDB;
+    }
+
+    @Override
+    public Map<Integer, Duration> runQueries() {
+        return null;
     }
 
     private Duration runTimedQuery (String query) throws BenchmarkException {

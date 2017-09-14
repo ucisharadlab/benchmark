@@ -1,5 +1,7 @@
 package edu.uci.ics.tippers.data;
 
+import edu.uci.ics.tippers.common.Database;
+
 public abstract class BaseDataUploader {
 
     protected int mapping;
@@ -7,6 +9,10 @@ public abstract class BaseDataUploader {
     public BaseDataUploader(int mapping) {
         this.mapping = mapping;
     }
+
+    public abstract Database getDatabase();
+
+    public abstract void addAllData();
 
     public abstract void addInfrastructureData();
 

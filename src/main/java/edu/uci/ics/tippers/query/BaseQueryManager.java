@@ -1,10 +1,13 @@
 package edu.uci.ics.tippers.query;
 
+import edu.uci.ics.tippers.common.Database;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 
+import javax.xml.crypto.Data;
 import java.time.Duration;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 public abstract class BaseQueryManager {
 
@@ -16,6 +19,8 @@ public abstract class BaseQueryManager {
         this.writeOutput = writeOutput;
     }
 
+    public abstract Database getDatabase();
+
     public int getMapping() {
         return this.mapping;
     }
@@ -23,6 +28,8 @@ public abstract class BaseQueryManager {
     public int setMapping() {
         return this.mapping;
     }
+
+    public abstract Map<Integer, Duration> runQueries();
 
     public abstract Duration runQuery1(String sensorId) throws BenchmarkException;
 
