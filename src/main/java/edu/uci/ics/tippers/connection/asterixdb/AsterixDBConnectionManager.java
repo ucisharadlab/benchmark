@@ -32,7 +32,7 @@ public class AsterixDBConnectionManager extends BaseConnectionManager {
 
     private AsterixDBConnectionManager() {
         try {
-            InputStream inputStream = getClass().getClassLoader().getResourceAsStream("/asterixdb/asterixdb.properties");
+            InputStream inputStream = getClass().getClassLoader().getResourceAsStream("asterixdb/asterixdb.properties");
             props = new Properties();
             props.load(inputStream);
 
@@ -50,10 +50,16 @@ public class AsterixDBConnectionManager extends BaseConnectionManager {
     }
 
     public HttpResponse sendQuery(String query) {
+        return sendQuery(query, true);
+    }
+
+    public HttpResponse sendQuery(String query, boolean withDataverse) {
         CloseableHttpClient client = HttpClients.createDefault();
         String url = String.format("http://%s:%s/query/service", SERVER, PORT);
         HttpPost httpPost = new HttpPost(url);
-        query = String.format("Use %s; ", DATAVERSE) + query;
+
+        if (withDataverse)
+            query = String.format("Use %s; ", DATAVERSE) + query;
 
         List<NameValuePair> params = new ArrayList<NameValuePair>(2);
         params.add(new BasicNameValuePair("statement", query));

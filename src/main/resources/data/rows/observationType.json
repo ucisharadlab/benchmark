@@ -1,0 +1,45 @@
+[
+  {
+    "id": "WiFiAPType",
+    "name": "WifiObservationType",
+    "description": "Observation Type for Wifi",
+    "payloadSchema": "[{\"clientId\": \"STRING\"}]"
+
+  },
+  {
+    "id": "WeMoType",
+    "name": "WeMoObservationType",
+    "description": "Observation Type for Wemo",
+    "payloadSchema": "[{\"currentMilliWatts\": \"INTEGER\"}, {\"onTodaySeconds\": \"INTEGER\"}]"
+
+  },
+  {
+    "id": "WiFiInterfaceType",
+    "name": "WiFiInterfaceObservationType",
+    "description": "Observation Type for Wemo",
+    "payloadSchema": "[{\"reading\": \"INTEGER\"}]"
+
+  },
+  {
+    "id": "BeaconType",
+    "name": "BeaconObservationType",
+    "description": "Observation Type for Wemo",
+    "payloadSchema": "[{\"reading\": \"INTEGER\"}]"
+
+  },
+  {
+    "id": "EnergyMeterType",
+    "name": "EnergyMeterObservationType",
+    "description": "Observation Type for Wemo",
+    "payloadSchema": "[{\"temperature\": \"INTEGER\"}]"
+
+  },
+  {
+    "id": "CameraType",
+    "name": "WeMoObservationType",
+    "description": "Observation Type for Wemo",
+    "payloadSchema": "[{\"reading\": \"INTEGER\"}]"
+
+  }
+
+]

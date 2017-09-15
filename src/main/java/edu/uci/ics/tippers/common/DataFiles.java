@@ -1,11 +1,10 @@
 package edu.uci.ics.tippers.common;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public enum DataFiles {
 
     INFRA_TYPE ("infrastructureType.json"),
+    LOCATION ("location.json"),
+    REGION ("region.json"),
     INFRA ("infrastructure.json") ,
     GROUP ("group.json"),
     USER ("user.json"),
@@ -27,7 +26,7 @@ public enum DataFiles {
     }
 
     public String getPath() {
-        return "/data/" + path;
+        return path;
     }
 
 }

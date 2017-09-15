@@ -1,0 +1,82 @@
+[
+  {
+    'description': 'Office Description',
+    'name': 'Office Type',
+    'id': 'office'
+  },
+  {
+    'description': 'Class Room Description',
+    'name': 'Class Rooms',
+    'id': 'class_room'
+  },
+  {
+    'description': 'Utility Room Description',
+    'name': 'Utility Rooms',
+    'id': 'utilities'
+  },
+  {
+    'description': 'Corridor Description',
+    'name': 'Corridors',
+    'id': 'corridor'
+  },
+  {
+    'description': 'Seminar Room Description',
+    'name': 'Seminar Rooms',
+    'id': 'seminar_room'
+  },
+  {
+    'description': 'Lab Description',
+    'name': 'Labs',
+    'id': 'lab'
+  },
+  {
+    'description': 'Reception Description',
+    'name': 'reception',
+    'id': 'reception'
+  },
+  {
+    'description': 'Mail Room Description',
+    'name': 'Mail Rooms',
+    'id': 'mail_room'
+  },
+  {
+    'description': 'Works Room Description',
+    'name': 'WOrk Rooms',
+    'id': 'work_room'
+  },
+  {
+    'description': 'Conference Room Description',
+    'name': 'Conference Rooms',
+    'id': 'conference_room'
+  },
+  {
+    'description': 'Meeting Room Description',
+    'name': 'Meeting Rooms',
+    'id': 'meeting_room'
+  },
+  {
+    'description': 'Male Restroom Description',
+    'name': 'Male Restrooms',
+    'id': 'male_restroom'
+  },
+  {
+    'description': 'Female Restroom Description',
+    'name': 'Female Restroom',
+    'id': 'female_restroom'
+  },
+  {
+    'description': 'Facility Room Description',
+    'name': 'Facility Rooms',
+    'id': 'facility_room'
+  },
+  {
+    'description': 'Elevators Description',
+    'name': 'Elevators',
+    'id': 'elevator'
+  },
+  {
+    'description': 'Kitchen Description',
+    'name': 'Kitchen',
+    'id': 'kitchen'
+  }
+]

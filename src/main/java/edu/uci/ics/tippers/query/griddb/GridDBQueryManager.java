@@ -21,7 +21,7 @@ public class GridDBQueryManager extends BaseQueryManager {
     }
 
     @Override
-    public Map<Integer, Duration> runQueries() {
+    public Map<Integer, Duration> runQueries() throws BenchmarkException {
         return null;
     }
 
@@ -46,7 +46,8 @@ public class GridDBQueryManager extends BaseQueryManager {
     }
 
     @Override
-    public Duration runQuery5(String sensorTypeName, Date startTime, Date endTime, String payloadAttribute, Object startPayloadValue, Object endPayloadValue) throws BenchmarkException {
+    public Duration runQuery5(String sensorTypeName, Date startTime, Date endTime, String payloadAttribute,
+                              Object startPayloadValue, Object endPayloadValue) throws BenchmarkException {
         return null;
     }
 }

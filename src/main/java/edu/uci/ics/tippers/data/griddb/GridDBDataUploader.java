@@ -5,8 +5,8 @@ import edu.uci.ics.tippers.data.BaseDataUploader;
 
 public class GridDBDataUploader extends BaseDataUploader {
 
-    public GridDBDataUploader(int mapping) {
-        super(mapping);
+    public GridDBDataUploader(int mapping, String dataDir) {
+        super(mapping, dataDir);
     }
 
     @Override

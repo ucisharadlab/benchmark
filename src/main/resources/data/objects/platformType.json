@@ -1,0 +1,12 @@
+[
+  {
+    'description': 'Mobile Phone Devices',
+    'name': 'Mobile Phone',
+    'id': 'pt1'
+  },
+  {
+    'description': 'Raspberry Pi Devices',
+    'name': 'Raspberry Pi',
+    'id': 'pt2'
+  }
+]

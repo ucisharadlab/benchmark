@@ -4,17 +4,16 @@ import edu.uci.ics.tippers.common.Database;
 import edu.uci.ics.tippers.connection.asterixdb.AsterixDBConnectionManager;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.query.BaseQueryManager;
-import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -34,7 +33,9 @@ public class AsterixDBQueryManager extends BaseQueryManager{
     }
 
     @Override
-    public Map<Integer, Duration> runQueries() {
+    public Map<Integer, Duration> runQueries() throws BenchmarkException{
+        Map<Integer, Duration> queryRunTimes = new HashMap<>();
+        runQuery1("emeter1");
         return null;
     }
 

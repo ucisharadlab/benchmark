@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.prefs.Preferences;
 
@@ -47,17 +46,21 @@ public class Benchmark {
 
     private void runBenchmark(BaseSchema schemaCreator, BaseDataUploader dataUploader, BaseQueryManager queryManager) {
 
-        // Creating schema on a particular database and particular mapping
-        schemaCreator.createSchema();
+        try {
+            // Creating schema on a particular database and particular mapping
+            // schemaCreator.createSchema();
 
-        // Inserting data into the database system after schema creation
-        dataUploader.addAllData();
+            // Inserting data into the database system after schema creation
+            //dataUploader.addAllData();
 
-        // Running benchmark queries and gathering query runtimes
-        runTimes.put(new Pair<>(queryManager.getDatabase(), queryManager.getMapping()), queryManager.runQueries());
+            // Running benchmark queries and gathering query runtimes
+            runTimes.put(new Pair<>(queryManager.getDatabase(), queryManager.getMapping()), queryManager.runQueries());
 
-        // Cleaning up inserted data and dropping created schema
-        schemaCreator.dropSchema();
+            // Cleaning up inserted data and dropping created schema
+            //schemaCreator.dropSchema();
+        } catch (BenchmarkException be) {
+            be.printStackTrace();
+        }
     }
 
     public static void main(String args[]) {
@@ -66,14 +69,14 @@ public class Benchmark {
         try {
             benchmark.readConfiguration();
             DBMSManager dbmsManager = new DBMSManager(configuration.getScriptsDir());
-            dbmsManager.startServers();
+            //dbmsManager.startServers();
 
             for (Database database: configuration.getDatabases()) {
                 switch (database) {
                     case GRIDDB:
                         configuration.getMappings().get(Database.GRIDDB).forEach(
                                 e->benchmark.runBenchmark(
-                                        new GridDBSchema(e), new GridDBDataUploader(e),
+                                        new GridDBSchema(e), new GridDBDataUploader(e, configuration.getDataDir()),
                                         new GridDBQueryManager(e, false)));
                         break;
                     case CRATEDB:
@@ -83,7 +86,7 @@ public class Benchmark {
                     case ASTERIXDB:
                         configuration.getMappings().get(Database.GRIDDB).forEach(
                                 e->benchmark.runBenchmark(
-                                        new AsterixDBSchema(e), new AsterixDBDataUploader(e),
+                                        new AsterixDBSchema(e), new AsterixDBDataUploader(e, configuration.getDataDir()),
                                         new AsterixDBQueryManager(e, false)));
                         break;
                     case CASSANDRA:
@@ -98,7 +101,7 @@ public class Benchmark {
             ReportBuilder builder = new ReportBuilder(runTimes, ReportFormat.TEXT);
             builder.createReport();
 
-            dbmsManager.stopServers();
+            //dbmsManager.stopServers();
         } catch (BenchmarkException e) {
             e.printStackTrace();
         }

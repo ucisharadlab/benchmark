@@ -12,8 +12,8 @@ import java.io.InputStream;
 
 public class AsterixDBSchema extends BaseSchema {
 
-    private String CREATE_SCHEMA_FILE = "/asterixdb/schema/mapping1/create.sqlpp";
-    private String DROP_SCHEMA_FILE = "/asterixdb/schema/mapping1/drop.sqlpp";
+    private String CREATE_SCHEMA_FILE = "asterixdb/schema/mapping1/create.sqlpp";
+    private String DROP_SCHEMA_FILE = "asterixdb/schema/mapping1/drop.sqlpp";
 
     public AsterixDBSchema(int mapping) {
         super(mapping);
@@ -33,7 +33,7 @@ public class AsterixDBSchema extends BaseSchema {
             e.printStackTrace();
         }
 
-        HttpResponse response = AsterixDBConnectionManager.getInstance().sendQuery(queryString);
+        HttpResponse response = AsterixDBConnectionManager.getInstance().sendQuery(queryString, false);
         try {
             System.out.println(EntityUtils.toString(response.getEntity()));
         } catch (IOException e) {

@@ -13,6 +13,7 @@ public class Configuration {
     private Map<Database, List<Integer>> mappings = new HashMap<>();
     private Preferences preferences;
     private String scriptsDir;
+    private String dataDir;
 
     public Configuration(Preferences preferences) throws BenchmarkException {
         this.preferences = preferences;
@@ -45,6 +46,12 @@ public class Configuration {
             throw new BenchmarkException("Scripts directory location not provided in configuration file");
         }
         scriptsDir = nodeValue;
+
+        nodeValue = preferences.node("benchmark").get("data-dir", null);
+        if (nodeValue == null) {
+            throw new BenchmarkException("Data directory location not provided in configuration file");
+        }
+        dataDir = nodeValue;
     }
 
     public List<Database> getDatabases() {
@@ -69,5 +76,13 @@ public class Configuration {
 
     public void setScriptsDir(String scriptsDir) {
         this.scriptsDir = scriptsDir;
+    }
+
+    public String getDataDir() {
+        return dataDir;
+    }
+
+    public void setDataDir(String dataDir) {
+        this.dataDir = dataDir;
     }
 }
