@@ -47,27 +47,43 @@ public class Benchmark {
     private void runBenchmark(BaseSchema schemaCreator, BaseDataUploader dataUploader, BaseQueryManager queryManager) {
 
         try {
+            System.out.println(String.format("Running Benchmark On %s With Mapping %s",
+                    schemaCreator.getDatabase().getName(), schemaCreator.getMapping()));
+
             // Creating schema on a particular database and particular mapping
-            // schemaCreator.createSchema();
+            System.out.println("Creating Schema ...");
+            schemaCreator.createSchema();
 
             // Inserting data into the database system after schema creation
-            //dataUploader.addAllData();
+            System.out.println("Inserting Data ...");
+            dataUploader.addAllData();
 
             // Running benchmark queries and gathering query runtimes
+            System.out.println("Running Queries ...");
             runTimes.put(new Pair<>(queryManager.getDatabase(), queryManager.getMapping()), queryManager.runQueries());
 
             // Cleaning up inserted data and dropping created schema
-            //schemaCreator.dropSchema();
-        } catch (BenchmarkException be) {
-            be.printStackTrace();
+            System.out.println("Cleaning Up Database, Removing Data And Schema ...\n");
+            schemaCreator.dropSchema();
+
+        } catch (Exception be) {
+            //be.printStackTrace();
+            runTimes.put(new Pair<>(queryManager.getDatabase(), queryManager.getMapping()), null);
         }
     }
 
     public static void main(String args[]) {
+
+        System.out.println("****Starting IoT Benchmark v0.1****\n");
+
         Benchmark benchmark = new Benchmark();
 
         try {
+
+            System.out.println("Reading Configuration File benchmark.ini .... \n");
             benchmark.readConfiguration();
+
+            System.out.println("Starting Up Database Servers\n");
             DBMSManager dbmsManager = new DBMSManager(configuration.getScriptsDir());
             //dbmsManager.startServers();
 
@@ -77,7 +93,7 @@ public class Benchmark {
                         configuration.getMappings().get(Database.GRIDDB).forEach(
                                 e->benchmark.runBenchmark(
                                         new GridDBSchema(e), new GridDBDataUploader(e, configuration.getDataDir()),
-                                        new GridDBQueryManager(e, false)));
+                                        new GridDBQueryManager(e, configuration.getQueriesDir(), false)));
                         break;
                     case CRATEDB:
                         break;
@@ -87,7 +103,7 @@ public class Benchmark {
                         configuration.getMappings().get(Database.GRIDDB).forEach(
                                 e->benchmark.runBenchmark(
                                         new AsterixDBSchema(e), new AsterixDBDataUploader(e, configuration.getDataDir()),
-                                        new AsterixDBQueryManager(e, false)));
+                                        new AsterixDBQueryManager(e, configuration.getQueriesDir(), false)));
                         break;
                     case CASSANDRA:
                         break;
@@ -98,9 +114,11 @@ public class Benchmark {
                 }
             }
 
-            ReportBuilder builder = new ReportBuilder(runTimes, ReportFormat.TEXT);
+            ReportBuilder builder = new ReportBuilder(runTimes, configuration.getReportsDir(), ReportFormat.TEXT);
             builder.createReport();
+            System.out.println("\n****Report Written To Reports Directory****");
 
+            System.out.println("Stopping All Database Servers");
             //dbmsManager.stopServers();
         } catch (BenchmarkException e) {
             e.printStackTrace();

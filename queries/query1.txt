@@ -1,0 +1,3 @@
+# time(s), sensorId
+1,emeter1
+2,emeter5

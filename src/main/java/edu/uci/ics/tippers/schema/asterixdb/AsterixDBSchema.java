@@ -21,7 +21,7 @@ public class AsterixDBSchema extends BaseSchema {
 
     @Override
     public Database getDatabase() {
-        return null;
+        return Database.ASTERIXDB;
     }
 
     private  void runSQLPPFile(String file) {

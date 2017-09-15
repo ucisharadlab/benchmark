@@ -4,17 +4,17 @@ import edu.uci.ics.tippers.common.Database;
 import edu.uci.ics.tippers.connection.asterixdb.AsterixDBConnectionManager;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.query.BaseQueryManager;
+import edu.uci.ics.tippers.query.QueryCSVReader;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class AsterixDBQueryManager extends BaseQueryManager{
@@ -22,21 +22,14 @@ public class AsterixDBQueryManager extends BaseQueryManager{
     private AsterixDBConnectionManager connectionManager;
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
-    public AsterixDBQueryManager(int mapping, boolean writeOutput){
-        super(mapping, writeOutput);
+    public AsterixDBQueryManager(int mapping, String queriesDir, boolean writeOutput){
+        super(mapping, queriesDir, writeOutput);
         connectionManager = AsterixDBConnectionManager.getInstance();
     }
 
     @Override
     public Database getDatabase() {
         return Database.ASTERIXDB;
-    }
-
-    @Override
-    public Map<Integer, Duration> runQueries() throws BenchmarkException{
-        Map<Integer, Duration> queryRunTimes = new HashMap<>();
-        runQuery1("emeter1");
-        return null;
     }
 
     private Duration runTimedQuery (String query) throws BenchmarkException {
@@ -76,7 +69,7 @@ public class AsterixDBQueryManager extends BaseQueryManager{
                 return runTimedQuery(
                         String.format("SELECT s.id, s.name FROM Sensor s WHERE s.sensorType.name=\"%s\" AND "
                                         + "(SOME e IN s.coverage.entitiesCovered SATISFIES e.id IN {{"
-                                        + locationIds.stream().map(e -> "\"" + e + "\"").collect(Collectors.joining(","))
+                                        + locationIds.stream().map(e -> "\"" + e + "\"" ).collect(Collectors.joining(","))
                                         + "}});",
                                 sensorTypeName)
                 );
@@ -108,7 +101,7 @@ public class AsterixDBQueryManager extends BaseQueryManager{
                         String.format("SELECT timeStamp, sensor.id, payload FROM Observation WHERE sensor.id IN {{ "
                                         + sensorIds.stream().map(e -> "\"" + e + "\"").collect(Collectors.joining(","))
                                         + " }} AND timeStamp >= datetime(\"%s\") AND timeStamp <= datetime(\"%s\");",
-                                startTime, endTime)
+                                sdf.format(startTime), sdf.format(endTime))
                 );
             default:
                 throw new BenchmarkException("No Such Mapping");

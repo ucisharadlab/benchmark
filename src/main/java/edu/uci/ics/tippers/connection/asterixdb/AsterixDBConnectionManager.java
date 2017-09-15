@@ -40,6 +40,9 @@ public class AsterixDBConnectionManager extends BaseConnectionManager {
             PORT = props.getProperty("port");
             DATAVERSE = props.getProperty("dataverse");
 
+            // Warming Up
+            sendQuery(";");
+
         } catch (IOException ie) {
             LOGGER.error(ie);
         }

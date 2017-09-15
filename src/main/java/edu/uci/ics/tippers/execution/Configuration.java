@@ -14,6 +14,8 @@ public class Configuration {
     private Preferences preferences;
     private String scriptsDir;
     private String dataDir;
+    private String queriesDir;
+    private String reportsDir;
 
     public Configuration(Preferences preferences) throws BenchmarkException {
         this.preferences = preferences;
@@ -52,6 +54,19 @@ public class Configuration {
             throw new BenchmarkException("Data directory location not provided in configuration file");
         }
         dataDir = nodeValue;
+
+        nodeValue = preferences.node("benchmark").get("queries-dir", null);
+        if (nodeValue == null) {
+            throw new BenchmarkException("Queries directory location not provided in configuration file");
+        }
+        queriesDir = nodeValue;
+
+        nodeValue = preferences.node("benchmark").get("reports-dir", null);
+        if (nodeValue == null) {
+            throw new BenchmarkException("Reports directory location not provided in configuration file");
+        }
+        reportsDir = nodeValue;
+
     }
 
     public List<Database> getDatabases() {
@@ -84,5 +99,21 @@ public class Configuration {
 
     public void setDataDir(String dataDir) {
         this.dataDir = dataDir;
+    }
+
+    public String getQueriesDir() {
+        return queriesDir;
+    }
+
+    public void setQueriesDir(String queriesDir) {
+        this.queriesDir = queriesDir;
+    }
+
+    public String getReportsDir() {
+        return reportsDir;
+    }
+
+    public void setReportsDir(String reportsDir) {
+        this.reportsDir = reportsDir;
     }
 }

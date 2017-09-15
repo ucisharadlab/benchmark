@@ -11,8 +11,8 @@ import java.util.Map;
 
 public class GridDBQueryManager extends BaseQueryManager {
 
-    public GridDBQueryManager(int mapping, boolean writeOutput) {
-        super(mapping, writeOutput);
+    public GridDBQueryManager(int mapping, String queriesDir, boolean writeOutput) {
+        super(mapping, queriesDir, writeOutput);
     }
 
     @Override
@@ -20,10 +20,6 @@ public class GridDBQueryManager extends BaseQueryManager {
         return Database.GRIDDB;
     }
 
-    @Override
-    public Map<Integer, Duration> runQueries() throws BenchmarkException {
-        return null;
-    }
 
     @Override
     public Duration runQuery1(String sensorId) throws BenchmarkException {
