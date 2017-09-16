@@ -15,8 +15,8 @@ public class AsterixDBSchema extends BaseSchema {
     private String CREATE_SCHEMA_FILE = "asterixdb/schema/mapping1/create.sqlpp";
     private String DROP_SCHEMA_FILE = "asterixdb/schema/mapping1/drop.sqlpp";
 
-    public AsterixDBSchema(int mapping) {
-        super(mapping);
+    public AsterixDBSchema(int mapping, String dataDir) {
+        super(mapping, dataDir);
     }
 
     @Override

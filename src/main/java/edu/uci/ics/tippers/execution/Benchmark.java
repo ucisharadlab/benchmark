@@ -91,9 +91,16 @@ public class Benchmark {
                 switch (database) {
                     case GRIDDB:
                         configuration.getMappings().get(Database.GRIDDB).forEach(
-                                e->benchmark.runBenchmark(
-                                        new GridDBSchema(e), new GridDBDataUploader(e, configuration.getDataDir()),
-                                        new GridDBQueryManager(e, configuration.getQueriesDir(), false)));
+                                e -> {
+                                    try {
+                                        benchmark.runBenchmark(
+                                                new GridDBSchema(e, configuration.getDataDir()),
+                                                new GridDBDataUploader(e, configuration.getDataDir()),
+                                                new GridDBQueryManager(e, configuration.getQueriesDir(), false));
+                                    } catch (BenchmarkException e1) {
+                                        e1.printStackTrace();
+                                    }
+                                });
                         break;
                     case CRATEDB:
                         break;
@@ -102,7 +109,8 @@ public class Benchmark {
                     case ASTERIXDB:
                         configuration.getMappings().get(Database.GRIDDB).forEach(
                                 e->benchmark.runBenchmark(
-                                        new AsterixDBSchema(e), new AsterixDBDataUploader(e, configuration.getDataDir()),
+                                        new AsterixDBSchema(e, configuration.getDataDir()),
+                                        new AsterixDBDataUploader(e, configuration.getDataDir()),
                                         new AsterixDBQueryManager(e, configuration.getQueriesDir(), false)));
                         break;
                     case CASSANDRA:

@@ -1,5 +1,6 @@
 package edu.uci.ics.tippers.data;
 
+import com.toshiba.mwcloud.gs.GSException;
 import edu.uci.ics.tippers.common.Database;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 
