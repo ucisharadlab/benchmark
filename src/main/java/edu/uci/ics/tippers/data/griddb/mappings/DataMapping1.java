@@ -4,12 +4,14 @@ import com.toshiba.mwcloud.gs.Collection;
 import com.toshiba.mwcloud.gs.GSException;
 import com.toshiba.mwcloud.gs.GridStore;
 import com.toshiba.mwcloud.gs.Row;
+import edu.uci.ics.tippers.common.DataFiles;
 import edu.uci.ics.tippers.data.griddb.BaseDataMapping;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -17,7 +19,6 @@ import java.io.InputStreamReader;
 public class DataMapping1 extends BaseDataMapping {
 
     private JSONParser parser = new JSONParser();
-    private JSONObject jsonObject;
 
     public DataMapping1(GridStore gridStore, String dataDir) {
         super(gridStore, dataDir);
@@ -26,7 +27,7 @@ public class DataMapping1 extends BaseDataMapping {
     public void addAll() throws GSException {
         addMetadata();
         addDevices();
-        addPresenceAndOccupancyData();
+        // addPresenceAndOccupancyData();
         addSensorsAndObservations();
     }
 
@@ -35,12 +36,10 @@ public class DataMapping1 extends BaseDataMapping {
         Collection<String, Row> collection;
         Row row;
         try {
-            ClassLoader classLoader = getClass().getClassLoader();
-            jsonObject = (JSONObject) parser.parse(new InputStreamReader(
-                    classLoader.getResourceAsStream("collection_container_dummy")));
 
             // Adding Groups
-            JSONArray group_list = (JSONArray) jsonObject.get("Group");
+            JSONArray group_list = (JSONArray) parser.parse(new InputStreamReader(
+                    new FileInputStream(dataDir + DataFiles.GROUP)));
 
             for(int i =0;i<group_list.size();i++){
                 JSONObject temp=(JSONObject)group_list.get(i);
@@ -55,7 +54,8 @@ public class DataMapping1 extends BaseDataMapping {
             }
 
             // Adding Users
-            JSONArray user_list = (JSONArray) jsonObject.get("User");
+            JSONArray user_list = (JSONArray) parser.parse(new InputStreamReader(
+                    new FileInputStream(dataDir + DataFiles.USER)));
 
             for(int i =0;i<user_list.size();i++){
                 JSONObject temp=(JSONObject)user_list.get(i);
@@ -77,7 +77,8 @@ public class DataMapping1 extends BaseDataMapping {
             }
 
             // Adding Locations
-            JSONArray location_list = (JSONArray) jsonObject.get("Location");
+            JSONArray location_list = (JSONArray) parser.parse(new InputStreamReader(
+                    new FileInputStream(dataDir + DataFiles.LOCATION)));
 
             for(int i =0;i<location_list.size();i++){
                 JSONObject temp=(JSONObject)location_list.get(i);
@@ -92,7 +93,8 @@ public class DataMapping1 extends BaseDataMapping {
             }
 
             // Adding Regions
-            JSONArray region_list = (JSONArray) jsonObject.get("Region");
+            JSONArray region_list = (JSONArray) parser.parse(new InputStreamReader(
+                    new FileInputStream(dataDir + DataFiles.REGION)));
 
             for(int i =0;i<region_list.size();i++){
                 JSONObject temp=(JSONObject)region_list.get(i);
@@ -113,7 +115,8 @@ public class DataMapping1 extends BaseDataMapping {
             }
 
             // Adding Infrastructure Type
-            JSONArray infraType_list = (JSONArray) jsonObject.get("InfrastructureType");
+            JSONArray infraType_list = (JSONArray) parser.parse(new InputStreamReader(
+                    new FileInputStream(dataDir + DataFiles.INFRA_TYPE)));
 
             for(int i =0;i<infraType_list.size();i++){
                 JSONObject temp=(JSONObject)infraType_list.get(i);
@@ -128,7 +131,8 @@ public class DataMapping1 extends BaseDataMapping {
             }
 
             // Adding Infrastructure
-            JSONArray infra_list = (JSONArray) jsonObject.get("Infrastructure");
+            JSONArray infra_list = (JSONArray) parser.parse(new InputStreamReader(
+                    new FileInputStream(dataDir + DataFiles.INFRA)));
 
             for(int i =0;i<infra_list.size();i++){
                 JSONObject temp=(JSONObject)infra_list.get(i);
@@ -158,13 +162,9 @@ public class DataMapping1 extends BaseDataMapping {
         Collection<String, Row> collection;
         Row row;
         try {
-            ClassLoader classLoader = getClass().getClassLoader();
-            jsonObject = (JSONObject) parser.parse(new InputStreamReader(
-                    classLoader.getResourceAsStream("collection_container_dummy")));
-
-
             // Adding Sensor Types
-            JSONArray sensorType_list = (JSONArray) jsonObject.get("SensorType");
+            JSONArray sensorType_list = (JSONArray) parser.parse(new InputStreamReader(
+                    new FileInputStream(dataDir + DataFiles.SENSOR_TYPE)));
 
             for(int i =0;i<sensorType_list.size();i++){
                 JSONObject temp=(JSONObject)sensorType_list.get(i);
@@ -180,7 +180,8 @@ public class DataMapping1 extends BaseDataMapping {
             }
 
             // Adding ObservationTypes
-            JSONArray obsType_list = (JSONArray) jsonObject.get("ObservationType");
+            JSONArray obsType_list = (JSONArray) parser.parse(new InputStreamReader(
+                    new FileInputStream(dataDir + DataFiles.OBS_TYPE)));
 
             for(int i =0;i<obsType_list.size();i++){
                 JSONObject temp=(JSONObject)obsType_list.get(i);
@@ -195,7 +196,8 @@ public class DataMapping1 extends BaseDataMapping {
             }
 
             // Adding Sensors
-            JSONArray sensor_list = (JSONArray) jsonObject.get("Sensor");
+            JSONArray sensor_list = (JSONArray) parser.parse(new InputStreamReader(
+                    new FileInputStream(dataDir + DataFiles.OBS)));
 
             for(int i =0;i<sensor_list.size();i++){
                 JSONObject temp=(JSONObject)sensor_list.get(i);
@@ -218,95 +220,95 @@ public class DataMapping1 extends BaseDataMapping {
                 collection.put(row);
             }
 
-            // TODO: Add dynamic Observations
-            jsonObject = (JSONObject) parser.parse(new InputStreamReader(
-                    classLoader.getResourceAsStream("observation_dummy_data")));
-
-            JSONArray obs_list = (JSONArray) jsonObject.get("TS_Observation_3101_clwa_1101");
-
-            for(int i =0;i<obs_list.size();i++){
-                JSONObject temp=(JSONObject)obs_list.get(i);
-                collection = gridStore.getCollection("TS_Observation_3101_clwa_1101");
-
-                row = collection.createRow();
-                row.setValue(0, temp.get("id"));
-                row.setValue(1, temp.get("timestamp"));
-                row.setValue(2, temp.get("clientid"));
-
-                collection.put(row);
-            }
-
-            obs_list = (JSONArray) jsonObject.get("TS_Observation_3101_clwa_2101");
-
-            for(int i =0;i<obs_list.size();i++){
-                JSONObject temp=(JSONObject)obs_list.get(i);
-                collection = gridStore.getCollection("TS_Observation_3101_clwa_2101");
-
-                row = collection.createRow();
-                row.setValue(0, temp.get("id"));
-                row.setValue(1, temp.get("timestamp"));
-                row.setValue(2, temp.get("clientid"));
-
-                collection.put(row);
-            }
-
-            obs_list = (JSONArray) jsonObject.get("TS_Observation_3101_clwa_3101");
-
-            for(int i =0;i<obs_list.size();i++){
-                JSONObject temp=(JSONObject)obs_list.get(i);
-                collection = gridStore.getCollection("TS_Observation_3101_clwa_3101");
-
-                row = collection.createRow();
-                row.setValue(0, temp.get("id"));
-                row.setValue(1, temp.get("timestamp"));
-                row.setValue(2, temp.get("clientid"));
-
-                collection.put(row);
-            }
-
-            obs_list = (JSONArray) jsonObject.get("TS_Observation_3101_clwa_4101");
-
-            for(int i =0;i<obs_list.size();i++){
-                JSONObject temp=(JSONObject)obs_list.get(i);
-                collection = gridStore.getCollection("TS_Observation_3101_clwa_4101");
-
-                row = collection.createRow();
-                row.setValue(0, temp.get("id"));
-                row.setValue(1, temp.get("timestamp"));
-                row.setValue(2, temp.get("clientid"));
-
-                collection.put(row);
-            }
-
-            obs_list = (JSONArray) jsonObject.get("TS_Observation_3101_clwa_5101");
-
-            for(int i =0;i<obs_list.size();i++){
-                JSONObject temp=(JSONObject)obs_list.get(i);
-                collection = gridStore.getCollection("TS_Observation_3101_clwa_5101");
-
-                row = collection.createRow();
-                row.setValue(0, temp.get("id"));
-                row.setValue(1, temp.get("timestamp"));
-                row.setValue(2, temp.get("clientid"));
-
-                collection.put(row);
-            }
-
-            obs_list = (JSONArray) jsonObject.get("TS_Observation_3101_clwa_6101");
-
-            for(int i =0;i<obs_list.size();i++){
-                JSONObject temp=(JSONObject)obs_list.get(i);
-                collection = gridStore.getCollection("TS_Observation_3101_clwa_6101");
-
-                row = collection.createRow();
-                row.setValue(0, temp.get("id"));
-                row.setValue(1, temp.get("timestamp"));
-                row.setValue(2, temp.get("clientid"));
-
-                collection.put(row);
-            }
-
-
+//            // TODO: Add dynamic Observations
+//            jsonObject = (JSONObject) parser.parse(new InputStreamReader(
+//                    classLoader.getResourceAsStream("observation_dummy_data")));
+//
+//            JSONArray obs_list = (JSONArray) jsonObject.get("TS_Observation_3101_clwa_1101");
+//
+//            for(int i =0;i<obs_list.size();i++){
+//                JSONObject temp=(JSONObject)obs_list.get(i);
+//                collection = gridStore.getCollection("TS_Observation_3101_clwa_1101");
+//
+//                row = collection.createRow();
+//                row.setValue(0, temp.get("id"));
+//                row.setValue(1, temp.get("timestamp"));
+//                row.setValue(2, temp.get("clientid"));
+//
+//                collection.put(row);
+//            }
+//
+//            obs_list = (JSONArray) jsonObject.get("TS_Observation_3101_clwa_2101");
+//
+//            for(int i =0;i<obs_list.size();i++){
+//                JSONObject temp=(JSONObject)obs_list.get(i);
+//                collection = gridStore.getCollection("TS_Observation_3101_clwa_2101");
+//
+//                row = collection.createRow();
+//                row.setValue(0, temp.get("id"));
+//                row.setValue(1, temp.get("timestamp"));
+//                row.setValue(2, temp.get("clientid"));
+//
+//                collection.put(row);
+//            }
+//
+//            obs_list = (JSONArray) jsonObject.get("TS_Observation_3101_clwa_3101");
+//
+//            for(int i =0;i<obs_list.size();i++){
+//                JSONObject temp=(JSONObject)obs_list.get(i);
+//                collection = gridStore.getCollection("TS_Observation_3101_clwa_3101");
+//
+//                row = collection.createRow();
+//                row.setValue(0, temp.get("id"));
+//                row.setValue(1, temp.get("timestamp"));
+//                row.setValue(2, temp.get("clientid"));
+//
+//                collection.put(row);
+//            }
+//
+//            obs_list = (JSONArray) jsonObject.get("TS_Observation_3101_clwa_4101");
+//
+//            for(int i =0;i<obs_list.size();i++){
+//                JSONObject temp=(JSONObject)obs_list.get(i);
+//                collection = gridStore.getCollection("TS_Observation_3101_clwa_4101");
+//
+//                row = collection.createRow();
+//                row.setValue(0, temp.get("id"));
+//                row.setValue(1, temp.get("timestamp"));
+//                row.setValue(2, temp.get("clientid"));
+//
+//                collection.put(row);
+//            }
+//
+//            obs_list = (JSONArray) jsonObject.get("TS_Observation_3101_clwa_5101");
+//
+//            for(int i =0;i<obs_list.size();i++){
+//                JSONObject temp=(JSONObject)obs_list.get(i);
+//                collection = gridStore.getCollection("TS_Observation_3101_clwa_5101");
+//
+//                row = collection.createRow();
+//                row.setValue(0, temp.get("id"));
+//                row.setValue(1, temp.get("timestamp"));
+//                row.setValue(2, temp.get("clientid"));
+//
+//                collection.put(row);
+//            }
+//
+//            obs_list = (JSONArray) jsonObject.get("TS_Observation_3101_clwa_6101");
+//
+//            for(int i =0;i<obs_list.size();i++){
+//                JSONObject temp=(JSONObject)obs_list.get(i);
+//                collection = gridStore.getCollection("TS_Observation_3101_clwa_6101");
+//
+//                row = collection.createRow();
+//                row.setValue(0, temp.get("id"));
+//                row.setValue(1, temp.get("timestamp"));
+//                row.setValue(2, temp.get("clientid"));
+//
+//                collection.put(row);
+//            }
+//
+//
         }
         catch(ParseException e) {
             e.printStackTrace();
@@ -325,12 +327,9 @@ public class DataMapping1 extends BaseDataMapping {
         Row row;
 
         try {
-            ClassLoader classLoader = getClass().getClassLoader();
-            jsonObject = (JSONObject) parser.parse(new InputStreamReader(
-                    classLoader.getResourceAsStream("collection_container_dummy")));
-
             // Adding PlatformTypes
-            JSONArray platformType_list = (JSONArray) jsonObject.get("PlatformType");
+            JSONArray platformType_list = (JSONArray) parser.parse(new InputStreamReader(
+                    new FileInputStream(dataDir + DataFiles.PLT_TYPE)));
 
             for(int i =0;i<platformType_list.size();i++){
                 JSONObject temp=(JSONObject)platformType_list.get(i);
@@ -345,7 +344,8 @@ public class DataMapping1 extends BaseDataMapping {
             }
 
             // Adding Platforms
-            JSONArray platform_list = (JSONArray) jsonObject.get("Platform");
+            JSONArray platform_list = (JSONArray)parser.parse(new InputStreamReader(
+                    new FileInputStream(dataDir + DataFiles.PLT_TYPE)));
 
             for(int i =0;i<platform_list.size();i++){
                 JSONObject temp=(JSONObject)platform_list.get(i);
@@ -370,98 +370,98 @@ public class DataMapping1 extends BaseDataMapping {
         }
     }
 
-    public void addPresenceAndOccupancyData() throws GSException {
+//    public void addPresenceAndOccupancyData() throws GSException {
+//
+//        Collection<String, Row> collection;
+//        Row row;
+//
+//        try {
+//            ClassLoader classLoader = getClass().getClassLoader();
+//            jsonObject = (JSONObject) parser.parse(new InputStreamReader(
+//                    classLoader.getResourceAsStream("Presence_dummy_data")));
+//
+//            // Adding Presence
+//            JSONArray presence_list = (JSONArray) jsonObject.get("Presence");
+//
+//            for(int i =0;i<presence_list.size();i++){
+//                JSONObject temp=(JSONObject)presence_list.get(i);
+//                collection = gridStore.getCollection("Presence");
+//
+//                row = collection.createRow();
+//                row.setValue(0, temp.get("id"));
+//                row.setValue(1, temp.get("locationid"));
+//                row.setValue(2, temp.get("userid"));
+//                row.setValue(3, temp.get("timestamp"));
+//                collection.put(row);
+//            }
+//
+//            // Adding Occupancy
+//            jsonObject = (JSONObject) parser.parse(new InputStreamReader(
+//                    classLoader.getResourceAsStream("Occupancy_dummy_data")));
+//
+//            // Adding Presence
+//            JSONArray occupancy_list = (JSONArray) jsonObject.get("Occupancy");
+//
+//            for(int i =0;i<occupancy_list.size();i++){
+//                JSONObject temp=(JSONObject)occupancy_list.get(i);
+//                collection = gridStore.getCollection("Occupancy");
+//
+//                row = collection.createRow();
+//                row.setValue(0, temp.get("id"));
+//                row.setValue(1, temp.get("infraid"));
+//                row.setValue(2, temp.get("occupancy"));
+//                row.setValue(3, temp.get("timestamp"));
+//                collection.put(row);
+//            }
+//
+//        }
+//        catch(ParseException e) {
+//            e.printStackTrace();
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
-        Collection<String, Row> collection;
-        Row row;
-
-        try {
-            ClassLoader classLoader = getClass().getClassLoader();
-            jsonObject = (JSONObject) parser.parse(new InputStreamReader(
-                    classLoader.getResourceAsStream("Presence_dummy_data")));
-
-            // Adding Presence
-            JSONArray presence_list = (JSONArray) jsonObject.get("Presence");
-
-            for(int i =0;i<presence_list.size();i++){
-                JSONObject temp=(JSONObject)presence_list.get(i);
-                collection = gridStore.getCollection("Presence");
-
-                row = collection.createRow();
-                row.setValue(0, temp.get("id"));
-                row.setValue(1, temp.get("locationid"));
-                row.setValue(2, temp.get("userid"));
-                row.setValue(3, temp.get("timestamp"));
-                collection.put(row);
-            }
-
-            // Adding Occupancy
-            jsonObject = (JSONObject) parser.parse(new InputStreamReader(
-                    classLoader.getResourceAsStream("Occupancy_dummy_data")));
-
-            // Adding Presence
-            JSONArray occupancy_list = (JSONArray) jsonObject.get("Occupancy");
-
-            for(int i =0;i<occupancy_list.size();i++){
-                JSONObject temp=(JSONObject)occupancy_list.get(i);
-                collection = gridStore.getCollection("Occupancy");
-
-                row = collection.createRow();
-                row.setValue(0, temp.get("id"));
-                row.setValue(1, temp.get("infraid"));
-                row.setValue(2, temp.get("occupancy"));
-                row.setValue(3, temp.get("timestamp"));
-                collection.put(row);
-            }
-
-        }
-        catch(ParseException e) {
-            e.printStackTrace();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void addVSAndSemanticObservations() throws GSException {
-
-        Collection<String, Row> collection;
-        Row row;
-
-        // Adding SemanticObservationTypes
-        collection = gridStore.getCollection("User");
-        row = collection.createRow();
-        row.setValue(0, "user1");
-        row.setValue(1, "peeyushg@uci.edu");
-        row.setValue(2, "Peeyush");
-        row.setValue(3, new String[]{"group1"});
-
-        collection.put(row);
-
-        // Adding Virtual Sensor Types
-        collection = gridStore.getCollection("User");
-        row = collection.createRow();
-        row.setValue(0, "user1");
-        row.setValue(1, "peeyushg@uci.edu");
-        row.setValue(2, "Peeyush");
-        row.setValue(3, new String[]{"group1"});
-
-        collection.put(row);
-
-        // Adding Virtual Sensors
-        collection = gridStore.getCollection("User");
-        row = collection.createRow();
-        row.setValue(0, "user1");
-        row.setValue(1, "peeyushg@uci.edu");
-        row.setValue(2, "Peeyush");
-        row.setValue(3, new String[]{"group1"});
-
-        collection.put(row);
-
-        //  TODO: Adding dynamic semantic observations
-
-    }
+//    public void addVSAndSemanticObservations() throws GSException {
+//
+//        Collection<String, Row> collection;
+//        Row row;
+//
+//        // Adding SemanticObservationTypes
+//        collection = gridStore.getCollection("User");
+//        row = collection.createRow();
+//        row.setValue(0, "user1");
+//        row.setValue(1, "peeyushg@uci.edu");
+//        row.setValue(2, "Peeyush");
+//        row.setValue(3, new String[]{"group1"});
+//
+//        collection.put(row);
+//
+//        // Adding Virtual Sensor Types
+//        collection = gridStore.getCollection("User");
+//        row = collection.createRow();
+//        row.setValue(0, "user1");
+//        row.setValue(1, "peeyushg@uci.edu");
+//        row.setValue(2, "Peeyush");
+//        row.setValue(3, new String[]{"group1"});
+//
+//        collection.put(row);
+//
+//        // Adding Virtual Sensors
+//        collection = gridStore.getCollection("User");
+//        row = collection.createRow();
+//        row.setValue(0, "user1");
+//        row.setValue(1, "peeyushg@uci.edu");
+//        row.setValue(2, "Peeyush");
+//        row.setValue(3, new String[]{"group1"});
+//
+//        collection.put(row);
+//
+//        //  TODO: Adding dynamic semantic observations
+//
+//    }
 
 }
 

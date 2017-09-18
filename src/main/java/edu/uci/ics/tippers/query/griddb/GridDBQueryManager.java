@@ -7,7 +7,6 @@ import edu.uci.ics.tippers.query.BaseQueryManager;
 import java.time.Duration;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 public class GridDBQueryManager extends BaseQueryManager {
 
@@ -19,6 +18,7 @@ public class GridDBQueryManager extends BaseQueryManager {
     public Database getDatabase() {
         return Database.GRIDDB;
     }
+
 
 
     @Override

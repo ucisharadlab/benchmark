@@ -6,7 +6,7 @@ import com.toshiba.mwcloud.gs.GridStore;
 public abstract class BaseDataMapping {
 
     protected GridStore gridStore;
-    private String dataDir;
+    protected String dataDir;
 
     public BaseDataMapping(GridStore gridStore, String dataDir) {
         this.gridStore = gridStore;
