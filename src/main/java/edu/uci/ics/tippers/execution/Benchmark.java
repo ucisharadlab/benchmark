@@ -28,6 +28,8 @@ import java.util.prefs.Preferences;
 public class Benchmark {
 
     private static String CONFIG = "benchmark.ini";
+    private static final String OBJECTS = "objects/";
+    private static final String ROWS = "rows/";
     private static Map<Pair<Database, Integer>, Map<Integer, Duration>> runTimes = new HashMap<>();
     private static Configuration configuration;
 
@@ -67,7 +69,7 @@ public class Benchmark {
             schemaCreator.dropSchema();
 
         } catch (Exception be) {
-            //be.printStackTrace();
+            be.printStackTrace();
             runTimes.put(new Pair<>(queryManager.getDatabase(), queryManager.getMapping()), null);
         }
     }
@@ -94,8 +96,8 @@ public class Benchmark {
                                 e -> {
                                     try {
                                         benchmark.runBenchmark(
-                                                new GridDBSchema(e, configuration.getDataDir()),
-                                                new GridDBDataUploader(e, configuration.getDataDir()),
+                                                new GridDBSchema(e, configuration.getDataDir() + ROWS),
+                                                new GridDBDataUploader(e, configuration.getDataDir() + ROWS),
                                                 new GridDBQueryManager(e, configuration.getQueriesDir(), false));
                                     } catch (BenchmarkException e1) {
                                         e1.printStackTrace();
@@ -109,8 +111,8 @@ public class Benchmark {
                     case ASTERIXDB:
                         configuration.getMappings().get(Database.GRIDDB).forEach(
                                 e->benchmark.runBenchmark(
-                                        new AsterixDBSchema(e, configuration.getDataDir()),
-                                        new AsterixDBDataUploader(e, configuration.getDataDir()),
+                                        new AsterixDBSchema(e, configuration.getDataDir() + OBJECTS),
+                                        new AsterixDBDataUploader(e, configuration.getDataDir() + OBJECTS),
                                         new AsterixDBQueryManager(e, configuration.getQueriesDir(), false)));
                         break;
                     case CASSANDRA:

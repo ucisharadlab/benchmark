@@ -11,7 +11,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-// Parse observationTemperature.json file
+// Parse observation.json file
 public class TemperatureObs 
 {
 	private List<String> typeIds;
@@ -30,7 +30,7 @@ public class TemperatureObs
         JSONArray observations = new JSONArray();
         try {
             JSONParser parser = new JSONParser();
-            observations = (JSONArray) parser.parse(new FileReader("../POST/observationTemperature.json"));
+            observations = (JSONArray) parser.parse(new FileReader("../POST/observation.json"));
         } catch (FileNotFoundException ex) {
             System.err.println("File not found");
             // exit(1); Problem

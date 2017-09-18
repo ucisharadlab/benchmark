@@ -39,7 +39,7 @@ public class DataMapping1 extends BaseDataMapping {
 
             // Adding Groups
             JSONArray group_list = (JSONArray) parser.parse(new InputStreamReader(
-                    new FileInputStream(dataDir + DataFiles.GROUP)));
+                    new FileInputStream(dataDir + DataFiles.GROUP.getPath())));
 
             for(int i =0;i<group_list.size();i++){
                 JSONObject temp=(JSONObject)group_list.get(i);
@@ -55,7 +55,7 @@ public class DataMapping1 extends BaseDataMapping {
 
             // Adding Users
             JSONArray user_list = (JSONArray) parser.parse(new InputStreamReader(
-                    new FileInputStream(dataDir + DataFiles.USER)));
+                    new FileInputStream(dataDir + DataFiles.USER.getPath())));
 
             for(int i =0;i<user_list.size();i++){
                 JSONObject temp=(JSONObject)user_list.get(i);
@@ -64,10 +64,10 @@ public class DataMapping1 extends BaseDataMapping {
 
                 row = collection.createRow();
                 row.setValue(0, temp.get("id"));
-                row.setValue(1, temp.get("email"));
+                row.setValue(1, temp.get("emailId"));
                 row.setValue(2, temp.get("name"));
-                row.setValue(3, temp.get("name"));
-                groups=(JSONArray)temp.get("group");
+                row.setValue(3, temp.get("googleAuthToken"));
+                groups=(JSONArray)temp.get("groupIds");
                 String[] groups_s=new String[groups.size()];
                 for(int x=0;x<groups.size();x++)
                     groups_s[x]=groups.get(x).toString();
@@ -78,7 +78,7 @@ public class DataMapping1 extends BaseDataMapping {
 
             // Adding Locations
             JSONArray location_list = (JSONArray) parser.parse(new InputStreamReader(
-                    new FileInputStream(dataDir + DataFiles.LOCATION)));
+                    new FileInputStream(dataDir + DataFiles.LOCATION.getPath())));
 
             for(int i =0;i<location_list.size();i++){
                 JSONObject temp=(JSONObject)location_list.get(i);
@@ -86,37 +86,38 @@ public class DataMapping1 extends BaseDataMapping {
 
                 row = collection.createRow();
                 row.setValue(0, temp.get("id"));
-                row.setValue(1, (Double)temp.get("x"));
-                row.setValue(2, (Double)temp.get("y"));
-                row.setValue(3, (Double)temp.get("z"));
+                row.setValue(1, ((Number)temp.get("x")).doubleValue());
+                row.setValue(2, ((Number)temp.get("y")).doubleValue());
+                row.setValue(3, ((Number)temp.get("z")).doubleValue());
                 collection.put(row);
             }
 
+            // TODO: Adding Region row File and Region inserts
             // Adding Regions
-            JSONArray region_list = (JSONArray) parser.parse(new InputStreamReader(
-                    new FileInputStream(dataDir + DataFiles.REGION)));
-
-            for(int i =0;i<region_list.size();i++){
-                JSONObject temp=(JSONObject)region_list.get(i);
-                JSONArray locations;
-                collection = gridStore.getCollection("Region");
-
-                row = collection.createRow();
-                row.setValue(0, temp.get("id"));
-                row.setValue(1, (Double)temp.get("floor"));
-                row.setValue(2, temp.get("name"));
-                locations=(JSONArray)temp.get("geometry");
-                String[] locations_s=new String[locations.size()];
-                for(int x=0;x<locations.size();x++)
-                    locations_s[x]=locations.get(x).toString();
-                row.setValue(3,locations_s);
-
-                collection.put(row);
-            }
+//            JSONArray region_list = (JSONArray) parser.parse(new InputStreamReader(
+//                    new FileInputStream(dataDir + DataFiles.REGION.getPath())));
+//
+//            for(int i =0;i<region_list.size();i++){
+//                JSONObject temp=(JSONObject)region_list.get(i);
+//                JSONArray locations;
+//                collection = gridStore.getCollection("Region");
+//
+//                row = collection.createRow();
+//                row.setValue(0, temp.get("id"));
+//                row.setValue(1, ((Number)temp.get("floor")).doubleValue());
+//                row.setValue(2, temp.get("name"));
+//                locations=(JSONArray)temp.get("geometry");
+//                String[] locations_s=new String[locations.size()];
+//                for(int x=0;x<locations.size();x++)
+//                    locations_s[x]=locations.get(x).toString();
+//                row.setValue(3,locations_s);
+//
+//                collection.put(row);
+//            }
 
             // Adding Infrastructure Type
             JSONArray infraType_list = (JSONArray) parser.parse(new InputStreamReader(
-                    new FileInputStream(dataDir + DataFiles.INFRA_TYPE)));
+                    new FileInputStream(dataDir + DataFiles.INFRA_TYPE.getPath())));
 
             for(int i =0;i<infraType_list.size();i++){
                 JSONObject temp=(JSONObject)infraType_list.get(i);
@@ -132,7 +133,7 @@ public class DataMapping1 extends BaseDataMapping {
 
             // Adding Infrastructure
             JSONArray infra_list = (JSONArray) parser.parse(new InputStreamReader(
-                    new FileInputStream(dataDir + DataFiles.INFRA)));
+                    new FileInputStream(dataDir + DataFiles.INFRA.getPath())));
 
             for(int i =0;i<infra_list.size();i++){
                 JSONObject temp=(JSONObject)infra_list.get(i);
@@ -141,8 +142,8 @@ public class DataMapping1 extends BaseDataMapping {
                 row = collection.createRow();
                 row.setValue(0, temp.get("id"));
                 row.setValue(1, temp.get("name"));
-                row.setValue(2, temp.get("type"));
-                row.setValue(3, temp.get("region"));
+                row.setValue(2, temp.get("typeId"));
+                row.setValue(3, ((JSONObject)temp.get("region")).get("id"));
 
                 collection.put(row);
             }
@@ -164,7 +165,7 @@ public class DataMapping1 extends BaseDataMapping {
         try {
             // Adding Sensor Types
             JSONArray sensorType_list = (JSONArray) parser.parse(new InputStreamReader(
-                    new FileInputStream(dataDir + DataFiles.SENSOR_TYPE)));
+                    new FileInputStream(dataDir + DataFiles.SENSOR_TYPE.getPath())));
 
             for(int i =0;i<sensorType_list.size();i++){
                 JSONObject temp=(JSONObject)sensorType_list.get(i);
@@ -181,7 +182,7 @@ public class DataMapping1 extends BaseDataMapping {
 
             // Adding ObservationTypes
             JSONArray obsType_list = (JSONArray) parser.parse(new InputStreamReader(
-                    new FileInputStream(dataDir + DataFiles.OBS_TYPE)));
+                    new FileInputStream(dataDir + DataFiles.OBS_TYPE.getPath())));
 
             for(int i =0;i<obsType_list.size();i++){
                 JSONObject temp=(JSONObject)obsType_list.get(i);
@@ -197,7 +198,7 @@ public class DataMapping1 extends BaseDataMapping {
 
             // Adding Sensors
             JSONArray sensor_list = (JSONArray) parser.parse(new InputStreamReader(
-                    new FileInputStream(dataDir + DataFiles.OBS)));
+                    new FileInputStream(dataDir + DataFiles.OBS.getPath())));
 
             for(int i =0;i<sensor_list.size();i++){
                 JSONObject temp=(JSONObject)sensor_list.get(i);
@@ -329,7 +330,7 @@ public class DataMapping1 extends BaseDataMapping {
         try {
             // Adding PlatformTypes
             JSONArray platformType_list = (JSONArray) parser.parse(new InputStreamReader(
-                    new FileInputStream(dataDir + DataFiles.PLT_TYPE)));
+                    new FileInputStream(dataDir + DataFiles.PLT_TYPE.getPath())));
 
             for(int i =0;i<platformType_list.size();i++){
                 JSONObject temp=(JSONObject)platformType_list.get(i);
@@ -345,7 +346,7 @@ public class DataMapping1 extends BaseDataMapping {
 
             // Adding Platforms
             JSONArray platform_list = (JSONArray)parser.parse(new InputStreamReader(
-                    new FileInputStream(dataDir + DataFiles.PLT_TYPE)));
+                    new FileInputStream(dataDir + DataFiles.PLT.getPath())));
 
             for(int i =0;i<platform_list.size();i++){
                 JSONObject temp=(JSONObject)platform_list.get(i);

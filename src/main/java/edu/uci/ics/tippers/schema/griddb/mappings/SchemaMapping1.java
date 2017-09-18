@@ -1,18 +1,23 @@
 package edu.uci.ics.tippers.schema.griddb.mappings;
 
 import com.toshiba.mwcloud.gs.*;
+import edu.uci.ics.tippers.common.DataFiles;
+import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.schema.griddb.BaseSchemaMapping;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.*;
 
-/**
- * Created by peeyush on 26/4/17.
- */
+
 public class SchemaMapping1 extends BaseSchemaMapping {
 
-    private GridStore gridStore;
+    private JSONParser parser = new JSONParser();
     private EnumSet<IndexType> indexSet = EnumSet.of(IndexType.HASH);
 
     public SchemaMapping1(GridStore gridStore, String dataDir) {
@@ -81,7 +86,7 @@ public class SchemaMapping1 extends BaseSchemaMapping {
 
         columnInfoList.add(new ColumnInfo("id", GSType.STRING, indexSet));
         columnInfoList.add(new ColumnInfo("name", GSType.STRING));
-        columnInfoList.add(new ColumnInfo("locationId", GSType.STRING));
+        //columnInfoList.add(new ColumnInfo("locationId", GSType.STRING));
         columnInfoList.add(new ColumnInfo("ownerId", GSType.STRING));
         columnInfoList.add(new ColumnInfo("typeId", GSType.STRING));
 
@@ -165,6 +170,65 @@ public class SchemaMapping1 extends BaseSchemaMapping {
 
         gridStore.putCollection("Sensor", containerInfo, true);
 
+        // Creating Time series Observation Containers, One per each Sensor
+        JSONArray sensorList = null;
+        try {
+            sensorList = (JSONArray) parser.parse(new InputStreamReader(
+                    new FileInputStream(dataDir + DataFiles.SENSOR.getPath())));
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        for(int i =0;i<sensorList.size();i++){
+            JSONObject temp=(JSONObject)sensorList.get(i);
+
+            containerInfo = new ContainerInfo();
+            List<ColumnInfo> tempColumnInfoList = new ArrayList<>();
+            String collectionName = Constants.GRIDDB_OBS_PREFIX + temp.get("id");
+            containerInfo.setName(collectionName);
+            containerInfo.setType(ContainerType.TIME_SERIES);
+
+            tempColumnInfoList.add(new ColumnInfo("timeStamp", GSType.TIMESTAMP));
+            tempColumnInfoList.add(new ColumnInfo("id", GSType.STRING));
+            tempColumnInfoList.add(new ColumnInfo("typeId", GSType.STRING));
+
+            JSONArray schema = null;
+            try {
+                schema = (JSONArray) parser.parse((String)
+                        ((JSONObject)
+                                ((JSONObject)temp.get("sensorType"))
+                                        .get("observationType"))
+                        .get("payloadSchema"));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+            Iterator<JSONObject> iterator = schema.iterator();
+
+            iterator.forEachRemaining( e-> {
+                Set<String> keys =  e.keySet();
+
+                keys.forEach(k-> {
+                    GSType type = null;
+                    if (e.get(k).equals("STRING"))
+                        type = GSType.STRING;
+                    if (e.get(k).equals("DOUBLE"))
+                        type = GSType.DOUBLE;
+                    if (e.get(k).equals("INTEGER"))
+                        type = GSType.INTEGER;
+
+                    tempColumnInfoList.add(new ColumnInfo(k, type));
+                });
+            });
+
+            containerInfo.setColumnInfoList(tempColumnInfoList);
+            containerInfo.setRowKeyAssigned(true);
+
+            gridStore.putTimeSeries(collectionName, containerInfo, true);
+        }
+
     }
 
     public void createVSensorAndSObservationSchema() throws GSException {
@@ -229,6 +293,63 @@ public class SchemaMapping1 extends BaseSchemaMapping {
 
         gridStore.putCollection("VirtualSensor", containerInfo, true);
 
+        // Creating Semantic Observation Containers, One per each Semantic Observation Type
+
+        // Creating Time series Observation Containers, One per each Sensor
+        JSONArray soTypeList = null;
+        try {
+            soTypeList = (JSONArray) parser.parse(new InputStreamReader(
+                    new FileInputStream(dataDir + DataFiles.SO_TYPE.getPath())));
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+
+        for(int i =0;i<soTypeList.size();i++) {
+            JSONObject temp=(JSONObject)soTypeList.get(i);
+            String collectionName = Constants.GRIDDB_SO_PREFIX + temp.get("id");
+            containerInfo = new ContainerInfo();
+            List<ColumnInfo> tempColumnInfoList = new ArrayList<>();
+            containerInfo.setName(collectionName);
+            containerInfo.setType(ContainerType.COLLECTION);
+
+            tempColumnInfoList.add(new ColumnInfo("id", GSType.STRING));
+            tempColumnInfoList.add(new ColumnInfo("timeStamp", GSType.TIMESTAMP));
+            tempColumnInfoList.add(new ColumnInfo("semanticEntityId", GSType.STRING));
+            tempColumnInfoList.add(new ColumnInfo("virtualSensorId", GSType.STRING));
+
+
+            JSONArray schema = null;
+            try {
+                schema = (JSONArray) parser.parse((String)temp.get("payloadSchema"));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+            Iterator<JSONObject> iterator = schema.iterator();
+
+            iterator.forEachRemaining( e-> {
+                Set<String> keys =  e.keySet();
+
+                keys.forEach(k-> {
+                    GSType type = null;
+                    if (e.get(k).equals("STRING"))
+                        type = GSType.STRING;
+                    if (e.get(k).equals("DOUBLE"))
+                        type = GSType.DOUBLE;
+                    if (e.get(k).equals("INTEGER"))
+                        type = GSType.INTEGER;
+
+                    tempColumnInfoList.add(new ColumnInfo(k, type));
+                });
+            });
+            containerInfo.setColumnInfoList(tempColumnInfoList);
+            containerInfo.setRowKeyAssigned(true);
+
+            gridStore.putCollection(collectionName, containerInfo, true);
+        }
     }
 
     public void createMetadataSchema() throws GSException {

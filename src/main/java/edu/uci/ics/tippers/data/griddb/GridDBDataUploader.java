@@ -3,6 +3,7 @@ package edu.uci.ics.tippers.data.griddb;
 import com.toshiba.mwcloud.gs.GSException;
 import com.toshiba.mwcloud.gs.GridStore;
 import edu.uci.ics.tippers.common.Database;
+import edu.uci.ics.tippers.connection.griddb.StoreManager;
 import edu.uci.ics.tippers.data.BaseDataUploader;
 import edu.uci.ics.tippers.data.griddb.mappings.DataMapping1;
 import edu.uci.ics.tippers.exception.BenchmarkException;
@@ -14,6 +15,7 @@ public class GridDBDataUploader extends BaseDataUploader {
 
     public GridDBDataUploader(int mapping, String dataDir) throws BenchmarkException {
         super(mapping, dataDir);
+        gridStore = StoreManager.getInstance().getGridStore();
         switch (mapping) {
             case 1:
                 dataMapping = new DataMapping1(gridStore, dataDir);

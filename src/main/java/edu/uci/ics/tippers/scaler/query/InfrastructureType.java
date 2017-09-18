@@ -25,7 +25,7 @@ public class InfrastructureType {
         JSONArray locationTypes = new JSONArray();
         try {
             JSONParser parser = new JSONParser();
-            locationTypes = (JSONArray) parser.parse(new FileReader("../POST/sensor.json"));
+            locationTypes = (JSONArray) parser.parse(new FileReader("../POST/sensorOld.json"));
         } catch (FileNotFoundException ex) {
             System.err.println("File not found");
             // exit(1); Problem

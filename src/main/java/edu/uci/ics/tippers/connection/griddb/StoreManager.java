@@ -23,7 +23,7 @@ public class StoreManager {
     private StoreManager() {
         // Get a GridStore instance
         try {
-            InputStream inputStream = getClass().getClassLoader().getResourceAsStream("/griddb/griddb.properties");
+            InputStream inputStream = getClass().getClassLoader().getResourceAsStream("griddb/griddb.properties");
             props = new Properties();
             props.load(inputStream);
             Properties factoryProperties = new Properties();

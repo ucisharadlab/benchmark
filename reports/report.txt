@@ -1,3 +1,2 @@
 Database	QueryRunTimes(ms)
-asterixdb	Mapping1	1;33	2;101	3;47	4;90	
 griddb	Mapping1	None

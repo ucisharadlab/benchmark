@@ -11,7 +11,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-// Parse sensor.json file
+// Parse sensorOld.json file
 public class Sensor
 {  
     private List<String> ids;
@@ -31,7 +31,7 @@ public class Sensor
         JSONArray sensors = new JSONArray();
         try {
             JSONParser parser = new JSONParser();
-            sensors = (JSONArray) parser.parse(new FileReader("../POST/sensor.json"));
+            sensors = (JSONArray) parser.parse(new FileReader("../POST/sensorOld.json"));
         } catch (FileNotFoundException ex) {
             System.err.println("File not found");
             // exit(1); Problem

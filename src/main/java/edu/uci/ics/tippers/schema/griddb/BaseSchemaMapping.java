@@ -12,7 +12,7 @@ import java.util.List;
 public abstract class BaseSchemaMapping {
 
     protected GridStore gridStore;
-    private String dataDir;
+    protected String dataDir;
 
     public BaseSchemaMapping(GridStore gridStore, String dataDir) {
         this.gridStore = gridStore;
