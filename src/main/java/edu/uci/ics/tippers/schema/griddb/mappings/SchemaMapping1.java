@@ -294,8 +294,6 @@ public class SchemaMapping1 extends BaseSchemaMapping {
         gridStore.putCollection("VirtualSensor", containerInfo, true);
 
         // Creating Semantic Observation Containers, One per each Semantic Observation Type
-
-        // Creating Time series Observation Containers, One per each Sensor
         JSONArray soTypeList = null;
         try {
             soTypeList = (JSONArray) parser.parse(new InputStreamReader(

@@ -10,7 +10,11 @@
 
 
     <dependencies>
-        <!-- https://mvnrepository.com/artifact/net.sf.opencsv/opencsv -->
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongo-java-driver</artifactId>
+            <version>3.4.3</version>
+        </dependency>
         <dependency>
             <groupId>net.sf.opencsv</groupId>
             <artifactId>opencsv</artifactId>

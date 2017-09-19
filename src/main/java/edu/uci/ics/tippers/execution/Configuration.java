@@ -16,6 +16,7 @@ public class Configuration {
     private String dataDir;
     private String queriesDir;
     private String reportsDir;
+    private boolean writeOutput;
 
     public Configuration(Preferences preferences) throws BenchmarkException {
         this.preferences = preferences;
@@ -67,6 +68,8 @@ public class Configuration {
         }
         reportsDir = nodeValue;
 
+        writeOutput = preferences.node("benchmark").getBoolean("write-query-result", false);;
+
     }
 
     public List<Database> getDatabases() {
@@ -115,5 +118,13 @@ public class Configuration {
 
     public void setReportsDir(String reportsDir) {
         this.reportsDir = reportsDir;
+    }
+
+    public boolean isWriteOutput() {
+        return writeOutput;
+    }
+
+    public void setWriteOutput(boolean writeOutput) {
+        this.writeOutput = writeOutput;
     }
 }

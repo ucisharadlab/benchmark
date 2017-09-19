@@ -2,6 +2,7 @@ package edu.uci.ics.tippers.execution;
 
 import edu.uci.ics.tippers.common.Database;
 import edu.uci.ics.tippers.common.ReportFormat;
+import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.data.BaseDataUploader;
 import edu.uci.ics.tippers.data.asterixdb.AsterixDBDataUploader;
 import edu.uci.ics.tippers.data.griddb.GridDBDataUploader;
@@ -27,7 +28,6 @@ import java.util.prefs.Preferences;
  */
 public class Benchmark {
 
-    private static String CONFIG = "benchmark.ini";
     private static final String OBJECTS = "objects/";
     private static final String ROWS = "rows/";
     private static Map<Pair<Database, Integer>, Map<Integer, Duration>> runTimes = new HashMap<>();
@@ -35,7 +35,7 @@ public class Benchmark {
 
     private Configuration readConfiguration() throws BenchmarkException {
         try {
-            Ini ini = new Ini(new File(getClass().getClassLoader().getResource(CONFIG).getFile()));
+            Ini ini = new Ini(new File(getClass().getClassLoader().getResource(Constants.CONFIG).getFile()));
             Preferences prefs = new IniPreferences(ini);
             configuration = new Configuration(prefs);
 
@@ -97,16 +97,10 @@ public class Benchmark {
                 switch (database) {
                     case GRIDDB:
                         configuration.getMappings().get(Database.GRIDDB).forEach(
-                                e -> {
-                                    try {
-                                        benchmark.runBenchmark(
-                                                new GridDBSchema(e, configuration.getDataDir() + ROWS),
-                                                new GridDBDataUploader(e, configuration.getDataDir() + ROWS),
-                                                new GridDBQueryManager(e, configuration.getQueriesDir(), false));
-                                    } catch (BenchmarkException e1) {
-                                        e1.printStackTrace();
-                                    }
-                                });
+                                e -> benchmark.runBenchmark(
+                                            new GridDBSchema(e, configuration.getDataDir() + ROWS),
+                                            new GridDBDataUploader(e, configuration.getDataDir() + ROWS),
+                                            new GridDBQueryManager(e, configuration.getQueriesDir(), false)));
                         break;
                     case CRATEDB:
                         break;
@@ -114,10 +108,11 @@ public class Benchmark {
                         break;
                     case ASTERIXDB:
                         configuration.getMappings().get(Database.GRIDDB).forEach(
-                                e->benchmark.runBenchmark(
+                                e -> benchmark.runBenchmark(
                                         new AsterixDBSchema(e, configuration.getDataDir() + OBJECTS),
                                         new AsterixDBDataUploader(e, configuration.getDataDir() + OBJECTS),
-                                        new AsterixDBQueryManager(e, configuration.getQueriesDir(), false)));
+                                        new AsterixDBQueryManager(e, configuration.getQueriesDir(),
+                                                configuration.isWriteOutput())));
                         break;
                     case CASSANDRA:
                         break;
