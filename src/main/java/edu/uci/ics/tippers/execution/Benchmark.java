@@ -49,6 +49,8 @@ public class Benchmark {
     private void runBenchmark(BaseSchema schemaCreator, BaseDataUploader dataUploader, BaseQueryManager queryManager) {
 
         try {
+            System.out.println("---------------------------------------------------------------\n");
+
             System.out.println(String.format("Running Benchmark On %s With Mapping %s",
                     schemaCreator.getDatabase().getName(), schemaCreator.getMapping()));
 
@@ -67,6 +69,8 @@ public class Benchmark {
             // Cleaning up inserted data and dropping created schema
             System.out.println("Cleaning Up Database, Removing Data And Schema ...\n");
             schemaCreator.dropSchema();
+
+            System.out.println("---------------------------------------------------------------\n");
 
         } catch (Exception be) {
             be.printStackTrace();

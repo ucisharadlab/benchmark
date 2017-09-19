@@ -34,11 +34,11 @@ public class AsterixDBSchema extends BaseSchema {
         }
 
         HttpResponse response = AsterixDBConnectionManager.getInstance().sendQuery(queryString, false);
-        try {
-            System.out.println(EntityUtils.toString(response.getEntity()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            System.out.println(EntityUtils.toString(response.getEntity()));
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
     }
 
     @Override

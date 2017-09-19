@@ -2,6 +2,7 @@ package edu.uci.ics.tippers.execution;
 
 import edu.uci.ics.tippers.common.Database;
 import edu.uci.ics.tippers.common.ReportFormat;
+import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import javafx.util.Pair;
 
@@ -49,7 +50,10 @@ public class ReportBuilder {
                     continue;
                 }
                 for (Integer query: queryTimes.keySet()) {
-                    line += query + ";" + queryTimes.get(query).toMillis()+ "\t";
+                    if (queryTimes.get(query) != Constants.MAX_DURATION)
+                        line += query + ";" + queryTimes.get(query).toMillis()+ "\t";
+                    else
+                        line += query + ";" + "None" + "\t";
                 }
                 line += "\n";
                 writer.write(line);

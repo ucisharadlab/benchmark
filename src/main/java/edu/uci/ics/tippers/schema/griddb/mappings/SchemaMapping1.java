@@ -86,7 +86,7 @@ public class SchemaMapping1 extends BaseSchemaMapping {
 
         columnInfoList.add(new ColumnInfo("id", GSType.STRING, indexSet));
         columnInfoList.add(new ColumnInfo("name", GSType.STRING));
-        //columnInfoList.add(new ColumnInfo("locationId", GSType.STRING));
+        columnInfoList.add(new ColumnInfo("locationId", GSType.STRING));
         columnInfoList.add(new ColumnInfo("ownerId", GSType.STRING));
         columnInfoList.add(new ColumnInfo("typeId", GSType.STRING));
 
