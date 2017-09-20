@@ -6,13 +6,16 @@ import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.data.BaseDataUploader;
 import edu.uci.ics.tippers.data.asterixdb.AsterixDBDataUploader;
 import edu.uci.ics.tippers.data.griddb.GridDBDataUploader;
+import edu.uci.ics.tippers.data.mongodb.MongoDBDataUploader;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.query.BaseQueryManager;
 import edu.uci.ics.tippers.query.asterixdb.AsterixDBQueryManager;
 import edu.uci.ics.tippers.query.griddb.GridDBQueryManager;
+import edu.uci.ics.tippers.query.mongodb.MongoDBQueryManager;
 import edu.uci.ics.tippers.schema.BaseSchema;
 import edu.uci.ics.tippers.schema.asterixdb.AsterixDBSchema;
 import edu.uci.ics.tippers.schema.griddb.GridDBSchema;
+import edu.uci.ics.tippers.schema.mongodb.MongoDBSchema;
 import javafx.util.Pair;
 import org.ini4j.Ini;
 import org.ini4j.IniPreferences;
@@ -30,6 +33,8 @@ public class Benchmark {
 
     private static final String OBJECTS = "objects/";
     private static final String ROWS = "rows/";
+    private static final String MIX = "mix/";
+
     private static Map<Pair<Database, Integer>, Map<Integer, Duration>> runTimes = new HashMap<>();
     private static Configuration configuration;
 
@@ -100,14 +105,21 @@ public class Benchmark {
                                 e -> benchmark.runBenchmark(
                                             new GridDBSchema(e, configuration.getDataDir() + ROWS),
                                             new GridDBDataUploader(e, configuration.getDataDir() + ROWS),
-                                            new GridDBQueryManager(e, configuration.getQueriesDir(), false)));
+                                            new GridDBQueryManager(e, configuration.getQueriesDir(),
+                                                    configuration.isWriteOutput())));
                         break;
                     case CRATEDB:
                         break;
                     case MONGODB:
+                        configuration.getMappings().get(Database.MONGODB).forEach(
+                                e -> benchmark.runBenchmark(
+                                        new MongoDBSchema(e, configuration.getDataDir() + MIX),
+                                        new MongoDBDataUploader(e, configuration.getDataDir() + MIX),
+                                        new MongoDBQueryManager(e, configuration.getQueriesDir(),
+                                                configuration.isWriteOutput())));
                         break;
                     case ASTERIXDB:
-                        configuration.getMappings().get(Database.GRIDDB).forEach(
+                        configuration.getMappings().get(Database.ASTERIXDB).forEach(
                                 e -> benchmark.runBenchmark(
                                         new AsterixDBSchema(e, configuration.getDataDir() + OBJECTS),
                                         new AsterixDBDataUploader(e, configuration.getDataDir() + OBJECTS),
