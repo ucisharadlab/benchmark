@@ -7,15 +7,18 @@ import edu.uci.ics.tippers.data.BaseDataUploader;
 import edu.uci.ics.tippers.data.asterixdb.AsterixDBDataUploader;
 import edu.uci.ics.tippers.data.griddb.GridDBDataUploader;
 import edu.uci.ics.tippers.data.mongodb.MongoDBDataUploader;
+import edu.uci.ics.tippers.data.postgresql.PgSQLDataUploader;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.query.BaseQueryManager;
 import edu.uci.ics.tippers.query.asterixdb.AsterixDBQueryManager;
 import edu.uci.ics.tippers.query.griddb.GridDBQueryManager;
 import edu.uci.ics.tippers.query.mongodb.MongoDBQueryManager;
+import edu.uci.ics.tippers.query.postgresql.PgSQLQueryManager;
 import edu.uci.ics.tippers.schema.BaseSchema;
 import edu.uci.ics.tippers.schema.asterixdb.AsterixDBSchema;
 import edu.uci.ics.tippers.schema.griddb.GridDBSchema;
 import edu.uci.ics.tippers.schema.mongodb.MongoDBSchema;
+import edu.uci.ics.tippers.schema.postgresql.PgSQLSchema;
 import javafx.util.Pair;
 import org.ini4j.Ini;
 import org.ini4j.IniPreferences;
@@ -129,6 +132,12 @@ public class Benchmark {
                     case CASSANDRA:
                         break;
                     case POSTGRESQL:
+                        configuration.getMappings().get(Database.POSTGRESQL).forEach(
+                                e -> benchmark.runBenchmark(
+                                        new PgSQLSchema(e, configuration.getDataDir() + MIX),
+                                        new PgSQLDataUploader(e, configuration.getDataDir() + MIX),
+                                        new PgSQLQueryManager(e, configuration.getQueriesDir(),
+                                                configuration.isWriteOutput())));
                         break;
                     default:
                         throw new BenchmarkException("Database Not Supported");

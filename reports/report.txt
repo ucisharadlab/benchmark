@@ -1,4 +1,2 @@
-Database	QueryRunTimes(ms)
-griddb	Mapping1	1;3	2;23	3;1	4;2	
-asterixdb	Mapping1	1;106	2;169	3;93	4;116	
-mongodb	Mapping1	1;4	2;1	3;4	4;6	
+Database	Mapping	QueryRunTimes(ms)
+postgresql	1	1;10000000000	2;10000000000	3;10000000000	4;10000000000	

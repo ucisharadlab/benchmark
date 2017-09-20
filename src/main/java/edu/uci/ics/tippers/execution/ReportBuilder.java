@@ -34,14 +34,14 @@ public class ReportBuilder {
     }
 
     private void createTextReport() throws BenchmarkException {
-        BufferedWriter writer = null;
+        BufferedWriter writer;
         try {
             writer = new BufferedWriter(new FileWriter(reportsDir + "report.txt"));
-            writer.write("Database\tQueryRunTimes(ms)\n" );
+            writer.write("Database\tMapping\tQueryRunTimes(ms)\n" );
 
             for(Pair<Database, Integer> key: runTimes.keySet()) {
 
-                String line = key.getKey().getName() + "\t" + "Mapping" + key.getValue() + "\t";
+                String line = key.getKey().getName() + "\t" + key.getValue() + "\t";
                 Map<Integer, Duration> queryTimes = runTimes.get(key);
 
                 if (queryTimes == null) {
