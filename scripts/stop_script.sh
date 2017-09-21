@@ -1,9 +1,9 @@
 # MongoDB
-echo "Stopping MongoDB"
+echo -e "Stopping MongoDB ...\n\n"
 mongod --shutdown  -dbpath /home/benchmark/opt/mongodb/data/
 
 # GridDB
-echo "Stopping GridDB"
+echo -e "Stopping GridDB ...\n\n"
 export PATH=$PATH:/home/benchmark/opt/griddb/bin
 export GS_HOME=/home/benchmark/opt/griddb
 export GS_LOG=/home/benchmark/opt/griddb/log
@@ -13,17 +13,17 @@ sleep 5
 gs_stopnode -u admin/admin
 
 # AsterixDB
-echo "Stopping AsterixDB"
+echo -e "Stopping AsterixDB ... \n\n"
 /home/benchmark/opt/asterixdb/opt/local/bin/stop-sample-cluster.sh
 
 # PostgreSQL
-echo "Stopping Postgres"
+echo -e "Stopping Postgres ... \n\n"
 service postgresql stop
 
 # Cassandra
-echo "Stopping Cassandra"
+echo -e "Stopping Cassandra ... \n\n"
 service cassandra stop
 
 # CrateDB
-echo "Stopping CrateDB"
+echo -e "Stopping CrateDB ... \n\n"
 service crate stop

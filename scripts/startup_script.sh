@@ -1,10 +1,10 @@
 # MongoDB
-echo "Starting MongoDB"
+echo -e "Starting MongoDB ... \n\n"
 export PATH=$PATH:/home/benchmark/opt/mongodb/bin
 mongod --fork --logpath /tmp/mongodb.log -dbpath /home/benchmark/opt/mongodb/data/
 
 # GridDB
-echo "Starting GridDB"
+echo -e "Starting GridDB ... \n\n"
 export PATH=$PATH:/home/benchmark/opt/griddb/bin
 export GS_HOME=/home/benchmark/opt/griddb
 export GS_LOG=/home/benchmark/opt/griddb/log
@@ -14,17 +14,17 @@ sleep 5
 gs_joincluster -c cluster1 -u admin/admin
 
 # AsterixDB
-echo "Starting AsterixDB"
+echo -e "Starting AsterixDB ... \n\n"
 /home/benchmark/opt/asterixdb/opt/local/bin/start-sample-cluster.sh
 
 # PostgreSQL
-echo "Starting Postgres"
+echo -e "Starting Postgres ... \n\n"
 service postgresql start
 
 # Cassandra
-echo "Starting Cassandra"
+echo -e "Starting Cassandra ... \n\n"
 service cassandra start
 
 # CrateDB
-echo "Starting CrateDB"
+echo -e "Starting CrateDB ... \n\n"
 service crate start

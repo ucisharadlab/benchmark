@@ -1,2 +1,2 @@
 Database	Mapping	QueryRunTimes(ms)
-postgresql	1	1;10000000000	2;10000000000	3;10000000000	4;10000000000	
+postgresql	1	1;12	2;4	3;3	4;2	

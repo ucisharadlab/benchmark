@@ -80,9 +80,14 @@ public class Benchmark {
 
             System.out.println("---------------------------------------------------------------\n");
 
-        } catch (Exception be) {
+        } catch (Exception | Error be) {
             be.printStackTrace();
             runTimes.put(new Pair<>(queryManager.getDatabase(), queryManager.getMapping()), null);
+            try {
+                schemaCreator.dropSchema();
+            } catch (Exception | Error e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -99,7 +104,7 @@ public class Benchmark {
 
             System.out.println("Starting Up Database Servers\n");
             DBMSManager dbmsManager = new DBMSManager(configuration.getScriptsDir());
-            //dbmsManager.startServers();
+            dbmsManager.startServers();
 
             for (Database database: configuration.getDatabases()) {
                 switch (database) {
@@ -134,8 +139,8 @@ public class Benchmark {
                     case POSTGRESQL:
                         configuration.getMappings().get(Database.POSTGRESQL).forEach(
                                 e -> benchmark.runBenchmark(
-                                        new PgSQLSchema(e, configuration.getDataDir() + MIX),
-                                        new PgSQLDataUploader(e, configuration.getDataDir() + MIX),
+                                        new PgSQLSchema(e, configuration.getDataDir() + ROWS),
+                                        new PgSQLDataUploader(e, configuration.getDataDir() + ROWS),
                                         new PgSQLQueryManager(e, configuration.getQueriesDir(),
                                                 configuration.isWriteOutput())));
                         break;
@@ -149,7 +154,7 @@ public class Benchmark {
             System.out.println("\n****Report Written To Reports Directory****");
 
             System.out.println("Stopping All Database Servers");
-            //dbmsManager.stopServers();
+            dbmsManager.stopServers();
         } catch (BenchmarkException e) {
             e.printStackTrace();
         }
