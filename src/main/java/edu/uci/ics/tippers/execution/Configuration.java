@@ -1,6 +1,7 @@
 package edu.uci.ics.tippers.execution;
 
 import edu.uci.ics.tippers.common.Database;
+import edu.uci.ics.tippers.common.ReportFormat;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 
 import java.util.*;
@@ -17,6 +18,7 @@ public class Configuration {
     private String queriesDir;
     private String reportsDir;
     private boolean writeOutput;
+    private ReportFormat format;
 
     public Configuration(Preferences preferences) throws BenchmarkException {
         this.preferences = preferences;
@@ -68,7 +70,9 @@ public class Configuration {
         }
         reportsDir = nodeValue;
 
-        writeOutput = preferences.node("benchmark").getBoolean("write-query-result", false);;
+        writeOutput = preferences.node("benchmark").getBoolean("write-query-result", false);
+
+        format= ReportFormat.get(preferences.node("benchmark").get("report-format", "text"));
 
     }
 
@@ -126,5 +130,13 @@ public class Configuration {
 
     public void setWriteOutput(boolean writeOutput) {
         this.writeOutput = writeOutput;
+    }
+
+    public ReportFormat getFormat() {
+        return format;
+    }
+
+    public void setFormat(ReportFormat format) {
+        this.format = format;
     }
 }

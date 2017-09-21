@@ -149,7 +149,8 @@ public class Benchmark {
                 }
             }
 
-            ReportBuilder builder = new ReportBuilder(runTimes, configuration.getReportsDir(), ReportFormat.TEXT);
+            ReportBuilder builder = new ReportBuilder(runTimes, configuration.getReportsDir(),
+                    configuration.getFormat());
             builder.createReport();
             System.out.println("\n****Report Written To Reports Directory****");
 

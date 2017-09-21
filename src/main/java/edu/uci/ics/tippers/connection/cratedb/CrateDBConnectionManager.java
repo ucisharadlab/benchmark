@@ -1,23 +1,19 @@
-package edu.uci.ics.tippers.connection.postgresql;
+package edu.uci.ics.tippers.connection.cratedb;
 
-import edu.uci.ics.tippers.connection.asterixdb.AsterixDBConnectionManager;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 
-public class PgSQLConnectionManager {
+public class CrateDBConnectionManager {
 
-    private static final Logger LOGGER = Logger.getLogger(PgSQLConnectionManager.class);
-    private static PgSQLConnectionManager _instance = new PgSQLConnectionManager();
+    private static final Logger LOGGER = Logger.getLogger(CrateDBConnectionManager.class);
+    private static CrateDBConnectionManager _instance = new CrateDBConnectionManager();
     private Properties props;
     private static String SERVER;
     private static String PORT;
@@ -25,9 +21,9 @@ public class PgSQLConnectionManager {
     private static String USER;
     private static String PASSWORD;
 
-    private PgSQLConnectionManager() {
+    private CrateDBConnectionManager() {
         try {
-            InputStream inputStream = getClass().getClassLoader().getResourceAsStream("postgresql/pgsql.properties");
+            InputStream inputStream = getClass().getClassLoader().getResourceAsStream("cratedb/cratedb.properties");
             props = new Properties();
             props.load(inputStream);
 
@@ -42,28 +38,18 @@ public class PgSQLConnectionManager {
         }
     }
 
-    public static PgSQLConnectionManager getInstance() {
+    public static CrateDBConnectionManager getInstance() {
         return _instance;
     }
 
 
     public Connection getConnection() throws BenchmarkException {
-        try {
-
-            Class.forName("org.postgresql.Driver");
-
-        } catch (ClassNotFoundException e) {
-
-            System.out.println("Where is your PostgreSQL JDBC Driver? "
-                    + "Include in your library path!");
-            e.printStackTrace();
-
-        }
 
         Connection connection;
         try {
             connection = DriverManager.getConnection(
-                    String.format("jdbc:postgresql://%s:%s/%s", SERVER, PORT, DATABASE), USER, PASSWORD);
+                    String.format("jdbc:crate://%s:%s/", SERVER, PORT));
+            connection.setSchema(DATABASE);
 
             return connection;
         } catch (SQLException e) {
