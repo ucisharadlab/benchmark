@@ -17,15 +17,20 @@ public class CrateDBQueryManager extends BaseQueryManager {
     private PgSQLQueryManager externalQueryManager;
     private Connection connection;
 
-    public CrateDBQueryManager(int mapping, String queriesDir, boolean writeOutput) {
-        super(mapping, queriesDir, writeOutput);
+    public CrateDBQueryManager(int mapping, String queriesDir, boolean writeOutput, long timeout) {
+        super(mapping, queriesDir, writeOutput, timeout);
         connection = CrateDBConnectionManager.getInstance().getConnection();
-        externalQueryManager = new PgSQLQueryManager(mapping, queriesDir, writeOutput, connection);
+        externalQueryManager = new PgSQLQueryManager(mapping, queriesDir, writeOutput, timeout, connection);
     }
 
     @Override
     public Database getDatabase() {
         return Database.CRATEDB;
+    }
+
+    @Override
+    public void cleanUp() {
+
     }
 
     @Override

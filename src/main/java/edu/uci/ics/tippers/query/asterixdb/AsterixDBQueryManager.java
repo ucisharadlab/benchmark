@@ -5,17 +5,15 @@ import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.connection.asterixdb.AsterixDBConnectionManager;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.query.BaseQueryManager;
-import edu.uci.ics.tippers.query.QueryCSVReader;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class AsterixDBQueryManager extends BaseQueryManager{
@@ -23,14 +21,19 @@ public class AsterixDBQueryManager extends BaseQueryManager{
     private AsterixDBConnectionManager connectionManager;
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
-    public AsterixDBQueryManager(int mapping, String queriesDir, boolean writeOutput){
-        super(mapping, queriesDir, writeOutput);
+    public AsterixDBQueryManager(int mapping, String queriesDir, boolean writeOutput, long timeout){
+        super(mapping, queriesDir, writeOutput, timeout);
         connectionManager = AsterixDBConnectionManager.getInstance();
     }
 
     @Override
     public Database getDatabase() {
         return Database.ASTERIXDB;
+    }
+
+    @Override
+    public void cleanUp() {
+
     }
 
     private Duration runTimedQuery (String query) throws BenchmarkException {

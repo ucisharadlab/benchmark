@@ -19,6 +19,7 @@ public class Configuration {
     private String reportsDir;
     private boolean writeOutput;
     private ReportFormat format;
+    private Long timeout;
 
     public Configuration(Preferences preferences) throws BenchmarkException {
         this.preferences = preferences;
@@ -73,6 +74,8 @@ public class Configuration {
         writeOutput = preferences.node("benchmark").getBoolean("write-query-result", false);
 
         format= ReportFormat.get(preferences.node("benchmark").get("report-format", "text"));
+
+        timeout= preferences.node("benchmark").getLong("query-timeout", 10000000);
 
     }
 
@@ -138,5 +141,13 @@ public class Configuration {
 
     public void setFormat(ReportFormat format) {
         this.format = format;
+    }
+
+    public Long getTimeout() {
+        return timeout;
+    }
+
+    public void setTimeout(Long timeout) {
+        this.timeout = timeout;
     }
 }

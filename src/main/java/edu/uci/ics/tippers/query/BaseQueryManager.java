@@ -1,24 +1,28 @@
 package edu.uci.ics.tippers.query;
 
 import edu.uci.ics.tippers.common.Database;
+import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.*;
 
 public abstract class BaseQueryManager {
 
     protected int mapping;
     protected boolean writeOutput;
     protected String queriesDir;
+    protected long timeout;
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
-    public BaseQueryManager(int mapping, String queriesDir, boolean writeOutput) {
+    public BaseQueryManager(int mapping, String queriesDir, boolean writeOutput, long timeout) {
         this.mapping = mapping;
         this.writeOutput = writeOutput;
         this.queriesDir = queriesDir;
+        this.timeout = timeout;
     }
 
     public abstract Database getDatabase();
@@ -29,6 +33,28 @@ public abstract class BaseQueryManager {
 
     public int setMapping() {
         return this.mapping;
+    }
+
+    private Duration runWithThread(Callable<Duration> query) {
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        Future<Duration> future = executorService.submit(query);
+        try {
+            return future.get(timeout, TimeUnit.MILLISECONDS);
+        }catch (TimeoutException e) {
+            e.printStackTrace();
+            return Constants.MAX_DURATION;
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            throw new BenchmarkException("Error Running Query");
+        } finally {
+            executorService.shutdown();
+            try {
+                executorService.awaitTermination(Constants.SHUTDOWN_WAIT, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            cleanUp();
+        }
     }
 
     private void warmingUp() {
@@ -53,7 +79,7 @@ public abstract class BaseQueryManager {
 
         while ((values = reader.readNextLine()) != null) {
             String sensorId = values[1];
-            runTime = runTime.plus(runQuery1(sensorId));
+            runTime = runTime.plus(runWithThread(()->runQuery1(sensorId)));
             numQueries++;
         }
 
@@ -65,7 +91,7 @@ public abstract class BaseQueryManager {
         while ((values = reader.readNextLine()) != null) {
             String sensorTypeName = values[1];
             List<String> locations = Arrays.asList(values[2].split(";"));
-            runTime = runTime.plus(runQuery2(sensorTypeName, locations));
+            runTime = runTime.plus(runWithThread(()->runQuery2(sensorTypeName, locations)));
             numQueries++;
         }
         queryRunTimes.put(2, runTime.dividedBy(numQueries));
@@ -75,15 +101,17 @@ public abstract class BaseQueryManager {
         reader = new QueryCSVReader(queriesDir + "query3.txt");
         while ((values = reader.readNextLine()) != null) {
             String sensorId = values[1];
-            Date start = null, end = null;
+            final Date start, end;
             try {
                 start = sdf.parse(values[2]);
                 end = sdf.parse(values[3]);
+                runTime = runTime.plus(runWithThread(()->runQuery3(sensorId, start, end)));
+                numQueries++;
             } catch (ParseException e) {
                 e.printStackTrace();
+                throw new BenchmarkException("Error Running Queries, Incorrect Date Format");
             }
-            runTime = runTime.plus(runQuery3(sensorId, start, end));
-            numQueries++;
+
         }
         queryRunTimes.put(3, runTime.dividedBy(numQueries));
 
@@ -92,20 +120,23 @@ public abstract class BaseQueryManager {
         reader = new QueryCSVReader(queriesDir + "query4.txt");
         while ((values = reader.readNextLine()) != null) {
             List<String> sensorIds = Arrays.asList(values[1].split(";"));
-            Date start = null, end = null;
+            Date start, end;
             try {
                 start = sdf.parse(values[2]);
                 end = sdf.parse(values[3]);
+                runTime = runTime.plus(runWithThread(()->runQuery4(sensorIds, start, end)));
+                numQueries++;
             } catch (ParseException e) {
                 e.printStackTrace();
+                throw new BenchmarkException("Error Running Queries, Incorrect Date Format");
             }
-            runTime = runTime.plus(runQuery4(sensorIds, start, end));
-            numQueries++;
         }
         queryRunTimes.put(4, runTime.dividedBy(numQueries));
 
         return queryRunTimes;
     }
+
+    public abstract void cleanUp();
 
     public abstract Duration runQuery1(String sensorId) throws BenchmarkException;
 

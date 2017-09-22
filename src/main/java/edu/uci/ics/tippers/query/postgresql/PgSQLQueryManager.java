@@ -16,13 +16,14 @@ public class PgSQLQueryManager extends BaseQueryManager{
 
     private Connection connection;
 
-    public PgSQLQueryManager(int mapping, String queriesDir, boolean writeOutput) {
-        super(mapping, queriesDir, writeOutput);
+    public PgSQLQueryManager(int mapping, String queriesDir, boolean writeOutput, long timeout) {
+        super(mapping, queriesDir, writeOutput, timeout);
         connection = PgSQLConnectionManager.getInstance().getConnection();
     }
 
-    public PgSQLQueryManager(int mapping, String queriesDir, boolean writeOutput, Connection connection) {
-        super(mapping, queriesDir, writeOutput);
+    public PgSQLQueryManager(int mapping, String queriesDir, boolean writeOutput, long timeout,
+                             Connection connection) {
+        super(mapping, queriesDir, writeOutput, timeout);
         this.connection = connection;
     }
 
@@ -54,6 +55,11 @@ public class PgSQLQueryManager extends BaseQueryManager{
     @Override
     public Database getDatabase() {
         return Database.POSTGRESQL;
+    }
+
+    @Override
+    public void cleanUp() {
+
     }
 
     @Override

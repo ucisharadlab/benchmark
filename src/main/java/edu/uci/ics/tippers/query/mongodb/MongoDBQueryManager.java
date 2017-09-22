@@ -1,6 +1,5 @@
 package edu.uci.ics.tippers.query.mongodb;
 
-import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoIterable;
@@ -24,14 +23,19 @@ public class MongoDBQueryManager extends BaseQueryManager{
 
     private MongoDatabase database;
 
-    public MongoDBQueryManager(int mapping, String queriesDir, boolean writeOutput) {
-        super(mapping, queriesDir, writeOutput);
+    public MongoDBQueryManager(int mapping, String queriesDir, boolean writeOutput, long timeout) {
+        super(mapping, queriesDir, writeOutput, timeout);
         database = DBManager.getInstance().getDatabase();
     }
 
     @Override
     public Database getDatabase() {
         return Database.MONGODB;
+    }
+
+    @Override
+    public void cleanUp() {
+
     }
 
     @Override

@@ -13,13 +13,18 @@ import java.util.List;
  */
 public class CassandraQueryManager extends BaseQueryManager {
 
-    public CassandraQueryManager(int mapping, String queriesDir, boolean writeOutput) {
-        super(mapping, queriesDir, writeOutput);
+    public CassandraQueryManager(int mapping, String queriesDir, boolean writeOutput, long timeout) {
+        super(mapping, queriesDir, writeOutput, timeout);
     }
 
     @Override
     public Database getDatabase() {
         return null;
+    }
+
+    @Override
+    public void cleanUp() {
+
     }
 
     @Override

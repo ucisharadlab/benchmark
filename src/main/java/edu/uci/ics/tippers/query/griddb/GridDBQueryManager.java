@@ -5,18 +5,12 @@ import edu.uci.ics.tippers.common.Database;
 import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.connection.griddb.StoreManager;
 import edu.uci.ics.tippers.exception.BenchmarkException;
-import edu.uci.ics.tippers.execution.Benchmark;
 import edu.uci.ics.tippers.query.BaseQueryManager;
-import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
-import org.json.simple.JSONArray;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -25,14 +19,24 @@ public class GridDBQueryManager extends BaseQueryManager {
     private GridStore gridStore;
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
-    public GridDBQueryManager(int mapping, String queriesDir, boolean writeOutput) {
-        super(mapping, queriesDir, writeOutput);
+    public GridDBQueryManager(int mapping, String queriesDir, boolean writeOutput, long timeout) {
+        super(mapping, queriesDir, writeOutput, timeout);
         gridStore = StoreManager.getInstance().getGridStore();
     }
 
     @Override
     public Database getDatabase() {
         return Database.GRIDDB;
+    }
+
+    @Override
+    public void cleanUp(){
+        try {
+            gridStore.close();
+            gridStore = StoreManager.getInstance().getGridStore();
+        } catch (GSException e) {
+        }
+
     }
 
     private Duration runTimedQuery(String containerName, String query) throws BenchmarkException {

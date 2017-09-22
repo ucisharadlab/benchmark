@@ -6,7 +6,6 @@ import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import javafx.util.Pair;
 
-import javax.xml.crypto.Data;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -53,10 +52,10 @@ public class ReportBuilder {
                     continue;
                 }
                 for (Integer query: queryTimes.keySet()) {
-                    if (queryTimes.get(query) != Constants.MAX_DURATION)
+                    if (queryTimes.get(query).compareTo(Constants.MAX_DURATION) < 0 )
                         line += String.format("%10s", query+";"+queryTimes.get(query).toMillis());
                     else
-                        line += String.format("%10s", query + ";" + "None" );
+                        line += String.format("%10s", query + ";" + "KIA" );
                 }
                 line += "\n";
                 writer.write(line);

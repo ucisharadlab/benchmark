@@ -8,6 +8,7 @@ public class Constants {
     public static final String GRIDDB_SO_PREFIX = "TS_SO_";
     public static final Duration MAX_DURATION = Duration.ofSeconds(10000000, 0);
     public static String CONFIG = "benchmark.ini";
+    public static long SHUTDOWN_WAIT = 1000;
 
 
 }

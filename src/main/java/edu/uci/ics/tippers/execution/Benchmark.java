@@ -122,7 +122,7 @@ public class Benchmark {
                                             new GridDBSchema(e, configuration.getDataDir() + ROWS),
                                             new GridDBDataUploader(e, configuration.getDataDir() + ROWS),
                                             new GridDBQueryManager(e, configuration.getQueriesDir(),
-                                                    configuration.isWriteOutput())));
+                                                    configuration.isWriteOutput(), configuration.getTimeout())));
                         break;
                     case CRATEDB:
                         configuration.getMappings().get(Database.CRATEDB).forEach(
@@ -130,7 +130,7 @@ public class Benchmark {
                                         new CrateDBSchema(e, configuration.getDataDir() + ROWS),
                                         new CrateDBDataUploader(e, configuration.getDataDir() + ROWS),
                                         new CrateDBQueryManager(e, configuration.getQueriesDir(),
-                                                configuration.isWriteOutput())));
+                                                configuration.isWriteOutput(), configuration.getTimeout())));
                         break;
                     case MONGODB:
                         configuration.getMappings().get(Database.MONGODB).forEach(
@@ -138,7 +138,7 @@ public class Benchmark {
                                         new MongoDBSchema(e, configuration.getDataDir() + MIX),
                                         new MongoDBDataUploader(e, configuration.getDataDir() + MIX),
                                         new MongoDBQueryManager(e, configuration.getQueriesDir(),
-                                                configuration.isWriteOutput())));
+                                                configuration.isWriteOutput(), configuration.getTimeout())));
                         break;
                     case ASTERIXDB:
                         configuration.getMappings().get(Database.ASTERIXDB).forEach(
@@ -146,7 +146,7 @@ public class Benchmark {
                                         new AsterixDBSchema(e, configuration.getDataDir() + OBJECTS),
                                         new AsterixDBDataUploader(e, configuration.getDataDir() + OBJECTS),
                                         new AsterixDBQueryManager(e, configuration.getQueriesDir(),
-                                                configuration.isWriteOutput())));
+                                                configuration.isWriteOutput(), configuration.getTimeout())));
                         break;
                     case CASSANDRA:
                         configuration.getMappings().get(Database.CASSANDRA).forEach(
@@ -154,7 +154,7 @@ public class Benchmark {
                                         new CassandraSchema(e, configuration.getDataDir() + ROWS),
                                         new CassandraDataUploader(e, configuration.getDataDir() + ROWS),
                                         new CassandraQueryManager(e, configuration.getQueriesDir(),
-                                                configuration.isWriteOutput())));
+                                                configuration.isWriteOutput(), configuration.getTimeout())));
                         break;
                     case POSTGRESQL:
                         configuration.getMappings().get(Database.POSTGRESQL).forEach(
@@ -162,7 +162,7 @@ public class Benchmark {
                                         new PgSQLSchema(e, configuration.getDataDir() + ROWS),
                                         new PgSQLDataUploader(e, configuration.getDataDir() + ROWS),
                                         new PgSQLQueryManager(e, configuration.getQueriesDir(),
-                                                configuration.isWriteOutput())));
+                                                configuration.isWriteOutput(), configuration.getTimeout())));
                         break;
                     default:
                         throw new BenchmarkException("Database Not Supported");
