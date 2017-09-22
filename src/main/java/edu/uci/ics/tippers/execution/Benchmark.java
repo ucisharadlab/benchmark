@@ -1,10 +1,10 @@
 package edu.uci.ics.tippers.execution;
 
 import edu.uci.ics.tippers.common.Database;
-import edu.uci.ics.tippers.common.ReportFormat;
 import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.data.BaseDataUploader;
 import edu.uci.ics.tippers.data.asterixdb.AsterixDBDataUploader;
+import edu.uci.ics.tippers.data.cassandra.CassandraDataUploader;
 import edu.uci.ics.tippers.data.cratedb.CrateDBDataUploader;
 import edu.uci.ics.tippers.data.griddb.GridDBDataUploader;
 import edu.uci.ics.tippers.data.mongodb.MongoDBDataUploader;
@@ -12,12 +12,14 @@ import edu.uci.ics.tippers.data.postgresql.PgSQLDataUploader;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.query.BaseQueryManager;
 import edu.uci.ics.tippers.query.asterixdb.AsterixDBQueryManager;
+import edu.uci.ics.tippers.query.cassandra.CassandraQueryManager;
 import edu.uci.ics.tippers.query.cratedb.CrateDBQueryManager;
 import edu.uci.ics.tippers.query.griddb.GridDBQueryManager;
 import edu.uci.ics.tippers.query.mongodb.MongoDBQueryManager;
 import edu.uci.ics.tippers.query.postgresql.PgSQLQueryManager;
 import edu.uci.ics.tippers.schema.BaseSchema;
 import edu.uci.ics.tippers.schema.asterixdb.AsterixDBSchema;
+import edu.uci.ics.tippers.schema.cassandra.CassandraSchema;
 import edu.uci.ics.tippers.schema.cratedb.CrateDBSchema;
 import edu.uci.ics.tippers.schema.griddb.GridDBSchema;
 import edu.uci.ics.tippers.schema.mongodb.MongoDBSchema;
@@ -147,6 +149,12 @@ public class Benchmark {
                                                 configuration.isWriteOutput())));
                         break;
                     case CASSANDRA:
+                        configuration.getMappings().get(Database.CASSANDRA).forEach(
+                                e -> benchmark.runBenchmark(
+                                        new CassandraSchema(e, configuration.getDataDir() + ROWS),
+                                        new CassandraDataUploader(e, configuration.getDataDir() + ROWS),
+                                        new CassandraQueryManager(e, configuration.getQueriesDir(),
+                                                configuration.isWriteOutput())));
                         break;
                     case POSTGRESQL:
                         configuration.getMappings().get(Database.POSTGRESQL).forEach(
