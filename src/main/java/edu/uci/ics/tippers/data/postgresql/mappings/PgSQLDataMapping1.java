@@ -1,8 +1,7 @@
 package edu.uci.ics.tippers.data.postgresql.mappings;
 
 import edu.uci.ics.tippers.common.DataFiles;
-import edu.uci.ics.tippers.common.constants.Constants;
-import edu.uci.ics.tippers.data.postgresql.BaseDataMapping;
+import edu.uci.ics.tippers.data.postgresql.PgSQLBaseDataMapping;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -10,7 +9,6 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.Connection;
@@ -20,13 +18,13 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.UUID;
 
-public class DataMapping1 extends BaseDataMapping {
+public class PgSQLDataMapping1 extends PgSQLBaseDataMapping {
 
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-dd-MM HH:mm:ss");
 
     private JSONParser parser = new JSONParser();
 
-    public DataMapping1(Connection connection, String dataDir) {
+    public PgSQLDataMapping1(Connection connection, String dataDir) {
         super(connection, dataDir);
     }
 

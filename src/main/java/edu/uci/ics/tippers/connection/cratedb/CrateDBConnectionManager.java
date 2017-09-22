@@ -47,14 +47,16 @@ public class CrateDBConnectionManager {
 
         Connection connection;
         try {
+            Properties properties = new Properties();
+            properties.put("user", USER);
             connection = DriverManager.getConnection(
-                    String.format("jdbc:crate://%s:%s/", SERVER, PORT));
+                    String.format("jdbc:crate://%s:%s/", SERVER, PORT), properties);
             connection.setSchema(DATABASE);
 
             return connection;
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new BenchmarkException("Error Connecting to Postgres");
+            throw new BenchmarkException("Error Connecting to CrateDB");
         }
     }
 

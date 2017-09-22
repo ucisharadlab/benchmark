@@ -21,7 +21,12 @@ public class PgSQLQueryManager extends BaseQueryManager{
         connection = PgSQLConnectionManager.getInstance().getConnection();
     }
 
-    private Duration runTimedQuery(PreparedStatement stmt) throws BenchmarkException {
+    public PgSQLQueryManager(int mapping, String queriesDir, boolean writeOutput, Connection connection) {
+        super(mapping, queriesDir, writeOutput);
+        this.connection = connection;
+    }
+
+    public Duration runTimedQuery(PreparedStatement stmt) throws BenchmarkException {
         try {
             Instant start = Instant.now();
             ResultSet rs = stmt.executeQuery();
@@ -125,7 +130,7 @@ public class PgSQLQueryManager extends BaseQueryManager{
                     stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
                     stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
 
-                    Array sensorIdArray = connection.createArrayOf("VARCHAR", sensorIds.toArray());
+                    Array sensorIdArray = connection.createArrayOf("string", sensorIds.toArray());
                     stmt.setArray(3, sensorIdArray);
 
                     return runTimedQuery(stmt);

@@ -4,6 +4,8 @@ import com.toshiba.mwcloud.gs.GSException;
 import edu.uci.ics.tippers.common.Database;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 
+import java.time.Duration;
+
 public abstract class BaseDataUploader {
 
     protected int mapping;
@@ -32,7 +34,7 @@ public abstract class BaseDataUploader {
 
     public abstract Database getDatabase();
 
-    public abstract void addAllData() throws BenchmarkException;
+    public abstract Duration addAllData() throws BenchmarkException;
 
     public abstract void addInfrastructureData() throws BenchmarkException;
 

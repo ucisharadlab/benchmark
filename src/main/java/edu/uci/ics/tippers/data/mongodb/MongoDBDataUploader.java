@@ -16,6 +16,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,12 +37,17 @@ public class MongoDBDataUploader extends BaseDataUploader{
     }
 
     @Override
-    public void addAllData() throws BenchmarkException {
+    public Duration addAllData() throws BenchmarkException {
+        Instant start = Instant.now();
+
         addInfrastructureData();
         addUserData();
         addDeviceData();
         addSensorData();
         addObservationData();
+
+        Instant end = Instant.now();
+        return Duration.between(start, end);
     }
 
     private void addDataToCollection(String collectionName, DataFiles dataFile) {

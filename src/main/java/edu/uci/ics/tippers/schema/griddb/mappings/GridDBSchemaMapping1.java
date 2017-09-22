@@ -3,7 +3,7 @@ package edu.uci.ics.tippers.schema.griddb.mappings;
 import com.toshiba.mwcloud.gs.*;
 import edu.uci.ics.tippers.common.DataFiles;
 import edu.uci.ics.tippers.common.constants.Constants;
-import edu.uci.ics.tippers.schema.griddb.BaseSchemaMapping;
+import edu.uci.ics.tippers.schema.griddb.GridDBBaseSchemaMapping;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -15,12 +15,12 @@ import java.io.InputStreamReader;
 import java.util.*;
 
 
-public class SchemaMapping1 extends BaseSchemaMapping {
+public class GridDBSchemaMapping1 extends GridDBBaseSchemaMapping {
 
     private JSONParser parser = new JSONParser();
     private EnumSet<IndexType> indexSet = EnumSet.of(IndexType.HASH);
 
-    public SchemaMapping1(GridStore gridStore, String dataDir) {
+    public GridDBSchemaMapping1(GridStore gridStore, String dataDir) {
         super(gridStore, dataDir);
     }
 

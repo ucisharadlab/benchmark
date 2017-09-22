@@ -8,6 +8,9 @@ import edu.uci.ics.tippers.data.BaseDataUploader;
 import edu.uci.ics.tippers.data.griddb.mappings.DataMapping1;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 
+import java.time.Duration;
+import java.time.Instant;
+
 public class GridDBDataUploader extends BaseDataUploader {
 
     private GridStore gridStore;
@@ -31,9 +34,12 @@ public class GridDBDataUploader extends BaseDataUploader {
     }
 
     @Override
-    public void addAllData() throws BenchmarkException {
+    public Duration addAllData() throws BenchmarkException {
         try {
+            Instant start = Instant.now();
             dataMapping.addAll();
+            Instant end = Instant.now();
+            return Duration.between(start, end);
         } catch (GSException e) {
             e.printStackTrace();
             throw new BenchmarkException("Error Inserting Data");

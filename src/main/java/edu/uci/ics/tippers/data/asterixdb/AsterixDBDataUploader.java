@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.Duration;
+import java.time.Instant;
 
 public class AsterixDBDataUploader extends BaseDataUploader {
 
@@ -27,13 +29,17 @@ public class AsterixDBDataUploader extends BaseDataUploader {
     }
 
     @Override
-    public void addAllData() throws BenchmarkException {
+    public Duration addAllData() throws BenchmarkException {
+        Instant start = Instant.now();
 
         addInfrastructureData();
         addUserData();
         addDeviceData();
         addSensorData();
         addObservationData();
+
+        Instant end = Instant.now();
+        return Duration.between(start, end);
     }
 
     public String prepareInsertQuery(String dataset, DataFiles dataFile) throws BenchmarkException {

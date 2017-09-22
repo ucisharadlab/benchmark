@@ -37,26 +37,29 @@ public class ReportBuilder {
         BufferedWriter writer;
         try {
             writer = new BufferedWriter(new FileWriter(reportsDir + "report.txt"));
-            writer.write("Database\tMapping\tQueryRunTimes(ms)\n" );
+            writer.write(String.format("%s%10s%25s\n", "Database", "Mapping", "Query;RunTime(ms)"));
+
+            writer.write("-----------------------------------------------------\n");
 
             for(Pair<Database, Integer> key: runTimes.keySet()) {
 
-                String line = key.getKey().getName() + "\t" + key.getValue() + "\t";
+                String line = String.format("%s%5s",key.getKey().getName(), key.getValue());
                 Map<Integer, Duration> queryTimes = runTimes.get(key);
 
                 if (queryTimes == null) {
-                    line += "None\n";
+                    line += String.format("%10s","None\n");
                     writer.write(line);
                     continue;
                 }
                 for (Integer query: queryTimes.keySet()) {
                     if (queryTimes.get(query) != Constants.MAX_DURATION)
-                        line += query + ";" + queryTimes.get(query).toMillis()+ "\t";
+                        line += String.format("%10s", query+";"+queryTimes.get(query).toMillis());
                     else
-                        line += query + ";" + "None" + "\t";
+                        line += String.format("%10s", query + ";" + "None" );
                 }
                 line += "\n";
                 writer.write(line);
+                writer.write("-----------------------------------------------------\n");
             }
             writer.close();
         } catch (IOException e) {

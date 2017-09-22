@@ -5,17 +5,20 @@ import edu.uci.ics.tippers.common.ReportFormat;
 import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.data.BaseDataUploader;
 import edu.uci.ics.tippers.data.asterixdb.AsterixDBDataUploader;
+import edu.uci.ics.tippers.data.cratedb.CrateDBDataUploader;
 import edu.uci.ics.tippers.data.griddb.GridDBDataUploader;
 import edu.uci.ics.tippers.data.mongodb.MongoDBDataUploader;
 import edu.uci.ics.tippers.data.postgresql.PgSQLDataUploader;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.query.BaseQueryManager;
 import edu.uci.ics.tippers.query.asterixdb.AsterixDBQueryManager;
+import edu.uci.ics.tippers.query.cratedb.CrateDBQueryManager;
 import edu.uci.ics.tippers.query.griddb.GridDBQueryManager;
 import edu.uci.ics.tippers.query.mongodb.MongoDBQueryManager;
 import edu.uci.ics.tippers.query.postgresql.PgSQLQueryManager;
 import edu.uci.ics.tippers.schema.BaseSchema;
 import edu.uci.ics.tippers.schema.asterixdb.AsterixDBSchema;
+import edu.uci.ics.tippers.schema.cratedb.CrateDBSchema;
 import edu.uci.ics.tippers.schema.griddb.GridDBSchema;
 import edu.uci.ics.tippers.schema.mongodb.MongoDBSchema;
 import edu.uci.ics.tippers.schema.postgresql.PgSQLSchema;
@@ -58,7 +61,6 @@ public class Benchmark {
 
         try {
             System.out.println("---------------------------------------------------------------\n");
-
             System.out.println(String.format("Running Benchmark On %s With Mapping %s",
                     schemaCreator.getDatabase().getName(), schemaCreator.getMapping()));
 
@@ -68,11 +70,14 @@ public class Benchmark {
 
             // Inserting data into the database system after schema creation
             System.out.println("Inserting Data ...");
-            dataUploader.addAllData();
+            Map<Integer, Duration> runTimePerMapping = new HashMap<Integer, Duration>();
+            runTimePerMapping.put(0, dataUploader.addAllData());
 
             // Running benchmark queries and gathering query runtimes
             System.out.println("Running Queries ...");
-            runTimes.put(new Pair<>(queryManager.getDatabase(), queryManager.getMapping()), queryManager.runQueries());
+            runTimePerMapping.putAll(queryManager.runQueries());
+
+            runTimes.put(new Pair<>(queryManager.getDatabase(), queryManager.getMapping()), runTimePerMapping);
 
             // Cleaning up inserted data and dropping created schema
             System.out.println("Cleaning Up Database, Removing Data And Schema ...\n");
@@ -84,6 +89,7 @@ public class Benchmark {
             be.printStackTrace();
             runTimes.put(new Pair<>(queryManager.getDatabase(), queryManager.getMapping()), null);
             try {
+                System.out.println("Cleaning Up Database, Removing Data And Schema ...\n");
                 schemaCreator.dropSchema();
             } catch (Exception | Error e) {
                 e.printStackTrace();
@@ -104,7 +110,7 @@ public class Benchmark {
 
             System.out.println("Starting Up Database Servers\n");
             DBMSManager dbmsManager = new DBMSManager(configuration.getScriptsDir());
-            dbmsManager.startServers();
+            //dbmsManager.startServers();
 
             for (Database database: configuration.getDatabases()) {
                 switch (database) {
@@ -117,6 +123,12 @@ public class Benchmark {
                                                     configuration.isWriteOutput())));
                         break;
                     case CRATEDB:
+                        configuration.getMappings().get(Database.CRATEDB).forEach(
+                                e -> benchmark.runBenchmark(
+                                        new CrateDBSchema(e, configuration.getDataDir() + ROWS),
+                                        new CrateDBDataUploader(e, configuration.getDataDir() + ROWS),
+                                        new CrateDBQueryManager(e, configuration.getQueriesDir(),
+                                                configuration.isWriteOutput())));
                         break;
                     case MONGODB:
                         configuration.getMappings().get(Database.MONGODB).forEach(
@@ -155,7 +167,7 @@ public class Benchmark {
             System.out.println("\n****Report Written To Reports Directory****");
 
             System.out.println("Stopping All Database Servers");
-            dbmsManager.stopServers();
+            //dbmsManager.stopServers();
         } catch (BenchmarkException e) {
             e.printStackTrace();
         }

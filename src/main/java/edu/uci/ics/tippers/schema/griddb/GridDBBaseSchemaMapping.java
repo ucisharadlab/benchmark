@@ -9,12 +9,12 @@ import java.util.List;
 /**
  * Created by peeyush on 26/4/17.
  */
-public abstract class BaseSchemaMapping {
+public abstract class GridDBBaseSchemaMapping {
 
     protected GridStore gridStore;
     protected String dataDir;
 
-    public BaseSchemaMapping(GridStore gridStore, String dataDir) {
+    public GridDBBaseSchemaMapping(GridStore gridStore, String dataDir) {
         this.gridStore = gridStore;
         this.dataDir = dataDir;
     }
