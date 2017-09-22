@@ -130,7 +130,7 @@ public class PgSQLQueryManager extends BaseQueryManager{
                     stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
                     stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
 
-                    Array sensorIdArray = connection.createArrayOf("string", sensorIds.toArray());
+                    Array sensorIdArray = connection.createArrayOf("VARCHAR", sensorIds.toArray());
                     stmt.setArray(3, sensorIdArray);
 
                     return runTimedQuery(stmt);

@@ -31,7 +31,19 @@ public abstract class BaseQueryManager {
         return this.mapping;
     }
 
+    private void warmingUp() {
+        QueryCSVReader reader = new QueryCSVReader(queriesDir + "query1.txt");
+        String[] values;
+        while ((values = reader.readNextLine()) != null) {
+            String sensorId = values[1];
+            runQuery1(sensorId);
+        }
+    }
+
     public Map<Integer, Duration> runQueries() throws BenchmarkException{
+
+        warmingUp();
+
         Map<Integer, Duration> queryRunTimes = new HashMap<>();
 
         QueryCSVReader reader = new QueryCSVReader(queriesDir + "query1.txt");

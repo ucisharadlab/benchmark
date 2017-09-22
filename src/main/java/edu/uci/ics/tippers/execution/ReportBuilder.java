@@ -39,7 +39,7 @@ public class ReportBuilder {
             writer = new BufferedWriter(new FileWriter(reportsDir + "report.txt"));
             writer.write(String.format("%s%10s%25s\n", "Database", "Mapping", "Query;RunTime(ms)"));
 
-            writer.write("-----------------------------------------------------\n");
+            writer.write("------------------------------------------------------------------------------------\n");
 
             for(Pair<Database, Integer> key: runTimes.keySet()) {
 
@@ -49,6 +49,7 @@ public class ReportBuilder {
                 if (queryTimes == null) {
                     line += String.format("%10s","None\n");
                     writer.write(line);
+                    writer.write("------------------------------------------------------------------------------------\n");
                     continue;
                 }
                 for (Integer query: queryTimes.keySet()) {
@@ -59,7 +60,7 @@ public class ReportBuilder {
                 }
                 line += "\n";
                 writer.write(line);
-                writer.write("-----------------------------------------------------\n");
+                writer.write("------------------------------------------------------------------------------------\n");
             }
             writer.close();
         } catch (IOException e) {

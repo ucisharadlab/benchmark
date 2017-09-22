@@ -7,10 +7,7 @@ import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.query.BaseQueryManager;
 import edu.uci.ics.tippers.query.postgresql.PgSQLQueryManager;
 
-import java.sql.Array;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.Duration;
 import java.util.Date;
 import java.util.List;
@@ -78,9 +75,23 @@ public class CrateDBQueryManager extends BaseQueryManager {
     public Duration runQuery4(List<String> sensorIds, Date startTime, Date endTime) throws BenchmarkException {
         switch (mapping) {
             case 1:
-                return externalQueryManager.runQuery4(sensorIds, startTime, endTime);
+                String query = "SELECT timeStamp, payload FROM OBSERVATION WHERE timestamp>? AND timestamp<? " +
+                        "AND SENSOR_ID = ANY(?)";
+                try {
+                    PreparedStatement stmt = connection.prepareStatement(query);
+                    stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
+                    stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
+
+                    Array sensorIdArray = connection.createArrayOf("string", sensorIds.toArray());
+                    stmt.setArray(3, sensorIdArray);
+
+                    return externalQueryManager.runTimedQuery(stmt);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
             default:
-                throw new BenchmarkException("Error Running Query 4 on CrateDB");
+                throw new BenchmarkException("No Such Mapping");
         }
     }
 
