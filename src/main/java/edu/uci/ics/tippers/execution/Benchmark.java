@@ -17,6 +17,7 @@ import edu.uci.ics.tippers.query.cratedb.CrateDBQueryManager;
 import edu.uci.ics.tippers.query.griddb.GridDBQueryManager;
 import edu.uci.ics.tippers.query.mongodb.MongoDBQueryManager;
 import edu.uci.ics.tippers.query.postgresql.PgSQLQueryManager;
+import edu.uci.ics.tippers.scaler.Scale;
 import edu.uci.ics.tippers.schema.BaseSchema;
 import edu.uci.ics.tippers.schema.asterixdb.AsterixDBSchema;
 import edu.uci.ics.tippers.schema.cassandra.CassandraSchema;
@@ -109,6 +110,13 @@ public class Benchmark {
 
             System.out.println("Reading Configuration File benchmark.ini .... \n");
             benchmark.readConfiguration();
+
+            System.out.println("Generating Test Data And Queries\n");
+            Scale scaler = new Scale(configuration.isScaleQueries(), configuration.isScaleData());
+            scaler.scaleDataAndQueries();
+
+            if (true)
+                return;
 
             System.out.println("Starting Up Database Servers\n");
             DBMSManager dbmsManager = new DBMSManager(configuration.getScriptsDir());

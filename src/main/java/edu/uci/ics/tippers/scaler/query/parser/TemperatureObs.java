@@ -1,4 +1,4 @@
-package edu.uci.ics.tippers.scaler.query;
+package edu.uci.ics.tippers.scaler.query.parser;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;

@@ -1,11 +1,11 @@
-package edu.uci.ics.tippers.scaler.ScaleData;
+package edu.uci.ics.tippers.common.util;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-// edu.uci.ics.tippers.scaler.ScaleData.Helper function
+// edu.uci.ics.tippers.scaler.data.Helper function
 public class Helper {
 	// Increase timestamp for each observation based on observation speed
 	public String increaseTimestamp(String startTime, int obsSpeed) {

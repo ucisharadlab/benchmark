@@ -20,6 +20,8 @@ public class Configuration {
     private boolean writeOutput;
     private ReportFormat format;
     private Long timeout;
+    private boolean scaleQueries;
+    private boolean scaleData;
 
     public Configuration(Preferences preferences) throws BenchmarkException {
         this.preferences = preferences;
@@ -76,6 +78,10 @@ public class Configuration {
         format= ReportFormat.get(preferences.node("benchmark").get("report-format", "text"));
 
         timeout= preferences.node("benchmark").getLong("query-timeout", 10000000);
+
+        scaleData = preferences.node("benchmark").getBoolean("scale-data", false);
+
+        scaleQueries = preferences.node("benchmark").getBoolean("scale-query", false);
 
     }
 
@@ -149,5 +155,21 @@ public class Configuration {
 
     public void setTimeout(Long timeout) {
         this.timeout = timeout;
+    }
+
+    public boolean isScaleQueries() {
+        return scaleQueries;
+    }
+
+    public void setScaleQueries(boolean scaleQueries) {
+        this.scaleQueries = scaleQueries;
+    }
+
+    public boolean isScaleData() {
+        return scaleData;
+    }
+
+    public void setScaleData(boolean scaleData) {
+        this.scaleData = scaleData;
     }
 }

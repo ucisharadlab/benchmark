@@ -1,4 +1,4 @@
-package edu.uci.ics.tippers.scaler.query;
+package edu.uci.ics.tippers.scaler.query.parser;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -11,21 +11,22 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-public class InfrastructureType {
+// Parse sensorType.json file to extract the sensor type information
+public class SensorType {
 	private List<String> ids;
 
     // A constructor to initialize the Data Members for
-    public InfrastructureType() {
+    public SensorType() {
         this.ids = new ArrayList<String>();
     }
 
-    // Parse the json file and extract the semsor ids
+    // Parse the json file and extract the sensor type ids
     public void parseData() {
         // parse json file
-        JSONArray locationTypes = new JSONArray();
+        JSONArray sensorTypes = new JSONArray();
         try {
             JSONParser parser = new JSONParser();
-            locationTypes = (JSONArray) parser.parse(new FileReader("../POST/sensorOld.json"));
+            sensorTypes = (JSONArray) parser.parse(new FileReader("../POST/sensorType.json"));
         } catch (FileNotFoundException ex) {
             System.err.println("File not found");
             // exit(1); Problem
@@ -38,16 +39,16 @@ public class InfrastructureType {
         }
         
         // loop through the sensors array and extract ids
-        for (Object obj : locationTypes) {
-            JSONObject locationType = (JSONObject) obj;
-            String id = (String) locationType.get("id");
+        for (Object obj : sensorTypes) {
+            JSONObject sensorType = (JSONObject) obj;
+            String id = (String) sensorType.get("id");
             this.ids.add(id);
         }
     }
-    
-    // return the infrastructureType Ids
+
+    // return sensor id list
     public List<String> getIds() {
-    	return this.ids;
+        return this.ids;
     }
 
 }
