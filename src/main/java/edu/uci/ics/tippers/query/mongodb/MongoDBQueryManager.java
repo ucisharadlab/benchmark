@@ -149,11 +149,38 @@ public class MongoDBQueryManager extends BaseQueryManager{
     @Override
     public Duration runQuery5(String sensorTypeName, Date startTime, Date endTime, String payloadAttribute,
                               Object startPayloadValue, Object endPayloadValue) throws BenchmarkException {
-        return Constants.MAX_DURATION;
+        switch (mapping) {
+            case 1:
+                Instant start = Instant.now();
+
+                MongoCollection<Document> collection = database.getCollection("Observation");
+                MongoIterable<Document> iterable = collection.find(
+                        and(
+                                eq("sensor.sensorType.name", sensorTypeName),
+                                gt("timeStamp", startTime),
+                                lt("timeStamp", endTime),
+                                gt(String.format("payload.%s", payloadAttribute), startPayloadValue),
+                                lt(String.format("payload.%s", payloadAttribute), endPayloadValue)))
+                        .projection(new Document("timeStamp", 1)
+                                .append("_id", 0)
+                                .append("sensor.id", 1)
+                                .append("payload.temperature", 1));
+
+                iterable.forEach((Consumer<? super Document>) e -> {
+                    if (writeOutput) {
+                        // TODO: Write To File
+                        System.out.println(e.toJson());
+                    }
+                });
+                Instant end = Instant.now();
+                return Duration.between(start, end);
+            default:
+                throw new BenchmarkException("No Such Mapping");
+        }
     }
 
     @Override
     public Duration runQuery6(List<String> sensorIds, Date startTime, Date endTime) throws BenchmarkException {
-        return null;
+        return Constants.MAX_DURATION;
     }
 }

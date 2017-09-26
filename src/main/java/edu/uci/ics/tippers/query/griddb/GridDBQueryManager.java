@@ -183,11 +183,49 @@ public class GridDBQueryManager extends BaseQueryManager {
     @Override
     public Duration runQuery5(String sensorTypeName, Date startTime, Date endTime, String payloadAttribute,
                               Object startPayloadValue, Object endPayloadValue) throws BenchmarkException {
-        return Constants.MAX_DURATION;
+        Instant start = Instant.now();
+        List<Row> sensorTypes = runQueryWithRows("SensorType",
+                String.format("SELECT * FROM SensorType WHERE name='%s'", sensorTypeName));
+
+        try {
+            List<Row> sensors = runQueryWithRows("Sensor",
+                    String.format("SELECT * FROM Sensor WHERE typeId='%s'", sensorTypes.get(0).getString(0)));
+            for (Row row : sensors) {
+                String collectionName = Constants.GRIDDB_OBS_PREFIX + row.getString(0);
+                String query = String.format("SELECT * FROM %s WHERE timeStamp > TIMESTAMP('%s') " +
+                        "AND timeStamp < TIMESTAMP('%s') AND %s >= %s AND %s <= %s ",
+                        collectionName, sdf.format(startTime), sdf.format(endTime), payloadAttribute, startPayloadValue,
+                        payloadAttribute, endPayloadValue);
+                List<Row> observations = runQueryWithRows(collectionName, query);
+
+                observations.forEach(e->{
+                    if (writeOutput) {
+                        // TODO: Write output to a file
+                        ContainerInfo containerInfo = null;
+                        try {
+                            containerInfo = e.getSchema();
+                            int columnCount = containerInfo.getColumnCount();
+                            for (int i = 0; i < columnCount; i++) {
+                                System.out.println(e.getValue(i));
+                            }
+                        } catch (GSException e1) {
+                            e1.printStackTrace();
+                            throw new BenchmarkException("Error Running Query On GridDB");
+                        }
+                    }
+                });
+
+            }
+            Instant end = Instant.now();
+            return Duration.between(start, end);
+        } catch (GSException ge) {
+            ge.printStackTrace();
+            throw new BenchmarkException("Error Running Query");
+        }
     }
 
     @Override
     public Duration runQuery6(List<String> sensorIds, Date startTime, Date endTime) throws BenchmarkException {
-        return null;
+        return Constants.MAX_DURATION;
     }
 }
