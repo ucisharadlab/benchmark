@@ -112,11 +112,10 @@ public class Benchmark {
             benchmark.readConfiguration();
 
             System.out.println("Generating Test Data And Queries\n");
-            Scale scaler = new Scale(configuration.isScaleQueries(), configuration.isScaleData());
+            Scale scaler = new Scale(configuration.isScaleQueries(), configuration.isScaleData(),
+                    configuration.getDataDir());
             scaler.scaleDataAndQueries();
 
-            if (true)
-                return;
 
             System.out.println("Starting Up Database Servers\n");
             DBMSManager dbmsManager = new DBMSManager(configuration.getScriptsDir());

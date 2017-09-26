@@ -151,4 +151,9 @@ public class MongoDBQueryManager extends BaseQueryManager{
                               Object startPayloadValue, Object endPayloadValue) throws BenchmarkException {
         return Constants.MAX_DURATION;
     }
+
+    @Override
+    public Duration runQuery6(List<String> sensorIds, Date startTime, Date endTime) throws BenchmarkException {
+        return null;
+    }
 }

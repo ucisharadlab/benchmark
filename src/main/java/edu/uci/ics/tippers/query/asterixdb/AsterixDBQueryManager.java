@@ -117,11 +117,39 @@ public class AsterixDBQueryManager extends BaseQueryManager{
                           Object startPayloadValue, Object endPayloadValue) throws BenchmarkException {
         switch (mapping) {
             case 1:
-                return Constants.MAX_DURATION;
+                return runTimedQuery(
+                        String.format("SELECT timeStamp, sensor.id, payload " +
+                            "FROM Observation " +
+                            "WHERE sensor.sensorType.name = \"%s\" AND timeStamp >= datetime(\"%s\") AND " +
+                            "timeStamp <= datetime(\"%s\") " +
+                            "AND payload.%s >= %s AND payload.%s <= %s",
+                                sensorTypeName, sdf.format(startTime), sdf.format(endTime), payloadAttribute,
+                                startPayloadValue, payloadAttribute, endPayloadValue)
+                );
             default:
                 throw new BenchmarkException("No Such Mapping");
         }
 
     }
 
+
+    @Override
+    public Duration runQuery6(List<String> sensorIds, Date startTime, Date endTime) throws BenchmarkException {
+        switch (mapping) {
+            case 1:
+                return runTimedQuery(
+                        String.format("SELECT obs.id , AVG(obs.count) FROM " +
+                                "(SELECT sensor.id , get_date_from_datetime(timeStamp), count(*)  AS count " +
+                                "FROM Observation " +
+                                "WHERE sensor.id IN {{ " +
+                                sensorIds.stream().map(e -> "\"" + e + "\"").collect(Collectors.joining(",")) +
+                                " }} AND timeStamp >= datetime(\"%s\") AND timeStamp <= datetime(\"%s\") " +
+                                "GROUP BY sensor.id, get_date_from_datetime(timeStamp)) AS obs GROUP BY obs.id",
+                                sdf.format(startTime), sdf.format(endTime))
+                );
+            default:
+                throw new BenchmarkException("No Such Mapping");
+        }
+
+    }
 }
