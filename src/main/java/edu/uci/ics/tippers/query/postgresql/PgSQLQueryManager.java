@@ -5,6 +5,7 @@ import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.connection.postgresql.PgSQLConnectionManager;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.query.BaseQueryManager;
+import org.json.JSONObject;
 
 import java.sql.*;
 import java.time.Duration;
@@ -51,6 +52,7 @@ public class PgSQLQueryManager extends BaseQueryManager{
             throw new BenchmarkException("Error Running Query");
         }
     }
+
 
     @Override
     public Database getDatabase() {
@@ -152,7 +154,67 @@ public class PgSQLQueryManager extends BaseQueryManager{
     @Override
     public Duration runQuery5(String sensorTypeName, Date startTime, Date endTime, String payloadAttribute,
                               Object startPayloadValue, Object endPayloadValue) throws BenchmarkException {
-        return Constants.MAX_DURATION;
+        switch (mapping) {
+            case 1:
+                Instant start = Instant.now();
+                String query = "SELECT timeStamp, payload FROM OBSERVATION o, SENSOR s, SENSOR_TYPE st  " +
+                        "WHERE s.id = o.sensor_id AND s.sensor_type_id=st.id AND st.name=? AND " +
+                        "timestamp>? AND timestamp<? ";
+                try {
+                    PreparedStatement stmt = connection.prepareStatement(query);
+
+                    stmt.setString(1, sensorTypeName);
+                    stmt.setTimestamp(2, new Timestamp(startTime.getTime()));
+                    stmt.setTimestamp(3, new Timestamp(endTime.getTime()));
+
+                    ResultSet rs = stmt.executeQuery();
+                    ResultSetMetaData rsmd = rs.getMetaData();
+                    int columnsNumber = rsmd.getColumnCount();
+                    int payloadColNum = 1;
+
+                    for(int i = 1; i <= columnsNumber; i++) {
+                        if ("payload".equals(rsmd.getColumnName(i))) {
+                            payloadColNum = i;
+                        }
+                    }
+                    while(rs.next()) {
+                        JSONObject payload = new JSONObject(rs.getString(payloadColNum));
+
+                        if (startPayloadValue instanceof  Integer) {
+                            if (payload.getInt(payloadAttribute) >= (Integer)startPayloadValue
+                                    && payload.getInt(payloadAttribute) <= (Integer)endPayloadValue) {
+                                // TODO: Write to File
+                                if (writeOutput) {
+                                    for(int i = 1; i <= columnsNumber; i++)
+                                        System.out.print(rs.getString(i) + "\t");
+                                    System.out.println();
+                                }
+                            }
+
+                        } else if (startPayloadValue instanceof  Double) {
+                            if (payload.getDouble(payloadAttribute) >= (Double)startPayloadValue
+                                    && payload.getDouble(payloadAttribute) <= (Double)endPayloadValue) {
+                                // TODO: Write to File
+                                if (writeOutput) {
+                                    for(int i = 1; i <= columnsNumber; i++)
+                                        System.out.print(rs.getString(i) + "\t");
+                                    System.out.println();
+                                }
+                            }
+
+                        }
+                    }
+
+                    rs.close();
+                    Instant end = Instant.now();
+                    return Duration.between(start, end);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
+            default:
+                throw new BenchmarkException("No Such Mapping");
+        }
     }
 
     @Override

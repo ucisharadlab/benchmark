@@ -101,12 +101,19 @@ public class CrateDBQueryManager extends BaseQueryManager {
     }
 
     @Override
-    public Duration runQuery5(String sensorTypeName, Date startTime, Date endTime, String payloadAttribute, Object startPayloadValue, Object endPayloadValue) throws BenchmarkException {
-        return Constants.MAX_DURATION;
+    public Duration runQuery5(String sensorTypeName, Date startTime, Date endTime, String payloadAttribute,
+                              Object startPayloadValue, Object endPayloadValue) throws BenchmarkException {
+        switch (mapping) {
+            case 1:
+                return externalQueryManager.runQuery5(sensorTypeName, startTime, endTime, payloadAttribute,
+                        startPayloadValue, endPayloadValue);
+            default:
+                throw new BenchmarkException("No Such Mapping");
+        }
     }
 
     @Override
     public Duration runQuery6(List<String> sensorIds, Date startTime, Date endTime) throws BenchmarkException {
-        return null;
+        return Constants.MAX_DURATION;
     }
 }
