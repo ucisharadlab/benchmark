@@ -114,6 +114,29 @@ public class CrateDBQueryManager extends BaseQueryManager {
 
     @Override
     public Duration runQuery6(List<String> sensorIds, Date startTime, Date endTime) throws BenchmarkException {
-        return Constants.MAX_DURATION;
+        switch (mapping) {
+            case 1:
+                String query = "SELECT obs.sensor_id, avg(counts) FROM " +
+                        "(SELECT sensor_id, date_trunc('day', timestamp), " +
+                        "count(*) as counts " +
+                        "FROM OBSERVATION WHERE timestamp>? AND timestamp<? " +
+                        "AND SENSOR_ID = ANY(?) GROUP BY sensor_id, date_trunc('day', timestamp)) " +
+                        "AS obs GROUP BY sensor_id";
+                try {
+                    PreparedStatement stmt = connection.prepareStatement(query);
+                    stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
+                    stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
+
+                    Array sensorIdArray = connection.createArrayOf("string", sensorIds.toArray());
+                    stmt.setArray(3, sensorIdArray);
+
+                    return externalQueryManager.runTimedQuery(stmt);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
+            default:
+                throw new BenchmarkException("No Such Mapping");
+        }
     }
 }
