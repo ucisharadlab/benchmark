@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.UUID;
 
 public class DataMapping1 extends BaseDataMapping {
@@ -25,6 +26,7 @@ public class DataMapping1 extends BaseDataMapping {
 
     public DataMapping1(GridStore gridStore, String dataDir) {
         super(gridStore, dataDir);
+        //sdf.setTimeZone(TimeZone.getTimeZone("PDT"));
     }
 
     public void addAll() throws GSException {

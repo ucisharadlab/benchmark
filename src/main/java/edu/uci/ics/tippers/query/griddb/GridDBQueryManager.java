@@ -5,14 +5,15 @@ import edu.uci.ics.tippers.common.Database;
 import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.connection.griddb.StoreManager;
 import edu.uci.ics.tippers.exception.BenchmarkException;
+import edu.uci.ics.tippers.operators.GroupBy;
 import edu.uci.ics.tippers.query.BaseQueryManager;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 public class GridDBQueryManager extends BaseQueryManager {
 
@@ -22,6 +23,7 @@ public class GridDBQueryManager extends BaseQueryManager {
     public GridDBQueryManager(int mapping, String queriesDir, boolean writeOutput, long timeout) {
         super(mapping, queriesDir, writeOutput, timeout);
         gridStore = StoreManager.getInstance().getGridStore();
+        //sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
     @Override
@@ -226,6 +228,45 @@ public class GridDBQueryManager extends BaseQueryManager {
 
     @Override
     public Duration runQuery6(List<String> sensorIds, Date startTime, Date endTime) throws BenchmarkException {
-        return Constants.MAX_DURATION;
+        // TODO: Fix Error Due to TimeZone
+        Instant start = Instant.now();
+        try {
+            for (String sensorId : sensorIds) {
+                String collectionName = Constants.GRIDDB_OBS_PREFIX + sensorId;
+                String query = String.format("SELECT * FROM %s WHERE timeStamp >= TIMESTAMP('%s') " +
+                        "AND timeStamp <= TIMESTAMP('%s')", collectionName, sdf.format(startTime), sdf.format(endTime));
+                List<Row> observations = runQueryWithRows(collectionName, query);
+
+                JSONArray jsonObservations = new JSONArray();
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+                observations.forEach(e -> {
+                    JSONObject object = new JSONObject();
+                    try {
+                        object.put("date", dateFormat.format(e.getTimestamp(0)));
+                        jsonObservations.put(object);
+                    } catch (GSException e1) {
+                        e1.printStackTrace();
+                    }
+                });
+
+                GroupBy groupBy = new GroupBy();
+                JSONArray groups = groupBy.doGroupBy(jsonObservations, Arrays.asList("date"));
+                final int[] sum = {0};
+
+                groups.iterator().forEachRemaining(e-> {
+                    sum[0] += ((JSONArray)e).length();
+                });
+
+                if (writeOutput) {
+                    System.out.println(sensorId + ", " + sum[0] /groups.length());
+                }
+            }
+            Instant end = Instant.now();
+            return Duration.between(start, end);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new BenchmarkException("Error Running Query");
+        }
     }
 }
