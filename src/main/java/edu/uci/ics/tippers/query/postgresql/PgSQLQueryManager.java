@@ -5,49 +5,59 @@ import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.connection.postgresql.PgSQLConnectionManager;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.query.BaseQueryManager;
+import edu.uci.ics.tippers.writer.RowWriter;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.sql.*;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 
+import static edu.uci.ics.tippers.common.util.Helper.getFileFromQuery;
+
 public class PgSQLQueryManager extends BaseQueryManager{
 
     private Connection connection;
 
-    public PgSQLQueryManager(int mapping, String queriesDir, boolean writeOutput, long timeout) {
-        super(mapping, queriesDir, writeOutput, timeout);
+    // Needed For External Databases
+    private Database database = Database.POSTGRESQL;
+
+    public PgSQLQueryManager(int mapping, String queriesDir, String outputDir, boolean writeOutput, long timeout) {
+        super(mapping, queriesDir, outputDir, writeOutput, timeout);
         connection = PgSQLConnectionManager.getInstance().getConnection();
     }
 
-    public PgSQLQueryManager(int mapping, String queriesDir, boolean writeOutput, long timeout,
+    // For External Database (CrateDB) Usage
+    public PgSQLQueryManager( int mapping, String queriesDir, String outputDir, boolean writeOutput, long timeout,
                              Connection connection) {
-        super(mapping, queriesDir, writeOutput, timeout);
+        super(mapping, queriesDir, outputDir, writeOutput, timeout);
         this.connection = connection;
+        this.database = Database.CRATEDB;
     }
 
-    public Duration runTimedQuery(PreparedStatement stmt) throws BenchmarkException {
+    public Duration runTimedQuery(PreparedStatement stmt, int queryNum) throws BenchmarkException {
         try {
             Instant start = Instant.now();
             ResultSet rs = stmt.executeQuery();
             ResultSetMetaData rsmd = rs.getMetaData();
             int columnsNumber = rsmd.getColumnCount();
 
+            RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(queryNum));
             while(rs.next()) {
-                // TODO: Write to File
                 if (writeOutput) {
+                    StringBuilder line = new StringBuilder("");
                     for(int i = 1; i <= columnsNumber; i++)
-                        System.out.print(rs.getString(i) + "\t");
-                    System.out.println();
+                        line.append(rs.getString(i)).append("\t");
+                    writer.writeString(line.toString());
                 }
             }
-
+            writer.close();
             rs.close();
             Instant end = Instant.now();
             return Duration.between(start, end);
-        } catch (SQLException e) {
+        } catch (SQLException | IOException e) {
             e.printStackTrace();
             throw new BenchmarkException("Error Running Query");
         }
@@ -56,7 +66,7 @@ public class PgSQLQueryManager extends BaseQueryManager{
 
     @Override
     public Database getDatabase() {
-        return Database.POSTGRESQL;
+        return database;
     }
 
     @Override
@@ -72,7 +82,7 @@ public class PgSQLQueryManager extends BaseQueryManager{
                 try {
                     PreparedStatement stmt = connection.prepareStatement(query);
                     stmt.setString(1, sensorId);
-                    return runTimedQuery(stmt);
+                    return runTimedQuery(stmt, 1);
                 } catch (SQLException e) {
                     e.printStackTrace();
                     throw new BenchmarkException("Error Running Query");
@@ -95,7 +105,7 @@ public class PgSQLQueryManager extends BaseQueryManager{
 
                     Array locationsArray = connection.createArrayOf("VARCHAR", locationIds.toArray());
                     stmt.setArray(2, locationsArray);
-                    return runTimedQuery(stmt);
+                    return runTimedQuery(stmt, 2);
                 } catch (SQLException e) {
                     e.printStackTrace();
                     throw new BenchmarkException("Error Running Query");
@@ -117,7 +127,7 @@ public class PgSQLQueryManager extends BaseQueryManager{
                     stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
                     stmt.setString(3, sensorId);
 
-                    return runTimedQuery(stmt);
+                    return runTimedQuery(stmt, 3);
                 } catch (SQLException e) {
                     e.printStackTrace();
                     throw new BenchmarkException("Error Running Query");
@@ -141,7 +151,7 @@ public class PgSQLQueryManager extends BaseQueryManager{
                     Array sensorIdArray = connection.createArrayOf("VARCHAR", sensorIds.toArray());
                     stmt.setArray(3, sensorIdArray);
 
-                    return runTimedQuery(stmt);
+                    return runTimedQuery(stmt, 4);
                 } catch (SQLException e) {
                     e.printStackTrace();
                     throw new BenchmarkException("Error Running Query");
@@ -177,38 +187,39 @@ public class PgSQLQueryManager extends BaseQueryManager{
                             payloadColNum = i;
                         }
                     }
+                    RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(5));
                     while(rs.next()) {
                         JSONObject payload = new JSONObject(rs.getString(payloadColNum));
 
                         if (startPayloadValue instanceof  Integer) {
                             if (payload.getInt(payloadAttribute) >= (Integer)startPayloadValue
                                     && payload.getInt(payloadAttribute) <= (Integer)endPayloadValue) {
-                                // TODO: Write to File
                                 if (writeOutput) {
+                                    StringBuilder line = new StringBuilder("");
                                     for(int i = 1; i <= columnsNumber; i++)
-                                        System.out.print(rs.getString(i) + "\t");
-                                    System.out.println();
+                                        line.append(rs.getString(i)).append("\t");
+                                    writer.writeString(line.toString());
                                 }
                             }
 
                         } else if (startPayloadValue instanceof  Double) {
                             if (payload.getDouble(payloadAttribute) >= (Double)startPayloadValue
                                     && payload.getDouble(payloadAttribute) <= (Double)endPayloadValue) {
-                                // TODO: Write to File
                                 if (writeOutput) {
+                                    StringBuilder line = new StringBuilder("");
                                     for(int i = 1; i <= columnsNumber; i++)
-                                        System.out.print(rs.getString(i) + "\t");
-                                    System.out.println();
+                                        line.append(rs.getString(i)).append("\t");
+                                    writer.writeString(line.toString());
                                 }
                             }
 
                         }
                     }
-
+                    writer.close();
                     rs.close();
                     Instant end = Instant.now();
                     return Duration.between(start, end);
-                } catch (SQLException e) {
+                } catch (SQLException | IOException e) {
                     e.printStackTrace();
                     throw new BenchmarkException("Error Running Query");
                 }
@@ -235,7 +246,7 @@ public class PgSQLQueryManager extends BaseQueryManager{
                     Array sensorIdArray = connection.createArrayOf("VARCHAR", sensorIds.toArray());
                     stmt.setArray(3, sensorIdArray);
 
-                    return runTimedQuery(stmt);
+                    return runTimedQuery(stmt, 6);
                 } catch (SQLException e) {
                     e.printStackTrace();
                     throw new BenchmarkException("Error Running Query");

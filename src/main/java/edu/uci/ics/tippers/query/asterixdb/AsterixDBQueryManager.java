@@ -2,9 +2,11 @@ package edu.uci.ics.tippers.query.asterixdb;
 
 import edu.uci.ics.tippers.common.Database;
 import edu.uci.ics.tippers.common.constants.Constants;
+import edu.uci.ics.tippers.common.util.Helper;
 import edu.uci.ics.tippers.connection.asterixdb.AsterixDBConnectionManager;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.query.BaseQueryManager;
+import edu.uci.ics.tippers.writer.RowWriter;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 
@@ -21,8 +23,8 @@ public class AsterixDBQueryManager extends BaseQueryManager{
     private AsterixDBConnectionManager connectionManager;
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
-    public AsterixDBQueryManager(int mapping, String queriesDir, boolean writeOutput, long timeout){
-        super(mapping, queriesDir, writeOutput, timeout);
+    public AsterixDBQueryManager(int mapping, String queriesDir, String outputDir, boolean writeOutput, long timeout){
+        super(mapping, queriesDir, outputDir, writeOutput, timeout);
         connectionManager = AsterixDBConnectionManager.getInstance();
     }
 
@@ -36,7 +38,7 @@ public class AsterixDBQueryManager extends BaseQueryManager{
 
     }
 
-    private Duration runTimedQuery (String query) throws BenchmarkException {
+    private Duration runTimedQuery (String query, int queryNum) throws BenchmarkException {
         Instant startTime = Instant.now();
         HttpResponse response = connectionManager.sendQuery(query);
         Instant endTime = Instant.now();
@@ -44,7 +46,10 @@ public class AsterixDBQueryManager extends BaseQueryManager{
         if (writeOutput) {
             // TODO: Write To File
             try {
-                System.out.println(EntityUtils.toString(response.getEntity()));
+                RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping,
+                        Helper.getFileFromQuery(queryNum));
+                writer.writeString(EntityUtils.toString(response.getEntity()));
+                writer.close();
             } catch (IOException e) {
                 e.printStackTrace();
                 throw new BenchmarkException("Error writing output to file");
@@ -58,7 +63,7 @@ public class AsterixDBQueryManager extends BaseQueryManager{
         switch (mapping) {
             case 1:
                 return runTimedQuery(
-                    String.format("SELECT name FROM Sensor WHERE id = \"%s\";", sensorId)
+                    String.format("SELECT name FROM Sensor WHERE id = \"%s\";", sensorId), 1
                 );
             default:
                 throw new BenchmarkException("No Such Mapping");
@@ -75,7 +80,7 @@ public class AsterixDBQueryManager extends BaseQueryManager{
                                         + "(SOME e IN s.coverage.entitiesCovered SATISFIES e.id IN {{"
                                         + locationIds.stream().map(e -> "\"" + e + "\"" ).collect(Collectors.joining(","))
                                         + "}});",
-                                sensorTypeName)
+                                sensorTypeName), 2
                 );
             default:
                 throw new BenchmarkException("No Such Mapping");
@@ -90,7 +95,7 @@ public class AsterixDBQueryManager extends BaseQueryManager{
                 return runTimedQuery(
                         String.format("SELECT timeStamp, sensor.id, payload FROM Observation WHERE sensor.id=\"%s\" "
                                 + "AND timeStamp >= datetime(\"%s\") AND timeStamp <= datetime(\"%s\");",
-                                sensorId, sdf.format(startTime), sdf.format(endTime))
+                                sensorId, sdf.format(startTime), sdf.format(endTime)), 3
                 );
             default:
                 throw new BenchmarkException("No Such Mapping");
@@ -105,7 +110,7 @@ public class AsterixDBQueryManager extends BaseQueryManager{
                         String.format("SELECT timeStamp, sensor.id, payload FROM Observation WHERE sensor.id IN {{ "
                                         + sensorIds.stream().map(e -> "\"" + e + "\"").collect(Collectors.joining(","))
                                         + " }} AND timeStamp >= datetime(\"%s\") AND timeStamp <= datetime(\"%s\");",
-                                sdf.format(startTime), sdf.format(endTime))
+                                sdf.format(startTime), sdf.format(endTime)),  4
                 );
             default:
                 throw new BenchmarkException("No Such Mapping");
@@ -124,7 +129,7 @@ public class AsterixDBQueryManager extends BaseQueryManager{
                             "timeStamp <= datetime(\"%s\") " +
                             "AND payload.%s >= %s AND payload.%s <= %s",
                                 sensorTypeName, sdf.format(startTime), sdf.format(endTime), payloadAttribute,
-                                startPayloadValue, payloadAttribute, endPayloadValue)
+                                startPayloadValue, payloadAttribute, endPayloadValue), 5
                 );
             default:
                 throw new BenchmarkException("No Such Mapping");
@@ -145,7 +150,7 @@ public class AsterixDBQueryManager extends BaseQueryManager{
                                 sensorIds.stream().map(e -> "\"" + e + "\"").collect(Collectors.joining(",")) +
                                 " }} AND timeStamp >= datetime(\"%s\") AND timeStamp <= datetime(\"%s\") " +
                                 "GROUP BY sensor.id, get_date_from_datetime(timeStamp)) AS obs GROUP BY obs.id",
-                                sdf.format(startTime), sdf.format(endTime))
+                                sdf.format(startTime), sdf.format(endTime)), 6
                 );
             default:
                 throw new BenchmarkException("No Such Mapping");

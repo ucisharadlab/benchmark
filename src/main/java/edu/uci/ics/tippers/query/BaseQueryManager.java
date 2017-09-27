@@ -10,17 +10,21 @@ import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.*;
 
+import static edu.uci.ics.tippers.common.util.Helper.getFileFromQuery;
+
 public abstract class BaseQueryManager {
 
     protected int mapping;
     protected boolean writeOutput;
     protected String queriesDir;
+    protected String outputDir;
     protected long timeout;
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
-    public BaseQueryManager(int mapping, String queriesDir, boolean writeOutput, long timeout) {
+    public BaseQueryManager(int mapping, String queriesDir, String outputDir, boolean writeOutput, long timeout) {
         this.mapping = mapping;
         this.writeOutput = writeOutput;
+        this.outputDir = outputDir;
         this.queriesDir = queriesDir;
         this.timeout = timeout;
     }
@@ -58,7 +62,7 @@ public abstract class BaseQueryManager {
     }
 
     private void warmingUp() {
-        QueryCSVReader reader = new QueryCSVReader(queriesDir + "query1.txt");
+        QueryCSVReader reader = new QueryCSVReader(queriesDir + getFileFromQuery(1));
         String[] values;
         while ((values = reader.readNextLine()) != null) {
             String sensorId = values[1];
@@ -68,11 +72,13 @@ public abstract class BaseQueryManager {
 
     public Map<Integer, Duration> runQueries() throws BenchmarkException{
 
+        // Warming up the database by running certain queries
         warmingUp();
 
         Map<Integer, Duration> queryRunTimes = new HashMap<>();
 
-        QueryCSVReader reader = new QueryCSVReader(queriesDir + "query1.txt");
+        // Query 1
+        QueryCSVReader reader = new QueryCSVReader(queriesDir + getFileFromQuery(1));
         String[] values;
         int numQueries = 0;
         Duration runTime = Duration.ofSeconds(0);
@@ -90,10 +96,10 @@ public abstract class BaseQueryManager {
             queryRunTimes.put(1, Constants.MAX_DURATION);
         }
 
-
+        // Query 2
         numQueries = 0;
         runTime = Duration.ZERO;
-        reader = new QueryCSVReader(queriesDir + "query2.txt");
+        reader = new QueryCSVReader(queriesDir + getFileFromQuery(2));
         try {
             while ((values = reader.readNextLine()) != null) {
                 String sensorTypeName = values[1];
@@ -107,9 +113,10 @@ public abstract class BaseQueryManager {
             queryRunTimes.put(2, Constants.MAX_DURATION);
         }
 
+        // Query 3
         numQueries = 0;
         runTime = Duration.ZERO;
-        reader = new QueryCSVReader(queriesDir + "query3.txt");
+        reader = new QueryCSVReader(queriesDir + getFileFromQuery(3));
         try {
             while ((values = reader.readNextLine()) != null) {
                 String sensorId = values[1];
@@ -131,9 +138,10 @@ public abstract class BaseQueryManager {
             queryRunTimes.put(3, Constants.MAX_DURATION);
         }
 
+        // Query 4
         numQueries = 0;
         runTime = Duration.ZERO;
-        reader = new QueryCSVReader(queriesDir + "query4.txt");
+        reader = new QueryCSVReader(queriesDir + getFileFromQuery(4));
         try {
             while ((values = reader.readNextLine()) != null) {
                 List<String> sensorIds = Arrays.asList(values[1].split(";"));
@@ -154,9 +162,10 @@ public abstract class BaseQueryManager {
             queryRunTimes.put(4, Constants.MAX_DURATION);
         }
 
+        // Query 5
         numQueries = 0;
         runTime = Duration.ZERO;
-        reader = new QueryCSVReader(queriesDir + "query5.txt");
+        reader = new QueryCSVReader(queriesDir + getFileFromQuery(5));
         try {
             while ((values = reader.readNextLine()) != null) {
                 String sensorTypeName = values[1];
@@ -194,9 +203,10 @@ public abstract class BaseQueryManager {
             queryRunTimes.put(5, Constants.MAX_DURATION);
         }
 
+        // Query 6
         numQueries = 0;
         runTime = Duration.ZERO;
-        reader = new QueryCSVReader(queriesDir + "query6.txt");
+        reader = new QueryCSVReader(queriesDir + getFileFromQuery(6));
         try {
             while ((values = reader.readNextLine()) != null) {
                 List<String> sensorIds = Arrays.asList(values[1].split(";"));

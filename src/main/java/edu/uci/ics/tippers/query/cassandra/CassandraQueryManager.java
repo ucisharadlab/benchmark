@@ -13,8 +13,8 @@ import java.util.List;
  */
 public class CassandraQueryManager extends BaseQueryManager {
 
-    public CassandraQueryManager(int mapping, String queriesDir, boolean writeOutput, long timeout) {
-        super(mapping, queriesDir, writeOutput, timeout);
+    public CassandraQueryManager(int mapping, String queriesDir, String outputDir, boolean writeOutput, long timeout) {
+        super(mapping, queriesDir, outputDir, writeOutput, timeout);
     }
 
     @Override

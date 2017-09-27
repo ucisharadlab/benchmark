@@ -5,23 +5,28 @@ import edu.uci.ics.tippers.common.Database;
 import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.connection.griddb.StoreManager;
 import edu.uci.ics.tippers.exception.BenchmarkException;
+import edu.uci.ics.tippers.execution.Benchmark;
 import edu.uci.ics.tippers.operators.GroupBy;
 import edu.uci.ics.tippers.query.BaseQueryManager;
+import edu.uci.ics.tippers.writer.RowWriter;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+
+import static edu.uci.ics.tippers.common.util.Helper.getFileFromQuery;
 
 public class GridDBQueryManager extends BaseQueryManager {
 
     private GridStore gridStore;
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
-    public GridDBQueryManager(int mapping, String queriesDir, boolean writeOutput, long timeout) {
-        super(mapping, queriesDir, writeOutput, timeout);
+    public GridDBQueryManager(int mapping, String queriesDir, String outputDir, boolean writeOutput, long timeout) {
+        super(mapping, queriesDir, outputDir, writeOutput, timeout);
         gridStore = StoreManager.getInstance().getGridStore();
         //sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
@@ -41,7 +46,7 @@ public class GridDBQueryManager extends BaseQueryManager {
 
     }
 
-    private Duration runTimedQuery(String containerName, String query) throws BenchmarkException {
+    private Duration runTimedQuery(String containerName, String query, int queryNum) throws BenchmarkException {
         try {
             Instant startTime = Instant.now();
             Container<String, Row> container = gridStore.getContainer(containerName);
@@ -50,23 +55,25 @@ public class GridDBQueryManager extends BaseQueryManager {
             RowSet<Row> rows = gridDBQuery.fetch();
 
             Row row;
-
+            RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(queryNum));
             while (rows.hasNext()) {
                 row = rows.next();
                 if (writeOutput) {
-                    // TODO: Write output to a file
+                    StringBuilder line = new StringBuilder("");
                     containerInfo = row.getSchema();
                     int columnCount = containerInfo.getColumnCount();
                     for (int i = 0; i < columnCount; i++) {
-                        System.out.println(row.getValue(i));
+                        line.append(row.getValue(i)).append("\t");
                     }
+                    writer.writeString(line.toString());
                 }
             }
+            writer.close();
             Instant endTime = Instant.now();
             return Duration.between(startTime, endTime);
 
-        } catch (GSException ge) {
-            ge.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
             throw new BenchmarkException("Error Running Query On GridDB");
         }
     }
@@ -101,7 +108,7 @@ public class GridDBQueryManager extends BaseQueryManager {
 
     @Override
     public Duration runQuery1(String sensorId) throws BenchmarkException {
-        return runTimedQuery("Sensor", String.format("SELECT * FROM Sensor WHERE id='%s'",sensorId));
+        return runTimedQuery("Sensor", String.format("SELECT * FROM Sensor WHERE id='%s'",sensorId), 1);
     }
 
     @Override
@@ -113,18 +120,19 @@ public class GridDBQueryManager extends BaseQueryManager {
         try {
             List<Row> sensors = runQueryWithRows("Sensor",
                     String.format("SELECT * FROM Sensor WHERE typeId='%s'", sensorTypes.get(0).getString(0)));
+            RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(2));
             for(Row row : sensors) {
                 String coverageId = row.getString(6);
                 Row coverage = getById("SensorCoverage", coverageId);
                 String[] entitiesCovered = coverage.getStringArray(2);
+
                 locationIds.forEach(e-> {
                     for (String s : entitiesCovered) {
                         if (s.equals(e)) {
                             if (writeOutput) {
-                                // TODO: Write output to a file
                                 try {
-                                    System.out.println(row.getValue(0));
-                                } catch (GSException e1) {
+                                    writer.writeString(row.getString(0));
+                                } catch (IOException e1) {
                                     e1.printStackTrace();
                                     throw new BenchmarkException("Error Running Query On GridDB");
                                 }
@@ -133,11 +141,11 @@ public class GridDBQueryManager extends BaseQueryManager {
                     }
                 });
             }
+            writer.close();
             Instant endTime = Instant.now();
             return Duration.between(startTime, endTime);
-        } catch (GSException ge) {
-            throw new BenchmarkException("Error running query on griddb");
-        }
+        } catch (IOException e) {
+            throw new BenchmarkException("Error running query on griddb");        }
     }
 
     @Override
@@ -145,7 +153,7 @@ public class GridDBQueryManager extends BaseQueryManager {
         String collectionName = Constants.GRIDDB_OBS_PREFIX + sensorId;
         String query = String.format("SELECT * FROM %s WHERE timeStamp > TIMESTAMP('%s') " +
                 "AND timeStamp < TIMESTAMP('%s')", collectionName, sdf.format(startTime), sdf.format(endTime));
-        return runTimedQuery(collectionName, query);
+        return runTimedQuery(collectionName, query, 3);
     }
 
     @Override
@@ -159,22 +167,30 @@ public class GridDBQueryManager extends BaseQueryManager {
                     "AND timeStamp < TIMESTAMP('%s')", collectionName, sdf.format(startTime), sdf.format(endTime));
             List<Row> observations = runQueryWithRows(collectionName, query);
 
-            observations.forEach(e->{
-                if (writeOutput) {
-                    // TODO: Write output to a file
-                    ContainerInfo containerInfo = null;
-                    try {
-                        containerInfo = e.getSchema();
-                        int columnCount = containerInfo.getColumnCount();
-                        for (int i = 0; i < columnCount; i++) {
-                            System.out.println(e.getValue(i));
+            try {
+                RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(4));
+                observations.forEach(e -> {
+                    if (writeOutput) {
+                        ContainerInfo containerInfo = null;
+                        try {
+                            StringBuilder line = new StringBuilder("");
+                            containerInfo = e.getSchema();
+                            int columnCount = containerInfo.getColumnCount();
+                            for (int i = 0; i < columnCount; i++) {
+                                line.append(e.getValue(i)).append("\t");
+                            }
+                            writer.writeString(line.toString());
+                        } catch (IOException e1) {
+                            e1.printStackTrace();
+                            throw new BenchmarkException("Error Running Query On GridDB");
                         }
-                    } catch (GSException e1) {
-                        e1.printStackTrace();
-                        throw new BenchmarkException("Error Running Query On GridDB");
                     }
-                }
-            });
+                });
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new BenchmarkException("Error Running Query");
+            }
 
         }
         Instant end = Instant.now();
@@ -192,6 +208,8 @@ public class GridDBQueryManager extends BaseQueryManager {
         try {
             List<Row> sensors = runQueryWithRows("Sensor",
                     String.format("SELECT * FROM Sensor WHERE typeId='%s'", sensorTypes.get(0).getString(0)));
+
+            RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(5));
             for (Row row : sensors) {
                 String collectionName = Constants.GRIDDB_OBS_PREFIX + row.getString(0);
                 String query = String.format("SELECT * FROM %s WHERE timeStamp > TIMESTAMP('%s') " +
@@ -202,15 +220,16 @@ public class GridDBQueryManager extends BaseQueryManager {
 
                 observations.forEach(e->{
                     if (writeOutput) {
-                        // TODO: Write output to a file
                         ContainerInfo containerInfo = null;
                         try {
+                            StringBuilder line = new StringBuilder("");
                             containerInfo = e.getSchema();
                             int columnCount = containerInfo.getColumnCount();
                             for (int i = 0; i < columnCount; i++) {
-                                System.out.println(e.getValue(i));
+                                line.append(e.getValue(i)).append("\t");
                             }
-                        } catch (GSException e1) {
+                            writer.writeString(line.toString());
+                        } catch (IOException e1) {
                             e1.printStackTrace();
                             throw new BenchmarkException("Error Running Query On GridDB");
                         }
@@ -218,9 +237,10 @@ public class GridDBQueryManager extends BaseQueryManager {
                 });
 
             }
+            writer.close();
             Instant end = Instant.now();
             return Duration.between(start, end);
-        } catch (GSException ge) {
+        } catch (IOException ge) {
             ge.printStackTrace();
             throw new BenchmarkException("Error Running Query");
         }
@@ -231,6 +251,7 @@ public class GridDBQueryManager extends BaseQueryManager {
         // TODO: Fix Error Due to TimeZone
         Instant start = Instant.now();
         try {
+            RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(6));
             for (String sensorId : sensorIds) {
                 String collectionName = Constants.GRIDDB_OBS_PREFIX + sensorId;
                 String query = String.format("SELECT * FROM %s WHERE timeStamp >= TIMESTAMP('%s') " +
@@ -259,9 +280,10 @@ public class GridDBQueryManager extends BaseQueryManager {
                 });
 
                 if (writeOutput) {
-                    System.out.println(sensorId + ", " + sum[0] /groups.length());
+                    writer.writeString(sensorId + ", " + sum[0] /groups.length());
                 }
             }
+            writer.close();
             Instant end = Instant.now();
             return Duration.between(start, end);
         } catch (Exception e) {

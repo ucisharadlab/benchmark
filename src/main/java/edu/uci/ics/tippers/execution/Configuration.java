@@ -17,6 +17,7 @@ public class Configuration {
     private String dataDir;
     private String queriesDir;
     private String reportsDir;
+    private String outputDir;
     private boolean writeOutput;
     private ReportFormat format;
     private Long timeout;
@@ -72,6 +73,12 @@ public class Configuration {
             throw new BenchmarkException("Reports directory location not provided in configuration file");
         }
         reportsDir = nodeValue;
+
+        nodeValue = preferences.node("benchmark").get("query-result-dir", null);
+        if (nodeValue == null) {
+            throw new BenchmarkException("Output directory location not provided in configuration file");
+        }
+        outputDir = nodeValue;
 
         writeOutput = preferences.node("benchmark").getBoolean("write-query-result", false);
 
@@ -171,5 +178,13 @@ public class Configuration {
 
     public void setScaleData(boolean scaleData) {
         this.scaleData = scaleData;
+    }
+
+    public String getOutputDir() {
+        return outputDir;
+    }
+
+    public void setOutputDir(String outputDir) {
+        this.outputDir = outputDir;
     }
 }

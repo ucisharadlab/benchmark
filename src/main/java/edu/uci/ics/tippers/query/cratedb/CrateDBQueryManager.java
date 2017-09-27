@@ -17,10 +17,10 @@ public class CrateDBQueryManager extends BaseQueryManager {
     private PgSQLQueryManager externalQueryManager;
     private Connection connection;
 
-    public CrateDBQueryManager(int mapping, String queriesDir, boolean writeOutput, long timeout) {
-        super(mapping, queriesDir, writeOutput, timeout);
+    public CrateDBQueryManager(int mapping, String queriesDir, String outputDir, boolean writeOutput, long timeout) {
+        super(mapping, queriesDir, outputDir, writeOutput, timeout);
         connection = CrateDBConnectionManager.getInstance().getConnection();
-        externalQueryManager = new PgSQLQueryManager(mapping, queriesDir, writeOutput, timeout, connection);
+        externalQueryManager = new PgSQLQueryManager(mapping, queriesDir, outputDir, writeOutput, timeout, connection);
     }
 
     @Override
@@ -56,7 +56,7 @@ public class CrateDBQueryManager extends BaseQueryManager {
 
                     Array locationsArray = connection.createArrayOf("string", locationIds.toArray());
                     stmt.setArray(2, locationsArray);
-                    return externalQueryManager.runTimedQuery(stmt);
+                    return externalQueryManager.runTimedQuery(stmt, 2);
                 } catch (SQLException e) {
                     e.printStackTrace();
                     throw new BenchmarkException("Error Running Query");
@@ -90,7 +90,7 @@ public class CrateDBQueryManager extends BaseQueryManager {
                     Array sensorIdArray = connection.createArrayOf("string", sensorIds.toArray());
                     stmt.setArray(3, sensorIdArray);
 
-                    return externalQueryManager.runTimedQuery(stmt);
+                    return externalQueryManager.runTimedQuery(stmt, 4);
                 } catch (SQLException e) {
                     e.printStackTrace();
                     throw new BenchmarkException("Error Running Query");
@@ -130,7 +130,7 @@ public class CrateDBQueryManager extends BaseQueryManager {
                     Array sensorIdArray = connection.createArrayOf("string", sensorIds.toArray());
                     stmt.setArray(3, sensorIdArray);
 
-                    return externalQueryManager.runTimedQuery(stmt);
+                    return externalQueryManager.runTimedQuery(stmt, 6);
                 } catch (SQLException e) {
                     e.printStackTrace();
                     throw new BenchmarkException("Error Running Query");

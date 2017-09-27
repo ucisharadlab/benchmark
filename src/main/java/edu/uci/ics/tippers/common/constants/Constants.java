@@ -9,6 +9,6 @@ public class Constants {
     public static final Duration MAX_DURATION = Duration.ofSeconds(10000000, 0);
     public static String CONFIG = "benchmark.ini";
     public static long SHUTDOWN_WAIT = 1000;
-
+    public static String QUERY_FILE_FORMAT = "query%s.txt";
 
 }

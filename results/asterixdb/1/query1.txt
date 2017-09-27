@@ -1,0 +1,15 @@
+{
+	"requestID": "1a6d4ee6-f657-4704-b545-04d92c329525",
+	"signature": "*",
+	"results": [ { "name": "EnergyMeter5" }
+ ]
+	,
+	"status": "success",
+	"metrics": {
+		"elapsedTime": "46.910441ms",
+		"executionTime": "46.765951ms",
+		"resultCount": 1,
+		"resultSize": 27
+	}
+}
+

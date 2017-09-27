@@ -1,5 +1,7 @@
 package edu.uci.ics.tippers.common.util;
 
+import edu.uci.ics.tippers.common.constants.Constants;
+
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -7,6 +9,11 @@ import java.util.List;
 
 // edu.uci.ics.tippers.scaler.data.Helper function
 public class Helper {
+
+	public static String getFileFromQuery(int query) {
+		return String.format(Constants.QUERY_FILE_FORMAT, query);
+	}
+
 	// Increase timestamp for each observation based on observation speed
 	public String increaseTimestamp(String startTime, int obsSpeed) {
 		Timestamp ts = Timestamp.valueOf(startTime);

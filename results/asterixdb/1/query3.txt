@@ -1,0 +1,88 @@
+{
+	"requestID": "1385e667-87f8-4323-86d3-09b91c430dbd",
+	"signature": "*",
+	"results": [ { "timeStamp": "2017-11-07T05:41:40.000Z", "id": "emeter4", "payload": { "temperature": 3 } }
+, { "timeStamp": "2017-11-07T07:13:20.000Z", "id": "emeter4", "payload": { "temperature": 20 } }
+, { "timeStamp": "2017-11-07T01:06:40.000Z", "id": "emeter4", "payload": { "temperature": 3 } }
+, { "timeStamp": "2017-11-07T06:06:40.000Z", "id": "emeter4", "payload": { "temperature": 75 } }
+, { "timeStamp": "2017-11-07T02:46:40.000Z", "id": "emeter4", "payload": { "temperature": 74 } }
+, { "timeStamp": "2017-11-07T09:51:40.000Z", "id": "emeter4", "payload": { "temperature": 64 } }
+, { "timeStamp": "2017-11-07T07:21:40.000Z", "id": "emeter4", "payload": { "temperature": 100 } }
+, { "timeStamp": "2017-11-07T04:35:00.000Z", "id": "emeter4", "payload": { "temperature": 94 } }
+, { "timeStamp": "2017-11-07T05:58:20.000Z", "id": "emeter4", "payload": { "temperature": 26 } }
+, { "timeStamp": "2017-11-07T09:26:40.000Z", "id": "emeter4", "payload": { "temperature": 9 } }
+, { "timeStamp": "2017-11-07T07:46:40.000Z", "id": "emeter4", "payload": { "temperature": 2 } }
+, { "timeStamp": "2017-11-07T02:05:00.000Z", "id": "emeter4", "payload": { "temperature": 19 } }
+, { "timeStamp": "2017-11-07T00:33:20.000Z", "id": "emeter4", "payload": { "temperature": 52 } }
+, { "timeStamp": "2017-11-07T04:26:40.000Z", "id": "emeter4", "payload": { "temperature": 71 } }
+, { "timeStamp": "2017-11-07T03:36:40.000Z", "id": "emeter4", "payload": { "temperature": 26 } }
+, { "timeStamp": "2017-11-07T07:38:20.000Z", "id": "emeter4", "payload": { "temperature": 16 } }
+, { "timeStamp": "2017-11-07T02:13:20.000Z", "id": "emeter4", "payload": { "temperature": 12 } }
+, { "timeStamp": "2017-11-07T00:58:20.000Z", "id": "emeter4", "payload": { "temperature": 57 } }
+, { "timeStamp": "2017-11-07T05:33:20.000Z", "id": "emeter4", "payload": { "temperature": 3 } }
+, { "timeStamp": "2017-11-07T09:01:40.000Z", "id": "emeter4", "payload": { "temperature": 59 } }
+, { "timeStamp": "2017-11-07T09:18:20.000Z", "id": "emeter4", "payload": { "temperature": 5 } }
+, { "timeStamp": "2017-11-07T05:50:00.000Z", "id": "emeter4", "payload": { "temperature": 3 } }
+, { "timeStamp": "2017-11-07T00:08:20.000Z", "id": "emeter4", "payload": { "temperature": 55 } }
+, { "timeStamp": "2017-11-07T06:56:40.000Z", "id": "emeter4", "payload": { "temperature": 45 } }
+, { "timeStamp": "2017-11-07T03:11:40.000Z", "id": "emeter4", "payload": { "temperature": 50 } }
+, { "timeStamp": "2017-11-07T02:30:00.000Z", "id": "emeter4", "payload": { "temperature": 23 } }
+, { "timeStamp": "2017-11-07T07:05:00.000Z", "id": "emeter4", "payload": { "temperature": 67 } }
+, { "timeStamp": "2017-11-07T01:40:00.000Z", "id": "emeter4", "payload": { "temperature": 86 } }
+, { "timeStamp": "2017-11-07T00:00:00.000Z", "id": "emeter4", "payload": { "temperature": 100 } }
+, { "timeStamp": "2017-11-07T10:08:20.000Z", "id": "emeter4", "payload": { "temperature": 61 } }
+, { "timeStamp": "2017-11-07T00:50:00.000Z", "id": "emeter4", "payload": { "temperature": 75 } }
+, { "timeStamp": "2017-11-07T02:55:00.000Z", "id": "emeter4", "payload": { "temperature": 17 } }
+, { "timeStamp": "2017-11-07T00:16:40.000Z", "id": "emeter4", "payload": { "temperature": 9 } }
+, { "timeStamp": "2017-11-07T09:10:00.000Z", "id": "emeter4", "payload": { "temperature": 88 } }
+, { "timeStamp": "2017-11-07T05:16:40.000Z", "id": "emeter4", "payload": { "temperature": 6 } }
+, { "timeStamp": "2017-11-07T01:56:40.000Z", "id": "emeter4", "payload": { "temperature": 72 } }
+, { "timeStamp": "2017-11-07T10:00:00.000Z", "id": "emeter4", "payload": { "temperature": 22 } }
+, { "timeStamp": "2017-11-07T08:28:20.000Z", "id": "emeter4", "payload": { "temperature": 33 } }
+, { "timeStamp": "2017-11-07T08:45:00.000Z", "id": "emeter4", "payload": { "temperature": 75 } }
+, { "timeStamp": "2017-11-07T06:40:00.000Z", "id": "emeter4", "payload": { "temperature": 44 } }
+, { "timeStamp": "2017-11-07T03:28:20.000Z", "id": "emeter4", "payload": { "temperature": 49 } }
+, { "timeStamp": "2017-11-07T03:20:00.000Z", "id": "emeter4", "payload": { "temperature": 17 } }
+, { "timeStamp": "2017-11-07T01:15:00.000Z", "id": "emeter4", "payload": { "temperature": 52 } }
+, { "timeStamp": "2017-11-07T06:48:20.000Z", "id": "emeter4", "payload": { "temperature": 8 } }
+, { "timeStamp": "2017-11-07T01:48:20.000Z", "id": "emeter4", "payload": { "temperature": 98 } }
+, { "timeStamp": "2017-11-07T08:03:20.000Z", "id": "emeter4", "payload": { "temperature": 67 } }
+, { "timeStamp": "2017-11-07T06:23:20.000Z", "id": "emeter4", "payload": { "temperature": 76 } }
+, { "timeStamp": "2017-11-07T06:15:00.000Z", "id": "emeter4", "payload": { "temperature": 21 } }
+, { "timeStamp": "2017-11-07T05:08:20.000Z", "id": "emeter4", "payload": { "temperature": 74 } }
+, { "timeStamp": "2017-11-07T04:01:40.000Z", "id": "emeter4", "payload": { "temperature": 19 } }
+, { "timeStamp": "2017-11-07T01:23:20.000Z", "id": "emeter4", "payload": { "temperature": 14 } }
+, { "timeStamp": "2017-11-07T09:35:00.000Z", "id": "emeter4", "payload": { "temperature": 74 } }
+, { "timeStamp": "2017-11-07T01:31:40.000Z", "id": "emeter4", "payload": { "temperature": 77 } }
+, { "timeStamp": "2017-11-07T04:18:20.000Z", "id": "emeter4", "payload": { "temperature": 78 } }
+, { "timeStamp": "2017-11-07T03:53:20.000Z", "id": "emeter4", "payload": { "temperature": 56 } }
+, { "timeStamp": "2017-11-07T02:21:40.000Z", "id": "emeter4", "payload": { "temperature": 65 } }
+, { "timeStamp": "2017-11-07T02:38:20.000Z", "id": "emeter4", "payload": { "temperature": 25 } }
+, { "timeStamp": "2017-11-07T04:43:20.000Z", "id": "emeter4", "payload": { "temperature": 52 } }
+, { "timeStamp": "2017-11-07T04:10:00.000Z", "id": "emeter4", "payload": { "temperature": 92 } }
+, { "timeStamp": "2017-11-07T08:20:00.000Z", "id": "emeter4", "payload": { "temperature": 27 } }
+, { "timeStamp": "2017-11-07T09:43:20.000Z", "id": "emeter4", "payload": { "temperature": 26 } }
+, { "timeStamp": "2017-11-07T03:45:00.000Z", "id": "emeter4", "payload": { "temperature": 83 } }
+, { "timeStamp": "2017-11-07T03:03:20.000Z", "id": "emeter4", "payload": { "temperature": 90 } }
+, { "timeStamp": "2017-11-07T00:25:00.000Z", "id": "emeter4", "payload": { "temperature": 76 } }
+, { "timeStamp": "2017-11-07T06:31:40.000Z", "id": "emeter4", "payload": { "temperature": 48 } }
+, { "timeStamp": "2017-11-07T08:36:40.000Z", "id": "emeter4", "payload": { "temperature": 56 } }
+, { "timeStamp": "2017-11-07T05:00:00.000Z", "id": "emeter4", "payload": { "temperature": 98 } }
+, { "timeStamp": "2017-11-07T08:11:40.000Z", "id": "emeter4", "payload": { "temperature": 43 } }
+, { "timeStamp": "2017-11-07T05:25:00.000Z", "id": "emeter4", "payload": { "temperature": 58 } }
+, { "timeStamp": "2017-11-07T00:41:40.000Z", "id": "emeter4", "payload": { "temperature": 88 } }
+, { "timeStamp": "2017-11-07T07:55:00.000Z", "id": "emeter4", "payload": { "temperature": 63 } }
+, { "timeStamp": "2017-11-07T07:30:00.000Z", "id": "emeter4", "payload": { "temperature": 54 } }
+, { "timeStamp": "2017-11-07T08:53:20.000Z", "id": "emeter4", "payload": { "temperature": 34 } }
+, { "timeStamp": "2017-11-07T04:51:40.000Z", "id": "emeter4", "payload": { "temperature": 31 } }
+ ]
+	,
+	"status": "success",
+	"metrics": {
+		"elapsedTime": "66.081737ms",
+		"executionTime": "65.780863ms",
+		"resultCount": 74,
+		"resultSize": 7022
+	}
+}
+

@@ -1,0 +1,20 @@
+{
+	"requestID": "2b419f80-f610-4036-9421-2726c2522950",
+	"signature": "*",
+	"results": [ { "id": "3141_clwa_1100", "name": "3141_clwa_1100 " }
+, { "id": "3141_clwb_1100", "name": "3141_clwb_1100" }
+, { "id": "3141_clwd_1100", "name": "3141_clwd_1100" }
+, { "id": "3142_clwa_2059", "name": "3142_clwa_2059" }
+, { "id": "3141_clwc_1100", "name": "3141_clwc_1100" }
+, { "id": "3141_clwe_1100", "name": "3141_clwe_1100" }
+ ]
+	,
+	"status": "success",
+	"metrics": {
+		"elapsedTime": "241.738176ms",
+		"executionTime": "241.405422ms",
+		"resultCount": 6,
+		"resultSize": 319
+	}
+}
+

@@ -1,0 +1,3 @@
+{ "_id" : { "sensorId" : "emeter4" }, "averagePerDay" : 74.0 }
+{ "_id" : { "sensorId" : "emeter7" }, "averagePerDay" : 74.0 }
+{ "_id" : { "sensorId" : "emeter6" }, "averagePerDay" : 74.0 }

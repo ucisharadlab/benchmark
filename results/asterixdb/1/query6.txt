@@ -1,0 +1,17 @@
+{
+	"requestID": "926813dd-94ca-478a-8911-e22114400f07",
+	"signature": "*",
+	"results": [ { "id": "emeter4", "$1": 74.0 }
+, { "id": "emeter6", "$1": 74.0 }
+, { "id": "emeter7", "$1": 74.0 }
+ ]
+	,
+	"status": "success",
+	"metrics": {
+		"elapsedTime": "186.009906ms",
+		"executionTime": "185.391084ms",
+		"resultCount": 3,
+		"resultSize": 96
+	}
+}
+

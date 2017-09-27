@@ -13,12 +13,16 @@ public class RowWriter<T> {
     protected Writer stringWriter;
     protected JsonWriter jsonWriter;
 
-    public RowWriter(String outputDir, Database database, String fileName) throws IOException {
+    public RowWriter(String outputDir, Database database, int mapping, String fileName) throws IOException {
+          // TODO: Fix Getting Generic Types by Using SuperClass
+//        ParameterizedType t = (ParameterizedType) getClass().getGenericSuperclass();
+//        type = (Class<?>) t.getActualTypeArguments()[0];
+        type = String.class;
 
-        ParameterizedType t = (ParameterizedType) RowWriter.class.getGenericSuperclass();
-        type = (Class<?>) t.getActualTypeArguments()[0];
+        File dir = new File(new File(outputDir, database.getName()), String.valueOf(mapping));
+        dir.mkdirs();
 
-        String path = new File(new File(outputDir, database.getName()), fileName).getPath();
+        String path = new File(dir, fileName).getPath();
 
         if (type == JSONObject.class) {
             jsonWriter = new JsonWriter(new FileWriter(path));
