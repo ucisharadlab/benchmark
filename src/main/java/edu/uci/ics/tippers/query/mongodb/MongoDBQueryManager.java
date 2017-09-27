@@ -3,20 +3,27 @@ package edu.uci.ics.tippers.query.mongodb;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoIterable;
+import com.mongodb.client.model.Accumulators;
+import com.mongodb.client.model.Aggregates;
 import edu.uci.ics.tippers.common.Database;
 import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.connection.mongodb.DBManager;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.query.BaseQueryManager;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Consumer;
 
+import static com.mongodb.client.model.Accumulators.*;
 import static com.mongodb.client.model.Filters.*;
+import static com.mongodb.client.model.Aggregates.*;
+import static com.mongodb.client.model.Projections.*;
 
 
 public class MongoDBQueryManager extends BaseQueryManager{
@@ -181,6 +188,45 @@ public class MongoDBQueryManager extends BaseQueryManager{
 
     @Override
     public Duration runQuery6(List<String> sensorIds, Date startTime, Date endTime) throws BenchmarkException {
-        return Constants.MAX_DURATION;
+        switch (mapping) {
+            case 1:
+                Instant start = Instant.now();
+
+                MongoCollection<Document> collection = database.getCollection("Observation");
+
+                Bson match = match(and(
+                        in("sensor.id", sensorIds),
+                        gt("timeStamp", startTime),
+                        lt("timeStamp", endTime)));
+
+                Bson project = project(
+                        fields(
+                                excludeId(),
+                                include("sensor.id"),
+                                computed(
+                                        "date",
+                                        new Document("$dateToString", new Document("format", "%Y-%m-%d")
+                                                .append("date", "$timeStamp"))
+                                )
+                        )
+                );
+
+                Bson group1 = group(new Document("date", "$date").append("sensorId", "$sensor.id"),
+                        sum("count", 1));
+                Bson group2 = group(new Document("sensorId", "$_id.sensorId"), avg("averagePerDay", "$count"));
+
+                MongoIterable<Document> iterable = collection.aggregate(Arrays.asList(match, project, group1, group2));
+
+                iterable.forEach((Consumer<? super Document>) e -> {
+                    if (writeOutput) {
+                        // TODO: Write To File
+                        System.out.println(e.toJson());
+                    }
+                });
+                Instant end = Instant.now();
+                return Duration.between(start, end);
+            default:
+                throw new BenchmarkException("No Such Mapping");
+        }
     }
 }
