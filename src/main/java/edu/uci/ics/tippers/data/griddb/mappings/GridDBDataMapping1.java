@@ -3,7 +3,7 @@ package edu.uci.ics.tippers.data.griddb.mappings;
 import com.toshiba.mwcloud.gs.*;
 import edu.uci.ics.tippers.common.DataFiles;
 import edu.uci.ics.tippers.common.constants.Constants;
-import edu.uci.ics.tippers.data.griddb.BaseDataMapping;
+import edu.uci.ics.tippers.data.griddb.GridDBBaseDataMapping;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -14,17 +14,15 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
 import java.util.UUID;
 
-public class DataMapping1 extends BaseDataMapping {
+public class GridDBDataMapping1 extends GridDBBaseDataMapping {
 
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-dd-MM HH:mm:ss");
 
     private JSONParser parser = new JSONParser();
 
-    public DataMapping1(GridStore gridStore, String dataDir) {
+    public GridDBDataMapping1(GridStore gridStore, String dataDir) {
         super(gridStore, dataDir);
         //sdf.setTimeZone(TimeZone.getTimeZone("PDT"));
     }
