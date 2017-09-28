@@ -116,7 +116,6 @@ public class Benchmark {
                     configuration.getDataDir());
             scaler.scaleDataAndQueries();
 
-
             System.out.println("Starting Up Database Servers\n");
             DBMSManager dbmsManager = new DBMSManager(configuration.getScriptsDir());
             //dbmsManager.startServers();
@@ -182,8 +181,9 @@ public class Benchmark {
                 }
             }
 
+            DataSize dataSize = new DataSize(configuration.getDataDir() + ROWS);
             ReportBuilder builder = new ReportBuilder(runTimes, configuration.getReportsDir(),
-                    configuration.getFormat());
+                    configuration.getFormat(), dataSize);
             builder.createReport();
             System.out.println("\n****Report Written To Reports Directory****");
 

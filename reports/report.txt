@@ -1,6 +1,19 @@
+---------------Dataset Size---------------
+
+Number Of Groups: 1
+Number Of Users: 14
+Number Of SensorTypes: 6
+Number Of Sensors: 82
+Number Of InfraTypes: 16
+Number Of Infra: 340
+Number Of SOTypes: 3
+Number Of VSensors: 2
+Number Of Observations: 1384
+------------------------------------------
+
+------------- Insertion And Query Times----------
+
 Database   Mapping        Query;RunTime(ms)
 ------------------------------------------------------------------------------------
-cratedb    1   0;80655       1;5      2;34       3;8      4;10      5;46      6;14
-------------------------------------------------------------------------------------
-postgresql    1   0;29923       1;0       2;2       3;2       4;3       5;9       6;2
+griddb    1    0;1433       1;1      2;40       3;7      4;17      5;10       6;9
 ------------------------------------------------------------------------------------

@@ -20,12 +20,14 @@ public class ReportBuilder {
     private ReportFormat format;
     private Map<Pair<Database, Integer>, Map<Integer, Duration>> runTimes;
     private String reportsDir;
+    private DataSize dataSize;
 
     public ReportBuilder(Map<Pair<Database, Integer>, Map<Integer, Duration>> runTimes, String reportsDir,
-                         ReportFormat format){
+                         ReportFormat format, DataSize dataSize){
         this.format = format;
         this.runTimes = runTimes;
         this.reportsDir = reportsDir;
+        this.dataSize = dataSize;
     }
 
     private void createPDFReport() {
@@ -36,8 +38,12 @@ public class ReportBuilder {
         BufferedWriter writer;
         try {
             writer = new BufferedWriter(new FileWriter(reportsDir + "report.txt"));
-            writer.write(String.format("%s%10s%25s\n", "Database", "Mapping", "Query;RunTime(ms)"));
 
+            dataSize.appendInfoToFile(writer);
+
+            writer.write("------------- Insertion And Query Times----------\n\n");
+
+            writer.write(String.format("%s%10s%25s\n", "Database", "Mapping", "Query;RunTime(ms)"));
             writer.write("------------------------------------------------------------------------------------\n");
 
             for(Pair<Database, Integer> key: runTimes.keySet()) {
