@@ -152,8 +152,8 @@ public class Benchmark {
                     case ASTERIXDB:
                         configuration.getMappings().get(Database.ASTERIXDB).forEach(
                                 e -> benchmark.runBenchmark(
-                                        new AsterixDBSchema(e, configuration.getDataDir() + OBJECTS),
-                                        new AsterixDBDataUploader(e, configuration.getDataDir() + OBJECTS),
+                                        new AsterixDBSchema(e, configuration.getDataDir() + MIX),
+                                        new AsterixDBDataUploader(e, configuration.getDataDir() + MIX),
                                         new AsterixDBQueryManager(e, configuration.getQueriesDir(),
                                                 configuration.getOutputDir(),
                                                 configuration.isWriteOutput(), configuration.getTimeout())));

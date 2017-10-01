@@ -88,7 +88,6 @@ public class MongoDBDataUploader extends BaseDataUploader{
 
             Document docToInsert = Document.parse(gson.toJson(obs, Observation.class));
             docToInsert.put("timeStamp", obs.getTimeStamp());
-            System.out.println(gson.toJson(obs, Observation.class));
             collection.insertOne(docToInsert);
         }
     }
