@@ -247,8 +247,14 @@ public class GridDBDataMapping1 extends GridDBBaseDataMapping {
                 row.setValue(0, sdf.parse(temp.get("timestamp").toString()));
                 row.setValue(1, UUID.randomUUID().toString());
                 row.setValue(2, temp.get("typeId"));
-                row.setValue(3, ((Number)((JSONObject)temp.get("payload")).get("temperature")).intValue());
-
+                if (temp.get("typeId").toString().equals("EnergyMeterType")) {
+                    row.setValue(3, ((Number) ((JSONObject) temp.get("payload")).get("temperature")).intValue());
+                } else if (temp.get("typeId").toString().equals("WiFiAPType")) {
+                    row.setValue(3, ((JSONObject) temp.get("payload")).get("clientId"));
+                } else if (temp.get("typeId").toString().equals("WeMoType")) {
+                    row.setValue(3, ((Number) ((JSONObject) temp.get("payload")).get("currentMilliWatts")).intValue());
+                    row.setValue(4, ((Number) ((JSONObject) temp.get("payload")).get("onTodaySeconds")).intValue());
+                }
                 timeSeries.put(row);
             }
 

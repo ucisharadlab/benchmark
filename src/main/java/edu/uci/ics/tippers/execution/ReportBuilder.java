@@ -59,9 +59,9 @@ public class ReportBuilder {
                 }
                 for (Integer query: queryTimes.keySet()) {
                     if (queryTimes.get(query).compareTo(Constants.MAX_DURATION) < 0 )
-                        line += String.format("%10s", query+";"+queryTimes.get(query).toMillis());
+                        line += String.format("%10s", queryTimes.get(query).toMillis());
                     else
-                        line += String.format("%10s", query + ";" + "KIA" );
+                        line += String.format("%10s",  "KIA" );
                 }
                 line += "\n";
                 writer.write(line);

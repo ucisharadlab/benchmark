@@ -10,7 +10,7 @@ public class Infrastructure extends SemanticEntity {
 
 	private String name;
 
-	private InfrastructureType type;
+	private InfrastructureType type_;
 
 	private InfraConfig infraConfig;
 
@@ -20,12 +20,12 @@ public class Infrastructure extends SemanticEntity {
 		super();
 	}
 
-	public InfrastructureType getType() {
-		return type;
+	public InfrastructureType getType_() {
+		return type_;
 	}
 
-	public void setType(InfrastructureType type) {
-		this.type = type;
+	public void setType_(InfrastructureType type_) {
+		this.type_ = type_;
 	}
 
 	public InfraConfig getInfraConfig() {

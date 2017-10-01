@@ -2,7 +2,7 @@ package edu.uci.ics.tippers.model.observation;
 
 import edu.uci.ics.tippers.model.sensor.Sensor;
 
-import java.util.Calendar;
+import java.util.Date;
 
 public class Observation {
 
@@ -12,28 +12,28 @@ public class Observation {
 
 	private ObservationPayload payload;
 	
-	private Calendar timeStamp;
+	private Date timeStamp;
 
-    private ObservationType type;
+    private ObservationType type_;
 
-    public Observation(Sensor sensor, ObservationPayload observationPayload, Calendar timeStamp, ObservationType type) {
+    public Observation(Sensor sensor, ObservationPayload observationPayload, Date timeStamp, ObservationType type_) {
         super();
         this.sensor = sensor;
         this.payload = observationPayload;
         this.timeStamp = timeStamp;
-        this.type = type;
+        this.type_ = type_;
     }
 
     public Observation(){
 
     }
 
-	public ObservationType getType() {
-		return type;
+	public ObservationType getType_() {
+		return type_;
 	}
 
-	public void setType(ObservationType type) {
-		this.type = type;
+	public void setType_(ObservationType type_) {
+		this.type_ = type_;
 	}
 
 	public Sensor getSensor() {
@@ -52,11 +52,11 @@ public class Observation {
 		this.payload = observationPayload;
 	}
 
-	public Calendar getTimeStamp() {
+	public Date getTimeStamp() {
 		return timeStamp;
 	}
 
-	public void setTimeStamp(Calendar timeStamp) {
+	public void setTimeStamp(Date timeStamp) {
 		this.timeStamp = timeStamp;
 	}
 
@@ -69,11 +69,11 @@ public class Observation {
     }
 
     public ObservationType getObservationType() {
-        return type;
+        return type_;
     }
 
     public void setObservationType(ObservationType observationType) {
-        this.type = observationType;
+        this.type_ = observationType;
     }
 
     @Override

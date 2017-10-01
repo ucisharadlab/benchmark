@@ -160,15 +160,16 @@ public class GridDBQueryManager extends BaseQueryManager {
     public Duration runQuery4(List<String> sensorIds, Date startTime, Date endTime) throws BenchmarkException {
 
         Instant start = Instant.now();
+        try {
+            RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(4));
 
-        for (String sensorId : sensorIds) {
-            String collectionName = Constants.GRIDDB_OBS_PREFIX + sensorId;
-            String query = String.format("SELECT * FROM %s WHERE timeStamp > TIMESTAMP('%s') " +
-                    "AND timeStamp < TIMESTAMP('%s')", collectionName, sdf.format(startTime), sdf.format(endTime));
-            List<Row> observations = runQueryWithRows(collectionName, query);
+            for (String sensorId : sensorIds) {
+                String collectionName = Constants.GRIDDB_OBS_PREFIX + sensorId;
+                String query = String.format("SELECT * FROM %s WHERE timeStamp > TIMESTAMP('%s') " +
+                        "AND timeStamp < TIMESTAMP('%s')", collectionName, sdf.format(startTime), sdf.format(endTime));
+                List<Row> observations = runQueryWithRows(collectionName, query);
 
-            try {
-                RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(4));
+
                 observations.forEach(e -> {
                     if (writeOutput) {
                         ContainerInfo containerInfo = null;
@@ -186,13 +187,13 @@ public class GridDBQueryManager extends BaseQueryManager {
                         }
                     }
                 });
-                writer.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-                throw new BenchmarkException("Error Running Query");
             }
-
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new BenchmarkException("Error Running Query");
         }
+
         Instant end = Instant.now();
         return Duration.between(start, end);
 

@@ -1,12 +1,16 @@
 package edu.uci.ics.tippers.data.mongodb;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import edu.uci.ics.tippers.common.DataFiles;
 import edu.uci.ics.tippers.common.Database;
+import edu.uci.ics.tippers.common.util.BigJsonReader;
 import edu.uci.ics.tippers.connection.mongodb.DBManager;
 import edu.uci.ics.tippers.data.BaseDataUploader;
 import edu.uci.ics.tippers.exception.BenchmarkException;
+import edu.uci.ics.tippers.model.observation.Observation;
 import org.bson.Document;
 import org.json.JSONArray;
 
@@ -77,6 +81,23 @@ public class MongoDBDataUploader extends BaseDataUploader{
         collection.insertMany(documents);
     }
 
+    private void addObservations(String collectionName, DataFiles dataFile) {
+
+        MongoCollection collection = database.getCollection(collectionName);
+
+        BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + dataFile.getPath(), Observation.class);
+        Gson gson = new GsonBuilder().create();
+        Observation obs;
+        while ((obs = reader.readNext()) != null) {
+
+            Document docToInsert = Document.parse(gson.toJson(obs, Observation.class));
+            System.out.println(gson.toJson(obs, Observation.class));
+            collection.insertOne(docToInsert);
+        }
+
+
+    }
+
     @Override
     public void addInfrastructureData() throws BenchmarkException {
         switch (mapping) {
@@ -132,7 +153,7 @@ public class MongoDBDataUploader extends BaseDataUploader{
     public void addObservationData() throws BenchmarkException {
         switch (mapping) {
             case 1:
-                addDataToCollection("Observation", DataFiles.OBS);
+                addObservations("Observation", DataFiles.OBS);
                 break;
             default:
                 throw new BenchmarkException("Error Inserting Data");

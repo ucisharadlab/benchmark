@@ -27,7 +27,7 @@ public class Sensor {
 	
 	private SensorCoverage coverage;
 
-    private SensorConfig sensorConfig;
+    private String sensorConfig;
 
 	public Sensor(String id, String name, String description, String sensorIP, String sensorPort,
                   SensorType sensorType, Location location, Platform platform, User owner) {
@@ -127,11 +127,11 @@ public class Sensor {
         this.infrastructure = infrastructure;
     }
 
-    public SensorConfig getSensorConfig() {
+    public String getSensorConfig() {
         return sensorConfig;
     }
 
-    public void setSensorConfig(SensorConfig sensorConfig) {
+    public void setSensorConfig(String sensorConfig) {
         this.sensorConfig = sensorConfig;
     }
 
