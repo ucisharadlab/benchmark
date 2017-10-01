@@ -1,5 +1,6 @@
 package edu.uci.ics.tippers.model.observation;
 
+import com.google.gson.JsonObject;
 import edu.uci.ics.tippers.model.sensor.Sensor;
 
 import java.util.Date;
@@ -10,13 +11,13 @@ public class Observation {
 
 	private Sensor sensor;
 
-	private ObservationPayload payload;
+	private JsonObject payload;
 	
 	private Date timeStamp;
 
     private ObservationType type_;
 
-    public Observation(Sensor sensor, ObservationPayload observationPayload, Date timeStamp, ObservationType type_) {
+    public Observation(Sensor sensor, JsonObject observationPayload, Date timeStamp, ObservationType type_) {
         super();
         this.sensor = sensor;
         this.payload = observationPayload;
@@ -44,11 +45,11 @@ public class Observation {
 		this.sensor = sensor;
 	}
 
-	public ObservationPayload getPayload() {
+	public JsonObject getPayload() {
 		return payload;
 	}
 
-	public void setPayload(ObservationPayload observationPayload) {
+	public void setPayload(JsonObject observationPayload) {
 		this.payload = observationPayload;
 	}
 

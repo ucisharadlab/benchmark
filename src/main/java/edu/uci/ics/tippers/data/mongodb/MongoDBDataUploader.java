@@ -7,18 +7,19 @@ import com.mongodb.client.MongoDatabase;
 import edu.uci.ics.tippers.common.DataFiles;
 import edu.uci.ics.tippers.common.Database;
 import edu.uci.ics.tippers.common.util.BigJsonReader;
+import edu.uci.ics.tippers.common.util.Converter;
 import edu.uci.ics.tippers.connection.mongodb.DBManager;
 import edu.uci.ics.tippers.data.BaseDataUploader;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.model.observation.Observation;
 import org.bson.Document;
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
@@ -28,7 +29,8 @@ import java.util.List;
 public class MongoDBDataUploader extends BaseDataUploader{
 
     private MongoDatabase database;
-    private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+    private static String datePattern = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+    private static SimpleDateFormat sdf = new SimpleDateFormat(datePattern);
 
     public MongoDBDataUploader(int mapping, String dataDir) {
         super(mapping, dataDir);
@@ -68,14 +70,6 @@ public class MongoDBDataUploader extends BaseDataUploader{
         JSONArray jsonArray = new JSONArray(values);
         jsonArray.forEach(e-> {
             Document docToInsert = Document.parse(e.toString());
-            if (dataFile == DataFiles.OBS) {
-                try {
-                    docToInsert.put("timeStamp", sdf.parse(docToInsert.getString("timeStamp")));
-                } catch (ParseException e1) {
-                    e1.printStackTrace();
-                    throw new BenchmarkException("Error Inserting Data");
-                }
-            }
             documents.add(docToInsert);
         });
         collection.insertMany(documents);
@@ -86,16 +80,17 @@ public class MongoDBDataUploader extends BaseDataUploader{
         MongoCollection collection = database.getCollection(collectionName);
 
         BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + dataFile.getPath(), Observation.class);
-        Gson gson = new GsonBuilder().create();
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapter(JSONObject.class, Converter.<JSONObject>getJSONSerializer())
+                .create();
         Observation obs;
         while ((obs = reader.readNext()) != null) {
 
             Document docToInsert = Document.parse(gson.toJson(obs, Observation.class));
+            docToInsert.put("timeStamp", obs.getTimeStamp());
             System.out.println(gson.toJson(obs, Observation.class));
             collection.insertOne(docToInsert);
         }
-
-
     }
 
     @Override
