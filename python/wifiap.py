@@ -3,61 +3,59 @@ import random
 import json
 import uuid
 
-dt = datetime.datetime(2017, 7, 11, 0, 0, 0)
-end = datetime.datetime(2017, 9, 11, 23, 59, 59)
-step = datetime.timedelta(seconds=500)
+# dt = datetime.datetime(2017, 7, 11, 0, 0, 0)
+# end = datetime.datetime(2017, 9, 11, 23, 59, 59)
+# step = datetime.timedelta(seconds=500)
 
 ROWS = "data/rows/"
 OBJECTS = "data/objects/"
-MIX = "data/mix/"
 
-obsRowList = []
-obsObjectList = []
-obsMixList = []
 
-with open('../src/main/resources/data/rows/sensor.json') as data_file:
-    data = json.load(data_file)
+def createWiFiObservations(dt, end, step):
 
-sensors = []
+    with open('../src/main/resources/data/rows/sensor.json') as data_file:
+        data = json.load(data_file)
 
-for sensor in data:
-    if sensor['sensorType']['id'] == "WiFiAP":
-        sensors.append(sensor)
+    sensors = []
 
-num = len(sensors)
+    for sensor in data:
+        if sensor['sensorType']['id'] == "WiFiAP":
+            sensors.append(sensor)
 
-clientIds = ["client_" + str(i) for i in range(1000)]
+    num = len(sensors)
 
-while dt < end:
+    clientIds = ["client_" + str(i) for i in range(1000)]
 
-    for i in range(8):
-        pickedSensor = sensors[random.randint(1, num - 1)]
+    fpRow = open(ROWS + 'wifiAPdata.json', 'w')
+    fpObj = open(OBJECTS + 'wifiAPdata.json', 'w')
 
-        obs = {
-	    "id": str(uuid.uuid1()),
-            "timeStamp": dt.strftime('%Y-%m-%d %H:%M:%S'),
-            "sensorId": pickedSensor['id'],
-            "payload": {
-                "clientId": clientIds[random.randint(1, 999)]
-            },
-            "typeId": pickedSensor['sensorType']['observationType']['id'],
-        }
-        obsRowList.append(obs)
+    while dt < end:
 
-        obs = {
-            "timeStamp": dt.strftime('%Y-%m-%d %H:%M:%S'),
-            "sensor": pickedSensor,
-            "payload": {
-                "clientId": clientIds[random.randint(1, 999)]
-            },
-            "type_": pickedSensor['sensorType']['observationType'],
-        }
-        obsObjectList.append(obs)
+        for i in range(8):
+            pickedSensor = sensors[random.randint(1, num - 1)]
+            id = str(uuid.uuid1()),
+            obs = {
+                "id": id[0],
+                "timeStamp": dt.strftime('%Y-%m-%d %H:%M:%S'),
+                "sensorId": pickedSensor['id'],
+                "payload": {
+                    "clientId": clientIds[random.randint(1, 999)]
+                },
+                "typeId": pickedSensor['sensorType']['observationType']['id'],
+            }
+            fpRow.write(json.dumps(obs) +"\n")
 
-    dt += step
+            obs = {
+                "id": id[0],
+                "timeStamp": dt.strftime('%Y-%m-%d %H:%M:%S'),
+                "sensor": pickedSensor,
+                "payload": {
+                    "clientId": clientIds[random.randint(1, 999)]
+                },
+                "type_": pickedSensor['sensorType']['observationType'],
+            }
+            fpObj.write(json.dumps(obs) + '\n')
+        dt += step
 
-with open(ROWS + 'wifiAPdata.json', 'w') as fp:
-    json.dump(obsRowList, fp)
-
-with open(OBJECTS + 'wifiAPdata.json', 'w') as fp:
-    json.dump(obsObjectList, fp)
+    fpRow.close()
+    fpObj.close()

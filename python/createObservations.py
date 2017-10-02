@@ -1,44 +1,65 @@
 import datetime
 import random
 import json
+import wifiap, wemo, temperature
 
-dt = datetime.datetime(2017, 7, 11, 0, 0, 0)
-end = datetime.datetime(2017, 9, 11, 23, 59, 59)
+dt = datetime.datetime(2017, 11, 7, 0, 0, 0)
+end = datetime.datetime(2017, 11, 13, 23, 59, 59)
 step = datetime.timedelta(seconds=500)
 
 ROWS = "data/rows/"
 OBJECTS = "data/objects/"
-MIX = "data/mix/"
+line = None
 
-obsRowList = []
-obsObjectList = []
-obsMixList = []
+wifiap.createWiFiObservations(dt, end, step)
+wemo.createWemoObservations(dt, end, step)
+temperature.createTemperaturebservations(dt, end, step)
 
-# with open(ROWS + "wemoData.json") as data_file:
-#     wemoData = json.load(data_file)
-#
-# with open(ROWS + "wifiAPdata.json") as data_file:
-#     wifiAPData = json.load(data_file)
-#
-# with open(ROWS + "temperatureData.json") as data_file:
-#     temperatureData = json.load(data_file)
-#
-# obsRowList = wemoData + wifiAPData + temperatureData
-#
-# with open(ROWS + 'observation.json', 'w') as fp:
-#     json.dump(obsRowList, fp)
+finalRow = open(ROWS + 'observation.json', 'w')
+finalRow .write("[\n")
+
+wemoRow = open(ROWS + "wemoData.json")
+for line in wemoRow:
+    finalRow.write(line + ",\n")
+
+wifiRow = open(ROWS + "wifiAPdata.json")
+for line in wifiRow:
+    finalRow.write(line + ",\n")
+
+temperatureRow =  open(ROWS + "temperatureData.json")
+for line in temperatureRow:
+    finalRow.write(line + ",\n")
+
+finalRow.write(line)
+
+finalRow.write("\n]")
+
+finalRow.close()
+wifiRow.close()
+temperatureRow.close()
+wemoRow.close()
 
 
-with open(OBJECTS + "wemoData.json") as data_file:
-    wemoData = json.load(data_file)
+finalObj = open(OBJECTS + 'observation.json', 'w')
+finalObj .write("[\n")
 
-with open(OBJECTS + "wifiAPdata.json") as data_file:
-    wifiAPData = json.load(data_file)
+wemoObj = open(OBJECTS + "wemoData.json")
+for line in wemoObj:
+    finalObj.write(line + ",\n")
 
-with open(OBJECTS + "temperatureData.json") as data_file:
-    temperatureData = json.load(data_file)
+wifiObj = open(OBJECTS + "wifiAPdata.json")
+for line in wifiObj:
+    finalObj.write(line + ",\n")
 
-obsObjectList = wemoData + wifiAPData + temperatureData
+temperatureObj = open(OBJECTS + "temperatureData.json")
+for line in temperatureObj:
+    finalObj.write(line + ",\n")
 
-with open(OBJECTS + 'observation.json', 'w') as fp:
-    json.dump(obsObjectList, fp)
+finalObj.write(line)
+
+finalObj.write("\n]")
+
+finalObj.close()
+wifiObj.close()
+temperatureObj.close()
+wemoObj.close()

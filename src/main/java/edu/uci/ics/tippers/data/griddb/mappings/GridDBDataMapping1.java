@@ -3,7 +3,9 @@ package edu.uci.ics.tippers.data.griddb.mappings;
 import com.toshiba.mwcloud.gs.*;
 import edu.uci.ics.tippers.common.DataFiles;
 import edu.uci.ics.tippers.common.constants.Constants;
+import edu.uci.ics.tippers.common.util.BigJsonReader;
 import edu.uci.ics.tippers.data.griddb.GridDBBaseDataMapping;
+import edu.uci.ics.tippers.model.observation.ObservationRow;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -14,11 +16,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
-import java.util.UUID;
 
 public class GridDBDataMapping1 extends GridDBBaseDataMapping {
 
-    private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-dd-MM HH:mm:ss");
+    private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     private JSONParser parser = new JSONParser();
 
@@ -234,38 +235,33 @@ public class GridDBDataMapping1 extends GridDBBaseDataMapping {
             }
 
             // Adding Observations
-            JSONArray observations = (JSONArray) parser.parse(new InputStreamReader(
-                    new FileInputStream(dataDir + DataFiles.OBS.getPath())));
+            BigJsonReader<ObservationRow> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
+                    ObservationRow.class);
+            ObservationRow obs = null;
 
-            for(int i =0;i<observations.size();i++){
-                JSONObject temp=(JSONObject)observations.get(i);
-                String collectionName = Constants.GRIDDB_OBS_PREFIX + temp.get("sensorId");
+            while ((obs = reader.readNext()) != null) {
+                String collectionName = Constants.GRIDDB_OBS_PREFIX + obs.getSensorId();
 
                 TimeSeries<Row> timeSeries = gridStore.getTimeSeries(collectionName);
 
                 row = timeSeries.createRow();
-                row.setValue(0, sdf.parse(temp.get("timestamp").toString()));
-                row.setValue(1, UUID.randomUUID().toString());
-                row.setValue(2, temp.get("typeId"));
-                if (temp.get("typeId").toString().equals("EnergyMeterType")) {
-                    row.setValue(3, ((Number) ((JSONObject) temp.get("payload")).get("temperature")).intValue());
-                } else if (temp.get("typeId").toString().equals("WiFiAPType")) {
-                    row.setValue(3, ((JSONObject) temp.get("payload")).get("clientId"));
-                } else if (temp.get("typeId").toString().equals("WeMoType")) {
-                    row.setValue(3, ((Number) ((JSONObject) temp.get("payload")).get("currentMilliWatts")).intValue());
-                    row.setValue(4, ((Number) ((JSONObject) temp.get("payload")).get("onTodaySeconds")).intValue());
+                row.setValue(0, obs.getTimeStamp());
+                row.setValue(1, obs.getId());
+                row.setValue(2, obs.getTypeId());
+
+                if (obs.getTypeId().equals("EnergyMeterType")) {
+                    row.setValue(3, obs.getPayload().get("temperature").getAsInt());
+                } else if (obs.getTypeId().equals("WiFiAPType")) {
+                    row.setValue(3, obs.getPayload().get("clientId").getAsString());
+                } else if (obs.getTypeId().equals("WeMoType")) {
+                    row.setValue(3, obs.getPayload().get("currentMilliWatts").getAsInt());
+                    row.setValue(4, obs.getPayload().get("onTodaySeconds").getAsInt());
                 }
                 timeSeries.put(row);
             }
 
         }
-        catch(ParseException e) {
-            e.printStackTrace();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (java.text.ParseException e) {
+        catch(ParseException | IOException e) {
             e.printStackTrace();
         }
 

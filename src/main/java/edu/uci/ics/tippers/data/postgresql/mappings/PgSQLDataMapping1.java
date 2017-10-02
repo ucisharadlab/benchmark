@@ -1,8 +1,10 @@
 package edu.uci.ics.tippers.data.postgresql.mappings;
 
 import edu.uci.ics.tippers.common.DataFiles;
+import edu.uci.ics.tippers.common.util.BigJsonReader;
 import edu.uci.ics.tippers.data.postgresql.PgSQLBaseDataMapping;
 import edu.uci.ics.tippers.exception.BenchmarkException;
+import edu.uci.ics.tippers.model.observation.ObservationRow;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -16,11 +18,10 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.UUID;
 
 public class PgSQLDataMapping1 extends PgSQLBaseDataMapping {
 
-    private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-dd-MM HH:mm:ss");
+    private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     private JSONParser parser = new JSONParser();
 
@@ -291,28 +292,27 @@ public class PgSQLDataMapping1 extends PgSQLBaseDataMapping {
             // Adding Observations
             insert = "INSERT INTO OBSERVATION " +
                     "(ID, PAYLOAD, TIMESTAMP, SENSOR_ID, OBSERVATION_TYPE_ID) VALUES (?, ?, ?, ?, ?)";
-            JSONArray observations = (JSONArray) parser.parse(new InputStreamReader(
-                    new FileInputStream(dataDir + DataFiles.OBS.getPath())));
+
+            BigJsonReader<ObservationRow> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
+                    ObservationRow.class);
+            ObservationRow obs = null;
 
             stmt = connection.prepareStatement(insert);
-            for(int i =0;i<observations.size();i++){
-                JSONObject temp=(JSONObject)observations.get(i);
+            while ((obs = reader.readNext()) != null) {
 
-                stmt.setString(4, (String) temp.get("sensorId"));
-                stmt.setTimestamp(3, new Timestamp(
-                        sdf.parse(temp.get("timestamp").toString()).getTime()));
-                stmt.setString(1, UUID.randomUUID().toString());
-                stmt.setString(5, (String)temp.get("typeId"));
-                stmt.setString(2, temp.get("payload").toString());
+                stmt.setString(4, obs.getSensorId());
+                stmt.setTimestamp(3, new Timestamp(obs.getTimeStamp().getTime()));
+                stmt.setString(1, obs.getId());
+                stmt.setString(5, obs.getTypeId());
+                stmt.setString(2, obs.getPayload().toString());
 
                 stmt.executeUpdate();
             }
 
         }
-        catch(ParseException | SQLException | java.text.ParseException | IOException e) {
+        catch(ParseException | SQLException | IOException e) {
             e.printStackTrace();
         }
-
 
     }
 

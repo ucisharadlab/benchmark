@@ -9,18 +9,22 @@ import org.json.JSONObject;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
 
 public class BigJsonReader<T> {
 
     private Class<?> claaz;
     private JsonReader reader;
     private Gson gson;
+    private static String datePattern = "yyyy-MM-dd HH:mm:ss";
+    private static SimpleDateFormat sdf = new SimpleDateFormat(datePattern);
 
     public BigJsonReader(String filePath, Class claaz) {
         this.claaz = claaz;
         try {
             reader = new JsonReader(new InputStreamReader(new FileInputStream(filePath), "UTF-8"));
             gson = new GsonBuilder()
+                    .setDateFormat(datePattern)
                     .registerTypeAdapter(JSONObject.class, Converter.getJSONDeserializer())
                     .create();
             reader.beginArray();

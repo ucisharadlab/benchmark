@@ -1,57 +1,60 @@
 import datetime
 import random
 import json
+import uuid
 
-dt = datetime.datetime(2017, 7, 11, 0, 0, 0)
-end = datetime.datetime(2017, 9, 11, 23, 59, 59)
-step = datetime.timedelta(seconds=500)
+# dt = datetime.datetime(2017, 7, 11, 0, 0, 0)
+# end = datetime.datetime(2017, 9, 11, 23, 59, 59)
+# step = datetime.timedelta(seconds=500)
 
 ROWS = "data/rows/"
 OBJECTS = "data/objects/"
-MIX = "data/mix/"
 
-obsRowList = []
-obsObjectList = []
-obsMixList = []
 
-with open('../src/main/resources/data/rows/sensor.json') as data_file:
-    data = json.load(data_file)
+def createTemperaturebservations(dt, end, step):
 
-sensors = []
+    with open('../src/main/resources/data/rows/sensor.json') as data_file:
+        data = json.load(data_file)
 
-for sensor in data:
-    if sensor['sensorType']['id'] == "EnergyMeter":
-        sensors.append(sensor)
-num = len(sensors)
+    sensors = []
 
-while dt < end:
+    for sensor in data:
+        if sensor['sensorType']['id'] == "EnergyMeter":
+            sensors.append(sensor)
+    num = len(sensors)
 
-    for i in range(8):
-        pickedSensor = sensors[random.randint(1, num - 1)]
-        obs = {
-            "timestamp": dt.strftime('%Y-%m-%d %H:%M:%S'),
-            "sensorId": pickedSensor['id'],
-            "payload": {
-                "temperature": random.randint(1, 100)
-            },
-            "typeId": "EnergyMeterType",
-        }
-        obsRowList.append(obs)
+    fpRow = open(ROWS + 'temperatureData.json', 'w')
+    fpObj = open(OBJECTS + 'temperatureData.json', 'w')
 
-        obs = {
-            "timestamp": dt.strftime('%Y-%m-%d %H:%M:%S'),
-            "sensor": pickedSensor,
-            "payload": {
-                "temperature": random.randint(1, 100)
-            },
-            "type_": pickedSensor['sensorType']['observationType'],
-        }
-        obsObjectList.append(obs)
+    while dt < end:
 
-    dt += step
+        for i in range(8):
+            pickedSensor = sensors[random.randint(1, num - 1)]
+            id = str(uuid.uuid1()),
 
-with open(ROWS + 'temperatureData.json', 'w') as fp:
-    json.dump(obsRowList, fp)
+            obs = {
+                "id": id[0],
+                "timeStamp": dt.strftime('%Y-%m-%d %H:%M:%S'),
+                "sensorId": pickedSensor['id'],
+                "payload": {
+                    "temperature": random.randint(1, 100)
+                },
+                "typeId": "EnergyMeterType",
+            }
+            fpRow.write(json.dumps(obs) +"\n")
 
-with open(OBJECTS + 'temperatureData.json', 'w') as fp:
-    json.dump(obsObjectList, fp)
+            obs = {
+                "id": id[0],
+                "timeStamp": dt.strftime('%Y-%m-%d %H:%M:%S'),
+                "sensor": pickedSensor,
+                "payload": {
+                    "temperature": random.randint(1, 100)
+                },
+                "type_": pickedSensor['sensorType']['observationType'],
+            }
+            fpObj.write(json.dumps(obs) + '\n')
+
+        dt += step
+
+    fpRow.close()
+    fpObj.close()
