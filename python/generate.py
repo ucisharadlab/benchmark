@@ -1,6 +1,7 @@
 import ConfigParser
 import shutil
 import users, sensors, observations
+import datetime
 
 configFile = "config.ini"
 common = ["location.json", "infrastructureType.json", "infrastructure.json",
@@ -40,10 +41,14 @@ def createSensors(config):
 
 
 def createObservations(config):
-    pass
+    start = datetime.datetime.strptime(config['observation']['start_timestamp'], "%Y-%m-%d %H:%M:%S")
+    end = start + datetime.timedelta(days=int(config['observation']['days']))
+    step =  datetime.timedelta(seconds=int(config['observation']['step']))
+    observations.createObservations(start, end, step, config['others']["data-dir"], config['others']["output-dir"])
 
 if __name__ == "__main__":
     configDict = readConfiguration()
     copyFiles(common, configDict['others']["data-dir"], configDict['others']["output-dir"])
     createUsers(configDict)
     createSensors(configDict)
+    createObservations(configDict)

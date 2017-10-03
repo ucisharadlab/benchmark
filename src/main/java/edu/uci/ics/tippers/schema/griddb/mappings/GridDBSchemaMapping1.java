@@ -29,7 +29,7 @@ public class GridDBSchemaMapping1 extends GridDBBaseSchemaMapping {
         createMetadataSchema();
         createDeviceSchema();
         createSensorAndObservationSchema();
-        createVSensorAndSObservationSchema();
+        //createVSensorAndSObservationSchema();
 
     }
 
@@ -40,23 +40,20 @@ public class GridDBSchemaMapping1 extends GridDBBaseSchemaMapping {
 
 
         gridStore.dropCollection("Location");
-        gridStore.dropCollection("Region");
         gridStore.dropCollection("InfrastructureType");
         gridStore.dropCollection("Infrastructure");
 
         gridStore.dropCollection("PlatformType");
         gridStore.dropCollection("Platform");
         gridStore.dropCollection("SensorType");
-        gridStore.dropCollection("ObservationType");
-        gridStore.dropCollection("SensorCoverage");
 
         gridStore.dropCollection("Sensor");
 
         // TODO: Dropping Observation Collection
 
-        gridStore.dropCollection("SemanticObservationType");
-        gridStore.dropCollection("VirtualSensorType");
-        gridStore.dropCollection("VirtualSensor");
+//        gridStore.dropCollection("SemanticObservationType");
+//        gridStore.dropCollection("VirtualSensorType");
+//        gridStore.dropCollection("VirtualSensor");
 
     }
 
@@ -86,7 +83,7 @@ public class GridDBSchemaMapping1 extends GridDBBaseSchemaMapping {
 
         columnInfoList.add(new ColumnInfo("id", GSType.STRING, indexSet));
         columnInfoList.add(new ColumnInfo("name", GSType.STRING));
-        columnInfoList.add(new ColumnInfo("locationId", GSType.STRING));
+        columnInfoList.add(new ColumnInfo("hashedMac", GSType.STRING));
         columnInfoList.add(new ColumnInfo("ownerId", GSType.STRING));
         columnInfoList.add(new ColumnInfo("typeId", GSType.STRING));
 
@@ -108,46 +105,13 @@ public class GridDBSchemaMapping1 extends GridDBBaseSchemaMapping {
         columnInfoList.add(new ColumnInfo("name", GSType.STRING));
         columnInfoList.add(new ColumnInfo("description", GSType.STRING));
         columnInfoList.add(new ColumnInfo("mobility", GSType.STRING));
-        columnInfoList.add(new ColumnInfo("captureFun", GSType.STRING));
-        columnInfoList.add(new ColumnInfo("observationTypeId", GSType.STRING));
+        columnInfoList.add(new ColumnInfo("captureFunctionality", GSType.STRING));
         columnInfoList.add(new ColumnInfo("payloadSchema", GSType.STRING));
 
 
         containerInfo.setColumnInfoList(columnInfoList);
         containerInfo.setRowKeyAssigned(true);
         gridStore.putCollection("SensorType", containerInfo, true);
-
-        // Creating Observation Types
-        containerInfo = new ContainerInfo();
-        columnInfoList = new ArrayList<>();
-        containerInfo.setName("ObservationType");
-        containerInfo.setType(ContainerType.COLLECTION);
-
-        columnInfoList.add(new ColumnInfo("id", GSType.STRING, indexSet));
-        columnInfoList.add(new ColumnInfo("name", GSType.STRING));
-        columnInfoList.add(new ColumnInfo("description", GSType.STRING));
-        columnInfoList.add(new ColumnInfo("payloadSchema", GSType.STRING));
-
-
-        containerInfo.setColumnInfoList(columnInfoList);
-        containerInfo.setRowKeyAssigned(true);
-
-        gridStore.putCollection("ObservationType", containerInfo, true);
-
-        // Creating Sensor  Coverage
-        containerInfo = new ContainerInfo();
-        columnInfoList = new ArrayList<>();
-        containerInfo.setName("SensorCoverage");
-        containerInfo.setType(ContainerType.COLLECTION);
-
-        columnInfoList.add(new ColumnInfo("id", GSType.STRING, indexSet));
-        columnInfoList.add(new ColumnInfo("radius", GSType.FLOAT));
-        columnInfoList.add(new ColumnInfo("entitiesCovered", GSType.STRING_ARRAY));
-
-        containerInfo.setColumnInfoList(columnInfoList);
-        containerInfo.setRowKeyAssigned(true);
-
-        gridStore.putCollection("SensorCoverage", containerInfo, true);
 
         // Creating Sensors
         containerInfo = new ContainerInfo();
@@ -160,8 +124,7 @@ public class GridDBSchemaMapping1 extends GridDBBaseSchemaMapping {
         columnInfoList.add(new ColumnInfo("typeId", GSType.STRING));
         columnInfoList.add(new ColumnInfo("infrastructureId", GSType.STRING));
         columnInfoList.add(new ColumnInfo("ownerId", GSType.STRING));
-        columnInfoList.add(new ColumnInfo("platformId", GSType.STRING));
-        columnInfoList.add(new ColumnInfo("coverageId", GSType.STRING));
+        columnInfoList.add(new ColumnInfo("coverage", GSType.STRING_ARRAY));
         columnInfoList.add(new ColumnInfo("sensorConfig", GSType.STRING));
 
 
@@ -192,14 +155,11 @@ public class GridDBSchemaMapping1 extends GridDBBaseSchemaMapping {
 
             tempColumnInfoList.add(new ColumnInfo("timeStamp", GSType.TIMESTAMP));
             tempColumnInfoList.add(new ColumnInfo("id", GSType.STRING));
-            tempColumnInfoList.add(new ColumnInfo("typeId", GSType.STRING));
 
             JSONArray schema = null;
             try {
                 schema = (JSONArray) parser.parse((String)
-                        ((JSONObject)
-                                ((JSONObject)temp.get("sensorType"))
-                                        .get("observationType"))
+                                ((JSONObject)temp.get("type_"))
                         .get("payloadSchema"));
             } catch (ParseException e) {
                 e.printStackTrace();
@@ -401,22 +361,6 @@ public class GridDBSchemaMapping1 extends GridDBBaseSchemaMapping {
 
         gridStore.putCollection("Location", containerInfo, true);
 
-        // Creating Regions
-        containerInfo = new ContainerInfo();
-        columnInfoList = new ArrayList<>();
-        containerInfo.setName("Region");
-        containerInfo.setType(ContainerType.COLLECTION);
-
-        columnInfoList.add(new ColumnInfo("id", GSType.STRING, indexSet));
-        columnInfoList.add(new ColumnInfo("floor", GSType.DOUBLE));
-        columnInfoList.add(new ColumnInfo("name", GSType.STRING));
-        columnInfoList.add(new ColumnInfo("geometry", GSType.STRING_ARRAY));
-
-        containerInfo.setColumnInfoList(columnInfoList);
-        containerInfo.setRowKeyAssigned(true);
-
-        gridStore.putCollection("Region", containerInfo, true);
-
         // Creating Infrastructure Type
         containerInfo = new ContainerInfo();
         columnInfoList = new ArrayList<>();
@@ -441,7 +385,8 @@ public class GridDBSchemaMapping1 extends GridDBBaseSchemaMapping {
         columnInfoList.add(new ColumnInfo("id", GSType.STRING, indexSet));
         columnInfoList.add(new ColumnInfo("name", GSType.STRING));
         columnInfoList.add(new ColumnInfo("typeId", GSType.STRING));
-        columnInfoList.add(new ColumnInfo("regionId", GSType.STRING));
+        columnInfoList.add(new ColumnInfo("floor", GSType.INTEGER));
+        columnInfoList.add(new ColumnInfo("geometry", GSType.STRING_ARRAY));
 
 
         containerInfo.setColumnInfoList(columnInfoList);

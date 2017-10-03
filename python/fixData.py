@@ -2,8 +2,8 @@ import json
 import uuid
 import random
 
-src = "/home/peeyush/benchmark/benchmark/src/main/resources/data/"
-dest = "/home/peeyush/benchmark/benchmark/data/"
+src = "/home/benchmark/benchmark/benchmark/src/main/resources/data/"
+dest = "/home/benchmark/benchmark/benchmark/data/"
 
 def fixInfra():
     with open(src+'infrastructure.json') as data_file:
@@ -17,7 +17,7 @@ def fixInfra():
         json.dump(infras, writer, indent=4)
 
 
-def fixPlatforms():
+def createPlatforms():
     with open(src+'user.json') as data_file:
         users = json.load(data_file)
     with open(src+'platformType.json') as data_file:
@@ -27,7 +27,7 @@ def fixPlatforms():
     platfoms = []
     for user in users:
         i += 1
-        id = str(uuid.uuid1())
+        id = str(uuid.uuid4())
         platform = {
             "id": id,
             "name": "platform{}".format(i),
@@ -38,6 +38,18 @@ def fixPlatforms():
         platfoms.append(platform)
         with open(dest + 'platform.json', 'w') as writer:
             json.dump(platfoms, writer, indent=4)
+
+
+def fixPlatformsFromPlatform():
+    with open(src+'platform.json') as data_file:
+        platforms = json.load(data_file)
+
+    for platform in platforms:
+        if platform['type_']['name'] == "Laptop":
+            platform['type_']['id'] = "pt3"
+
+    with open(dest + 'platform.json', 'w') as writer:
+        json.dump(platforms, writer, indent=4)
 
 
 def fixSensorTypes():
@@ -76,3 +88,5 @@ def fixSensors():
 
 def fixObservations():
     pass
+
+fixPlatformsFromPlatform()

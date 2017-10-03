@@ -9,6 +9,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
@@ -78,6 +79,7 @@ public class AsterixDBConnectionManager extends BaseConnectionManager {
         CloseableHttpResponse response = null;
         try {
             response = client.execute(httpPost);
+            //System.out.println(EntityUtils.toString(response.getEntity()));
         } catch (IOException e) {
             e.printStackTrace();
         }

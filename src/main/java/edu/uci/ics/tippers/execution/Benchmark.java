@@ -40,9 +40,6 @@ import java.util.prefs.Preferences;
  */
 public class Benchmark {
 
-    private static final String ROWS = "rows/";
-    private static final String OBJECTS = "objects/";
-
     private static Map<Pair<Database, Integer>, Map<Integer, Duration>> runTimes = new HashMap<>();
     private static Configuration configuration;
 
@@ -124,8 +121,8 @@ public class Benchmark {
                     case GRIDDB:
                         configuration.getMappings().get(Database.GRIDDB).forEach(
                                 e -> benchmark.runBenchmark(
-                                            new GridDBSchema(e, configuration.getDataDir() + ROWS),
-                                            new GridDBDataUploader(e, configuration.getDataDir() + ROWS),
+                                            new GridDBSchema(e, configuration.getDataDir()),
+                                            new GridDBDataUploader(e, configuration.getDataDir()),
                                             new GridDBQueryManager(e, configuration.getQueriesDir(),
                                                     configuration.getOutputDir(),
                                                     configuration.isWriteOutput(), configuration.getTimeout())));
@@ -133,8 +130,8 @@ public class Benchmark {
                     case CRATEDB:
                         configuration.getMappings().get(Database.CRATEDB).forEach(
                                 e -> benchmark.runBenchmark(
-                                        new CrateDBSchema(e, configuration.getDataDir() + ROWS),
-                                        new CrateDBDataUploader(e, configuration.getDataDir() + ROWS),
+                                        new CrateDBSchema(e, configuration.getDataDir()),
+                                        new CrateDBDataUploader(e, configuration.getDataDir()),
                                         new CrateDBQueryManager(e, configuration.getQueriesDir(),
                                                 configuration.getOutputDir(),
                                                 configuration.isWriteOutput(), configuration.getTimeout())));
@@ -142,8 +139,8 @@ public class Benchmark {
                     case MONGODB:
                         configuration.getMappings().get(Database.MONGODB).forEach(
                                 e -> benchmark.runBenchmark(
-                                        new MongoDBSchema(e, configuration.getDataDir() + OBJECTS),
-                                        new MongoDBDataUploader(e, configuration.getDataDir() + OBJECTS),
+                                        new MongoDBSchema(e, configuration.getDataDir()),
+                                        new MongoDBDataUploader(e, configuration.getDataDir()),
                                         new MongoDBQueryManager(e, configuration.getQueriesDir(),
                                                 configuration.getOutputDir(),
                                                 configuration.isWriteOutput(), configuration.getTimeout())));
@@ -151,8 +148,8 @@ public class Benchmark {
                     case ASTERIXDB:
                         configuration.getMappings().get(Database.ASTERIXDB).forEach(
                                 e -> benchmark.runBenchmark(
-                                        new AsterixDBSchema(e, configuration.getDataDir() + OBJECTS),
-                                        new AsterixDBDataUploader(e, configuration.getDataDir() + OBJECTS),
+                                        new AsterixDBSchema(e, configuration.getDataDir()),
+                                        new AsterixDBDataUploader(e, configuration.getDataDir()),
                                         new AsterixDBQueryManager(e, configuration.getQueriesDir(),
                                                 configuration.getOutputDir(),
                                                 configuration.isWriteOutput(), configuration.getTimeout())));
@@ -160,8 +157,8 @@ public class Benchmark {
                     case CASSANDRA:
                         configuration.getMappings().get(Database.CASSANDRA).forEach(
                                 e -> benchmark.runBenchmark(
-                                        new CassandraSchema(e, configuration.getDataDir() + ROWS),
-                                        new CassandraDataUploader(e, configuration.getDataDir() + ROWS),
+                                        new CassandraSchema(e, configuration.getDataDir()),
+                                        new CassandraDataUploader(e, configuration.getDataDir()),
                                         new CassandraQueryManager(e, configuration.getQueriesDir(),
                                                 configuration.getOutputDir(),
                                                 configuration.isWriteOutput(), configuration.getTimeout())));
@@ -169,8 +166,8 @@ public class Benchmark {
                     case POSTGRESQL:
                         configuration.getMappings().get(Database.POSTGRESQL).forEach(
                                 e -> benchmark.runBenchmark(
-                                        new PgSQLSchema(e, configuration.getDataDir() + ROWS),
-                                        new PgSQLDataUploader(e, configuration.getDataDir() + ROWS),
+                                        new PgSQLSchema(e, configuration.getDataDir()),
+                                        new PgSQLDataUploader(e, configuration.getDataDir()),
                                         new PgSQLQueryManager(e, configuration.getQueriesDir(),
                                                 configuration.getOutputDir(),
                                                 configuration.isWriteOutput(), configuration.getTimeout())));
@@ -180,7 +177,7 @@ public class Benchmark {
                 }
             }
 
-            DataSize dataSize = new DataSize(configuration.getDataDir() + ROWS);
+            DataSize dataSize = new DataSize(configuration.getDataDir());
             ReportBuilder builder = new ReportBuilder(runTimes, configuration.getReportsDir(),
                     configuration.getFormat(), dataSize);
             builder.createReport();

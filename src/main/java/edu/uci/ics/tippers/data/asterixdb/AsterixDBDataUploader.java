@@ -74,7 +74,6 @@ public class AsterixDBDataUploader extends BaseDataUploader {
             case 1:
                 connectionManager.sendQuery(prepareInsertQuery("InfrastructureType", DataFiles.INFRA_TYPE));
                 connectionManager.sendQuery(prepareInsertQuery("Location", DataFiles.LOCATION));
-                connectionManager.sendQuery(prepareInsertQuery("Region", DataFiles.REGION));
                 connectionManager.sendQuery(prepareInsertQuery("Infrastructure", DataFiles.INFRA));
                 break;
         }
@@ -94,7 +93,6 @@ public class AsterixDBDataUploader extends BaseDataUploader {
     public void addSensorData() throws BenchmarkException {
         switch (mapping) {
             case 1:
-                connectionManager.sendQuery(prepareInsertQuery("ObservationType", DataFiles.OBS_TYPE));
                 connectionManager.sendQuery(prepareInsertQuery("SensorType", DataFiles.SENSOR_TYPE));
                 connectionManager.sendQuery(prepareInsertQuery("Sensor", DataFiles.SENSOR));
                 break;
@@ -115,6 +113,7 @@ public class AsterixDBDataUploader extends BaseDataUploader {
     public void addObservationData() throws BenchmarkException {
         switch (mapping) {
             case 1:
+//                connectionManager.sendQuery(prepareInsertQuery("Observation", DataFiles.OBS));
                 BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
                         Observation.class);
                 Gson gson = new GsonBuilder()

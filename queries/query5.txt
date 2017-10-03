@@ -1,2 +1,6 @@
-# time(s), sensorTypeName, startTime, endTime, payloadAttribute, type(INT,DOUBLE,STRING), startPayloadValue, endPayloadValue
-1,EnergyMeter,2017-11-01T00:00:00Z,2017-11-07T010:10:10Z,temperature,INT,0,20
+# time(s), sensorTypeName, startTime, endTime, payloadAttribute, type_(INT,DOUBLE,STRING), startPayloadValue, endPayloadValue
+1,Thermometer,2017-11-01T00:00:00Z,2017-11-07T010:10:10Z,temperature,INT,0,20
+1,Thermometer,2017-11-01T00:00:00Z,2017-11-07T010:10:10Z,temperature,INT,0,20
+1,Thermometer,2017-11-01T00:00:00Z,2017-11-07T010:10:10Z,temperature,INT,0,20
+1,Thermometer,2017-11-01T00:00:00Z,2017-11-07T010:10:10Z,temperature,INT,0,20
+1,Thermometer,2017-11-01T00:00:00Z,2017-11-07T010:10:10Z,temperature,INT,0,20

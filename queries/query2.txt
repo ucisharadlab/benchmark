@@ -1,2 +1,6 @@
 # time(s), sensorTypeName, locationIds(List)
 2,WiFiAP,1100;2059
+2,WiFiAP,1100;2059
+2,WiFiAP,1100;2059
+2,WiFiAP,1100;2059
+2,WiFiAP,1100;2059

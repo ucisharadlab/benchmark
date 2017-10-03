@@ -97,7 +97,6 @@ public class MongoDBDataUploader extends BaseDataUploader{
         switch (mapping) {
             case 1:
                 addDataToCollection("Location", DataFiles.LOCATION);
-                addDataToCollection("Region", DataFiles.REGION);
                 addDataToCollection("InfrastructureType", DataFiles.INFRA_TYPE);
                 addDataToCollection("Infrastructure", DataFiles.INFRA);
                 break;
@@ -122,7 +121,6 @@ public class MongoDBDataUploader extends BaseDataUploader{
     public void addSensorData() throws BenchmarkException {
         switch (mapping) {
             case 1:
-                addDataToCollection("ObservationType", DataFiles.OBS_TYPE);
                 addDataToCollection("SensorType", DataFiles.SENSOR_TYPE);
                 addDataToCollection("Sensor", DataFiles.SENSOR);
                 break;

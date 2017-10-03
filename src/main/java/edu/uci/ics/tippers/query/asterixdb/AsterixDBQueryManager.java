@@ -76,8 +76,8 @@ public class AsterixDBQueryManager extends BaseQueryManager{
         switch (mapping) {
             case 1:
                 return runTimedQuery(
-                        String.format("SELECT s.id, s.name FROM Sensor s WHERE s.sensorType.name=\"%s\" AND "
-                                        + "(SOME e IN s.coverage.entitiesCovered SATISFIES e.id IN {{"
+                        String.format("SELECT s.id, s.name FROM Sensor s WHERE s.type_.name=\"%s\" AND "
+                                        + "(SOME e IN s.coverage SATISFIES e.id IN {{"
                                         + locationIds.stream().map(e -> "\"" + e + "\"" ).collect(Collectors.joining(","))
                                         + "}});",
                                 sensorTypeName), 2
@@ -125,7 +125,7 @@ public class AsterixDBQueryManager extends BaseQueryManager{
                 return runTimedQuery(
                         String.format("SELECT timeStamp, sensor.id, payload " +
                             "FROM Observation " +
-                            "WHERE sensor.sensorType.name = \"%s\" AND timeStamp >= datetime(\"%s\") AND " +
+                            "WHERE sensor.type_.name = \"%s\" AND timeStamp >= datetime(\"%s\") AND " +
                             "timeStamp <= datetime(\"%s\") " +
                             "AND payload.%s >= %s AND payload.%s <= %s",
                                 sensorTypeName, sdf.format(startTime), sdf.format(endTime), payloadAttribute,

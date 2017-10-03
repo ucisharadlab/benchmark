@@ -36,27 +36,12 @@ public class PgSQLDataMapping1 extends PgSQLBaseDataMapping {
         addSensorsAndObservations();
     }
 
-    public void addSemanticEntity(PreparedStatement stmt, String id) throws BenchmarkException{
-        try {
-            stmt.setString(1, id);
-            stmt.executeUpdate();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new BenchmarkException("Error Adding Data");
-        }
-    }
-
     public void addMetadata() throws BenchmarkException {
 
         PreparedStatement stmt;
         String insert;
 
         try {
-
-            String seInsert = "INSERT INTO SEMANTIC_ENTITY " +
-                    "(ID) VALUES (?)";
-            PreparedStatement seStmt = connection.prepareStatement(seInsert);
 
             // Adding Groups
             insert ="INSERT INTO USER_GROUP " + "(ID, NAME, DESCRIPTION) VALUES (?, ?, ?)";
@@ -86,8 +71,6 @@ public class PgSQLDataMapping1 extends PgSQLBaseDataMapping {
                 JSONObject temp=(JSONObject)user_list.get(i);
                 JSONArray groups;
 
-                addSemanticEntity(seStmt, (String)temp.get("id"));
-
                 stmt.setString(1, (String)temp.get("id"));
                 stmt.setString(2, (String)temp.get("emailId"));
                 stmt.setString(4, (String)temp.get("name"));
@@ -96,10 +79,10 @@ public class PgSQLDataMapping1 extends PgSQLBaseDataMapping {
                 stmt.executeUpdate();
 
 
-                groups=(JSONArray)temp.get("groupIds");
+                groups=(JSONArray)temp.get("groups");
                 memStmt.setString(1, (String)temp.get("id"));
                 for(int x=0;x<groups.size();x++) {
-                    memStmt.setString(2, groups.get(x).toString());
+                    memStmt.setString(2, ((JSONObject)groups.get(x)).get("id").toString());
                     memStmt.executeUpdate();
                 }
             }
@@ -121,33 +104,6 @@ public class PgSQLDataMapping1 extends PgSQLBaseDataMapping {
 
             }
 
-            // Adding Regions
-            insert = "INSERT INTO REGION " +
-                    "(ID, FLOOR, NAME) VALUES (?, ?, ?)";
-            JSONArray region_list = (JSONArray) parser.parse(new InputStreamReader(
-                    new FileInputStream(dataDir + DataFiles.REGION.getPath())));
-            stmt = connection.prepareStatement(insert);
-
-            String regionInfra = "INSERT INTO REGION_LOCATION " + "(LOCATION_ID, REGION_ID) VALUES (?, ?)";
-            PreparedStatement regionInfraStmt = connection.prepareStatement(membership);
-
-
-            for(int i =0;i<region_list.size();i++){
-                JSONObject temp=(JSONObject)region_list.get(i);
-                JSONArray locations;
-
-                stmt.setString(1, (String)temp.get("id"));
-                stmt.setDouble(2, ((Number)temp.get("floor")).doubleValue());
-                stmt.setString(3, (String)temp.get("name"));
-                stmt.executeUpdate();
-
-                locations = (JSONArray)temp.get("geometry");
-                regionInfraStmt.setString(2, (String)temp.get("id"));
-                for(int x=0; x<locations.size(); x++) {
-                    regionInfraStmt.setString(1, ((JSONObject) locations.get(x)).get("id").toString());
-                }
-            }
-
             // Adding Infrastructure Type
             insert = "INSERT INTO INFRASTRUCTURE_TYPE " +
                     "(ID, NAME, DESCRIPTION) VALUES (?, ?, ?)";
@@ -167,7 +123,7 @@ public class PgSQLDataMapping1 extends PgSQLBaseDataMapping {
 
             // Adding Infrastructure
             insert = "INSERT INTO INFRASTRUCTURE " +
-                    "(ID, INFRASTRUCTURE_TYPE_ID, NAME, REGION_ID) VALUES (?, ?, ?, ?)";
+                    "(ID, INFRASTRUCTURE_TYPE_ID, NAME, FLOOR) VALUES (?, ?, ?, ?)";
 
             JSONArray infra_list = (JSONArray) parser.parse(new InputStreamReader(
                     new FileInputStream(dataDir + DataFiles.INFRA.getPath())));
@@ -176,14 +132,26 @@ public class PgSQLDataMapping1 extends PgSQLBaseDataMapping {
             for(int i =0;i<infra_list.size();i++){
                 JSONObject temp=(JSONObject)infra_list.get(i);
 
-                addSemanticEntity(seStmt, (String)temp.get("id"));
-
                 stmt.setString(1, (String)temp.get("id"));
                 stmt.setString(3, (String)temp.get("name"));
                 stmt.setString(2, (String)((JSONObject)temp.get("type_")).get("id"));
-                stmt.setString(4, (String)((JSONObject)temp.get("region")).get("id"));
+                stmt.setInt(4, ((Number)temp.get("floor")).intValue());
                 stmt.executeUpdate();
+            }
 
+            String regionInfra = "INSERT INTO INFRASTRUCTURE_LOCATION " + "(LOCATION_ID, INFRASTRUCTURE_ID) VALUES (?, ?)";
+            PreparedStatement regionInfraStmt = connection.prepareStatement(membership);
+
+
+            for(int i =0;i<infra_list.size();i++){
+                JSONObject temp=(JSONObject)infra_list.get(i);
+                JSONArray locations;
+
+                locations = (JSONArray)temp.get("geometry");
+                regionInfraStmt.setString(2, (String)temp.get("id"));
+                for(int x=0; x<locations.size(); x++) {
+                    regionInfraStmt.setString(1, ((JSONObject) locations.get(x)).get("id").toString());
+                }
             }
 
         }
@@ -200,30 +168,10 @@ public class PgSQLDataMapping1 extends PgSQLBaseDataMapping {
         String insert;
 
         try {
-
-            // Adding ObservationTypes
-            insert = "INSERT INTO OBSERVATION_TYPE " +
-                    "(ID, NAME, DESCRIPTION, PAYLOAD_SCHEMA) VALUES (?, ?, ?, ?)";
-            JSONArray obsType_list = (JSONArray) parser.parse(new InputStreamReader(
-                    new FileInputStream(dataDir + DataFiles.OBS_TYPE.getPath())));
-
-            stmt = connection.prepareStatement(insert);
-            for(int i =0;i<obsType_list.size();i++){
-
-                JSONObject temp=(JSONObject)obsType_list.get(i);
-
-                stmt.setString(1, (String)temp.get("id"));
-                stmt.setString(2, (String)temp.get("name"));
-                stmt.setString(3, (String)temp.get("description"));
-                stmt.setString(4, (String)temp.get("payloadSchema"));
-                stmt.executeUpdate();
-
-            }
-
             // Adding Sensor Types
             insert = "INSERT INTO SENSOR_TYPE " +
-                    "(ID, NAME, DESCRIPTION, MOBILITY, OBSERVATION_TYPE_ID) " +
-                    "VALUES (?, ?, ?, ?, ?)";
+                    "(ID, NAME, DESCRIPTION, MOBILITY, CAPTURE_FUNCTIONALITY, PAYLOAD_SCHEMA) " +
+                    "VALUES (?, ?, ?, ?, ?, ?)";
             JSONArray sensorType_list = (JSONArray) parser.parse(new InputStreamReader(
                     new FileInputStream(dataDir + DataFiles.SENSOR_TYPE.getPath())));
             stmt = connection.prepareStatement(insert);
@@ -234,8 +182,8 @@ public class PgSQLDataMapping1 extends PgSQLBaseDataMapping {
                 stmt.setString(2, (String)temp.get("name"));
                 stmt.setString(3, (String)temp.get("description"));
                 stmt.setString(4, (String)temp.get("mobility"));
-                stmt.setString(5, (String)temp.get("observationTypeId"));
-
+                stmt.setString(5, (String)temp.get("captureFunctionality"));
+                stmt.setString(6, (String)temp.get("payloadSchema"));
                 stmt.executeUpdate();
 
             }
@@ -244,17 +192,14 @@ public class PgSQLDataMapping1 extends PgSQLBaseDataMapping {
 
             // Adding Sensors
             insert = "INSERT INTO SENSOR" +
-                    "(ID, NAME, COVERAGE_ID, INFRASTRUCTURE_ID, USER_ID, SENSOR_TYPE_ID) " +
+                    "(ID, NAME, INFRASTRUCTURE_ID, USER_ID, SENSOR_TYPE_ID, SENSOR_CONFIG) " +
                     "VALUES (?, ?, ?, ?, ?, ?)";
 
-            String senCoverage = "INSERT INTO SENSOR_COVERAGE" +
-                    "(ID, RADIUS) " +
-                    "VALUES (?, ?)";
+
             String covInfrastructure = "INSERT INTO Coverage_Infrastructure" +
-                    "(ID, INFRASTRUCTURE_ID) " +
+                    "(SENSOR_ID, INFRASTRUCTURE_ID) " +
                     "VALUES (?, ?)" ;
 
-            PreparedStatement senCoverageStmt = connection.prepareStatement(senCoverage);
             PreparedStatement covInfraStmt = connection.prepareStatement(covInfrastructure);
 
             JSONArray sensor_list = (JSONArray) parser.parse(new InputStreamReader(
@@ -263,29 +208,21 @@ public class PgSQLDataMapping1 extends PgSQLBaseDataMapping {
             stmt = connection.prepareStatement(insert);
             for(int i =0;i<sensor_list.size();i++){
                 JSONObject temp=(JSONObject)sensor_list.get(i);
-                JSONArray locations;
 
-                senCoverageStmt.setString(1, (String)((JSONObject)temp.get("coverage")).get("id"));
-                senCoverageStmt.setDouble(2, 0);
-                senCoverageStmt.executeUpdate();
+                stmt.setString(1, (String)temp.get("id"));
+                stmt.setString(2, (String)temp.get("name"));
+                stmt.setString(3, (String)((JSONObject)temp.get("infrastructure")).get("id"));
+                stmt.setString(4, (String)((JSONObject)temp.get("owner")).get("id"));
+                stmt.setString(5, (String)((JSONObject)temp.get("type_")).get("id"));
+                stmt.setString(6, (String)temp.get("sensorConfig"));
+                stmt.executeUpdate();
 
-                JSONArray entitiesCovered = (JSONArray)((JSONObject)temp.get("coverage")).get("entitiesCovered");
-                covInfraStmt.setString(1, (String)((JSONObject)temp.get("coverage")).get("id"));
+                JSONArray entitiesCovered = (JSONArray) temp.get("coverage");
+                covInfraStmt.setString(1, (String)temp.get("id"));
                 for(int x=0; x<entitiesCovered.size(); x++) {
                     covInfraStmt.setString(2,((JSONObject)entitiesCovered.get(x)).get("name").toString());
                     covInfraStmt.executeUpdate();
                 }
-
-                stmt.setString(1, (String)temp.get("id"));
-                stmt.setString(2, (String)temp.get("name"));
-                stmt.setString(6, (String)((JSONObject)temp.get("sensorType")).get("id"));
-                stmt.setString(4, (String)((JSONObject)temp.get("infrastructure")).get("id"));
-                stmt.setString(5, (String)((JSONObject)temp.get("owner")).get("id"));
-                // stmt.setString(5, (String)temp.get("platform"));
-                stmt.setString(3, (String)((JSONObject)temp.get("coverage")).get("id"));
-                //stmt.setString(7, (String)temp.get("sensorConfig"));
-                stmt.executeUpdate();
-
 
             }
 

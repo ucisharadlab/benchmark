@@ -20,7 +20,7 @@ def createUsers(numUsers, src, dest):
     numGroups = len(groups)
 
     for i in range(numUsers):
-        id = str(uuid.uuid1())
+        id = str(uuid.uuid4())
         groupList = [groups[random.randint(0, numGroups-1)]]
         user = {
             "id": id,
@@ -31,7 +31,7 @@ def createUsers(numUsers, src, dest):
         }
         users.append(user)
 
-        id = str(uuid.uuid1())
+        id = str(uuid.uuid4())
         platform = {
             "id": id,
             "name": "simPlatform{}".format(i),

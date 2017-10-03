@@ -10,7 +10,7 @@ public class SensorType {
 
     private String mobility;
 
-	private String captureFun;
+	private String captureFunctionality;
 
 	private String payloadSchema;
 
@@ -30,12 +30,12 @@ public class SensorType {
 		this.description = description;
 	}
 
-    public String getCaptureFun() {
-		return captureFun;
+    public String getCaptureFunctionality() {
+		return captureFunctionality;
 	}
 
-	public void setCaptureFun(String captureFun) {
-		this.captureFun = captureFun;
+	public void setCaptureFunctionality(String captureFunctionality) {
+		this.captureFunctionality = captureFunctionality;
 	}
 
 	public String getId() {
@@ -65,7 +65,7 @@ public class SensorType {
 	@Override
 	public String toString() {
 		return "SensorType [id=" + id + ", description=" + description + ", mobility=" + mobility
-                + ", captureFun=" + ((captureFun == null )? "": captureFun) + "]";
+                + ", captureFunctionality=" + ((captureFunctionality == null )? "": captureFunctionality) + "]";
 	}
 
 }

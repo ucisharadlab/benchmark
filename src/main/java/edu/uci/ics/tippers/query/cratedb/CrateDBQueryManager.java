@@ -47,9 +47,9 @@ public class CrateDBQueryManager extends BaseQueryManager {
     public Duration runQuery2(String sensorTypeName, List<String> locationIds) throws BenchmarkException {
         switch (mapping) {
             case 1:
-                String query = "SELECT sen.name FROM SENSOR sen, SENSOR_TYPE st, SENSOR_COVERAGE sc, " +
+                String query = "SELECT sen.name FROM SENSOR sen, SENSOR_TYPE st, " +
                         "COVERAGE_INFRASTRUCTURE ci WHERE sen.SENSOR_TYPE_ID=st.id AND st.name=? " +
-                        "AND sen.COVERAGE_ID=sc.id AND sc.id=ci.id AND ci.INFRASTRUCTURE_ID=ANY(?)";
+                        "AND sen.id=ci.SENSOR_ID AND ci.INFRASTRUCTURE_ID=ANY(?)";
                 try {
                     PreparedStatement stmt = connection.prepareStatement(query);
                     stmt.setString(1, sensorTypeName);

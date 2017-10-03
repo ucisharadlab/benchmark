@@ -122,9 +122,7 @@ public class GridDBQueryManager extends BaseQueryManager {
                     String.format("SELECT * FROM Sensor WHERE typeId='%s'", sensorTypes.get(0).getString(0)));
             RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(2));
             for(Row row : sensors) {
-                String coverageId = row.getString(6);
-                Row coverage = getById("SensorCoverage", coverageId);
-                String[] entitiesCovered = coverage.getStringArray(2);
+                String[] entitiesCovered = row.getStringArray(5);
 
                 locationIds.forEach(e-> {
                     for (String s : entitiesCovered) {

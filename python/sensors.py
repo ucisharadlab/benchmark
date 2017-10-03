@@ -24,7 +24,7 @@ def createSensors(numWifi, numWemo, numTemperature, src, dest):
             wemoSensors.append(sensor)
 
     for i in range(numWifi):
-        id = str(uuid.uuid1())
+        id = str(uuid.uuid4())
         copiedSensor = wifiSensors[random.randint(0, len(wifiSensors)-1)]
         sensor = {
             "id": id,
@@ -38,7 +38,7 @@ def createSensors(numWifi, numWemo, numTemperature, src, dest):
         sensors.append(sensor)
 
     for i in range(numWemo):
-        id = str(uuid.uuid1())
+        id = str(uuid.uuid4())
         copiedSensor = wemoSensors[random.randint(0, len(wemoSensors)-1)]
         owner = users[random.randint(0, len(users)-1)]
         sensor = {
@@ -53,7 +53,7 @@ def createSensors(numWifi, numWemo, numTemperature, src, dest):
         sensors.append(sensor)
 
     for i in range(numTemperature):
-        id = str(uuid.uuid1())
+        id = str(uuid.uuid4())
         copiedSensor = temperatureSensors[random.randint(0, len(temperatureSensors)-1)]
         owner = users[random.randint(0, len(users)-1)]
         sensor = {

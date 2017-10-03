@@ -71,10 +71,10 @@ public class GridDBDataMapping1 extends GridDBBaseDataMapping {
                 row.setValue(1, temp.get("emailId"));
                 row.setValue(2, temp.get("name"));
                 row.setValue(3, temp.get("googleAuthToken"));
-                groups=(JSONArray)temp.get("groupIds");
+                groups=(JSONArray)temp.get("groups");
                 String[] groups_s=new String[groups.size()];
                 for(int x=0;x<groups.size();x++)
-                    groups_s[x]=groups.get(x).toString();
+                    groups_s[x]=((JSONObject)groups.get(x)).get("id").toString();
                 row.setValue(4,groups_s);
 
                 collection.put(row);
@@ -93,28 +93,6 @@ public class GridDBDataMapping1 extends GridDBBaseDataMapping {
                 row.setValue(1, ((Number)temp.get("x")).doubleValue());
                 row.setValue(2, ((Number)temp.get("y")).doubleValue());
                 row.setValue(3, ((Number)temp.get("z")).doubleValue());
-                collection.put(row);
-            }
-
-            // Adding Regions
-            JSONArray region_list = (JSONArray) parser.parse(new InputStreamReader(
-                    new FileInputStream(dataDir + DataFiles.REGION.getPath())));
-
-            for(int i =0;i<region_list.size();i++){
-                JSONObject temp=(JSONObject)region_list.get(i);
-                JSONArray locations;
-                collection = gridStore.getCollection("Region");
-
-                row = collection.createRow();
-                row.setValue(0, temp.get("id"));
-                row.setValue(1, ((Number)temp.get("floor")).doubleValue());
-                row.setValue(2, temp.get("name"));
-                locations = (JSONArray)temp.get("geometry");
-                String[] locations_s=new String[locations.size()];
-                for(int x=0; x<locations.size(); x++)
-                    locations_s[x] = ((JSONObject)locations.get(x)).get("id").toString();
-                row.setValue(3, locations_s);
-
                 collection.put(row);
             }
 
@@ -146,7 +124,12 @@ public class GridDBDataMapping1 extends GridDBBaseDataMapping {
                 row.setValue(0, temp.get("id"));
                 row.setValue(1, temp.get("name"));
                 row.setValue(2, ((JSONObject)temp.get("type_")).get("id"));
-                row.setValue(3, ((JSONObject)temp.get("region")).get("id"));
+                row.setValue(3, ((Number)temp.get("floor")).intValue());
+                JSONArray locations = (JSONArray)temp.get("geometry");
+                String[] locations_s=new String[locations.size()];
+                for(int x=0; x<locations.size(); x++)
+                    locations_s[x] = ((JSONObject)locations.get(x)).get("id").toString();
+                row.setValue(4, locations_s);
 
                 collection.put(row);
             }
@@ -183,22 +166,6 @@ public class GridDBDataMapping1 extends GridDBBaseDataMapping {
                 collection.put(row);
             }
 
-            // Adding ObservationTypes
-            JSONArray obsType_list = (JSONArray) parser.parse(new InputStreamReader(
-                    new FileInputStream(dataDir + DataFiles.OBS_TYPE.getPath())));
-
-            for(int i =0;i<obsType_list.size();i++){
-                JSONObject temp=(JSONObject)obsType_list.get(i);
-                collection = gridStore.getCollection("ObservationType");
-
-                row = collection.createRow();
-                row.setValue(0, temp.get("id"));
-                row.setValue(1, temp.get("name"));
-                row.setValue(2, temp.get("description"));
-
-                collection.put(row);
-            }
-
             // Adding Sensors
             JSONArray sensor_list = (JSONArray) parser.parse(new InputStreamReader(
                     new FileInputStream(dataDir + DataFiles.SENSOR.getPath())));
@@ -211,27 +178,19 @@ public class GridDBDataMapping1 extends GridDBBaseDataMapping {
                 row = collection.createRow();
                 row.setValue(0, temp.get("id"));
                 row.setValue(1, temp.get("name"));
-                row.setValue(2, ((JSONObject)temp.get("sensorType")).get("id"));
+                row.setValue(2, ((JSONObject)temp.get("type_")).get("id"));
                 row.setValue(3, ((JSONObject)temp.get("infrastructure")).get("id"));
                 row.setValue(4, ((JSONObject)temp.get("owner")).get("id"));
-                // row.setValue(5, temp.get("platform"));
-                row.setValue(6, ((JSONObject)temp.get("coverage")).get("id"));
-                row.setValue(7, temp.get("sensorConfig"));
 
-                collection.put(row);
-
-                collection = gridStore.getCollection("SensorCoverage");
-
-                row = collection.createRow();
-                row.setValue(0, ((JSONObject)temp.get("coverage")).get("id"));
-                // row.setValue(1, ((JSONObject)temp.get("coverage")).get("radius"));
-                JSONArray entitiesCovered = (JSONArray)((JSONObject)temp.get("coverage")).get("entitiesCovered");
+                JSONArray entitiesCovered = (JSONArray)temp.get("coverage");
                 String[] entities=new String[entitiesCovered.size()];
                 for(int x=0; x<entitiesCovered.size();x++)
-                    entities[x]=((JSONObject)entitiesCovered.get(x)).get("name").toString();
-                row.setValue(2, entities);
+                    entities[x]=((JSONObject)entitiesCovered.get(x)).get("id").toString();
+                row.setValue(5, entities);
+                row.setValue(6, temp.get("sensorConfig"));
 
                 collection.put(row);
+
             }
 
             // Adding Observations
@@ -248,13 +207,13 @@ public class GridDBDataMapping1 extends GridDBBaseDataMapping {
                 row.setValue(0, obs.getTimeStamp());
                 row.setValue(1, obs.getId());
 
-                if (obs.getSensor().getType_().getId().equals("EnergyMeter")) {
-                    row.setValue(3, obs.getPayload().get("temperature").getAsInt());
+                if (obs.getSensor().getType_().getId().equals("Thermometer")) {
+                    row.setValue(2, obs.getPayload().get("temperature").getAsInt());
                 } else if (obs.getSensor().getType_().getId().equals("WiFiAP")) {
-                    row.setValue(3, obs.getPayload().get("clientId").getAsString());
+                    row.setValue(2, obs.getPayload().get("clientId").getAsString());
                 } else if (obs.getSensor().getType_().getId().equals("WeMo")) {
-                    row.setValue(3, obs.getPayload().get("currentMilliWatts").getAsInt());
-                    row.setValue(4, obs.getPayload().get("onTodaySeconds").getAsInt());
+                    row.setValue(2, obs.getPayload().get("currentMilliWatts").getAsInt());
+                    row.setValue(3, obs.getPayload().get("onTodaySeconds").getAsInt());
                 }
                 timeSeries.put(row);
             }
@@ -300,8 +259,9 @@ public class GridDBDataMapping1 extends GridDBBaseDataMapping {
                 row = collection.createRow();
                 row.setValue(0, temp.get("id"));
                 row.setValue(1, temp.get("name"));
-                row.setValue(3, temp.get("ownerId"));
-                row.setValue(4, temp.get("typeId"));
+                row.setValue(2, temp.get("hashedMac"));
+                row.setValue(3, ((JSONObject)temp.get("owner")).get("id"));
+                row.setValue(4, ((JSONObject)temp.get("type_")).get("id"));
                 collection.put(row);
             }
 

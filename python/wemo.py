@@ -20,12 +20,12 @@ def createWemoObservations(dt, end, step, dataDir):
 
     while dt < end:
 
-        for i in range(5):
-            pickedSensor = sensors[random.randint(1, num - 1)]
-            id = str(uuid.uuid1()),
+        for i in range(num / 3):
+            pickedSensor = sensors[random.randint(0, num - 1)]
+            id = str(uuid.uuid4())
 
             obs = {
-                "id": id[0],
+                "id": id,
                 "timeStamp": dt.strftime('%Y-%m-%d %H:%M:%S'),
                 "sensor": pickedSensor,
                 "payload": {

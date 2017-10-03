@@ -27,10 +27,7 @@ public class DataSize {
         writer.write(String.format("Number Of Sensors: %s\n", getNumberOfSensors()));
         writer.write(String.format("Number Of InfraTypes: %s\n", getNumberOfInfraTypes()));
         writer.write(String.format("Number Of Infra: %s\n", getNumberOfInfra()));
-        writer.write(String.format("Number Of SOTypes: %s\n", getNumberOfSOTypes()));
-        writer.write(String.format("Number Of VSensors: %s\n", getNumberOfVSensors()));
         writer.write(String.format("Number Of Observations: %s\n", getNumberOfObservations()));
-        // writer.write(String.format("Number Of SObservations: %s", getNumberOfSO()));
         writer.write("------------------------------------------\n\n");
 
     }
@@ -71,20 +68,8 @@ public class DataSize {
         return countObjects(DataFiles.INFRA);
     }
 
-    public int getNumberOfSOTypes() {
-        return countObjects(DataFiles.SO_TYPE);
-    }
-
     public int getNumberOfObservations() {
         return countObjects(DataFiles.OBS);
-    }
-
-    public int getNumberOfSO() {
-        return countObjects(DataFiles.SO);
-    }
-
-    public int getNumberOfVSensors() {
-        return countObjects(DataFiles.VS);
     }
 
 }

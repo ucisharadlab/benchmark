@@ -68,9 +68,10 @@ CREATE TYPE PlatformType As{
 /** related to sensors **/
 CREATE TYPE SensorTypeType AS {
 	id: string,
+	name: string,
 	description: string,
 	mobility: string,
-	captureFun: string,
+	captureFunctionality: string,
 	payloadSchema: string
 };
 
@@ -85,6 +86,12 @@ CREATE TYPE SensorType As {
     sensorConfig: string
 };
 
+CREATE TYPE ObservationType AS {
+	id: string,
+	sensor: SensorType,
+	payload: PayloadType,
+	timeStamp: datetime
+};
 
 /* Creating Datasets */
 CREATE DATASET Location(LocationType)

@@ -92,8 +92,8 @@ public class MongoDBQueryManager extends BaseQueryManager{
 
                 MongoCollection<Document> collection = database.getCollection("Sensor");
                 MongoIterable<Document> iterable = collection.find(and(
-                        eq("sensorType.name", sensorTypeName),
-                        in("coverage.entitiesCovered.id", locationIds)))
+                        eq("type_.name", sensorTypeName),
+                        in("coverage.id", locationIds)))
                         .projection(new Document("name", 1)
                                 .append("_id", 0)
                                 .append("id", 1));
@@ -168,7 +168,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
                 MongoCollection<Document> collection = database.getCollection("Observation");
                 MongoIterable<Document> iterable = collection.find(
                         and(
-                                eq("sensor.sensorType.name", sensorTypeName),
+                                eq("sensor.type_.name", sensorTypeName),
                                 gt("timeStamp", startTime),
                                 lt("timeStamp", endTime),
                                 gt(String.format("payload.%s", payloadAttribute), startPayloadValue),

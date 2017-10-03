@@ -1,6 +1,10 @@
 # time(s), sensorId
-1,emeter1
-1,emeter1
-1,emeter1
-1,emeter1
-2,emeter5
+1,thermometer1
+1,thermometer1
+1,thermometer1
+1,thermometer1
+2,thermometer5
+2,thermometer5
+2,thermometer5
+2,thermometer5
+2,thermometer5
