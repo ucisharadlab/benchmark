@@ -3,9 +3,8 @@ import shutil
 import users, sensors, observations
 
 configFile = "config.ini"
-common = ["location.json", "region.json", "infrastructureType.json", "infrastructure.json", "type_.json",
-          "observationType.json", "group.json", "platformType.json", "semanticObservationType.json",
-          "virtualSensorType.json", "virtualSensor.json"]
+common = ["location.json", "infrastructureType.json", "infrastructure.json",
+          "sensorType.json", "group.json", "platformType.json"]
 
 
 def readConfiguration():

@@ -3,5 +3,25 @@
     "id": "ISG",
     "name": "ISG",
     "description": "Information Systems Group"
+  },
+  {
+    "id": "CMU",
+    "name": "CMU",
+    "description": "CMU Privacy Group"
+  },
+  {
+    "id": "Compilers",
+    "name": "Compilers",
+    "description": "Compliers Group"
+  },
+  {
+    "id": "TOC",
+    "name": "TOC",
+    "description": "Theoretical CS Group"
+  },
+  {
+    "id": "AI",
+    "name": "AI",
+    "description": "AI Research Group"
   }
 ]

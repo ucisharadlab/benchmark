@@ -29,8 +29,7 @@ def createTemperaturebservations(dt, end, step, dataDir):
                 "sensor": pickedSensor,
                 "payload": {
                     "temperature": random.randint(1, 100)
-                },
-                "type_": pickedSensor['type_']['observationType'],
+                }
             }
             fpObj.write(json.dumps(obs) + '\n')
 

@@ -8,5 +8,10 @@
     "id": "pt2",
     "name": "Raspberry Pi",
     "description": "Raspberry Pi Devices"
+  },
+  {
+    "id": "pt2",
+    "name": "Laptop",
+    "description": "Laptop Devices"
   }
 ]

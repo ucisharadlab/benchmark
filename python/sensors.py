@@ -18,16 +18,16 @@ def createSensors(numWifi, numWemo, numTemperature, src, dest):
     for sensor in sensors:
         if sensor['type_']['id'] == "WiFiAP":
             wifiSensors.append(sensor)
-        if sensor['type_']['id'] == "EnergyMeter":
+        if sensor['type_']['id'] == "Thermometer":
             temperatureSensors.append(sensor)
         if sensor['type_']['id'] == "WeMo":
             wemoSensors.append(sensor)
 
     for i in range(numWifi):
-        id = str(uuid.uuid1()),
+        id = str(uuid.uuid1())
         copiedSensor = wifiSensors[random.randint(0, len(wifiSensors)-1)]
         sensor = {
-            "id": id[0],
+            "id": id,
             "name": "simSensor{}".format(i),
             "coverage": copiedSensor['coverage'],
             "sensorConfig": copiedSensor['sensorConfig'],
@@ -38,11 +38,11 @@ def createSensors(numWifi, numWemo, numTemperature, src, dest):
         sensors.append(sensor)
 
     for i in range(numWemo):
-        id = str(uuid.uuid1()),
+        id = str(uuid.uuid1())
         copiedSensor = wemoSensors[random.randint(0, len(wemoSensors)-1)]
         owner = users[random.randint(0, len(users)-1)]
         sensor = {
-            "id": id[0],
+            "id": id,
             "name": "simSensor{}".format(i),
             "coverage": copiedSensor['coverage'],
             "sensorConfig": copiedSensor['sensorConfig'],
@@ -53,11 +53,11 @@ def createSensors(numWifi, numWemo, numTemperature, src, dest):
         sensors.append(sensor)
 
     for i in range(numTemperature):
-        id = str(uuid.uuid1()),
+        id = str(uuid.uuid1())
         copiedSensor = temperatureSensors[random.randint(0, len(temperatureSensors)-1)]
         owner = users[random.randint(0, len(users)-1)]
         sensor = {
-            "id": id[0],
+            "id": id,
             "name": "simSensor{}".format(i),
             "coverage": copiedSensor['coverage'],
             "sensorConfig": copiedSensor['sensorConfig'],

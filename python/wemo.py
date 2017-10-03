@@ -31,8 +31,7 @@ def createWemoObservations(dt, end, step, dataDir):
                 "payload": {
                     "currentMilliWatts": random.randint(1, 100),
                     "onTodaySeconds": random.randint(1, 3600)
-                },
-                "type_": pickedSensor['type_']['observationType'],
+                }
             }
             fpObj.write(json.dumps(obs) + '\n')
 

@@ -31,8 +31,7 @@ def createWiFiObservations(dt, end, step, dataDir):
                 "sensor": pickedSensor,
                 "payload": {
                     "clientId": clientIds[random.randint(1, 999)]
-                },
-                "type_": pickedSensor['type_']['observationType'],
+                }
             }
             fpObj.write(json.dumps(obs) + '\n')
         dt += step
