@@ -1,0 +1,23 @@
+[
+  {
+    "id": "WiFiToLocation",
+    "name": "WiFiToLocation",
+    "description": " WIfi To Location type",
+    "inputTypeId": "WiFiAPType",
+    "semanticObservationTypeId" : "location"
+  },
+  {
+    "id": "WemoToLocation",
+    "name": "WemoToLocation",
+    "description": " Wemo To Location type",
+    "inputTypeId": "EnergyMeterType",
+    "semanticObservationTypeId" : "temperature"
+  },
+  {
+    "id": "WiFiToOccupancy",
+    "name": "WiFiToOccupancy",
+    "description": " WIfi To Occupancy type",
+    "inputTypeId": "WiFiAPType",
+    "semanticObservationTypeId" : "occupancy"
+  }
+]

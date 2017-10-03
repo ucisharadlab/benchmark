@@ -1,5 +1,5 @@
 Description of sensorTypes: double (real value), int (counter), trajectory
-sensorType: trajectory
+type_: trajectory
 timeScaleNum: 40
 timeScaleNoise: 0.01
 speedScaleNum: 1

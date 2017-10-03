@@ -1,0 +1,25 @@
+[
+  {
+    "name": "mobile1",
+    "type_": {
+      "description": "Mobile Phone Devices",
+      "name": "Mobile Phone",
+      "id": "pt1"
+    },
+    "location": {},
+    "owner": {
+      "groups": [
+        {
+          "description": "Information Systems Group",
+          "name": "ISG",
+          "id": "ISG"
+        }
+      ],
+      "name": "Peeyush Gupta",
+      "googleAuthToken": "b9a41d99-1557-45a0-aed0-3aca3e0fd36a",
+      "id": "user1",
+      "emailId": "peeyush@uci.edu"
+    },
+    "id": "p1"
+  }
+]

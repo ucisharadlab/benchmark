@@ -125,7 +125,7 @@ CREATE TYPE SensorDriverType AS {
 CREATE TYPE SensorType As {
     id: string,
     name: string,
-    sensorType: SensorTypeType,
+    type_: SensorTypeType,
     infrastructure: InfrastructureType,
     owner: UserType,
     coverage: SensorCoverageType,

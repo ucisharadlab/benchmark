@@ -1,7 +1,5 @@
 package edu.uci.ics.tippers.model.sensor;
 
-import edu.uci.ics.tippers.model.observation.ObservationType;
-
 public class SensorType {
 
 	private String id;
@@ -12,18 +10,9 @@ public class SensorType {
 
     private String mobility;
 
-	/**
-	 * Push/Pull/Streaming
-	 */
 	private String captureFun;
 
-    private ObservationType observationType;
-
 	private String payloadSchema;
-	 
-	public SensorType(){
-		
-	}
 
 	public String getPayloadSchema() {
 		return payloadSchema;
@@ -31,10 +20,6 @@ public class SensorType {
 
 	public void setPayloadSchema(String payloadSchema) {
 		this.payloadSchema = payloadSchema;
-	}
-
-	public SensorType(String name, String description, String payload) {
-		this.description = description;
 	}
 
 	public String getDescription() {
@@ -69,14 +54,6 @@ public class SensorType {
 		this.mobility = mobility;
 	}
 
-	public ObservationType getObservationType() {
-        return observationType;
-    }
-
-    public void setObservationType(ObservationType observationType) {
-        this.observationType = observationType;
-    }
-
 	public String getName() {
 		return name;
 	}
@@ -88,7 +65,7 @@ public class SensorType {
 	@Override
 	public String toString() {
 		return "SensorType [id=" + id + ", description=" + description + ", mobility=" + mobility
-                + ", captureFun=" + ((captureFun == null )? "": captureFun.toString()) + "]";
+                + ", captureFun=" + ((captureFun == null )? "": captureFun) + "]";
 	}
 
 }

@@ -1,7 +1,7 @@
 1. Query Description: Select a sensor with id X (<82)
 selectSensorNum: 5
 selectSensorSeed: 1
-2. Query Description: List all sensor of type X that can observe Locations in {locations} (<= 6)
+2. Query Description: List all sensor of type_ X that can observe Locations in {locations} (<= 6)
 spaceSensorNum: 5
 spaceSensorSeed: 1
 3. Query Description: Select Observations From a Sensor with id X between time range T1 and T2
@@ -10,7 +10,7 @@ observeSeed1: 1
 4. Query Description: Select Observations From Sensors in list {X1, X2 ...} between time range T1 and T2 (<=2^82)
 observeNum2: 5
 observeSeed2: 1
-5. Query Description: Select Observations of Sensors of type X between time range T1 and T2 (<= 6)
+5. Query Description: Select Observations of Sensors of type_ X between time range T1 and T2 (<= 6)
 observeNum3: 5
 observeSeed3: 1
 6. Query Description: Average number of observations per day between the begin and end dates for each sensor in {sensors}

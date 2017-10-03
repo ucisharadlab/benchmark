@@ -1,11 +1,10 @@
 package edu.uci.ics.tippers.model.sensor;
 
 import edu.uci.ics.tippers.model.metadata.infrastructure.Infrastructure;
-import edu.uci.ics.tippers.model.metadata.spatial.Location;
 import edu.uci.ics.tippers.model.metadata.user.User;
-import edu.uci.ics.tippers.model.platform.Platform;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Sensor {
 
@@ -13,49 +12,25 @@ public class Sensor {
 
 	private String name;
 
-	private String description;
+	private SensorType type_;
 
-	private SensorType sensorType;
-	
-	private Location location;
+	private Infrastructure infrastructure;
 
-    private Infrastructure infrastructure;
-
-	private Platform platform;
-	
 	private User owner;
-	
-	private SensorCoverage coverage;
 
     private String sensorConfig;
 
-	public Sensor(String id, String name, String description, String sensorIP, String sensorPort,
-                  SensorType sensorType, Location location, Platform platform, User owner) {
-		super();
-		this.id = id;
-		this.sensorType = sensorType;
-		this.location = location;
-		this.platform = platform;
-		this.owner = owner;
-	}
+	private List<Infrastructure> coverage;
 
-	public Sensor(){
+    public List<Infrastructure> getCoverage() {
+        return coverage;
+    }
 
-	}
-
-    public Sensor(String id, String name, String description, String sensorIP, String sensorPort,
-                  SensorType sensorType, Location location, Platform platform,
-                  User owner, SensorCoverage coverage) {
-        super();
-        this.id = id;
-		this.sensorType = sensorType;
-        this.location = location;
-        this.platform = platform;
-        this.owner = owner;
+    public void setCoverage(List<Infrastructure> coverage) {
         this.coverage = coverage;
     }
 
-	public String getName() {
+    public String getName() {
 		return name;
 	}
 
@@ -63,36 +38,12 @@ public class Sensor {
 		this.name = name;
 	}
 
-	public String getDescription() {
-		return description;
+	public SensorType getType_() {
+		return type_;
 	}
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public SensorType getSensorType() {
-		return sensorType;
-	}
-
-	public void setSensorType(SensorType sensorType) {
-		this.sensorType = sensorType;
-	}
-
-	public Location getLocation() {
-		return location;
-	}
-
-	public void setLocation(Location location) {
-		this.location = location;
-	}
-
-	public Platform getPlatform() {
-		return platform;
-	}
-
-	public void setPlatform(Platform platform) {
-		this.platform = platform;
+	public void setType_(SensorType type_) {
+		this.type_ = type_;
 	}
 
 	public User getOwner() {
@@ -105,14 +56,6 @@ public class Sensor {
 
 	public String getId() {
 		return id;
-	}
-
-	public SensorCoverage getCoverage() {
-		return coverage;
-	}
-
-	public void setCoverage(SensorCoverage coverage) {
-		this.coverage = coverage;
 	}
 
     public void setId(String id) {
@@ -141,16 +84,14 @@ public class Sensor {
         ArrayList<String> coverageIDs = null;
         if( coverage != null ) {
             coverageIDs = new ArrayList<>();
-            System.out.println(coverage.getEntitiesCovered().size());
+            System.out.println(coverage.size());
 
-            for(int i=0; i < coverage.getEntitiesCovered().size(); i++)
-                coverageIDs.add(coverage.getEntitiesCovered().get(i).getId());
+            for(int i=0; i < coverage.size(); i++)
+                coverageIDs.add(coverage.get(i).getId());
         }
 
         return "Sensor [id=" + id +
-                ", location=" +  ((location == null)? "null":location.toString()) +
-                ", type=" + ((sensorType == null)? "null":sensorType.toString()) +
-                ", platform=" + ((platform == null)? "null":platform.toString()) +
+                ", type=" + ((type_ == null)? "null": type_.toString()) +
                 ", user_id=" + ((owner == null)? "null":owner.getId()) +
                 ", coverage_room_ids=" + ((coverageIDs == null)? "null":coverageIDs.toString()) +
                 "]";

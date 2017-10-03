@@ -4,7 +4,7 @@ import edu.uci.ics.tippers.common.DataFiles;
 import edu.uci.ics.tippers.common.util.BigJsonReader;
 import edu.uci.ics.tippers.data.postgresql.PgSQLBaseDataMapping;
 import edu.uci.ics.tippers.exception.BenchmarkException;
-import edu.uci.ics.tippers.model.observation.ObservationRow;
+import edu.uci.ics.tippers.model.observation.Observation;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -291,19 +291,18 @@ public class PgSQLDataMapping1 extends PgSQLBaseDataMapping {
 
             // Adding Observations
             insert = "INSERT INTO OBSERVATION " +
-                    "(ID, PAYLOAD, TIMESTAMP, SENSOR_ID, OBSERVATION_TYPE_ID) VALUES (?, ?, ?, ?, ?)";
+                    "(ID, PAYLOAD, TIMESTAMP, SENSOR_ID) VALUES (?, ?, ?, ?)";
 
-            BigJsonReader<ObservationRow> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
-                    ObservationRow.class);
-            ObservationRow obs = null;
+            BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
+                    Observation.class);
+            Observation obs = null;
 
             stmt = connection.prepareStatement(insert);
             while ((obs = reader.readNext()) != null) {
 
-                stmt.setString(4, obs.getSensorId());
+                stmt.setString(4, obs.getSensor().getId());
                 stmt.setTimestamp(3, new Timestamp(obs.getTimeStamp().getTime()));
                 stmt.setString(1, obs.getId());
-                stmt.setString(5, obs.getTypeId());
                 stmt.setString(2, obs.getPayload().toString());
 
                 stmt.executeUpdate();

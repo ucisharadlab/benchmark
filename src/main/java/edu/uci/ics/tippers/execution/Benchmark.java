@@ -40,9 +40,8 @@ import java.util.prefs.Preferences;
  */
 public class Benchmark {
 
-    private static final String OBJECTS = "objects/";
     private static final String ROWS = "rows/";
-    private static final String MIX = "mix/";
+    private static final String OBJECTS = "objects/";
 
     private static Map<Pair<Database, Integer>, Map<Integer, Duration>> runTimes = new HashMap<>();
     private static Configuration configuration;
@@ -143,8 +142,8 @@ public class Benchmark {
                     case MONGODB:
                         configuration.getMappings().get(Database.MONGODB).forEach(
                                 e -> benchmark.runBenchmark(
-                                        new MongoDBSchema(e, configuration.getDataDir() + MIX),
-                                        new MongoDBDataUploader(e, configuration.getDataDir() + MIX),
+                                        new MongoDBSchema(e, configuration.getDataDir() + OBJECTS),
+                                        new MongoDBDataUploader(e, configuration.getDataDir() + OBJECTS),
                                         new MongoDBQueryManager(e, configuration.getQueriesDir(),
                                                 configuration.getOutputDir(),
                                                 configuration.isWriteOutput(), configuration.getTimeout())));
@@ -152,8 +151,8 @@ public class Benchmark {
                     case ASTERIXDB:
                         configuration.getMappings().get(Database.ASTERIXDB).forEach(
                                 e -> benchmark.runBenchmark(
-                                        new AsterixDBSchema(e, configuration.getDataDir() + MIX),
-                                        new AsterixDBDataUploader(e, configuration.getDataDir() + MIX),
+                                        new AsterixDBSchema(e, configuration.getDataDir() + OBJECTS),
+                                        new AsterixDBDataUploader(e, configuration.getDataDir() + OBJECTS),
                                         new AsterixDBQueryManager(e, configuration.getQueriesDir(),
                                                 configuration.getOutputDir(),
                                                 configuration.isWriteOutput(), configuration.getTimeout())));

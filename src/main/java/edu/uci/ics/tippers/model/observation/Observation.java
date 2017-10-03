@@ -15,28 +15,6 @@ public class Observation {
 	
 	private Date timeStamp;
 
-    private ObservationType type_;
-
-    public Observation(Sensor sensor, JsonObject observationPayload, Date timeStamp, ObservationType type_) {
-        super();
-        this.sensor = sensor;
-        this.payload = observationPayload;
-        this.timeStamp = timeStamp;
-        this.type_ = type_;
-    }
-
-    public Observation(){
-
-    }
-
-	public ObservationType getType_() {
-		return type_;
-	}
-
-	public void setType_(ObservationType type_) {
-		this.type_ = type_;
-	}
-
 	public Sensor getSensor() {
 		return sensor;
 	}
@@ -67,14 +45,6 @@ public class Observation {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public ObservationType getObservationType() {
-        return type_;
-    }
-
-    public void setObservationType(ObservationType observationType) {
-        this.type_ = observationType;
     }
 
     @Override

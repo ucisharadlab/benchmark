@@ -5,7 +5,7 @@ import edu.uci.ics.tippers.common.DataFiles;
 import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.common.util.BigJsonReader;
 import edu.uci.ics.tippers.data.griddb.GridDBBaseDataMapping;
-import edu.uci.ics.tippers.model.observation.ObservationRow;
+import edu.uci.ics.tippers.model.observation.Observation;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -235,25 +235,24 @@ public class GridDBDataMapping1 extends GridDBBaseDataMapping {
             }
 
             // Adding Observations
-            BigJsonReader<ObservationRow> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
-                    ObservationRow.class);
-            ObservationRow obs = null;
+            BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
+                    Observation.class);
+            Observation obs = null;
 
             while ((obs = reader.readNext()) != null) {
-                String collectionName = Constants.GRIDDB_OBS_PREFIX + obs.getSensorId();
+                String collectionName = Constants.GRIDDB_OBS_PREFIX + obs.getSensor().getId();
 
                 TimeSeries<Row> timeSeries = gridStore.getTimeSeries(collectionName);
 
                 row = timeSeries.createRow();
                 row.setValue(0, obs.getTimeStamp());
                 row.setValue(1, obs.getId());
-                row.setValue(2, obs.getTypeId());
 
-                if (obs.getTypeId().equals("EnergyMeterType")) {
+                if (obs.getSensor().getType_().getId().equals("EnergyMeter")) {
                     row.setValue(3, obs.getPayload().get("temperature").getAsInt());
-                } else if (obs.getTypeId().equals("WiFiAPType")) {
+                } else if (obs.getSensor().getType_().getId().equals("WiFiAP")) {
                     row.setValue(3, obs.getPayload().get("clientId").getAsString());
-                } else if (obs.getTypeId().equals("WeMoType")) {
+                } else if (obs.getSensor().getType_().getId().equals("WeMo")) {
                     row.setValue(3, obs.getPayload().get("currentMilliWatts").getAsInt());
                     row.setValue(4, obs.getPayload().get("onTodaySeconds").getAsInt());
                 }

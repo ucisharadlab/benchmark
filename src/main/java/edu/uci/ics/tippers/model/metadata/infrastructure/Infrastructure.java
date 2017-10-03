@@ -1,9 +1,10 @@
 package edu.uci.ics.tippers.model.metadata.infrastructure;
 
 import edu.uci.ics.tippers.model.metadata.SemanticEntity;
-import edu.uci.ics.tippers.model.metadata.spatial.Region;
 
 import javax.xml.bind.annotation.XmlType;
+import java.util.ArrayList;
+import java.util.List;
 
 @XmlType(name="")
 public class Infrastructure extends SemanticEntity {
@@ -12,10 +13,10 @@ public class Infrastructure extends SemanticEntity {
 
 	private InfrastructureType type_;
 
-	private InfraConfig infraConfig;
+	private List<Location> geometry = new ArrayList<>();
 
-	private Region region;
-	
+	private int floor;
+
 	public Infrastructure() {
 		super();
 	}
@@ -28,14 +29,6 @@ public class Infrastructure extends SemanticEntity {
 		this.type_ = type_;
 	}
 
-	public InfraConfig getInfraConfig() {
-		return infraConfig;
-	}
-
-	public void setInfraConfig(InfraConfig infraConfig) {
-		this.infraConfig = infraConfig;
-	}
-
 	public String getName() {
 		return name;
 	}
@@ -44,11 +37,19 @@ public class Infrastructure extends SemanticEntity {
 		this.name = name;
 	}
 
-	public Region getRegion() {
-		return region;
+	public List<Location> getGeometry() {
+		return geometry;
 	}
 
-	public void setRegion(Region region) {
-		this.region = region;
+	public void setGeometry(List<Location> geometry) {
+		this.geometry = geometry;
+	}
+
+	public int getFloor() {
+		return floor;
+	}
+
+	public void setFloor(int floor) {
+		this.floor = floor;
 	}
 }
