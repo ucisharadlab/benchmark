@@ -117,6 +117,7 @@ public class Benchmark {
             //dbmsManager.startServers();
 
             for (Database database: configuration.getDatabases()) {
+                dbmsManager.startServer(database);
                 switch (database) {
                     case GRIDDB:
                         configuration.getMappings().get(Database.GRIDDB).forEach(
@@ -175,6 +176,7 @@ public class Benchmark {
                     default:
                         throw new BenchmarkException("Database Not Supported");
                 }
+                dbmsManager.stopServer(database);
             }
 
             DataSize dataSize = new DataSize(configuration.getDataDir());

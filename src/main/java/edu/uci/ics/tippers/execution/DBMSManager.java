@@ -1,5 +1,6 @@
 package edu.uci.ics.tippers.execution;
 
+import edu.uci.ics.tippers.common.Database;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 
 import java.io.BufferedReader;
@@ -42,13 +43,22 @@ public class DBMSManager {
         }
     }
 
-    public void startServers() throws BenchmarkException {
+    public void startAllServers() throws BenchmarkException {
         runShellScript(scriptsDir + startUp);
     }
 
-    public void stopServers() throws BenchmarkException {
+    public void stopAllServers() throws BenchmarkException {
         runShellScript(scriptsDir + stop);
 
     }
+
+    public void startServer(Database database) {
+        runShellScript(String.format("%sstart/%s.sh",this.scriptsDir, database.getName()));
+    }
+
+    public void stopServer(Database database) {
+        runShellScript(String.format("%sstop/%s.sh",this.scriptsDir, database.getName()));
+    }
+
 
 }

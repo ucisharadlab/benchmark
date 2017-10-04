@@ -27,7 +27,7 @@ def createSensors(numWifi, numWemo, numTemperature, src, dest):
         id = str(uuid.uuid4())
         copiedSensor = wifiSensors[random.randint(0, len(wifiSensors)-1)]
         sensor = {
-            "id": id,
+            "id": id.replace('-', '_'),
             "name": "simSensor{}".format(i),
             "coverage": copiedSensor['coverage'],
             "sensorConfig": copiedSensor['sensorConfig'],
@@ -42,7 +42,7 @@ def createSensors(numWifi, numWemo, numTemperature, src, dest):
         copiedSensor = wemoSensors[random.randint(0, len(wemoSensors)-1)]
         owner = users[random.randint(0, len(users)-1)]
         sensor = {
-            "id": id,
+            "id": id.replace('-', '_'),
             "name": "simSensor{}".format(i),
             "coverage": copiedSensor['coverage'],
             "sensorConfig": copiedSensor['sensorConfig'],
@@ -57,7 +57,7 @@ def createSensors(numWifi, numWemo, numTemperature, src, dest):
         copiedSensor = temperatureSensors[random.randint(0, len(temperatureSensors)-1)]
         owner = users[random.randint(0, len(users)-1)]
         sensor = {
-            "id": id,
+            "id": id.replace('-', '_'),
             "name": "simSensor{}".format(i),
             "coverage": copiedSensor['coverage'],
             "sensorConfig": copiedSensor['sensorConfig'],

@@ -2,13 +2,13 @@ import ConfigParser
 import shutil
 import users, sensors, observations
 import datetime
+import sys
 
-configFile = "config.ini"
 common = ["location.json", "infrastructureType.json", "infrastructure.json",
           "sensorType.json", "group.json", "platformType.json"]
 
 
-def readConfiguration():
+def readConfiguration(configFile):
     Config = ConfigParser.ConfigParser()
     Config.read(configFile)
 
@@ -47,7 +47,8 @@ def createObservations(config):
     observations.createObservations(start, end, step, config['others']["data-dir"], config['others']["output-dir"])
 
 if __name__ == "__main__":
-    configDict = readConfiguration()
+    configFile = sys.argv[1]
+    configDict = readConfiguration(configFile)
     copyFiles(common, configDict['others']["data-dir"], configDict['others']["output-dir"])
     createUsers(configDict)
     createSensors(configDict)
