@@ -43,6 +43,21 @@ public class DataSize {
         }
     }
 
+    private int countLines(DataFiles dataFile) throws BenchmarkException {
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(dataDir + dataFile.getPath()));
+            int lines = 0;
+            while (reader.readLine() != null) lines++;
+            reader.close();
+            return lines;
+
+        } catch (  IOException e) {
+            e.printStackTrace();
+            throw new BenchmarkException("Error Counting Objects");
+        }
+    }
+
+
     public int getNumberOfGroups() {
         return countObjects(DataFiles.GROUP);
     }
@@ -69,7 +84,7 @@ public class DataSize {
     }
 
     public int getNumberOfObservations() {
-        return countObjects(DataFiles.OBS);
+        return countLines(DataFiles.OBS)/2;
     }
 
 }
