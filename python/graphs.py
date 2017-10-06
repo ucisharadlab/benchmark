@@ -49,18 +49,22 @@ def generateGraphs():
                      map(lambda x: x.split(), filter(lambda x: not x.startswith("-"), report3[14:24]))]
 
     mat = []
+    numObjects = [5200, 28500, 55000]
     for q in [2, 4, 5, 6, 7, 8]:
         values = [[0] * 3 for i in range(5)]
         for i in range(3):
             for j in range(5):
+                if q == 2:
+                    queryRunTimes[i][j][q] = int(queryRunTimes[i][j][q])*1.0/numObjects[i]
                 values[dbms[queryRunTimes[i][j][0]]][i] = int(queryRunTimes[i][j][q])
+
         mat.append(values)
 
     labels = ['#1', '#2', '#3']
 
     dbs = ['AsterixDB', 'CrateDB', 'PostgreSQL', 'MongoDB', 'GridDB']
 
-    fig, axes = plt.subplots(nrows=2, ncols=3)
+    fig, axes = plt.subplots(nrows=3, ncols=2)
     ax0, ax1, ax2, ax3, ax4, ax5 = axes.flatten()
 
     drawBar(ax0, mat[0], 3, dbs, "Insert", labels)
