@@ -31,12 +31,12 @@ public class PgSQLDataMapping1 extends PgSQLBaseDataMapping {
 
     public void addAll() throws BenchmarkException{
         try {
-            connection.setAutoCommit(false);
+            //connection.setAutoCommit(false);
             addMetadata();
             addDevices();
             addSensorsAndObservations();
-            connection.commit();
-        } catch (SQLException e) {
+            //connection.commit();
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -146,7 +146,7 @@ public class PgSQLDataMapping1 extends PgSQLBaseDataMapping {
             }
 
             String regionInfra = "INSERT INTO INFRASTRUCTURE_LOCATION " + "(LOCATION_ID, INFRASTRUCTURE_ID) VALUES (?, ?)";
-            PreparedStatement regionInfraStmt = connection.prepareStatement(membership);
+            PreparedStatement regionInfraStmt = connection.prepareStatement(regionInfra);
 
 
             for(int i =0;i<infra_list.size();i++){
@@ -158,6 +158,7 @@ public class PgSQLDataMapping1 extends PgSQLBaseDataMapping {
                 for(int x=0; x<locations.size(); x++) {
                     regionInfraStmt.setString(1, ((JSONObject) locations.get(x)).get("id").toString());
                 }
+                regionInfraStmt.executeUpdate();
             }
 
         }
@@ -241,15 +242,21 @@ public class PgSQLDataMapping1 extends PgSQLBaseDataMapping {
             Observation obs = null;
 
             stmt = connection.prepareStatement(insert);
+            int batchSize = 100;
+            int count = 0;
             while ((obs = reader.readNext()) != null) {
 
                 stmt.setString(4, obs.getSensor().getId());
                 stmt.setTimestamp(3, new Timestamp(obs.getTimeStamp().getTime()));
                 stmt.setString(1, obs.getId());
                 stmt.setString(2, obs.getPayload().toString());
+                stmt.addBatch();
 
-                stmt.executeUpdate();
+                count ++;
+                if (count % batchSize == 0)
+                    stmt.executeBatch();
             }
+            stmt.executeBatch();
 
         }
         catch(ParseException | SQLException | IOException e) {
