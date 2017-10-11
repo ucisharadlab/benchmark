@@ -1,0 +1,135 @@
+DROP DATAVERSE TippersDB IF EXISTS;
+CREATE DATAVERSE TippersDB;
+
+Use TippersDB;
+
+/* Open types being used */
+CREATE TYPE PayloadType AS {
+};
+
+CREATE TYPE ConfigType AS {
+};
+
+
+/* Types related to infrastructure */
+CREATE TYPE LocationType AS  closed{
+    id: string,
+	x: double,
+	y: double,
+	z: double
+};
+
+CREATE TYPE InfrastructureTypeType AS{
+	id: string,
+	name: string,
+	description: string
+};
+
+CREATE TYPE InfrastructureType AS closed {
+	id: string,
+	name: string,
+	type_: InfrastructureTypeType,
+	floor: int,
+    geometry: [LocationType]
+};
+
+/* Types related to users */
+CREATE TYPE UserGroupType AS closed {
+	id: string,
+	name: string,
+	description: string
+};
+
+CREATE TYPE UserType AS closed {
+    id: string,
+	name: string,
+	googleAuthToken: string,
+	emailId: string,
+	groups: [UserGroupType]
+};
+
+
+/** related to platforms**/
+CREATE TYPE PlatformTypeType AS{
+    id: string,
+    name: string,
+    description: string
+};
+
+CREATE TYPE PlatformType As{
+    id: string,
+    name: string?,
+    ownerId: string?,
+    type_: PlatformTypeType?,
+    hashedMac: string?
+};
+
+
+/** related to sensors **/
+CREATE TYPE SensorTypeType AS {
+	id: string,
+	name: string,
+	description: string,
+	mobility: string,
+	captureFunctionality: string,
+	payloadSchema: string
+};
+
+
+CREATE TYPE SensorType As {
+    id: string,
+    name: string,
+    type_: SensorTypeType,
+    infrastructureId: string,
+    ownerId: string,
+    coverage: [string],
+    sensorConfig: string
+};
+
+CREATE TYPE ObservationType AS {
+	id: string,
+	sensorid: string,
+	payload: PayloadType,
+	timeStamp: datetime
+};
+
+/* Creating Datasets */
+CREATE DATASET Location(LocationType)
+PRIMARY KEY id;
+
+CREATE DATASET Infrastructure(InfrastructureType)
+PRIMARY KEY id;
+
+CREATE DATASET InfrastructureType(InfrastructureTypeType)
+PRIMARY KEY id;
+
+CREATE DATASET UserGroup(UserGroupType)
+PRIMARY KEY id;
+
+CREATE DATASET User(UserType)
+PRIMARY KEY id;
+
+CREATE DATASET PlatformType(PlatformTypeType)
+PRIMARY KEY id;
+
+CREATE DATASET Platform(PlatformType)
+PRIMARY KEY id;
+
+CREATE DATASET SensorType(SensorTypeType)
+PRIMARY KEY id;
+
+CREATE DATASET Sensor(SensorType)
+PRIMARY KEY id;
+
+CREATE DATASET Observation(ObservationType)
+PRIMARY KEY id;
+
+
+
+
+
+
+
+
+
+

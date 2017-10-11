@@ -6,6 +6,7 @@ import edu.uci.ics.tippers.connection.cratedb.CrateDBConnectionManager;
 import edu.uci.ics.tippers.data.BaseDataUploader;
 import edu.uci.ics.tippers.data.postgresql.PgSQLBaseDataMapping;
 import edu.uci.ics.tippers.data.postgresql.mappings.PgSQLDataMapping1;
+import edu.uci.ics.tippers.data.postgresql.mappings.PgSQLDataMapping2;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 
 import java.sql.Connection;
@@ -20,7 +21,16 @@ public class CrateDBDataUploader extends BaseDataUploader{
     public CrateDBDataUploader(int mapping, String dataDir) {
         super(mapping, dataDir);
         connection = CrateDBConnectionManager.getInstance().getConnection();
-        externalDataMapping = new PgSQLDataMapping1(connection, dataDir);
+        switch (mapping) {
+            case 1:
+                externalDataMapping = new PgSQLDataMapping1(connection, dataDir);
+                break;
+            case 2:
+                externalDataMapping = new PgSQLDataMapping2(connection, dataDir);
+                break;
+            default:
+                throw new BenchmarkException("No Such Mapping");
+        }
     }
 
     @Override

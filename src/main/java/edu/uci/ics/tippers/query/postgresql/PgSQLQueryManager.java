@@ -78,6 +78,7 @@ public class PgSQLQueryManager extends BaseQueryManager{
     public Duration runQuery1(String sensorId) throws BenchmarkException {
         switch (mapping) {
             case 1:
+            case 2:
                 String query = "SELECT name FROM SENSOR WHERE id=?";
                 try {
                     PreparedStatement stmt = connection.prepareStatement(query);
@@ -96,6 +97,7 @@ public class PgSQLQueryManager extends BaseQueryManager{
     public Duration runQuery2(String sensorTypeName, List<String> locationIds) throws BenchmarkException {
         switch (mapping) {
             case 1:
+            case 2:
                 String query = "SELECT sen.name FROM SENSOR sen, SENSOR_TYPE st, " +
                         "COVERAGE_INFRASTRUCTURE ci WHERE sen.SENSOR_TYPE_ID=st.id AND st.name=? " +
                         "AND sen.id=ci.SENSOR_ID AND ci.INFRASTRUCTURE_ID=ANY(?)";
@@ -132,6 +134,8 @@ public class PgSQLQueryManager extends BaseQueryManager{
                     e.printStackTrace();
                     throw new BenchmarkException("Error Running Query");
                 }
+            case 2:
+                return Constants.MAX_DURATION;
             default:
                 throw new BenchmarkException("No Such Mapping");
         }
@@ -156,6 +160,8 @@ public class PgSQLQueryManager extends BaseQueryManager{
                     e.printStackTrace();
                     throw new BenchmarkException("Error Running Query");
                 }
+            case 2:
+                return Constants.MAX_DURATION;
             default:
                 throw new BenchmarkException("No Such Mapping");
         }
@@ -223,6 +229,8 @@ public class PgSQLQueryManager extends BaseQueryManager{
                     e.printStackTrace();
                     throw new BenchmarkException("Error Running Query");
                 }
+            case 2:
+                return Constants.MAX_DURATION;
             default:
                 throw new BenchmarkException("No Such Mapping");
         }
@@ -251,6 +259,8 @@ public class PgSQLQueryManager extends BaseQueryManager{
                     e.printStackTrace();
                     throw new BenchmarkException("Error Running Query");
                 }
+            case 2:
+                return Constants.MAX_DURATION;
             default:
                 throw new BenchmarkException("No Such Mapping");
         }

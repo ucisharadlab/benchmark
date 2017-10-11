@@ -104,13 +104,31 @@ CREATE TABLE COVERAGE_INFRASTRUCTURE (
    FOREIGN KEY (SENSOR_ID) REFERENCES SENSOR (ID)
 ) ;
 
-CREATE TABLE OBSERVATION (
+CREATE TABLE WeMoObservation (
   id varchar(255) NOT NULL,
-  payload varchar(255) DEFAULT NULL,
+  currentMilliWatts integer DEFAULT NULL,
+  onTodaySeconds integer DEFAULT NULL,
   timeStamp timestamp NOT NULL,
   sensor_id varchar(255) DEFAULT NULL,
   PRIMARY KEY (id),
    FOREIGN KEY (sensor_id) REFERENCES SENSOR (ID)
 ) ;
 
+CREATE TABLE WiFiAPObservation (
+  id varchar(255) NOT NULL,
+  clientId varchar(255) DEFAULT NULL,
+  timeStamp timestamp NOT NULL,
+  sensor_id varchar(255) DEFAULT NULL,
+  PRIMARY KEY (id),
+   FOREIGN KEY (sensor_id) REFERENCES SENSOR (ID)
+) ;
+
+CREATE TABLE ThermometerObservation (
+  id varchar(255) NOT NULL,
+  temperature integer DEFAULT NULL,
+  timeStamp timestamp NOT NULL,
+  sensor_id varchar(255) DEFAULT NULL,
+  PRIMARY KEY (id),
+   FOREIGN KEY (sensor_id) REFERENCES SENSOR (ID)
+) ;
 

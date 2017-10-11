@@ -30,10 +30,16 @@ public class PgSQLDataMapping1 extends PgSQLBaseDataMapping {
     }
 
     public void addAll() throws BenchmarkException{
-        addMetadata();
-        addDevices();
-        // addPresenceAndOccupancyData();
-        addSensorsAndObservations();
+        try {
+            connection.setAutoCommit(false);
+            addMetadata();
+            addDevices();
+            addSensorsAndObservations();
+            connection.commit();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public void addMetadata() throws BenchmarkException {

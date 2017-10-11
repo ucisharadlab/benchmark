@@ -4,6 +4,7 @@ import edu.uci.ics.tippers.common.Database;
 import edu.uci.ics.tippers.connection.postgresql.PgSQLConnectionManager;
 import edu.uci.ics.tippers.data.BaseDataUploader;
 import edu.uci.ics.tippers.data.postgresql.mappings.PgSQLDataMapping1;
+import edu.uci.ics.tippers.data.postgresql.mappings.PgSQLDataMapping2;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 
 import java.sql.Connection;
@@ -13,7 +14,7 @@ import java.time.Instant;
 public class PgSQLDataUploader extends BaseDataUploader{
 
     private Connection connection;
-    private PgSQLDataMapping1 dataMapping;
+    private PgSQLBaseDataMapping dataMapping;
 
     public PgSQLDataUploader(int mapping, String dataDir) {
         super(mapping, dataDir);
@@ -21,6 +22,9 @@ public class PgSQLDataUploader extends BaseDataUploader{
         switch (mapping) {
             case 1:
                 dataMapping = new PgSQLDataMapping1(connection, dataDir);
+                break;
+            case 2:
+                dataMapping = new PgSQLDataMapping2(connection, dataDir);
                 break;
             default:
                 throw new BenchmarkException("No Such Mapping");

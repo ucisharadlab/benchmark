@@ -10,6 +10,7 @@ import edu.uci.ics.tippers.connection.asterixdb.AsterixDBConnectionManager;
 import edu.uci.ics.tippers.data.BaseDataUploader;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.model.observation.Observation;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -51,11 +52,12 @@ public class AsterixDBDataUploader extends BaseDataUploader {
         return Duration.between(start, end);
     }
 
-    public String prepareInsertQuery(String dataset, DataFiles dataFile) throws BenchmarkException {
-        // TODO: Modify Observation Insertion Code
-        if (dataFile == DataFiles.OBS)
-            return String.format("LOAD DATASET %s USING localfs((\"path\"=\"%s://%s\"),(\"format\"=\"adm\"))",
+    public String prepareFastUploadQuery(String dataset, DataFiles dataFile)  throws BenchmarkException {
+        return String.format("LOAD DATASET %s USING localfs((\"path\"=\"%s://%s\"),(\"format\"=\"adm\"))",
                 "Observation", "localhost", dataDir + dataFile.getPath());
+    }
+
+    public String prepareInsertQuery(String dataset, DataFiles dataFile) throws BenchmarkException {
 
         String values = null;
         try {
@@ -72,6 +74,7 @@ public class AsterixDBDataUploader extends BaseDataUploader {
     public void addInfrastructureData() throws BenchmarkException {
         switch (mapping) {
             case 1:
+            case 2:
                 connectionManager.sendQuery(prepareInsertQuery("InfrastructureType", DataFiles.INFRA_TYPE));
                 connectionManager.sendQuery(prepareInsertQuery("Location", DataFiles.LOCATION));
                 connectionManager.sendQuery(prepareInsertQuery("Infrastructure", DataFiles.INFRA));
@@ -83,6 +86,7 @@ public class AsterixDBDataUploader extends BaseDataUploader {
     public void addUserData() throws BenchmarkException {
         switch (mapping) {
             case 1:
+            case 2:
                 connectionManager.sendQuery(prepareInsertQuery("UserGroup", DataFiles.GROUP));
                 connectionManager.sendQuery(prepareInsertQuery("User", DataFiles.USER));
                 break;
@@ -96,6 +100,33 @@ public class AsterixDBDataUploader extends BaseDataUploader {
                 connectionManager.sendQuery(prepareInsertQuery("SensorType", DataFiles.SENSOR_TYPE));
                 connectionManager.sendQuery(prepareInsertQuery("Sensor", DataFiles.SENSOR));
                 break;
+            case 2:
+                connectionManager.sendQuery(prepareInsertQuery("SensorType", DataFiles.SENSOR_TYPE));
+                String values = null;
+                try {
+                    values = new String(Files.readAllBytes(Paths.get(dataDir + DataFiles.SENSOR.getPath())),
+                            StandardCharsets.UTF_8);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Reading Data Files");
+                }
+                JSONArray jsonArray = new JSONArray(values);
+                jsonArray.forEach(e-> {
+                    JSONObject docToInsert = (JSONObject)e;
+                    docToInsert.put("infrastructureId", docToInsert.getJSONObject("infrastructure").getString("id"));
+                    docToInsert.remove("infrastructure");
+                    docToInsert.put("ownerId", docToInsert.getJSONObject("owner").getString("id"));
+                    docToInsert.remove("owner");
+
+                    JSONArray entities = docToInsert.getJSONArray("coverage");
+                    JSONArray entityIds = new JSONArray();
+                    entities.forEach(entityIds::put);
+                    docToInsert.put("coverage", entities);
+
+                    String docString = e.toString();
+                    connectionManager.sendQuery(String.format(QUERY_FORMAT, "Sensor", docString));
+                });
+                break;
         }
     }
 
@@ -105,6 +136,25 @@ public class AsterixDBDataUploader extends BaseDataUploader {
             case 1:
                 connectionManager.sendQuery(prepareInsertQuery("PlatformType", DataFiles.PLT_TYPE));
                 connectionManager.sendQuery(prepareInsertQuery("Platform", DataFiles.PLT));
+                break;
+            case 2:
+                connectionManager.sendQuery(prepareInsertQuery("PlatformType", DataFiles.PLT_TYPE));
+                String values = null;
+                try {
+                    values = new String(Files.readAllBytes(Paths.get(dataDir + DataFiles.PLT.getPath())),
+                            StandardCharsets.UTF_8);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Reading Data Files");
+                }
+                JSONArray jsonArray = new JSONArray(values);
+                jsonArray.forEach(e-> {
+                    JSONObject docToInsert = (JSONObject)e;
+                    docToInsert.put("ownerId", docToInsert.getJSONObject("owner").getString("id"));
+                    docToInsert.remove("owner");
+                    String docString = e.toString();
+                    connectionManager.sendQuery(String.format(QUERY_FORMAT, "Platform", docString));
+                });
                 break;
         }
     }
@@ -122,6 +172,22 @@ public class AsterixDBDataUploader extends BaseDataUploader {
                 Observation obs;
                 while ((obs = reader.readNext()) != null) {
                     JSONObject docToInsert = new JSONObject(gson.toJson(obs, Observation.class));
+                    docToInsert.put("timeStamp", String.format("datetime('%s')", sdf.format(obs.getTimeStamp())));
+                    String docString = docToInsert.toString().replaceAll("\"(datetime\\(.*\\))\"", "$1");
+                    connectionManager.sendQuery(String.format(QUERY_FORMAT, "Observation", docString));
+                }
+                break;
+            case 2:
+                // TODO: Fast Insertion Code
+                reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
+                        Observation.class);
+                gson = new GsonBuilder()
+                        .registerTypeAdapter(JSONObject.class, Converter.<JSONObject>getJSONSerializer())
+                        .create();
+                while ((obs = reader.readNext()) != null) {
+                    JSONObject docToInsert = new JSONObject(gson.toJson(obs, Observation.class));
+                    docToInsert.put("sensorId", obs.getSensor().getId());
+                    docToInsert.remove("sensor");
                     docToInsert.put("timeStamp", String.format("datetime('%s')", sdf.format(obs.getTimeStamp())));
                     String docString = docToInsert.toString().replaceAll("\"(datetime\\(.*\\))\"", "$1");
                     connectionManager.sendQuery(String.format(QUERY_FORMAT, "Observation", docString));

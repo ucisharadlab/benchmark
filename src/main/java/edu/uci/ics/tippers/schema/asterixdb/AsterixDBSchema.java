@@ -12,8 +12,8 @@ import java.io.InputStream;
 
 public class AsterixDBSchema extends BaseSchema {
 
-    private String CREATE_SCHEMA_FILE = "asterixdb/schema/mapping1/create.sqlpp";
-    private String DROP_SCHEMA_FILE = "asterixdb/schema/mapping1/drop.sqlpp";
+    private String CREATE_SCHEMA_FILE = "asterixdb/schema/mapping%s/create.sqlpp";
+    private String DROP_SCHEMA_FILE = "asterixdb/schema/mapping%s/drop.sqlpp";
 
     public AsterixDBSchema(int mapping, String dataDir) {
         super(mapping, dataDir);
@@ -43,12 +43,12 @@ public class AsterixDBSchema extends BaseSchema {
 
     @Override
     public void createSchema() {
-        runSQLPPFile(CREATE_SCHEMA_FILE);
+        runSQLPPFile(String.format(CREATE_SCHEMA_FILE, mapping));
     }
 
     @Override
     public void dropSchema() {
-        runSQLPPFile(DROP_SCHEMA_FILE);
+        runSQLPPFile(String.format(DROP_SCHEMA_FILE, mapping));
     }
 
 }

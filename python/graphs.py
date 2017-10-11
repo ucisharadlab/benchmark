@@ -41,18 +41,23 @@ def generateGraphs():
     with open('../reports/report3.txt') as file:
         report3 = map(lambda x: x.strip(), file.readlines())
 
+    with open('../reports/report4.txt') as file:
+        report4 = map(lambda x: x.strip(), file.readlines())
+
     dataSize = [map(lambda x: int(x.split(":")[1]),  report1[2:9]), map(lambda x: int(x.split(":")[1]),  report2[2:9]),
-                map(lambda x: int(x.split(":")[1]), report3[2:9])]
+                map(lambda x: int(x.split(":")[1]), report3[2:9]), map(lambda x: int(x.split(":")[1]), report4[2:9])]
 
     queryRunTimes = [map(lambda x: x.split(),  filter(lambda x:not x.startswith("-"), report1[14:24])),
                      map(lambda x: x.split(), filter(lambda x: not x.startswith("-"), report2[14:24])),
-                     map(lambda x: x.split(), filter(lambda x: not x.startswith("-"), report3[14:24]))]
+                     map(lambda x: x.split(), filter(lambda x: not x.startswith("-"), report3[14:24])),
+                     map(lambda x: x.split(), filter(lambda x: not x.startswith("-"), report4[14:24]))]
 
     mat = []
-    numObjects = [5200, 28500, 55000]
+    numObjects = [5200, 28500, 55000, 262000]
+
     for q in [2, 4, 5, 6, 7, 8]:
-        values = [[0] * 3 for i in range(5)]
-        for i in range(3):
+        values = [[0] * 4 for i in range(5)]
+        for i in range(4):
             for j in range(5):
                 if q == 2:
                     queryRunTimes[i][j][q] = int(queryRunTimes[i][j][q])*1.0/numObjects[i]
@@ -60,24 +65,24 @@ def generateGraphs():
 
         mat.append(values)
 
-    labels = ['#1', '#2', '#3']
+    labels = ['#1', '#2', '#3', '#4']
 
     dbs = ['AsterixDB', 'CrateDB', 'PostgreSQL', 'MongoDB', 'GridDB']
 
     fig, axes = plt.subplots(nrows=3, ncols=2)
     ax0, ax1, ax2, ax3, ax4, ax5 = axes.flatten()
 
-    drawBar(ax0, mat[0], 3, dbs, "Insert", labels)
+    drawBar(ax0, mat[0], 4, dbs, "Insert", labels)
 
-    drawBar(ax1, mat[1], 3, dbs, "Q2", labels)
+    drawBar(ax1, mat[1], 4, dbs, "Q2", labels)
 
-    drawBar(ax2, mat[2], 3, dbs, "Q3", labels)
+    drawBar(ax2, mat[2], 4, dbs, "Q3", labels)
 
-    drawBar(ax3, mat[3], 3, dbs, "Q4", labels)
+    drawBar(ax3, mat[3], 4, dbs, "Q4", labels)
 
-    drawBar(ax4, mat[4], 3, dbs, "Q5", labels)
+    drawBar(ax4, mat[4], 4, dbs, "Q5", labels)
 
-    drawBar(ax5, mat[5], 3, dbs, "Q6", labels)
+    drawBar(ax5, mat[5], 4, dbs, "Q6", labels)
 
 
     fig.tight_layout()
