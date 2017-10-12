@@ -126,7 +126,7 @@ PRIMARY KEY id;
 
 CREATE FEED ObservationFeed using socket_adapter
     (
-       ("sockets"="localhost:19010"),
+       ("sockets"="localhost:29010"),
        ("address-type"="IP"),
        ("type-name"="ObservationType"),
        ("format"="adm")
