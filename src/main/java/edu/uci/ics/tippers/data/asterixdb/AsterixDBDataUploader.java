@@ -10,6 +10,7 @@ import edu.uci.ics.tippers.connection.asterixdb.AsterixDBConnectionManager;
 import edu.uci.ics.tippers.data.BaseDataUploader;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.model.observation.Observation;
+import org.apache.commons.text.StringEscapeUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -52,9 +53,86 @@ public class AsterixDBDataUploader extends BaseDataUploader {
         return Duration.between(start, end);
     }
 
-    public String prepareFastUploadQuery(String dataset, DataFiles dataFile)  throws BenchmarkException {
+    public String prepareQueryWithLoadFS(String dataset, DataFiles dataFile)  throws BenchmarkException {
         return String.format("LOAD DATASET %s USING localfs((\"path\"=\"%s://%s\"),(\"format\"=\"adm\"))",
                 "Observation", "localhost", dataDir + dataFile.getPath());
+    }
+
+    public void simpleObservationInsert(String dataset, DataFiles dataFile) {
+        switch (mapping) {
+            case 1:
+//                connectionManager.sendQuery(prepareInsertQuery("Observation", DataFiles.OBS));
+                BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
+                        Observation.class);
+                Gson gson = new GsonBuilder()
+                        .registerTypeAdapter(JSONObject.class, Converter.<JSONObject>getJSONSerializer())
+                        .create();
+                Observation obs;
+                while ((obs = reader.readNext()) != null) {
+                    JSONObject docToInsert = new JSONObject(gson.toJson(obs, Observation.class));
+                    docToInsert.put("timeStamp", String.format("datetime('%s')", sdf.format(obs.getTimeStamp())));
+                    String docString = docToInsert.toString().replaceAll("\"(datetime\\(.*\\))\"", "$1");
+                    connectionManager.sendQuery(String.format(QUERY_FORMAT, "Observation", docString));
+                }
+                break;
+            case 2:
+                // TODO: Fast Insertion Code
+                reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
+                        Observation.class);
+                gson = new GsonBuilder()
+                        .registerTypeAdapter(JSONObject.class, Converter.<JSONObject>getJSONSerializer())
+                        .create();
+                while ((obs = reader.readNext()) != null) {
+                    JSONObject docToInsert = new JSONObject(gson.toJson(obs, Observation.class));
+                    docToInsert.put("sensorId", obs.getSensor().getId());
+                    docToInsert.remove("sensor");
+                    docToInsert.put("timeStamp", String.format("datetime('%s')", sdf.format(obs.getTimeStamp())));
+                    String docString = docToInsert.toString().replaceAll("\"(datetime\\(.*\\))\"", "$1");
+                    connectionManager.sendQuery(String.format(QUERY_FORMAT, "Observation", docString));
+                }
+                break;
+        }
+    }
+
+    public void observationInsertThroughFeed() {
+        AsterixDataFeed feed = new AsterixDataFeed("Observation", connectionManager);
+
+        switch (mapping) {
+            case 1:
+//                connectionManager.sendQuery(prepareInsertQuery("Observation", DataFiles.OBS));
+                BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
+                        Observation.class);
+                Gson gson = new GsonBuilder()
+                        .registerTypeAdapter(JSONObject.class, Converter.<JSONObject>getJSONSerializer())
+                        .create();
+                Observation obs;
+                while ((obs = reader.readNext()) != null) {
+                    JSONObject docToInsert = new JSONObject(gson.toJson(obs, Observation.class).replace("\\", "\\\\\\"));
+                    docToInsert.put("timeStamp", String.format("datetime(\"%s\")", sdf.format(obs.getTimeStamp())));
+                    String docString = docToInsert.toString().replaceAll("\"(datetime\\(.*\\))\"", "$1");
+                    feed.sendDataToFeed(docString);
+                }
+                break;
+            case 2:
+                // TODO: Fast Insertion Code
+                reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
+                        Observation.class);
+                gson = new GsonBuilder()
+                        .registerTypeAdapter(JSONObject.class, Converter.<JSONObject>getJSONSerializer())
+                        .create();
+                while ((obs = reader.readNext()) != null) {
+                    JSONObject docToInsert = new JSONObject(
+                            gson.toJson(obs, Observation.class).replace("\\", "\\\\"));
+                    docToInsert.put("sensorId", obs.getSensor().getId());
+                    docToInsert.remove("sensor");
+                    docToInsert.put("timeStamp", String.format("datetime(\"%s\")", sdf.format(obs.getTimeStamp())));
+                    String docString = StringEscapeUtils.escapeJava(docToInsert.toString())
+                            .replaceAll("\"(datetime\\(.*\\))\"", "$1");
+                    feed.sendDataToFeed(docString);
+                }
+                break;
+        }
+        feed.stopFeed();
     }
 
     public String prepareInsertQuery(String dataset, DataFiles dataFile) throws BenchmarkException {
@@ -161,39 +239,7 @@ public class AsterixDBDataUploader extends BaseDataUploader {
 
     @Override
     public void addObservationData() throws BenchmarkException {
-        switch (mapping) {
-            case 1:
-//                connectionManager.sendQuery(prepareInsertQuery("Observation", DataFiles.OBS));
-                BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
-                        Observation.class);
-                Gson gson = new GsonBuilder()
-                        .registerTypeAdapter(JSONObject.class, Converter.<JSONObject>getJSONSerializer())
-                        .create();
-                Observation obs;
-                while ((obs = reader.readNext()) != null) {
-                    JSONObject docToInsert = new JSONObject(gson.toJson(obs, Observation.class));
-                    docToInsert.put("timeStamp", String.format("datetime('%s')", sdf.format(obs.getTimeStamp())));
-                    String docString = docToInsert.toString().replaceAll("\"(datetime\\(.*\\))\"", "$1");
-                    connectionManager.sendQuery(String.format(QUERY_FORMAT, "Observation", docString));
-                }
-                break;
-            case 2:
-                // TODO: Fast Insertion Code
-                reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
-                        Observation.class);
-                gson = new GsonBuilder()
-                        .registerTypeAdapter(JSONObject.class, Converter.<JSONObject>getJSONSerializer())
-                        .create();
-                while ((obs = reader.readNext()) != null) {
-                    JSONObject docToInsert = new JSONObject(gson.toJson(obs, Observation.class));
-                    docToInsert.put("sensorId", obs.getSensor().getId());
-                    docToInsert.remove("sensor");
-                    docToInsert.put("timeStamp", String.format("datetime('%s')", sdf.format(obs.getTimeStamp())));
-                    String docString = docToInsert.toString().replaceAll("\"(datetime\\(.*\\))\"", "$1");
-                    connectionManager.sendQuery(String.format(QUERY_FORMAT, "Observation", docString));
-                }
-                break;
-        }
+        observationInsertThroughFeed();
     }
 
     @Override

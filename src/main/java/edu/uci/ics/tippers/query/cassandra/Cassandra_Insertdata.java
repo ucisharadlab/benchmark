@@ -1,4 +1,4 @@
-package com.ymlin.cassandra;
+package edu.uci.ics.tippers.query.cassandra;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,7 +19,7 @@ import com.datastax.driver.core.Session;
 import com.datastax.driver.core.querybuilder.Insert;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Select.Where;
-import com.datastax.driver.mapping.annotations.Query;
+
 
 
 public class Cassandra_Insertdata 

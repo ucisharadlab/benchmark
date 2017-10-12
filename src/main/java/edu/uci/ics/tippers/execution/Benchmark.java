@@ -80,7 +80,7 @@ public class Benchmark {
 
             // Cleaning up inserted data and dropping created schema
             System.out.println("Cleaning Up Database, Removing Data And Schema ...\n");
-            schemaCreator.dropSchema();
+            //schemaCreator.dropSchema();
 
             System.out.println("---------------------------------------------------------------\n");
 

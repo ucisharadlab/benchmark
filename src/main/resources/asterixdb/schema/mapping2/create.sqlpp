@@ -124,6 +124,15 @@ PRIMARY KEY id;
 CREATE DATASET Observation(ObservationType)
 PRIMARY KEY id;
 
+CREATE FEED ObservationFeed using socket_adapter
+    (
+       ("sockets"="127.0.0.1:19010"),
+       ("address-type"="IP"),
+       ("type-name"="ObservationType"),
+       ("format"="adm")
+    );
+
+CONNECT FEED ObservationFeed TO DATASET Observation;
 
 
 

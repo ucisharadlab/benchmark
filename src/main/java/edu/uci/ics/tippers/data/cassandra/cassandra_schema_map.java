@@ -1,5 +1,4 @@
-package com.ymlin.cassandra;
-
+package edu.uci.ics.tippers.data.cassandra;
 
 import java.util.ArrayList;
 

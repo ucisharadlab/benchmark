@@ -1,4 +1,4 @@
-package com.ymlin.cassandra;
+package edu.uci.ics.tippers.query.cassandra;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +13,6 @@ import com.datastax.driver.core.Session;
 import com.datastax.driver.core.querybuilder.Insert;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Select.Where;
-import com.datastax.driver.mapping.annotations.Query;
 
 
 public class cassandra_query 
