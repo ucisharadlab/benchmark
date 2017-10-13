@@ -71,6 +71,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
     public Duration runQuery1(String sensorId) throws BenchmarkException {
         switch (mapping) {
             case 1:
+            case 2:
                 Instant start = Instant.now();
 
                 MongoCollection<Document> collection = database.getCollection("Sensor");
@@ -102,6 +103,21 @@ public class MongoDBQueryManager extends BaseQueryManager{
 
                 Instant end = Instant.now();
                 return Duration.between(start, end);
+            case 2:
+                start = Instant.now();
+
+                collection = database.getCollection("Sensor");
+                iterable = collection.find(and(
+                        eq("type_.name", sensorTypeName),
+                        in("coverage", locationIds)))
+                        .projection(new Document("name", 1)
+                                .append("_id", 0)
+                                .append("id", 1));
+
+                getResults(iterable, 2);
+
+                end = Instant.now();
+                return Duration.between(start, end);
             default:
                 throw new BenchmarkException("No Such Mapping");
         }
@@ -121,11 +137,30 @@ public class MongoDBQueryManager extends BaseQueryManager{
                         lt("timeStamp", endTime)))
                         .projection(new Document("timeStamp", 1)
                                 .append("_id", 0)
-                                .append("payload.temperature", 1));
+                                .append("payload", 1)
+                                .append("sensor.id", 1));
 
                 getResults(iterable, 3);
 
                 Instant end = Instant.now();
+                return Duration.between(start, end);
+            case 2:
+                start = Instant.now();
+
+                collection = database.getCollection("Observation");
+                iterable = collection.find(
+                        and(
+                                eq("sensorId", sensorId),
+                                gt("timeStamp", startTime),
+                                lt("timeStamp", endTime)))
+                        .projection(new Document("timeStamp", 1)
+                                .append("_id", 0)
+                                .append("payload", 1)
+                                .append("sensorId", 1));
+
+                getResults(iterable, 3);
+
+                end = Instant.now();
                 return Duration.between(start, end);
             default:
                 throw new BenchmarkException("No Such Mapping");
@@ -153,6 +188,24 @@ public class MongoDBQueryManager extends BaseQueryManager{
 
                 Instant end = Instant.now();
                 return Duration.between(start, end);
+            case 2:
+                start = Instant.now();
+
+                collection = database.getCollection("Observation");
+                iterable = collection.find(
+                        and(
+                                in("sensorId", sensorIds),
+                                gt("timeStamp", startTime),
+                                lt("timeStamp", endTime)))
+                        .projection(new Document("timeStamp", 1)
+                                .append("_id", 0)
+                                .append("sensorId", 1)
+                                .append("payload", 1));
+
+                getResults(iterable, 4);
+
+                end = Instant.now();
+                return Duration.between(start, end);
             default:
                 throw new BenchmarkException("No Such Mapping");
         }
@@ -167,6 +220,26 @@ public class MongoDBQueryManager extends BaseQueryManager{
 
                 MongoCollection<Document> collection = database.getCollection("Observation");
                 MongoIterable<Document> iterable = collection.find(
+                        and(
+                                eq("sensor.type_.name", sensorTypeName),
+                                gt("timeStamp", startTime),
+                                lt("timeStamp", endTime),
+                                gt(String.format("payload.%s", payloadAttribute), startPayloadValue),
+                                lt(String.format("payload.%s", payloadAttribute), endPayloadValue)))
+                        .projection(new Document("timeStamp", 1)
+                                .append("_id", 0)
+                                .append("sensor.id", 1)
+                                .append("payload", 1));
+
+                getResults(iterable, 5);
+
+                Instant end = Instant.now();
+                return Duration.between(start, end);
+            case 2:
+                start = Instant.now();
+
+                collection = database.getCollection("Observation");
+                iterable = collection.find(
                         and(
                                 eq("sensor.type_.name", sensorTypeName),
                                 gt("timeStamp", startTime),

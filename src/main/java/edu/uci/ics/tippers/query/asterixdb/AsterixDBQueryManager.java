@@ -62,6 +62,7 @@ public class AsterixDBQueryManager extends BaseQueryManager{
     public Duration runQuery1(String sensorId) throws BenchmarkException {
         switch (mapping) {
             case 1:
+            case 2:
                 return runTimedQuery(
                     String.format("SELECT name FROM Sensor WHERE id = \"%s\";", sensorId), 1
                 );
@@ -82,6 +83,14 @@ public class AsterixDBQueryManager extends BaseQueryManager{
                                         + "}});",
                                 sensorTypeName), 2
                 );
+            case 2:
+                return runTimedQuery(
+                        String.format("SELECT s.id, s.name FROM Sensor s WHERE s.type_.name=\"%s\" AND "
+                                        + "(SOME e IN s.coverage SATISFIES e IN {{"
+                                        + locationIds.stream().map(e -> "\"" + e + "\"" ).collect(Collectors.joining(","))
+                                        + "}});",
+                                sensorTypeName), 2
+                );
             default:
                 throw new BenchmarkException("No Such Mapping");
         }
@@ -97,6 +106,12 @@ public class AsterixDBQueryManager extends BaseQueryManager{
                                 + "AND timeStamp >= datetime(\"%s\") AND timeStamp <= datetime(\"%s\");",
                                 sensorId, sdf.format(startTime), sdf.format(endTime)), 3
                 );
+            case 2:
+                return runTimedQuery(
+                        String.format("SELECT timeStamp, sensorId, payload FROM Observation WHERE sensorId=\"%s\" "
+                                        + "AND timeStamp >= datetime(\"%s\") AND timeStamp <= datetime(\"%s\");",
+                                sensorId, sdf.format(startTime), sdf.format(endTime)), 3
+                );
             default:
                 throw new BenchmarkException("No Such Mapping");
         }
@@ -108,6 +123,13 @@ public class AsterixDBQueryManager extends BaseQueryManager{
             case 1:
                 return runTimedQuery(
                         String.format("SELECT timeStamp, sensor.id, payload FROM Observation WHERE sensor.id IN {{ "
+                                        + sensorIds.stream().map(e -> "\"" + e + "\"").collect(Collectors.joining(","))
+                                        + " }} AND timeStamp >= datetime(\"%s\") AND timeStamp <= datetime(\"%s\");",
+                                sdf.format(startTime), sdf.format(endTime)),  4
+                );
+            case 2:
+                return runTimedQuery(
+                        String.format("SELECT timeStamp, sensorId, payload FROM Observation WHERE sensorId IN {{ "
                                         + sensorIds.stream().map(e -> "\"" + e + "\"").collect(Collectors.joining(","))
                                         + " }} AND timeStamp >= datetime(\"%s\") AND timeStamp <= datetime(\"%s\");",
                                 sdf.format(startTime), sdf.format(endTime)),  4
@@ -131,6 +153,16 @@ public class AsterixDBQueryManager extends BaseQueryManager{
                                 sensorTypeName, sdf.format(startTime), sdf.format(endTime), payloadAttribute,
                                 startPayloadValue, payloadAttribute, endPayloadValue), 5
                 );
+            case 2:
+                return runTimedQuery(
+                        String.format("SELECT timeStamp, sensorId, payload " +
+                                        "FROM Observation, SensorType, Sensor " +
+                                        "WHERE sensor.type_.name = \"%s\" AND timeStamp >= datetime(\"%s\") AND " +
+                                        "timeStamp <= datetime(\"%s\") " +
+                                        "AND payload.%s >= %s AND payload.%s <= %s",
+                                sensorTypeName, sdf.format(startTime), sdf.format(endTime), payloadAttribute,
+                                startPayloadValue, payloadAttribute, endPayloadValue), 5
+                );
             default:
                 throw new BenchmarkException("No Such Mapping");
         }
@@ -150,6 +182,17 @@ public class AsterixDBQueryManager extends BaseQueryManager{
                                 sensorIds.stream().map(e -> "\"" + e + "\"").collect(Collectors.joining(",")) +
                                 " }} AND timeStamp >= datetime(\"%s\") AND timeStamp <= datetime(\"%s\") " +
                                 "GROUP BY sensor.id, get_date_from_datetime(timeStamp)) AS obs GROUP BY obs.id",
+                                sdf.format(startTime), sdf.format(endTime)), 6
+                );
+            case 2:
+                return runTimedQuery(
+                        String.format("SELECT obs.id , AVG(obs.count) FROM " +
+                                        "(SELECT sensorId , get_date_from_datetime(timeStamp), count(*)  AS count " +
+                                        "FROM Observation " +
+                                        "WHERE sensorId IN {{ " +
+                                        sensorIds.stream().map(e -> "\"" + e + "\"").collect(Collectors.joining(",")) +
+                                        " }} AND timeStamp >= datetime(\"%s\") AND timeStamp <= datetime(\"%s\") " +
+                                        "GROUP BY sensorId, get_date_from_datetime(timeStamp)) AS obs GROUP BY obs.id",
                                 sdf.format(startTime), sdf.format(endTime)), 6
                 );
             default:

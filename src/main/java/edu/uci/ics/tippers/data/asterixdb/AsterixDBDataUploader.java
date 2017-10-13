@@ -122,12 +122,11 @@ public class AsterixDBDataUploader extends BaseDataUploader {
                         .create();
                 while ((obs = reader.readNext()) != null) {
                     JSONObject docToInsert = new JSONObject(
-                            gson.toJson(obs, Observation.class).replace("\\", "\\\\"));
+                            gson.toJson(obs, Observation.class).replace("\\", "\\\\\\"));
                     docToInsert.put("sensorId", obs.getSensor().getId());
                     docToInsert.remove("sensor");
                     docToInsert.put("timeStamp", String.format("datetime(\"%s\")", sdf.format(obs.getTimeStamp())));
-                    String docString = StringEscapeUtils.escapeJava(docToInsert.toString())
-                            .replaceAll("\"(datetime\\(.*\\))\"", "$1");
+                    String docString = docToInsert.toString().replaceAll("\"(datetime\\(.*\\))\"", "$1");
                     feed.sendDataToFeed(docString);
                 }
                 break;
@@ -198,8 +197,8 @@ public class AsterixDBDataUploader extends BaseDataUploader {
 
                     JSONArray entities = docToInsert.getJSONArray("coverage");
                     JSONArray entityIds = new JSONArray();
-                    entities.forEach(entityIds::put);
-                    docToInsert.put("coverage", entities);
+                    entities.forEach(entity->entityIds.put(((JSONObject)entity).getString("id")));
+                    docToInsert.put("coverage", entityIds);
 
                     String docString = e.toString();
                     connectionManager.sendQuery(String.format(QUERY_FORMAT, "Sensor", docString));

@@ -88,7 +88,7 @@ CREATE TYPE SensorType As {
 
 CREATE TYPE ObservationType AS {
 	id: string,
-	sensorid: string,
+	sensorId: string,
 	payload: PayloadType,
 	timeStamp: datetime
 };
