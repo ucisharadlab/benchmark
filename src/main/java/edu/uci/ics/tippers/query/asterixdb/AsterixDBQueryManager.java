@@ -155,11 +155,12 @@ public class AsterixDBQueryManager extends BaseQueryManager{
                 );
             case 2:
                 return runTimedQuery(
-                        String.format("SELECT timeStamp, sensorId, payload " +
-                                        "FROM Observation, SensorType, Sensor " +
-                                        "WHERE sensor.type_.name = \"%s\" AND timeStamp >= datetime(\"%s\") AND " +
-                                        "timeStamp <= datetime(\"%s\") " +
-                                        "AND payload.%s >= %s AND payload.%s <= %s",
+                        String.format("SELECT obs.timeStamp, obs.sensorId, obs.payload " +
+                                        "FROM Observation obs, Sensor sen " +
+                                        "WHERE obs.sensorId = sen.id AND sen.type_.name = \"%s\" AND " +
+                                        "obs.timeStamp >= datetime(\"%s\") AND " +
+                                        "obs.timeStamp <= datetime(\"%s\") " +
+                                        "AND obs.payload.%s >= %s AND obs.payload.%s <= %s",
                                 sensorTypeName, sdf.format(startTime), sdf.format(endTime), payloadAttribute,
                                 startPayloadValue, payloadAttribute, endPayloadValue), 5
                 );
@@ -186,13 +187,13 @@ public class AsterixDBQueryManager extends BaseQueryManager{
                 );
             case 2:
                 return runTimedQuery(
-                        String.format("SELECT obs.id , AVG(obs.count) FROM " +
+                        String.format("SELECT obs.sensorId , AVG(obs.count) FROM " +
                                         "(SELECT sensorId , get_date_from_datetime(timeStamp), count(*)  AS count " +
                                         "FROM Observation " +
                                         "WHERE sensorId IN {{ " +
                                         sensorIds.stream().map(e -> "\"" + e + "\"").collect(Collectors.joining(",")) +
                                         " }} AND timeStamp >= datetime(\"%s\") AND timeStamp <= datetime(\"%s\") " +
-                                        "GROUP BY sensorId, get_date_from_datetime(timeStamp)) AS obs GROUP BY obs.id",
+                                        "GROUP BY sensorId, get_date_from_datetime(timeStamp)) AS obs GROUP BY obs.sensorId",
                                 sdf.format(startTime), sdf.format(endTime)), 6
                 );
             default:

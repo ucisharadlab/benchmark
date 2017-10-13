@@ -239,21 +239,29 @@ public class MongoDBQueryManager extends BaseQueryManager{
                 start = Instant.now();
 
                 collection = database.getCollection("Observation");
-                iterable = collection.find(
-                        and(
-                                eq("sensor.type_.name", sensorTypeName),
-                                gt("timeStamp", startTime),
-                                lt("timeStamp", endTime),
-                                gt(String.format("payload.%s", payloadAttribute), startPayloadValue),
-                                lt(String.format("payload.%s", payloadAttribute), endPayloadValue)))
-                        .projection(new Document("timeStamp", 1)
-                                .append("_id", 0)
-                                .append("sensor.id", 1)
-                                .append("payload.temperature", 1));
+
+                Bson lookUp = lookup("Sensor", "sensorId", "id", "sensors");
+
+                Bson match = match(and(
+                        eq("sensors.type_.name", sensorTypeName),
+                        gt("timeStamp", startTime),
+                        lt("timeStamp", endTime),
+                        gt(String.format("payload.%s", payloadAttribute), startPayloadValue),
+                        lt(String.format("payload.%s", payloadAttribute), endPayloadValue)
+                ));
+
+                Bson project = project(
+                        fields(
+                                excludeId(),
+                                include("sensorId", "payload", "timeStamp")
+                        )
+                );
+
+                iterable = collection.aggregate(Arrays.asList(lookUp, match, project));
 
                 getResults(iterable, 5);
 
-                Instant end = Instant.now();
+                end = Instant.now();
                 return Duration.between(start, end);
             default:
                 throw new BenchmarkException("No Such Mapping");
@@ -294,6 +302,38 @@ public class MongoDBQueryManager extends BaseQueryManager{
                 getResults(iterable, 6);
 
                 Instant end = Instant.now();
+                return Duration.between(start, end);
+            case 2:
+                start = Instant.now();
+
+                collection = database.getCollection("Observation");
+
+                match = match(and(
+                        in("sensorId", sensorIds),
+                        gt("timeStamp", startTime),
+                        lt("timeStamp", endTime)));
+
+                project = project(
+                        fields(
+                                excludeId(),
+                                include("sensorId"),
+                                computed(
+                                        "date",
+                                        new Document("$dateToString", new Document("format", "%Y-%m-%d")
+                                                .append("date", "$timeStamp"))
+                                )
+                        )
+                );
+
+                group1 = group(new Document("date", "$date").append("sensorId", "$sensorId"),
+                        sum("count", 1));
+                group2 = group(new Document("sensorId", "$_id.sensorId"), avg("averagePerDay", "$count"));
+
+                iterable = collection.aggregate(Arrays.asList(match, project, group1, group2));
+
+                getResults(iterable, 6);
+
+                end = Instant.now();
                 return Duration.between(start, end);
             default:
                 throw new BenchmarkException("No Such Mapping");

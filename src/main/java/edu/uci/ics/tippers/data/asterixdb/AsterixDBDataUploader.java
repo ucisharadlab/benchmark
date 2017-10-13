@@ -193,7 +193,7 @@ public class AsterixDBDataUploader extends BaseDataUploader {
                     docToInsert.put("infrastructureId", docToInsert.getJSONObject("infrastructure").getString("id"));
                     docToInsert.remove("infrastructure");
                     docToInsert.put("ownerId", docToInsert.getJSONObject("owner").getString("id"));
-                    docToInsert.remove("owner");
+                    docToInsert.remove("infrastructure");
 
                     JSONArray entities = docToInsert.getJSONArray("coverage");
                     JSONArray entityIds = new JSONArray();

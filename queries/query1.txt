@@ -3,8 +3,8 @@
 1,thermometer1
 1,thermometer1
 1,thermometer1
+2,thermometer1
 2,thermometer5
-2,thermometer5
-2,thermometer5
-2,thermometer5
-2,thermometer5
+2,thermometer4
+2,thermometer3
+2,thermometer2

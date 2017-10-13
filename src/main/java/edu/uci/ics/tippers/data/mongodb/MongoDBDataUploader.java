@@ -138,12 +138,12 @@ public class MongoDBDataUploader extends BaseDataUploader{
                 addDataToCollection("Sensor", DataFiles.SENSOR);
                 break;
             case 2:
-                addDataToCollection("SensorType", DataFiles.PLT_TYPE);
+                addDataToCollection("SensorType", DataFiles.SENSOR_TYPE);
 
                 MongoCollection collection = database.getCollection("Sensor");
                 String values = null;
                 try {
-                    values = new String(Files.readAllBytes(Paths.get(dataDir + DataFiles.PLT.getPath())),
+                    values = new String(Files.readAllBytes(Paths.get(dataDir + DataFiles.SENSOR.getPath())),
                             StandardCharsets.UTF_8);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -156,16 +156,17 @@ public class MongoDBDataUploader extends BaseDataUploader{
                     docToInsert.put("ownerId", ((Document)docToInsert.get("owner")).getString("id"));
                     docToInsert.remove("owner");
                     docToInsert.put("infrastructureId", ((Document)docToInsert.get("infrastructure")).getString("id"));
-                    docToInsert.remove("owner");
+                    docToInsert.remove("infrastructure");
 
                     List<Document> entities = (List<Document>) docToInsert.get("coverage");
                     JSONArray entityIds = new JSONArray();
-                    entities.forEach(entityIds::put);
-                    docToInsert.put("coverage", entities);
+                    entities.forEach(entity->entityIds.put(entity.getString("id")));
+                    docToInsert.put("coverage", entityIds);
 
                     documents.add(docToInsert);
                 });
                 collection.insertMany(documents);
+                break;
             default:
                 throw new BenchmarkException("Error Inserting Data");
         }
@@ -199,6 +200,7 @@ public class MongoDBDataUploader extends BaseDataUploader{
                     documents.add(docToInsert);
                 });
                 collection.insertMany(documents);
+                break;
             default:
                 throw new BenchmarkException("Error Inserting Data");
         }

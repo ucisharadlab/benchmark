@@ -1,6 +1,6 @@
 # time(s), sensorId, startTime, endTime
 5,thermometer4;thermometer6;thermometer7,2017-11-01T00:00:00Z,2017-11-07T010:10:10Z
-5,thermometer4;thermometer6;thermometer7,2017-11-01T00:00:00Z,2017-11-07T010:10:10Z
-5,thermometer4;thermometer6;thermometer7,2017-11-01T00:00:00Z,2017-11-07T010:10:10Z
-5,thermometer4;thermometer6;thermometer7,2017-11-01T00:00:00Z,2017-11-07T010:10:10Z
-5,thermometer4;thermometer6;thermometer7,2017-11-01T00:00:00Z,2017-11-07T010:10:10Z
+5,thermometer1;thermometer6;thermometer7,2017-11-01T00:00:00Z,2017-11-07T009:10:10Z
+5,thermometer4;thermometer3;thermometer7,2017-11-01T00:00:00Z,2017-11-07T007:10:10Z
+5,thermometer3;thermometer2;thermometer7,2017-11-01T00:00:00Z,2017-11-07T006:10:10Z
+5,thermometer1;thermometer5;thermometer7,2017-11-01T00:00:00Z,2017-11-07T005:10:10Z
