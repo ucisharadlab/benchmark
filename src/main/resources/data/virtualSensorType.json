@@ -1,23 +1,61 @@
 [
   {
-    "id": "WiFiToLocation",
-    "name": "WiFiToLocation",
-    "description": " WIfi To Location type",
-    "inputTypeId": "WiFiAPType",
-    "semanticObservationTypeId" : "location"
+    "id": "WiFiToPresence",
+    "name": "WiFiToPresence",
+    "description": " WIfi To Presence type",
+    "inputType": {
+      "description": "WiFi Access Point Sensors",
+      "mobility": "FIX",
+      "captureFunctionality": "PUSH",
+      "id": "WiFiAP",
+      "payloadSchema": "[{\"clientId\": \"STRING\"}]",
+      "name": "WiFiAP"
+    },
+    "semanticObservationType" : {
+      "id": "presence",
+      "name": "presence",
+      "description": "Location Semantic Observation",
+      "payloadSchema": "[{\"location\": \"STRING\"}]"
+
+    }
   },
   {
-    "id": "WemoToLocation",
-    "name": "WemoToLocation",
-    "description": " Wemo To Location type",
-    "inputTypeId": "EnergyMeterType",
-    "semanticObservationTypeId" : "temperature"
+    "id": "WemoToPresence",
+    "name": "WemoToPresence",
+    "description": " Wemo To Presence type",
+    "inputType": {
+      "description": "WeMo Sensors",
+      "mobility": "FIX",
+      "captureFunctionality": "PUSH",
+      "id": "WeMo",
+      "payloadSchema": "[{\"currentMilliWatts\": \"INTEGER\"}, {\"onTodaySeconds\": \"INTEGER\"}]",
+      "name": "WeMo"
+    },
+    "semanticObservationType" : {
+      "id": "presence",
+      "name": "presence",
+      "description": "Location Semantic Observation",
+      "payloadSchema": "[{\"location\": \"STRING\"}]"
+
+    }
   },
   {
     "id": "WiFiToOccupancy",
     "name": "WiFiToOccupancy",
     "description": " WIfi To Occupancy type",
-    "inputTypeId": "WiFiAPType",
-    "semanticObservationTypeId" : "occupancy"
+    "inputType": {
+      "description": "WiFi Access Point Sensors",
+      "mobility": "FIX",
+      "captureFunctionality": "PUSH",
+      "id": "WiFiAP",
+      "payloadSchema": "[{\"clientId\": \"STRING\"}]",
+      "name": "WiFiAP"
+    },
+    "semanticObservationType" : {
+      "id": "occupancy",
+      "name": "occupancy",
+      "description": "Occupancy Semantic Observation",
+      "payloadSchema": "[{\"occupancy\": \"INTEGER\"}]"
+    }
   }
 ]

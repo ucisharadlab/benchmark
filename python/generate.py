@@ -1,6 +1,6 @@
 import ConfigParser
 import shutil
-import users, sensors, observations
+import users, sensors, observations, semanticobservations
 import datetime
 import sys
 
@@ -47,6 +47,12 @@ def createObservations(config):
     step =  datetime.timedelta(seconds=int(config['observation']['step']))
     observations.createObservations(start, end, step, config['others']["data-dir"], config['others']["output-dir"])
 
+def createSemanticObservations(config):
+    start = datetime.datetime.strptime(config['observation']['start_timestamp'], "%Y-%m-%d %H:%M:%S")
+    end = start + datetime.timedelta(days=int(config['observation']['days']))
+    step = datetime.timedelta(seconds=int(config['observation']['step']))
+    semanticobservations.createObservations(start, end, step, config['others']["data-dir"], config['others']["output-dir"])
+
 if __name__ == "__main__":
     configFile = sys.argv[1]
     configDict = readConfiguration(configFile)
@@ -54,3 +60,4 @@ if __name__ == "__main__":
     createUsers(configDict)
     createSensors(configDict)
     createObservations(configDict)
+    createSemanticObservations(configDict)

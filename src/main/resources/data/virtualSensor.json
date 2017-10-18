@@ -1,19 +1,56 @@
 [
   {
   "id": "vSensor1",
-  "name": "WiFiToPresence",
+  "name": "WiFiToPresenceConverter",
   "description": "Converting WiFi Data to Presence",
   "language": "java",
-  "typeId": "WiFiToLocation",
+  "type_": {
+    "id": "WiFiToPresence",
+    "name": "WiFiToPresence",
+    "description": " WIfi To Presence type",
+    "inputType": {
+      "description": "WiFi Access Point Sensors",
+      "mobility": "FIX",
+      "captureFunctionality": "PUSH",
+      "id": "WiFiAP",
+      "payloadSchema": "[{\"clientId\": \"STRING\"}]",
+      "name": "WiFiAP"
+    },
+    "semanticObservationType" : {
+      "id": "presence",
+      "name": "presence",
+      "description": "Location Semantic Observation",
+      "payloadSchema": "[{\"location\": \"STRING\"}]"
+
+    }
+  },
   "projectName": "WiFiToPresence"
 
  },
   {
     "id": "vSensor2",
-    "name": "WiFiToOccupancy",
+    "name": "WiFiToOccupancyConverter",
     "description": "Converting WiFi Data to Occupancy",
     "language": "java",
-    "typeId": "WiFiToLocation",
+    "type_": {
+      "id": "WiFiToOccupancy",
+      "name": "WiFiToOccupancy",
+      "description": " WIfi To Occupancy type",
+      "inputType": {
+        "description": "WiFi Access Point Sensors",
+        "mobility": "FIX",
+        "captureFunctionality": "PUSH",
+        "id": "WiFiAP",
+        "payloadSchema": "[{\"clientId\": \"STRING\"}]",
+        "name": "WiFiAP"
+      },
+      "semanticObservationType" : {
+        "id": "occupancy",
+        "name": "occupancy",
+        "description": "Occupancy Semantic Observation",
+        "payloadSchema": "[{\"occupancy\": \"INTEGER\"}]"
+      }
+    },
     "projectName": "WiFiToPresence"
 
   }
