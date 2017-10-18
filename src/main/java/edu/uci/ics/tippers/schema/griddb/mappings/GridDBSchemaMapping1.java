@@ -29,7 +29,7 @@ public class GridDBSchemaMapping1 extends GridDBBaseSchemaMapping {
         createMetadataSchema();
         createDeviceSchema();
         createSensorAndObservationSchema();
-        //createVSensorAndSObservationSchema();
+        createVSensorAndSObservationSchema();
 
     }
 
@@ -51,9 +51,12 @@ public class GridDBSchemaMapping1 extends GridDBBaseSchemaMapping {
 
         // TODO: Dropping Observation Collection
 
-//        gridStore.dropCollection("SemanticObservationType");
-//        gridStore.dropCollection("VirtualSensorType");
-//        gridStore.dropCollection("VirtualSensor");
+        gridStore.dropCollection("SemanticObservationType");
+        gridStore.dropCollection("VirtualSensorType");
+        gridStore.dropCollection("VirtualSensor");
+
+        // TODO: Dropping Semantic Observation Collection
+
 
     }
 
@@ -236,17 +239,9 @@ public class GridDBSchemaMapping1 extends GridDBBaseSchemaMapping {
         columnInfoList.add(new ColumnInfo("id", GSType.STRING, indexSet));
         columnInfoList.add(new ColumnInfo("name", GSType.STRING));
         columnInfoList.add(new ColumnInfo("description", GSType.STRING));
-        columnInfoList.add(new ColumnInfo("sourceFileLocation", GSType.STRING));
-        columnInfoList.add(new ColumnInfo("compiledCodeLocation", GSType.STRING));
         columnInfoList.add(new ColumnInfo("language", GSType.STRING));
         columnInfoList.add(new ColumnInfo("projectName", GSType.STRING));
-        columnInfoList.add(new ColumnInfo("compileDirectory", GSType.STRING));
-        columnInfoList.add(new ColumnInfo("executeDirectory", GSType.STRING));
-        columnInfoList.add(new ColumnInfo("compileCommand", GSType.STRING));
-        columnInfoList.add(new ColumnInfo("executeCommand", GSType.STRING));
         columnInfoList.add(new ColumnInfo("typeId", GSType.STRING));
-        columnInfoList.add(new ColumnInfo("config", GSType.STRING));
-
 
         containerInfo.setColumnInfoList(columnInfoList);
         containerInfo.setRowKeyAssigned(true);
@@ -258,9 +253,7 @@ public class GridDBSchemaMapping1 extends GridDBBaseSchemaMapping {
         try {
             soTypeList = (JSONArray) parser.parse(new InputStreamReader(
                     new FileInputStream(dataDir + DataFiles.SO_TYPE.getPath())));
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
+        } catch (IOException | ParseException e) {
             e.printStackTrace();
         }
 
@@ -277,7 +270,7 @@ public class GridDBSchemaMapping1 extends GridDBBaseSchemaMapping {
             tempColumnInfoList.add(new ColumnInfo("timeStamp", GSType.TIMESTAMP));
             tempColumnInfoList.add(new ColumnInfo("semanticEntityId", GSType.STRING));
             tempColumnInfoList.add(new ColumnInfo("virtualSensorId", GSType.STRING));
-
+            tempColumnInfoList.add(new ColumnInfo("typeId", GSType.STRING));
 
             JSONArray schema = null;
             try {

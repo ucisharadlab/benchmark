@@ -12,7 +12,6 @@ public enum DataFiles {
     PLT ("platform.json"),
     SENSOR_TYPE ("sensorType.json"),
     SENSOR ("sensor.json") ,
-    OBS_TYPE ("observationType.json"),
     OBS ("observation.json"),
     VS_TYPE ("virtualSensorType.json"),
     VS ("virtualSensor.json"),

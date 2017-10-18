@@ -26,17 +26,21 @@ public class MongoDBSchema extends BaseSchema {
     @Override
     public void createSchema() throws BenchmarkException {
         database.createCollection("Location");
-        database.createCollection("Region");
         database.createCollection("InfrastructureType");
         database.createCollection("Infrastructure");
         database.createCollection("Group");
         database.createCollection("User");
         database.createCollection("PlatformType");
         database.createCollection("Platform");
-        database.createCollection("ObservationType");
+
         database.createCollection("SensorType");
         database.createCollection("Sensor");
         database.createCollection("Observation");
+
+        database.createCollection("SemanticObservationType");
+        database.createCollection("VirtualSensorType");
+        database.createCollection("VirtualSensor");
+        database.createCollection("SemanticObservation");
     }
 
     @Override

@@ -10,6 +10,8 @@ CREATE TYPE PayloadType AS {
 CREATE TYPE ConfigType AS {
 };
 
+CREATE TYPE SemanticEntityType AS {
+};
 
 /* Types related to infrastructure */
 CREATE TYPE LocationType AS  closed{
@@ -93,6 +95,43 @@ CREATE TYPE ObservationType AS {
 	timeStamp: datetime
 };
 
+/** related to virtual sensors */
+CREATE TYPE SemanticObservationTypeType AS {
+	id: string,
+	name: string,
+	description: string,
+	payloadSchema: string
+};
+
+CREATE TYPE VirtualSensorTypeType AS {
+	id: string,
+	name: string,
+	description: string,
+	inputType: SensorTypeType,
+	semanticObservationType: SemanticObservationTypeType,
+	payloadSchema: string
+};
+
+
+CREATE TYPE VirtualSensorType As {
+    id: string,
+    name: string,
+    description: string,
+    language: string,
+    type_: VirtualSensorTypeType,
+    projectName: string
+};
+
+CREATE TYPE SemanticObservationType AS {
+	id: string,
+	virtualSensor: SensorType,
+	payload: PayloadType,
+	timeStamp: datetime,
+	semanticEntity: SemanticEntityType,
+	type_: SemanticObservationTypeType
+};
+
+
 /* Creating Datasets */
 CREATE DATASET Location(LocationType)
 PRIMARY KEY id;
@@ -124,18 +163,38 @@ PRIMARY KEY id;
 CREATE DATASET Observation(ObservationType)
 PRIMARY KEY id;
 
+CREATE DATASET SemanticObservationType(SemanticObservationTypeType)
+PRIMARY KEY id;
+
+CREATE DATASET VirtualSensorType(VirtualSensorTypeType)
+PRIMARY KEY id;
+
+CREATE DATASET VirtualSensor(VirtualSensorType)
+PRIMARY KEY id;
+
+CREATE DATASET SemanticObservation(SemanticObservationType)
+PRIMARY KEY id;
+
 CREATE FEED ObservationFeed using socket_adapter
     (
        ("sockets"="localhost:29010"),
-       ("address-type"="IP"),
-       ("type-name"="ObservationType"),
+       ("address-type_"="IP"),
+       ("type_-name"="ObservationType"),
        ("format"="adm")
     );
 
 CONNECT FEED ObservationFeed TO DATASET Observation;
 
 
+CREATE FEED SemanticObservationFeed using socket_adapter
+    (
+       ("sockets"="localhost:29011"),
+       ("address-type_"="IP"),
+       ("type_-name"="SemanticObservationType"),
+       ("format"="adm")
+    );
 
+CONNECT FEED SemanticObservationFeed TO DATASET SemanticObservation;
 
 
 

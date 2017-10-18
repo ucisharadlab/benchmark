@@ -10,6 +10,7 @@ import edu.uci.ics.tippers.connection.asterixdb.AsterixDBConnectionManager;
 import edu.uci.ics.tippers.data.BaseDataUploader;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.model.observation.Observation;
+import edu.uci.ics.tippers.model.semanticObservation.SemanticObservation;
 import org.apache.commons.text.StringEscapeUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -61,7 +62,6 @@ public class AsterixDBDataUploader extends BaseDataUploader {
     public void simpleObservationInsert(String dataset, DataFiles dataFile) {
         switch (mapping) {
             case 1:
-//                connectionManager.sendQuery(prepareInsertQuery("Observation", DataFiles.OBS));
                 BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
                         Observation.class);
                 Gson gson = new GsonBuilder()
@@ -99,7 +99,6 @@ public class AsterixDBDataUploader extends BaseDataUploader {
 
         switch (mapping) {
             case 1:
-//                connectionManager.sendQuery(prepareInsertQuery("Observation", DataFiles.OBS));
                 BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
                         Observation.class);
                 Gson gson = new GsonBuilder()
@@ -126,6 +125,49 @@ public class AsterixDBDataUploader extends BaseDataUploader {
                     docToInsert.put("sensorId", obs.getSensor().getId());
                     docToInsert.remove("sensor");
                     docToInsert.put("timeStamp", String.format("datetime(\"%s\")", sdf.format(obs.getTimeStamp())));
+                    String docString = docToInsert.toString().replaceAll("\"(datetime\\(.*\\))\"", "$1");
+                    feed.sendDataToFeed(docString);
+                }
+                break;
+        }
+        feed.stopFeed();
+    }
+
+    public void semanticObservationInsertThroughFeed() {
+        AsterixDataFeed feed = new AsterixDataFeed("SemanticObservation", connectionManager);
+
+        switch (mapping) {
+            case 1:
+                BigJsonReader<SemanticObservation> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
+                        SemanticObservation.class);
+                Gson gson = new GsonBuilder()
+                        .registerTypeAdapter(JSONObject.class, Converter.<JSONObject>getJSONSerializer())
+                        .create();
+                SemanticObservation sobs;
+                while ((sobs = reader.readNext()) != null) {
+                    JSONObject docToInsert = new JSONObject(gson.toJson(sobs, Observation.class).replace("\\", "\\\\\\"));
+                    docToInsert.put("timeStamp", String.format("datetime(\"%s\")", sdf.format(sobs.getTimeStamp())));
+                    String docString = docToInsert.toString().replaceAll("\"(datetime\\(.*\\))\"", "$1");
+                    feed.sendDataToFeed(docString);
+                }
+                break;
+            case 2:
+                // TODO: Fast Insertion Code
+                reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
+                        SemanticObservation.class);
+                gson = new GsonBuilder()
+                        .registerTypeAdapter(JSONObject.class, Converter.<JSONObject>getJSONSerializer())
+                        .create();
+                while ((sobs = reader.readNext()) != null) {
+                    JSONObject docToInsert = new JSONObject(
+                            gson.toJson(sobs, Observation.class).replace("\\", "\\\\\\"));
+                    docToInsert.put("virtualSensorId", sobs.getVirtualSensor().getId());
+                    docToInsert.remove("virtualSensor");
+                    docToInsert.put("typeId", sobs.getType_().getId());
+                    docToInsert.remove("type_");
+                    docToInsert.put("semanticEntityId", sobs.getSemanticEntity().get("id"));
+                    docToInsert.remove("type_");
+                    docToInsert.put("timeStamp", String.format("datetime(\"%s\")", sdf.format(sobs.getTimeStamp())));
                     String docString = docToInsert.toString().replaceAll("\"(datetime\\(.*\\))\"", "$1");
                     feed.sendDataToFeed(docString);
                 }
@@ -243,12 +285,19 @@ public class AsterixDBDataUploader extends BaseDataUploader {
 
     @Override
     public void virtualSensorData() {
-        // TODO: Yet To Implement
+        switch (mapping) {
+            case 1:
+            case 2:
+                connectionManager.sendQuery(prepareInsertQuery("SemanticObservationType", DataFiles.SO_TYPE));
+                connectionManager.sendQuery(prepareInsertQuery("VirtualSensorType", DataFiles.VS_TYPE));
+                connectionManager.sendQuery(prepareInsertQuery("VirtualSensor", DataFiles.VS));
+                break;
+        }
     }
 
     @Override
     public void addSemanticObservationData() {
-        // TODO: Yet To Implement
+        semanticObservationInsertThroughFeed();
     }
 
 }

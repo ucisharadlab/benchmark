@@ -13,6 +13,7 @@ import edu.uci.ics.tippers.data.BaseDataUploader;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.model.observation.Observation;
 import edu.uci.ics.tippers.model.platform.Platform;
+import edu.uci.ics.tippers.model.semanticObservation.SemanticObservation;
 import org.bson.Document;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -96,6 +97,38 @@ public class MongoDBDataUploader extends BaseDataUploader{
                 case 2:
                     docToInsert.put("sensorId", ((Document)docToInsert.get("sensor")).getString("id"));
                     docToInsert.remove("sensor");
+                    break;
+            }
+
+            collection.insertOne(docToInsert);
+        }
+    }
+
+    private void addSemanticObservations(String collectionName, DataFiles dataFile) {
+
+        MongoCollection collection = database.getCollection(collectionName);
+
+        BigJsonReader<SemanticObservation> reader = new BigJsonReader<>(dataDir + dataFile.getPath(),
+                SemanticObservation.class);
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapter(JSONObject.class, Converter.<JSONObject>getJSONSerializer())
+                .create();
+        SemanticObservation obs;
+        while ((obs = reader.readNext()) != null) {
+
+            Document docToInsert = Document.parse(gson.toJson(obs, SemanticObservation.class));
+            docToInsert.put("timeStamp", obs.getTimeStamp());
+
+            switch (mapping) {
+                case 1:
+                    break;
+                case 2:
+                    docToInsert.put("virtualSensorId", ((Document)docToInsert.get("virtualSensor")).getString("id"));
+                    docToInsert.remove("virtualSensor");
+                    docToInsert.put("typeId", ((Document)docToInsert.get("type_")).getString("id"));
+                    docToInsert.remove("type_");
+                    docToInsert.put("semanticEntityId", ((Document)docToInsert.get("semanticEntity")).getString("id"));
+                    docToInsert.remove("semanticEntity");
                     break;
             }
 
@@ -213,11 +246,20 @@ public class MongoDBDataUploader extends BaseDataUploader{
 
     @Override
     public void virtualSensorData() {
-        // TODO: Insert Virtual Sensor Data
+        switch (mapping) {
+            case 1:
+            case 2:
+                addDataToCollection("SemanticObservationType", DataFiles.SO_TYPE);
+                addDataToCollection("VirtualSensorType", DataFiles.VS_TYPE);
+                addDataToCollection("VirtualSensor", DataFiles.VS);
+                break;
+            default:
+                throw new BenchmarkException("Error Inserting Data");
+        }
     }
 
     @Override
     public void addSemanticObservationData() {
-        // TODO: Insert Semantic Observation Data
+        addSemanticObservations("SemanticObservation", DataFiles.SO);
     }
 }

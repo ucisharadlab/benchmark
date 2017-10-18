@@ -6,6 +6,7 @@ import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.common.util.BigJsonReader;
 import edu.uci.ics.tippers.data.griddb.GridDBBaseDataMapping;
 import edu.uci.ics.tippers.model.observation.Observation;
+import edu.uci.ics.tippers.model.semanticObservation.SemanticObservation;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -223,7 +224,6 @@ public class GridDBDataMapping1 extends GridDBBaseDataMapping {
             e.printStackTrace();
         }
 
-
     }
 
     public void addDevices() throws GSException {
@@ -275,98 +275,98 @@ public class GridDBDataMapping1 extends GridDBBaseDataMapping {
         }
     }
 
-//    public void addPresenceAndOccupancyData() throws GSException {
-//
-//        Collection<String, Row> collection;
-//        Row row;
-//
-//        try {
-//            ClassLoader classLoader = getClass().getClassLoader();
-//            jsonObject = (JSONObject) parser.parse(new InputStreamReader(
-//                    classLoader.getResourceAsStream("Presence_dummy_data")));
-//
-//            // Adding Presence
-//            JSONArray presence_list = (JSONArray) jsonObject.get("Presence");
-//
-//            for(int i =0;i<presence_list.size();i++){
-//                JSONObject temp=(JSONObject)presence_list.get(i);
-//                collection = gridStore.getCollection("Presence");
-//
-//                row = collection.createRow();
-//                row.setValue(0, temp.get("id"));
-//                row.setValue(1, temp.get("locationid"));
-//                row.setValue(2, temp.get("userid"));
-//                row.setValue(3, temp.get("timestamp"));
-//                collection.put(row);
-//            }
-//
-//            // Adding Occupancy
-//            jsonObject = (JSONObject) parser.parse(new InputStreamReader(
-//                    classLoader.getResourceAsStream("Occupancy_dummy_data")));
-//
-//            // Adding Presence
-//            JSONArray occupancy_list = (JSONArray) jsonObject.get("Occupancy");
-//
-//            for(int i =0;i<occupancy_list.size();i++){
-//                JSONObject temp=(JSONObject)occupancy_list.get(i);
-//                collection = gridStore.getCollection("Occupancy");
-//
-//                row = collection.createRow();
-//                row.setValue(0, temp.get("id"));
-//                row.setValue(1, temp.get("infraid"));
-//                row.setValue(2, temp.get("occupancy"));
-//                row.setValue(3, temp.get("timestamp"));
-//                collection.put(row);
-//            }
-//
-//        }
-//        catch(ParseException e) {
-//            e.printStackTrace();
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
+    public void addVSAndSemanticObservations() throws GSException {
 
-//    public void addVSAndSemanticObservations() throws GSException {
-//
-//        Collection<String, Row> collection;
-//        Row row;
-//
-//        // Adding SemanticObservationTypes
-//        collection = gridStore.getCollection("User");
-//        row = collection.createRow();
-//        row.setValue(0, "user1");
-//        row.setValue(1, "peeyushg@uci.edu");
-//        row.setValue(2, "Peeyush");
-//        row.setValue(3, new String[]{"group1"});
-//
-//        collection.put(row);
-//
-//        // Adding Virtual Sensor Types
-//        collection = gridStore.getCollection("User");
-//        row = collection.createRow();
-//        row.setValue(0, "user1");
-//        row.setValue(1, "peeyushg@uci.edu");
-//        row.setValue(2, "Peeyush");
-//        row.setValue(3, new String[]{"group1"});
-//
-//        collection.put(row);
-//
-//        // Adding Virtual Sensors
-//        collection = gridStore.getCollection("User");
-//        row = collection.createRow();
-//        row.setValue(0, "user1");
-//        row.setValue(1, "peeyushg@uci.edu");
-//        row.setValue(2, "Peeyush");
-//        row.setValue(3, new String[]{"group1"});
-//
-//        collection.put(row);
-//
-//        //  TODO: Adding dynamic semantic observations
-//
-//    }
+        Collection<String, Row> collection;
+        Row row;
+        try {
+
+            // Adding Semantic Observation Types
+            JSONArray soType_list = (JSONArray) parser.parse(new InputStreamReader(
+                    new FileInputStream(dataDir + DataFiles.SO_TYPE.getPath())));
+
+            for(int i =0;i<soType_list.size();i++){
+                JSONObject temp=(JSONObject)soType_list.get(i);
+                collection = gridStore.getCollection("SemanticObservationType");
+
+                row = collection.createRow();
+                row.setValue(0, temp.get("id"));
+                row.setValue(1, temp.get("name"));
+                row.setValue(2, temp.get("description"));
+                collection.put(row);
+            }
+
+            // Adding Virtual Sensor Types
+            JSONArray vsensorType_list = (JSONArray) parser.parse(new InputStreamReader(
+                    new FileInputStream(dataDir + DataFiles.VS_TYPE.getPath())));
+
+            for(int i =0;i<vsensorType_list.size();i++){
+                JSONObject temp=(JSONObject)vsensorType_list.get(i);
+                collection = gridStore.getCollection("VirtualSensorType");
+
+                row = collection.createRow();
+                row.setValue(0, temp.get("id"));
+                row.setValue(1, temp.get("name"));
+                row.setValue(2, temp.get("description"));
+                row.setValue(3, ((JSONObject)temp.get("inputType")).get("id"));
+                row.setValue(4, ((JSONObject)temp.get("semanticObservationType")).get("id"));
+
+                collection.put(row);
+            }
+
+            // Adding Virtual Sensors
+            JSONArray sensor_list = (JSONArray) parser.parse(new InputStreamReader(
+                    new FileInputStream(dataDir + DataFiles.VS.getPath())));
+
+            for(int i =0;i<sensor_list.size();i++){
+                JSONObject temp=(JSONObject)sensor_list.get(i);
+                collection = gridStore.getCollection("Sensor");
+
+                row = collection.createRow();
+                row.setValue(0, temp.get("id"));
+                row.setValue(1, temp.get("name"));
+                row.setValue(2, temp.get("description"));
+                row.setValue(3, temp.get("language"));
+                row.setValue(4, temp.get("projectname"));
+                row.setValue(5, ((JSONObject)temp.get("type_")).get("id"));
+
+                collection.put(row);
+
+            }
+
+            // Adding Semantic Observations
+            BigJsonReader<SemanticObservation> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
+                    SemanticObservation.class);
+            SemanticObservation sobs = null;
+
+            while ((sobs = reader.readNext()) != null) {
+                String collectionName = Constants.GRIDDB_SO_PREFIX + sobs.getType_().getId();
+
+                //TimeSeries<Row> timeSeries = gridStore.getTimeSeries(collectionName);
+
+                collection = gridStore.getCollection(collectionName);
+
+                row = collection.createRow();
+                row.setValue(0, sobs.getId());
+                row.setValue(1, sobs.getTimeStamp());
+                row.setValue(2, sobs.getSemanticEntity().get("id"));
+                row.setValue(3, sobs.getVirtualSensor().getId());
+                row.setValue(4, sobs.getType_().getId());
+
+                if (sobs.getType_().getId().equals("occupancy")) {
+                    row.setValue(5, sobs.getPayload().get("occupancy").getAsInt());
+                } else if (sobs.getType_().getId().equals("presence")) {
+                    row.setValue(5, sobs.getPayload().get("location").getAsString());
+                }
+                collection.put(row);
+            }
+
+        }
+        catch(ParseException | IOException e) {
+            e.printStackTrace();
+        }
+
+    }
 
 }
 
