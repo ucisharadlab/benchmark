@@ -5,7 +5,8 @@ import datetime
 import sys
 
 common = ["location.json", "infrastructureType.json", "infrastructure.json",
-          "sensorType.json", "group.json", "platformType.json"]
+          "sensorType.json", "group.json", "platformType.json", "virtualSensorType.json", "virtualSensor.json",
+          "semanticObservationType.json"]
 
 
 def readConfiguration(configFile):
