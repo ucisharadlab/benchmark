@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import edu.uci.ics.tippers.model.virtualSensor.VirtualSensor;
 
 import java.util.Calendar;
+import java.util.Date;
 
 public class SemanticObservation {
 
@@ -13,7 +14,7 @@ public class SemanticObservation {
 
 	private JsonObject payload;
 	
-	private Calendar timeStamp;
+	private Date timeStamp;
 	
 	private JsonObject semanticEntity;
 
@@ -36,11 +37,11 @@ public class SemanticObservation {
 		this.type_ = type_;
 	}
 
-	public Calendar getTimeStamp() {
+	public Date getTimeStamp() {
 		return timeStamp;
 	}
 
-	public void setTimeStamp(Calendar timeStamp) {
+	public void setTimeStamp(Date timeStamp) {
 		this.timeStamp = timeStamp;
 	}
 

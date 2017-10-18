@@ -118,6 +118,50 @@ CREATE TABLE ThermometerObservation (
   PRIMARY KEY (id)
 ) ;
 
+CREATE TABLE IF NOT EXISTS SEMANTIC_OBSERVATION_TYPE (
+  ID string NOT NULL,
+  DESCRIPTION string ,
+  NAME varchar(255),
+  PRIMARY KEY (ID)
+) ;
+
+CREATE TABLE IF NOT EXISTS VIRTUAL_SENSOR_TYPE (
+  ID string NOT NULL,
+  NAME string,
+  DESCRIPTION string,
+  INPUT_TYPE_ID string,
+  SEMANTIC_OBSERVATION_TYPE_ID string,
+  PRIMARY KEY (ID)
+) ;
+
+CREATE TABLE IF NOT EXISTS VIRTUAL_SENSOR (
+  ID string NOT NULL,
+  NAME string,
+  DESCRIPTION string,
+  LANGUAGE string,
+  PROJECT_NAME string,
+  TYPE_ID string,
+  PRIMARY KEY (ID)
+) ;
+
+CREATE TABLE IF NOT EXISTS PRESENCE (
+  id string NOT NULL,
+  semantic_entity_id string NOT NULL,
+  location string,
+  timeStamp timestamp NOT NULL,
+  virtual_sensor_id string,
+  PRIMARY KEY (id)
+) ;
+
+CREATE TABLE IF NOT EXISTS OCCUPANCY (
+  id string NOT NULL,
+  semantic_entity_id string NOT NULL,
+  occupancy integer,
+  timeStamp timestamp NOT NULL,
+  virtual_sensor_id string,
+  PRIMARY KEY (id)
+) ;
+
 
 
 

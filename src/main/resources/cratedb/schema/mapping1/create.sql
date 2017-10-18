@@ -100,4 +100,39 @@ CREATE TABLE IF NOT EXISTS OBSERVATION (
   PRIMARY KEY (id)
 ) CLUSTERED INTO 1 shards WITH ( number_of_replicas = 0 );
 
+CREATE TABLE IF NOT EXISTS SEMANTIC_OBSERVATION_TYPE (
+  ID string NOT NULL,
+  DESCRIPTION string ,
+  NAME varchar(255),
+  PRIMARY KEY (ID)
+) ;
+
+CREATE TABLE IF NOT EXISTS VIRTUAL_SENSOR_TYPE (
+  ID string NOT NULL,
+  NAME string,
+  DESCRIPTION string,
+  INPUT_TYPE_ID string,
+  SEMANTIC_OBSERVATION_TYPE_ID string,
+  PRIMARY KEY (ID)
+) ;
+
+CREATE TABLE IF NOT EXISTS VIRTUAL_SENSOR (
+  ID string NOT NULL,
+  NAME string,
+  DESCRIPTION string,
+  LANGUAGE string,
+  PROJECT_NAME string,
+  TYPE_ID string,
+  PRIMARY KEY (ID)
+) ;
+
+CREATE TABLE IF NOT EXISTS SEMANTIC_OBSERVATION (
+  id string NOT NULL,
+  semantic_entity_id string NOT NULL,
+  payload string,
+  timeStamp timestamp NOT NULL,
+  virtual_sensor_id string,
+  type_id string,
+  PRIMARY KEY (id)
+) ;
 
