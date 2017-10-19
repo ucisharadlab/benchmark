@@ -12,6 +12,6 @@ public class Constants {
     public static String QUERY_FILE_FORMAT = "query%s.txt";
     public static int PGSQL_BATCH_SIZE = 100;
     public static String ASTERIX_FEED_IP = "localhost";
-    public static int ASTERIX_FEED_PORT = 29010;
+    public static int ASTERIX_FEED_PORT = 39010;
 
 }

@@ -36,6 +36,7 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
             addMetadata();
             addDevices();
             addSensorsAndObservations();
+            addVSAndSemanticObservations();
             connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -398,14 +399,14 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
                 stmt.setString(2, temp.get("name").toString());
                 stmt.setString(3, temp.get("description").toString());
                 stmt.setString(4, temp.get("language").toString());
-                stmt.setString(5, temp.get("projectname").toString());
+                stmt.setString(5, temp.get("projectName").toString());
                 stmt.setString(6, ((JSONObject)temp.get("type_")).get("id").toString());
 
                 stmt.executeUpdate();
             }
 
             // Adding Semantic Observations
-            BigJsonReader<SemanticObservation> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
+            BigJsonReader<SemanticObservation> reader = new BigJsonReader<>(dataDir + DataFiles.SO.getPath(),
                     SemanticObservation.class);
             SemanticObservation sobs = null;
 
@@ -425,21 +426,19 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
 
                 if (sobs.getType_().getId().equals("presence")) {
                     presenceStmt.setString(3, sobs.getPayload().get("location").getAsString());
-                    presenceStmt.setString(6, sobs.getType_().getId());
                     presenceStmt.setString(5, sobs.getVirtualSensor().getId());
                     presenceStmt.setTimestamp(4, new Timestamp(sobs.getTimeStamp().getTime()));
                     presenceStmt.setString(1, sobs.getId());
-                    presenceStmt.setString(2, sobs.getSemanticEntity().get("id").toString());
+                    presenceStmt.setString(2, sobs.getSemanticEntity().get("id").getAsString());
                     presenceStmt.addBatch();
                     presenceCount ++;
                 } else if (sobs.getType_().getId().equals("occupancy")) {
                     stmt = occupancyStmt;
                     occupancyStmt.setInt(3, sobs.getPayload().get("occupancy").getAsInt());
-                    occupancyStmt.setString(6, sobs.getType_().getId());
                     occupancyStmt.setString(5, sobs.getVirtualSensor().getId());
                     occupancyStmt.setTimestamp(4, new Timestamp(sobs.getTimeStamp().getTime()));
                     occupancyStmt.setString(1, sobs.getId());
-                    occupancyStmt.setString(2, sobs.getSemanticEntity().get("id").toString());
+                    occupancyStmt.setString(2, sobs.getSemanticEntity().get("id").getAsString());
                     occupancyStmt.addBatch();
                     occupancyCount ++;
                 }

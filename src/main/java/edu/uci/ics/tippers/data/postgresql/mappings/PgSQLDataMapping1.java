@@ -32,11 +32,12 @@ public class PgSQLDataMapping1 extends PgSQLBaseDataMapping {
 
     public void addAll() throws BenchmarkException{
         try {
-            //connection.setAutoCommit(false);
+            connection.setAutoCommit(false);
             addMetadata();
             addDevices();
             addSensorsAndObservations();
-            //connection.commit();
+            addVSAndSemanticObservations();
+            connection.commit();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -367,14 +368,14 @@ public class PgSQLDataMapping1 extends PgSQLBaseDataMapping {
                 stmt.setString(2, temp.get("name").toString());
                 stmt.setString(3, temp.get("description").toString());
                 stmt.setString(4, temp.get("language").toString());
-                stmt.setString(5, temp.get("projectname").toString());
+                stmt.setString(5, temp.get("projectName").toString());
                 stmt.setString(6, ((JSONObject)temp.get("type_")).get("id").toString());
 
                 stmt.executeUpdate();
             }
 
             // Adding Semantic Observations
-            BigJsonReader<SemanticObservation> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
+            BigJsonReader<SemanticObservation> reader = new BigJsonReader<>(dataDir + DataFiles.SO.getPath(),
                     SemanticObservation.class);
             SemanticObservation sobs = null;
 
@@ -389,7 +390,7 @@ public class PgSQLDataMapping1 extends PgSQLBaseDataMapping {
                 stmt.setString(5, sobs.getVirtualSensor().getId());
                 stmt.setTimestamp(4, new Timestamp(sobs.getTimeStamp().getTime()));
                 stmt.setString(1, sobs.getId());
-                stmt.setString(2, sobs.getSemanticEntity().get("id").toString());
+                stmt.setString(2, sobs.getSemanticEntity().get("id").getAsString());
                 stmt.setString(3, sobs.getPayload().toString());
 
                 stmt.addBatch();

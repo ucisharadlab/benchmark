@@ -32,7 +32,7 @@ public class GridDBDataMapping1 extends GridDBBaseDataMapping {
     public void addAll() throws GSException {
         addMetadata();
         addDevices();
-        // addPresenceAndOccupancyData();
+        addVSAndSemanticObservations();
         addSensorsAndObservations();
     }
 
@@ -320,14 +320,14 @@ public class GridDBDataMapping1 extends GridDBBaseDataMapping {
 
             for(int i =0;i<sensor_list.size();i++){
                 JSONObject temp=(JSONObject)sensor_list.get(i);
-                collection = gridStore.getCollection("Sensor");
+                collection = gridStore.getCollection("VirtualSensor");
 
                 row = collection.createRow();
                 row.setValue(0, temp.get("id"));
                 row.setValue(1, temp.get("name"));
                 row.setValue(2, temp.get("description"));
                 row.setValue(3, temp.get("language"));
-                row.setValue(4, temp.get("projectname"));
+                row.setValue(4, temp.get("projectName"));
                 row.setValue(5, ((JSONObject)temp.get("type_")).get("id"));
 
                 collection.put(row);
@@ -335,7 +335,7 @@ public class GridDBDataMapping1 extends GridDBBaseDataMapping {
             }
 
             // Adding Semantic Observations
-            BigJsonReader<SemanticObservation> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
+            BigJsonReader<SemanticObservation> reader = new BigJsonReader<>(dataDir + DataFiles.SO.getPath(),
                     SemanticObservation.class);
             SemanticObservation sobs = null;
 
@@ -349,7 +349,7 @@ public class GridDBDataMapping1 extends GridDBBaseDataMapping {
                 row = collection.createRow();
                 row.setValue(0, sobs.getId());
                 row.setValue(1, sobs.getTimeStamp());
-                row.setValue(2, sobs.getSemanticEntity().get("id"));
+                row.setValue(2, sobs.getSemanticEntity().get("id").getAsString());
                 row.setValue(3, sobs.getVirtualSensor().getId());
                 row.setValue(4, sobs.getType_().getId());
 

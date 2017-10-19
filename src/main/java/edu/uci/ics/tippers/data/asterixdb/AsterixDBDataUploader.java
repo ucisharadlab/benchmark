@@ -49,6 +49,7 @@ public class AsterixDBDataUploader extends BaseDataUploader {
         addDeviceData();
         addSensorData();
         addObservationData();
+        addSemanticObservationData();
 
         Instant end = Instant.now();
         return Duration.between(start, end);
@@ -138,14 +139,14 @@ public class AsterixDBDataUploader extends BaseDataUploader {
 
         switch (mapping) {
             case 1:
-                BigJsonReader<SemanticObservation> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
+                BigJsonReader<SemanticObservation> reader = new BigJsonReader<>(dataDir + DataFiles.SO.getPath(),
                         SemanticObservation.class);
                 Gson gson = new GsonBuilder()
                         .registerTypeAdapter(JSONObject.class, Converter.<JSONObject>getJSONSerializer())
                         .create();
                 SemanticObservation sobs;
                 while ((sobs = reader.readNext()) != null) {
-                    JSONObject docToInsert = new JSONObject(gson.toJson(sobs, Observation.class).replace("\\", "\\\\\\"));
+                    JSONObject docToInsert = new JSONObject(gson.toJson(sobs, SemanticObservation.class).replace("\\", "\\\\\\"));
                     docToInsert.put("timeStamp", String.format("datetime(\"%s\")", sdf.format(sobs.getTimeStamp())));
                     String docString = docToInsert.toString().replaceAll("\"(datetime\\(.*\\))\"", "$1");
                     feed.sendDataToFeed(docString);
@@ -153,14 +154,14 @@ public class AsterixDBDataUploader extends BaseDataUploader {
                 break;
             case 2:
                 // TODO: Fast Insertion Code
-                reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
+                reader = new BigJsonReader<>(dataDir + DataFiles.SO.getPath(),
                         SemanticObservation.class);
                 gson = new GsonBuilder()
                         .registerTypeAdapter(JSONObject.class, Converter.<JSONObject>getJSONSerializer())
                         .create();
                 while ((sobs = reader.readNext()) != null) {
                     JSONObject docToInsert = new JSONObject(
-                            gson.toJson(sobs, Observation.class).replace("\\", "\\\\\\"));
+                            gson.toJson(sobs, SemanticObservation.class).replace("\\", "\\\\\\"));
                     docToInsert.put("virtualSensorId", sobs.getVirtualSensor().getId());
                     docToInsert.remove("virtualSensor");
                     docToInsert.put("typeId", sobs.getType_().getId());

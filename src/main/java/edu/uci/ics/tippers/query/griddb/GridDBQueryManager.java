@@ -279,7 +279,8 @@ public class GridDBQueryManager extends BaseQueryManager {
                 });
 
                 if (writeOutput) {
-                    writer.writeString(sensorId + ", " + sum[0] /groups.length());
+                    if (groups.length() != 0)
+                        writer.writeString(sensorId + ", " + sum[0] /groups.length());
                 }
             }
             writer.close();

@@ -174,9 +174,9 @@ PRIMARY KEY id;
 
 CREATE FEED ObservationFeed using socket_adapter
     (
-       ("sockets"="127.0.0.1:29010"),
+       ("sockets"="127.0.0.1:39010"),
        ("address-type_"="IP"),
-       ("type_-name"="ObservationType"),
+       ("type-name"="ObservationType"),
        ("format"="adm")
     );
 
@@ -184,9 +184,9 @@ CONNECT FEED ObservationFeed TO DATASET Observation;
 
 CREATE FEED SemanticObservationFeed using socket_adapter
     (
-       ("sockets"="localhost:29011"),
+       ("sockets"="localhost:39010"),
        ("address-type_"="IP"),
-       ("type_-name"="SemanticObservationType"),
+       ("type-name"="SemanticObservationType"),
        ("format"="adm")
     );
 
