@@ -1,16 +1,18 @@
 from helper import Helper
 import helper
 import random
+import json
 
 
 class CounterScale(object):
 
-    def __init__(self):
-        self.outputFilename = "simulatedObs.json"
+    def __init__(self, seedData, outputFile, days, speed, sensors):
+        self.outputFilename = outputFile
+        self.seedData = seedData
+        self.days = days
+        self.speed = speed
+        self.sensors = sensors
         self.helper = Helper()
-
-    def setOutputFileName(self, outputFileName):
-        self.outputFilename = outputFileName
 
     def getRandAroundPayload(self, payload, scaleNoise):
         min = (int)(payload * (1 - scaleNoise))
@@ -27,21 +29,16 @@ class CounterScale(object):
             max = (int)(payload2 * (1 + scaleNoise))
             return random.randint(0, max - min) + min
 
-    def helpWriteToFile(self, jsonWriter, sensorType, timestamp, payload, sensorId, payloadName):
+    def helpWriteToFile(self, jsonWriter, timestamp, payload, sensorId, payloadName):
         try:
-            jsonWriter.beginObject()
-            jsonWriter.name("typeId")
-            jsonWriter.value(sensorType)
-            jsonWriter.name("timestamp")
-            jsonWriter.value(timestamp)
-            jsonWriter.name("payload")
-            jsonWriter.beginObject()
-            jsonWriter.name(payloadName)
-            jsonWriter.value(payload)
-            jsonWriter.endObject()
-            jsonWriter.name("sensorId")
-            jsonWriter.value(sensorId)
-            jsonWriter.endObject()
+            object = {
+                "sensorId": sensorId,
+                "timeStamp": timestamp,
+                "payload": {
+                    payloadName: payload
+                }
+            }
+            jsonWriter.write(json.dumps(object) + '\n')
         except Exception as e:
             print (e)
             print ("IO error")
@@ -49,8 +46,6 @@ class CounterScale(object):
         return jsonWriter
 
     def timeScale(self, timeScaleNoise, extendDays):
-        counterObs = CounterObsParser()
-        counterObs.parseData(self.outputFilename)
         sensorTypeIds = counterObs.getTypeIds()
         sensorType = sensorTypeIds.get(0)
         sensorIds = counterObs.getSensorIds()
@@ -63,9 +58,7 @@ class CounterScale(object):
 
         jsonWriter = None
         try:
-            jsonWriter = JsonWriter(FileWriter(self.outputFilename))
-            jsonWriter.setIndent("  ")
-            jsonWriter.beginArray()
+            jsonWriter = open(self.outputFilename, "w+")
             count = 1
 
             for m in range(recordDays):
@@ -74,7 +67,7 @@ class CounterScale(object):
                     timestamp = timestamps.get(i)
                     for j in range(sensorSize):
                         payload = payloads.get(pastObs+i * sensorSize+j)
-                        jsonWriter = self.helpWriteToFile(jsonWriter, sensorType, timestamp, payload, sensorIds.get(j), payloadName)
+                        self.helpWriteToFile(jsonWriter, timestamp, payload, sensorIds.get(j), payloadName)
                         count += 1
 
             for m in range(extendDays):
@@ -83,11 +76,11 @@ class CounterScale(object):
                     timestamp = helper.timeAddDays(timestamps.get(i), pastDays)
                     for j in range(sensorSize):
                         payload = self.getRandAroundPayload(payloads.get(i * sensorSize+j), timeScaleNoise)
-                        jsonWriter = self.helpWriteToFile(jsonWriter, sensorType, timestamp, payload, sensorIds.get(j), payloadName)
+                        self.helpWriteToFile(jsonWriter, timestamp, payload, sensorIds.get(j), payloadName)
                         count += 1
                         print("TimeScale" + count)
 
-            jsonWriter.endArray()
+            jsonWriter.close()
 
         except Exception as e:
             print("IO error")
@@ -113,9 +106,7 @@ class CounterScale(object):
 
         jsonWriter = None
         try:
-            jsonWriter = JsonWriter(FileWriter(self.outputFilename))
-            jsonWriter.setIndent("  ")
-            jsonWriter.beginArray()
+            jsonWriter = open(self.outputFilename, "w+")
 
             count = 1
             for m in range(recordDays):
@@ -123,7 +114,7 @@ class CounterScale(object):
                 for i in range(obsSpeed):
                     for j in range(sensorSize):
                         payload = payloads.get(j+i * sensorSize)
-                        jsonWriter = self.helpWriteToFile(jsonWriter, sensorType, timestamp, payload, sensorIds.get(j), payloadName)
+                        self.helpWriteToFile(jsonWriter, timestamp, payload, sensorIds.get(j), payloadName)
                         count += 1
                         print("SpeedScale" + count)
 
@@ -131,8 +122,9 @@ class CounterScale(object):
 
                     for k in range(speedScaleNum-1):
                         for j in range(sensorSize):
-                            payload = self.getRandBetweenPayloads(payloads.get(i * sensorSize+j), payloads.get(i * sensorSize+j+sensorSize), speedScaleNoise);
-                            jsonWriter = self.helpWriteToFile(jsonWriter, sensorType, timestamp, payload, sensorIds.get(j), payloadName)
+                            payload = self.getRandBetweenPayloads(payloads.get(i * sensorSize+j),
+                                                                  payloads.get(i * sensorSize+j+sensorSize), speedScaleNoise)
+                            self.helpWriteToFile(jsonWriter, timestamp, payload, sensorIds.get(j), payloadName)
                             count += 1
                             print("SpeedScale" + count)
 
@@ -140,7 +132,7 @@ class CounterScale(object):
 
                 for j in range(sensorSize):
                     payload = payloads.get((obsSpeed-1) * sensorSize + j)
-                    jsonWriter = self.helpWriteToFile(jsonWriter, sensorType, timestamp, payload, sensorIds.get(j), payloadName)
+                    self.helpWriteToFile(jsonWriter, timestamp, payload, sensorIds.get(j), payloadName)
                     count += 1
                     print("SpeedScale" + count)
 
@@ -148,11 +140,9 @@ class CounterScale(object):
                     timestamp = helper.increaseTime(timestamp, scaleSpeed)
                     for j in range(sensorSize):
                         payload = self.getRandAroundPayload(payloads.get((obsSpeed-1) * sensorSize + j), speedScaleNoise)
-                        jsonWriter = self.helpWriteToFile(jsonWriter, sensorType, timestamp, payload, sensorIds.get(j), payloadName)
+                        self.helpWriteToFile(jsonWriter, timestamp, payload, sensorIds.get(j), payloadName)
                         count += 1
                         print("SpeedScale" + count)
-
-            jsonWriter.endArray()
 
         except Exception as e:
             print("IO error")
@@ -181,9 +171,7 @@ class CounterScale(object):
 
         jsonWriter = None
         try:
-            jsonWriter = JsonWriter(FileWriter(self.outputFilename))
-            jsonWriter.setIndent("  ")
-            jsonWriter.beginArray()
+            jsonWriter = open(self.outputFilename, "w+")
 
             count = 1
             for m in range(recordDays):
@@ -198,12 +186,11 @@ class CounterScale(object):
                         n = random.randint(sensorSize-1)
                         payload = self.getRandAroundPayload(payloads.get(pastObs+i * sensorSize+n), deviceScaleNoise)
 
-                    jsonWriter = self.helpWriteToFile(jsonWriter, sensorType, timestamp, payload, sensorIds.get(j), payloadName)
+                    self.helpWriteToFile(jsonWriter, timestamp, payload, sensorIds.get(j), payloadName)
 
                     count += 1
                     print("DeviceScale" + count)
 
-            jsonWriter.endArray()
         except Exception as e:
             print("IO error")
         finally:
