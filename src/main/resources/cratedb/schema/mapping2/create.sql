@@ -94,34 +94,34 @@ CREATE TABLE IF NOT EXISTS COVERAGE_INFRASTRUCTURE (
 ) ;
 
 CREATE TABLE WeMoObservation (
-  id varchar(255) NOT NULL,
+  id string NOT NULL,
   currentMilliWatts integer ,
   onTodaySeconds integer,
   timeStamp timestamp NOT NULL,
-  sensor_id varchar(255),
+  sensor_id string,
   PRIMARY KEY (id)
 ) ;
 
 CREATE TABLE WiFiAPObservation (
-  id varchar(255) NOT NULL,
-  clientId varchar(255) ,
+  id string NOT NULL,
+  clientId string ,
   timeStamp timestamp NOT NULL,
-  sensor_id varchar(255) ,
+  sensor_id string ,
   PRIMARY KEY (id)
 ) ;
 
 CREATE TABLE ThermometerObservation (
-  id varchar(255) NOT NULL,
+  id string NOT NULL,
   temperature integer ,
   timeStamp timestamp NOT NULL,
-  sensor_id varchar(255),
+  sensor_id string,
   PRIMARY KEY (id)
 ) ;
 
 CREATE TABLE IF NOT EXISTS SEMANTIC_OBSERVATION_TYPE (
   ID string NOT NULL,
   DESCRIPTION string ,
-  NAME varchar(255),
+  NAME string,
   PRIMARY KEY (ID)
 ) ;
 

@@ -91,7 +91,7 @@ public abstract class BaseQueryManager {
             }
 
             queryRunTimes.put(1, runTime.dividedBy(numQueries));
-        } catch (Exception e) {
+        } catch (Exception | Error e) {
             e.printStackTrace();
             queryRunTimes.put(1, Constants.MAX_DURATION);
         }
@@ -108,7 +108,7 @@ public abstract class BaseQueryManager {
                 numQueries++;
             }
             queryRunTimes.put(2, runTime.dividedBy(numQueries));
-        } catch (Exception e) {
+        } catch (Exception | Error e) {
             e.printStackTrace();
             queryRunTimes.put(2, Constants.MAX_DURATION);
         }
@@ -133,7 +133,7 @@ public abstract class BaseQueryManager {
 
             }
             queryRunTimes.put(3, runTime.dividedBy(numQueries));
-        } catch (Exception e) {
+        } catch (Exception | Error e) {
             e.printStackTrace();
             queryRunTimes.put(3, Constants.MAX_DURATION);
         }
@@ -157,7 +157,7 @@ public abstract class BaseQueryManager {
                 }
             }
             queryRunTimes.put(4, runTime.dividedBy(numQueries));
-        } catch (Exception e) {
+        } catch (Exception | Error e) {
             e.printStackTrace();
             queryRunTimes.put(4, Constants.MAX_DURATION);
         }
@@ -198,7 +198,7 @@ public abstract class BaseQueryManager {
                 }
             }
             queryRunTimes.put(5, runTime.dividedBy(numQueries));
-        } catch (Exception e) {
+        } catch (Exception | Error e) {
             e.printStackTrace();
             queryRunTimes.put(5, Constants.MAX_DURATION);
         }
@@ -222,7 +222,7 @@ public abstract class BaseQueryManager {
                 }
             }
             queryRunTimes.put(6, runTime.dividedBy(numQueries));
-        } catch (Exception e) {
+        } catch (Exception | Error e) {
             e.printStackTrace();
             queryRunTimes.put(6, Constants.MAX_DURATION);
         }

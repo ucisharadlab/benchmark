@@ -251,27 +251,44 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
             PreparedStatement wemoStmt = connection.prepareStatement(wemoInsert);
             PreparedStatement temStmt = connection.prepareStatement(temperatureInsert);
 
-
+            int batchSize = 100;
+            int wifiCount = 0, wemoCount = 0, thermoCount = 0;
             while ((obs = reader.readNext()) != null) {
 
                 if (obs.getSensor().getType_().getId().equals("Thermometer")) {
-                    stmt = temStmt;
-                    stmt.setInt(4, obs.getPayload().get("temperature").getAsInt());
+                    temStmt.setInt(4, obs.getPayload().get("temperature").getAsInt());
+                    temStmt.setString(3, obs.getSensor().getId());
+                    temStmt.setTimestamp(2, new Timestamp(obs.getTimeStamp().getTime()));
+                    temStmt.setString(1, obs.getId());
+                    temStmt.addBatch();
+                    thermoCount ++;
                 } else if (obs.getSensor().getType_().getId().equals("WiFiAP")) {
-                    stmt = wifiStmt;
-                    stmt.setString(4, obs.getPayload().get("clientId").getAsString());
+                    wifiStmt.setString(4, obs.getPayload().get("clientId").getAsString());
+                    wifiStmt.setString(3, obs.getSensor().getId());
+                    wifiStmt.setTimestamp(2, new Timestamp(obs.getTimeStamp().getTime()));
+                    wifiStmt.setString(1, obs.getId());
+                    wifiStmt.addBatch();
+                    wifiCount ++;
                 } else if (obs.getSensor().getType_().getId().equals("WeMo")) {
-                    stmt = wemoStmt;
-                    stmt.setInt(4, obs.getPayload().get("currentMilliWatts").getAsInt());
-                    stmt.setInt(5, obs.getPayload().get("onTodaySeconds").getAsInt());
+                    wemoStmt.setInt(4, obs.getPayload().get("currentMilliWatts").getAsInt());
+                    wemoStmt.setInt(5, obs.getPayload().get("onTodaySeconds").getAsInt());
+                    wemoStmt.setString(3, obs.getSensor().getId());
+                    wemoStmt.setTimestamp(2, new Timestamp(obs.getTimeStamp().getTime()));
+                    wemoStmt.setString(1, obs.getId());
+                    wemoStmt.addBatch();
+                    wemoCount ++;
                 }
 
-                stmt.setString(3, obs.getSensor().getId());
-                stmt.setTimestamp(2, new Timestamp(obs.getTimeStamp().getTime()));
-                stmt.setString(1, obs.getId());
-
-                stmt.executeUpdate();
+                if (wemoCount % batchSize == 0)
+                    wemoStmt.executeBatch();
+                if (wifiCount % batchSize == 0)
+                    wifiStmt.executeBatch();
+                if (thermoCount % batchSize == 0)
+                    temStmt.executeBatch();
             }
+            wemoStmt.executeBatch();
+            wifiStmt.executeBatch();
+            temStmt.executeBatch();
 
         }
         catch(ParseException | SQLException | IOException e) {
@@ -403,35 +420,40 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
             PreparedStatement occupancyStmt = connection.prepareStatement(occupancyInsert);
 
             int batchSize = 100;
-            int count = 0;
+            int presenceCount = 0, occupancyCount = 0;
             while ((sobs = reader.readNext()) != null) {
 
                 if (sobs.getType_().getId().equals("presence")) {
-                    stmt = presenceStmt;
-                    stmt.setString(3, sobs.getPayload().get("location").getAsString());
+                    presenceStmt.setString(3, sobs.getPayload().get("location").getAsString());
+                    presenceStmt.setString(6, sobs.getType_().getId());
+                    presenceStmt.setString(5, sobs.getVirtualSensor().getId());
+                    presenceStmt.setTimestamp(4, new Timestamp(sobs.getTimeStamp().getTime()));
+                    presenceStmt.setString(1, sobs.getId());
+                    presenceStmt.setString(2, sobs.getSemanticEntity().get("id").toString());
+                    presenceStmt.addBatch();
+                    presenceCount ++;
                 } else if (sobs.getType_().getId().equals("occupancy")) {
                     stmt = occupancyStmt;
-                    stmt.setInt(3, sobs.getPayload().get("occupancy").getAsInt());
+                    occupancyStmt.setInt(3, sobs.getPayload().get("occupancy").getAsInt());
+                    occupancyStmt.setString(6, sobs.getType_().getId());
+                    occupancyStmt.setString(5, sobs.getVirtualSensor().getId());
+                    occupancyStmt.setTimestamp(4, new Timestamp(sobs.getTimeStamp().getTime()));
+                    occupancyStmt.setString(1, sobs.getId());
+                    occupancyStmt.setString(2, sobs.getSemanticEntity().get("id").toString());
+                    occupancyStmt.addBatch();
+                    occupancyCount ++;
                 }
 
-                stmt.setString(6, sobs.getType_().getId());
-                stmt.setString(5, sobs.getVirtualSensor().getId());
-                stmt.setTimestamp(4, new Timestamp(sobs.getTimeStamp().getTime()));
-                stmt.setString(1, sobs.getId());
-                stmt.setString(2, sobs.getSemanticEntity().get("id").toString());
-
-                stmt.addBatch();
-
-                count ++;
-                if (count % batchSize == 0)
-                    stmt.executeBatch();
+                if (presenceCount % batchSize == 0)
+                    presenceStmt.executeBatch();
+                if (occupancyCount % batchSize == 0)
+                    occupancyStmt.executeBatch();
             }
-            stmt.executeBatch();
+            presenceStmt.executeBatch();
+            occupancyStmt.executeBatch();
 
         }
-        catch(ParseException | IOException e) {
-            e.printStackTrace();
-        } catch (SQLException e) {
+        catch(ParseException | IOException | SQLException e) {
             e.printStackTrace();
         }
 

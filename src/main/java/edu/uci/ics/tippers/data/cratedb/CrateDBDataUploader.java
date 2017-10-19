@@ -43,6 +43,7 @@ public class CrateDBDataUploader extends BaseDataUploader{
         Instant start = Instant.now();
         switch (mapping){
             case 1:
+            case 2:
                 externalDataMapping.addAll();
                 break;
             default:

@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.sql.*;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -135,7 +136,41 @@ public class PgSQLQueryManager extends BaseQueryManager{
                     throw new BenchmarkException("Error Running Query");
                 }
             case 2:
-                return Constants.MAX_DURATION;
+                query = "SELECT SENSOR_TYPE_ID FROM SENSOR WHERE ID=?";
+                try {
+                    Instant start = Instant.now();
+                    PreparedStatement stmt = connection.prepareStatement(query);
+                    stmt.setString(1, sensorId);
+                    ResultSet rs = stmt.executeQuery();
+                    String typeId = null;
+                    while(rs.next()) {
+                        typeId = rs.getString(1);
+                    }
+                    rs.close();
+
+                    if ("Thermometer".equals(typeId))
+                        query = "SELECT timeStamp, temperature FROM ThermometerObservation  WHERE timestamp>? AND timestamp<? " +
+                            "AND SENSOR_ID=?";
+                    else if ("WeMo".equals(typeId))
+                        query = "SELECT timeStamp, currentMilliWatts, onTodaySeconds FROM WeMoObservation  WHERE timestamp>? AND timestamp<? " +
+                                "AND SENSOR_ID=?";
+                    else if ("WiFiAP".equals(typeId))
+                        query = "SELECT timeStamp, clientId FROM WiFiAPObservation  WHERE timestamp>? AND timestamp<? " +
+                                "AND SENSOR_ID=?";
+
+                    stmt = connection.prepareStatement(query);
+                    stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
+                    stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
+                    stmt.setString(3, sensorId);
+
+                    runTimedQuery(stmt, 3);
+
+                    Instant end = Instant.now();
+                    return Duration.between(start, end);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
             default:
                 throw new BenchmarkException("No Such Mapping");
         }
@@ -161,7 +196,70 @@ public class PgSQLQueryManager extends BaseQueryManager{
                     throw new BenchmarkException("Error Running Query");
                 }
             case 2:
-                return Constants.MAX_DURATION;
+                query = "SELECT ID, SENSOR_TYPE_ID FROM SENSOR WHERE ID=ANY(?)";
+                try {
+                    Instant start = Instant.now();
+                    PreparedStatement stmt = connection.prepareStatement(query);
+                    Array sensorIdArray = connection.createArrayOf("VARCHAR", sensorIds.toArray());
+                    stmt.setArray(1, sensorIdArray);
+
+                    ResultSet rs = stmt.executeQuery();
+                    String typeId = null;
+                    List<String> wifiSensors = new ArrayList<>();
+                    List<String> wemoSensors = new ArrayList<>();
+                    List<String> thermoSensors = new ArrayList<>();
+
+                    while(rs.next()) {
+                        typeId = rs.getString(2);
+                        if ("Thermometer".equals(typeId))
+                            thermoSensors.add(rs.getString(1));
+                        else if ("WeMo".equals(typeId))
+                            wemoSensors.add(rs.getString(1));
+                        else if ("WiFiAP".equals(typeId))
+                            wifiSensors.add(rs.getString(1));
+                    }
+                    rs.close();
+
+                    if (!thermoSensors.isEmpty()) {
+                        query = "SELECT timeStamp, temperature FROM ThermometerObservation  WHERE timestamp>? AND timestamp<? " +
+                                "AND SENSOR_ID=ANY(?)";
+                        stmt = connection.prepareStatement(query);
+                        stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
+                        stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
+
+                        sensorIdArray = connection.createArrayOf("VARCHAR", thermoSensors.toArray());
+                        stmt.setArray(3, sensorIdArray);
+                        runTimedQuery(stmt, 4);
+                    }
+                    else if ("WeMo".equals(typeId)) {
+                        query = "SELECT timeStamp, currentMilliWatts, onTodaySeconds FROM WeMoObservation  WHERE timestamp>? AND timestamp<? " +
+                                "AND SENSOR_ID=ANY(?)";
+                        stmt = connection.prepareStatement(query);
+                        stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
+                        stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
+
+                        sensorIdArray = connection.createArrayOf("VARCHAR", wemoSensors.toArray());
+                        stmt.setArray(3, sensorIdArray);
+                        runTimedQuery(stmt, 4);
+                    }
+                    else if ("WiFiAP".equals(typeId)) {
+                        query = "SELECT timeStamp, clientId FROM WiFiAPObservation  WHERE timestamp>? AND timestamp<? " +
+                                "AND SENSOR_ID=ANY(?)";
+                        stmt = connection.prepareStatement(query);
+                        stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
+                        stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
+
+                        sensorIdArray = connection.createArrayOf("VARCHAR", wifiSensors.toArray());
+                        stmt.setArray(3, sensorIdArray);
+                        runTimedQuery(stmt, 4);
+                    }
+
+                    Instant end = Instant.now();
+                    return Duration.between(start, end);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
             default:
                 throw new BenchmarkException("No Such Mapping");
         }
@@ -230,7 +328,27 @@ public class PgSQLQueryManager extends BaseQueryManager{
                     throw new BenchmarkException("Error Running Query");
                 }
             case 2:
-                return Constants.MAX_DURATION;
+
+                query = String.format("SELECT * FROM %sOBSERVATION o " +
+                        "WHERE timestamp>? AND timestamp<? AND %s>? AND %s<?", sensorTypeName,
+                        payloadAttribute, payloadAttribute);
+                try {
+                    PreparedStatement stmt = connection.prepareStatement(query);
+
+                    stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
+                    stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
+                    if (startPayloadValue instanceof  Integer) {
+                        stmt.setInt(3, (Integer) startPayloadValue);
+                        stmt.setInt(4, (Integer) endPayloadValue);
+                    } else if (startPayloadValue instanceof  Double) {
+                        stmt.setDouble(3, (Double) startPayloadValue);
+                        stmt.setDouble(4, (Double) endPayloadValue);
+                    }
+                    return runTimedQuery(stmt, 5);
+                } catch (SQLException  e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
             default:
                 throw new BenchmarkException("No Such Mapping");
         }
@@ -260,7 +378,82 @@ public class PgSQLQueryManager extends BaseQueryManager{
                     throw new BenchmarkException("Error Running Query");
                 }
             case 2:
-                return Constants.MAX_DURATION;
+                query = "SELECT ID, SENSOR_TYPE_ID FROM SENSOR WHERE ID=ANY(?)";
+                try {
+                    Instant start = Instant.now();
+                    PreparedStatement stmt = connection.prepareStatement(query);
+                    Array sensorIdArray = connection.createArrayOf("VARCHAR", sensorIds.toArray());
+                    stmt.setArray(1, sensorIdArray);
+
+                    ResultSet rs = stmt.executeQuery();
+                    String typeId = null;
+                    List<String> wifiSensors = new ArrayList<>();
+                    List<String> wemoSensors = new ArrayList<>();
+                    List<String> thermoSensors = new ArrayList<>();
+
+                    while(rs.next()) {
+                        typeId = rs.getString(2);
+                        if ("Thermometer".equals(typeId))
+                            thermoSensors.add(rs.getString(1));
+                        else if ("WeMo".equals(typeId))
+                            wemoSensors.add(rs.getString(1));
+                        else if ("WiFiAP".equals(typeId))
+                            wifiSensors.add(rs.getString(1));
+                    }
+                    rs.close();
+
+                    if (!thermoSensors.isEmpty()) {
+                        query = "SELECT obs.sensor_id, avg(counts) FROM " +
+                                "(SELECT sensor_id, date_trunc('day', timestamp), " +
+                                "count(*) as counts " +
+                                "FROM ThermometerObservation WHERE timestamp>? AND timestamp<? " +
+                                "AND SENSOR_ID = ANY(?) GROUP BY sensor_id, date_trunc('day', timestamp)) " +
+                                "AS obs GROUP BY sensor_id";
+                        stmt = connection.prepareStatement(query);
+                        stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
+                        stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
+
+                        sensorIdArray = connection.createArrayOf("VARCHAR", thermoSensors.toArray());
+                        stmt.setArray(3, sensorIdArray);
+                        runTimedQuery(stmt, 6);
+                    }
+                    else if ("WeMo".equals(typeId)) {
+                        query = "SELECT obs.sensor_id, avg(counts) FROM " +
+                                "(SELECT sensor_id, date_trunc('day', timestamp), " +
+                                "count(*) as counts " +
+                                "FROM WeMoObservation WHERE timestamp>? AND timestamp<? " +
+                                "AND SENSOR_ID = ANY(?) GROUP BY sensor_id, date_trunc('day', timestamp)) " +
+                                "AS obs GROUP BY sensor_id";
+                        stmt = connection.prepareStatement(query);
+                        stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
+                        stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
+
+                        sensorIdArray = connection.createArrayOf("VARCHAR", wemoSensors.toArray());
+                        stmt.setArray(3, sensorIdArray);
+                        runTimedQuery(stmt, 6);
+                    }
+                    else if ("WiFiAP".equals(typeId)) {
+                        query = "SELECT obs.sensor_id, avg(counts) FROM " +
+                                "(SELECT sensor_id, date_trunc('day', timestamp), " +
+                                "count(*) as counts " +
+                                "FROM WiFiAPObservation WHERE timestamp>? AND timestamp<? " +
+                                "AND SENSOR_ID = ANY(?) GROUP BY sensor_id, date_trunc('day', timestamp)) " +
+                                "AS obs GROUP BY sensor_id";
+                        stmt = connection.prepareStatement(query);
+                        stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
+                        stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
+
+                        sensorIdArray = connection.createArrayOf("VARCHAR", wifiSensors.toArray());
+                        stmt.setArray(3, sensorIdArray);
+                        runTimedQuery(stmt, 6);
+                    }
+
+                    Instant end = Instant.now();
+                    return Duration.between(start, end);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
             default:
                 throw new BenchmarkException("No Such Mapping");
         }
