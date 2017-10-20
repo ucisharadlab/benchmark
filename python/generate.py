@@ -1,8 +1,11 @@
 import ConfigParser
-import shutil
-import users, sensors, observations, semanticobservations
 import datetime
+import shutil
 import sys
+
+from metadata import sensors, users
+from observations import observations
+from semanticobservation import semanticobservations
 
 common = ["location.json", "infrastructureType.json", "infrastructure.json",
           "sensorType.json", "group.json", "platformType.json", "virtualSensorType.json", "virtualSensor.json",

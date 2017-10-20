@@ -1,8 +1,5 @@
-import shutil
-import users, sensors, observations
-from datetime import datetime
-import sys
 import json
+from datetime import datetime
 
 common = ["location", "infrastructureType", "infrastructure",
           "sensorType", "group", "platformType", "sensor", "platform", "user"]

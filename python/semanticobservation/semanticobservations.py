@@ -1,9 +1,7 @@
-import datetime
-import random
 import json
-import presence, occupancy
 import uuid
 
+import presence, occupancy
 
 def createObservations(dt, end, step, dataDir, outputDir):
 

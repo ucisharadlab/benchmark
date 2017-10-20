@@ -1,8 +1,9 @@
-import datetime
-import random
 import json
-import wifiap, wemo, temperature
 import uuid
+
+import temperature
+import wemo
+import wifiap
 
 
 def createObservations(dt, end, step, dataDir, outputDir):
