@@ -1,21 +1,33 @@
 import random
 import json
+import datetime
+import uuid
 from parser import Parser
+
 
 SPEED_SCALED_FILE = "data/speedScaledObservation.txt"
 SENSOR_SCALED_FILE = "data/sensorScaledObservation.txt"
+DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
 
 
 class CounterScale(object):
 
-    def __init__(self, dataDir, seedFile, outputFile, days, speed, sensors, type):
+    def __init__(self, dataDir, seedFile, outputFile, origDays, extendDays, origSpeed, extendSpeed, origSensor,
+                 extendSensor, payloadName, speedScaleNoise, timeScaleNoise, deviceScaeNoise, type):
         self.outputFile = outputFile
         self.dataDir = dataDir
         self.seedFile = seedFile
-        self.days = days
-        self.speed = speed
-        self.sensors = sensors
+        self.origDays = origDays
+        self.origSpeed = origSpeed
+        self.origSensor = origSensor
+        self.extendDays = extendDays
+        self.extendSpeed =extendSpeed
+        self.extendSensor = extendSensor
         self.type = type
+        self.payloadName = payloadName
+        self.speedScaleNoise = speedScaleNoise
+        self.timeScaleNoise = timeScaleNoise
+        self.deviceScaleNoise = deviceScaeNoise
         self.writer = open(self.outputFile, "w")
 
     def getRandAroundPayload(self, payload, scaleNoise):
@@ -33,13 +45,14 @@ class CounterScale(object):
             max = (int)(payload2 * (1 + scaleNoise))
             return random.randint(0, max - min) + min
 
-    def writeObject(self, timestamp, payload, sensorId, payloadName):
+    def writeObject(self, timestamp, payload, sensor):
         try:
             object = {
-                "sensorId": sensorId,
+                "id": str(uuid.uuid4()),
+                "sensor": sensor,
                 "timeStamp": timestamp,
                 "payload": {
-                    payloadName: payload
+                    self.payloadName: payload
                 }
             }
             self.writer.write(json.dumps(object) + '\n')
@@ -47,55 +60,46 @@ class CounterScale(object):
             print (e)
             print ("IO error")
 
-    def speedScale(self, speedScaleNum, speedScaleNoise):
-        self.seedData = Parser(self.dataDir, self.seedFile)
-        sensorIds = self.seedData.getSensorIds()
-        payloadValues = self.seedData.getPayloadValues()
-        timestamps = self.seedData.getTimestamps()
-        origSpeed = self.seedData.getOrigSpeed()
-        origDays = self.seedData.getOrigDays()
-        payloadName = self.seedData.getPayloadName()
-        numSensors = len(sensorIds)
+    def speedScale(self):
+        self.seedData = Parser(self.seedFile)
 
         self.writer = None
         try:
             self.writer = open(SPEED_SCALED_FILE, "w")
+            prevObservation = self.seedData.getNext()
+            prevTimestamp = datetime.datetime.strptime(prevObservation['timeStamp'], DATE_FORMAT)
 
-            count = 1
-            for m in range(origDays):
-                timestamp = helper.timeAddDays(timestamps.get(0), m)
-                for i in range(obsSpeed):
-                    for j in range(sensorSize):
-                        payload = payloads.get(j+i * sensorSize)
-                        self.writeObject(timestamp, payload, sensorIds.get(j), payloadName)
-                        count += 1
-                        print("SpeedScale" + count)
+            while prevObservation:
 
-                    timestamp = helper.increaseTime(timestamp, scaleSpeed)
+                self.writeObject(prevObservation['timeStamp'], prevObservation['payload'][self.payloadName],
+                                 prevObservation['sensor'])
 
-                    for k in range(speedScaleNum-1):
-                        for j in range(sensorSize):
-                            payload = self.getRandBetweenPayloads(payloads.get(i * sensorSize+j),
-                                                                  payloads.get(i * sensorSize+j+sensorSize), speedScaleNoise)
-                            self.writeObject(timestamp, payload, sensorIds.get(j), payloadName)
-                            count += 1
-                            print("SpeedScale" + count)
+                currentObservaton = self.seedData.getNext()
 
-                        timestamp = helper.increaseTime(timestamp, scaleSpeed)
+                if currentObservaton is None:
+                    self.writeObject(currentObservaton['timeStamp'], currentObservaton['payload'][self.payloadName],
+                                 currentObservaton['sensor'])
+                    prevObservation = currentObservaton
+                    continue
 
-                for j in range(numSensors):
-                    payload = payloadValues.get((origSpeed-1) * numSensors + j)
-                    self.writeObject(timestamp, payload, sensorIds.get(j), payloadName)
-                    count += 1
-                    print("SpeedScale" + count)
+                currentTimeStamp = datetime.datetime.strptime(currentObservaton['timeStamp'], DATE_FORMAT)
 
-                for k in range(speedScaleNum-1):
-                    timestamp += scaleSpeed
-                    for j in range(numSensors):
-                        payload = self.getRandAroundPayload(payloadValues.get((origSpeed-1) * numSensors + j), speedScaleNoise)
-                        self.writeObject(timestamp, payload, sensorIds.get(j), payloadName)
-                        count += 1
-                        print("SpeedScale" + count)
+                if prevTimestamp > currentTimeStamp:
+                    prevObservation = currentObservaton
+                    continue
+
+                prevPayload = prevObservation['payload'][self.payloadName]
+
+                timestamp = prevTimestamp
+                for i in range(self.extendSpeed/self.origSpeed - 1):
+                    timestamp += datetime.timedelta(seconds=self.extendSpeed)
+                    payload = self.getRandBetweenPayloads(prevPayload,
+                                                          currentObservaton['payload'][self.payloadName],
+                                                          self.speedScaleNoise)
+                    self.writeObject(timestamp, payload, prevObservation['sensor'])
+                    prevPayload = payload
+
+                prevObservation = currentObservaton
 
         except Exception as e:
             print("IO error")
@@ -105,42 +109,29 @@ class CounterScale(object):
             except Exception as e:
                 print("IO error")
 
-    def deviceScale(self, scaleNum, deviceScaleNoise, simulatedName):
-        self.seedData = Parser(self.dataDir, SPEED_SCALED_FILE)
-        sensorIds = self.seedData.getSensorIds()
-        payloadValues = self.seedData.getPayloadValues()
-        timestamps = self.seedData.getTimestamps()
-        origSpeed = self.seedData.getOrigSpeed()
-        origDays = self.seedData.getOrigDays()
-        payloadName = self.seedData.getPayloadName()
-        numSensors = len(sensorIds)
 
-        sensorSize = sensorIds.size()
+    def getCopyOfSensor(self, sensor, numCopy):
+        return sensor
 
-        scaledSensorSize = sensorSize * scaleNum
-        sensorIds = helper.scaleSensorIds(sensorIds, scaleNum, simulatedName)
+    def deviceScale(self):
+        self.seedData = Parser(SPEED_SCALED_FILE)
 
         self.writer = None
         try:
             self.writer = open(SENSOR_SCALED_FILE, "w")
 
-            count = 1
-            for m in range(recordDays):
-                pastObs = m * obsSpeed * sensorSize
-                for i in range(obsSpeed):
-                    timestamp = timestamps.get(m * obsSpeed+i)
+            currentObservation = self.seedData.getNext()
 
-                for j in range(scaledSensorSize):
-                    if j < sensorSize:
-                        payload = payloads.get(pastObs+i * sensorSize+j)
-                    else:
-                        n = random.randint(sensorSize-1)
-                        payload = self.getRandAroundPayload(payloads.get(pastObs+i * sensorSize+n), deviceScaleNoise)
+            while currentObservation:
+                self.writeObject(currentObservation['timeStamp'], currentObservation['payload'][self.payloadName],
+                                 currentObservation['sensor'])
+                for i in range(self.extendSensor/self.origSensor - 1):
+                    payload = self.getRandAroundPayload(currentObservation['payload'][self.payloadName],
+                                                          self.deviceScaleNoise)
+                    self.writeObject(currentObservation['timeStamp'], payload,
+                                     self.getCopyOfSensor(currentObservation['sensor'], i))
 
-                    self.writeObject(timestamp, payload, sensorIds.get(j), payloadName)
-
-                    count += 1
-                    print("DeviceScale" + count)
+                currentObservation = self.seedData.getNext()
 
         except Exception as e:
             print("IO error")
@@ -150,41 +141,26 @@ class CounterScale(object):
             except Exception as e:
                 print("IO error")
 
-    def timeScale(self, timeScaleNoise, extendDays):
-        self.seedData = Parser(self.dataDir, SENSOR_SCALED_FILE)
-        sensorIds = self.seedData.getSensorIds()
-        payloadValues = self.seedData.getPayloadValues()
-        timestamps = self.seedData.getTimestamps()
-        origSpeed = self.seedData.getOrigSpeed()
-        origDays = self.seedData.getOrigDays()
-        payloadName = self.seedData.getPayloadName()
-        numSensors = len(sensorIds)
+    def timeScale(self):
+        self.seedData = Parser(SENSOR_SCALED_FILE)
 
         self.writer = None
         try:
-            self.writer = open(self.outputFilename, "w")
-            count = 1
+            self.writer = open(self.outputFile, "w")
 
-            for m in range(origDays):
-                pastObs = m * origSpeed * numSensors
-                for i in range(origSpeed):
-                    timestamp = timestamps[i]
-                    for j in range(numSensors):
-                        payload = payloadValues[pastObs + i*numSensors + j]
-                        self.writeObject(timestamp, payload, sensorIds[j], payloadName)
-                        count += 1
+            currentObservation = self.seedData.getNext()
 
-            for m in range(extendDays):
-                pastDays = self.days + m
-                for i in range(obsSpeed):
-                    timestamp = helper.timeAddDays(timestamps.get(i), pastDays)
-                    for j in range(sensorSize):
-                        payload = self.getRandAroundPayload(payloads.get(i * sensorSize+j), timeScaleNoise)
-                        self.writeObject(timestamp, payload, sensorIds.get(j), payloadName)
-                        count += 1
-                        print("TimeScale" + count)
+            while currentObservation:
+                self.writeObject(currentObservation['timeStamp'], currentObservation['payload'][self.payloadName],
+                                 currentObservation['sensor'])
+                timestamp = datetime.datetime.strptime(currentObservation['timeStamp'], DATE_FORMAT)
+                for i in range(1, self.extendDays/self.origDays):
+                    payload = self.getRandAroundPayload(currentObservation['payload'][self.payloadName],
+                                                          self.deviceScaleNoise)
+                    timestamp += datetime.timedelta(days=i*self.origDays)
+                    self.writeObject(timestamp, payload, currentObservation['sensor'])
 
-            self.writer.close()
+                currentObservation = self.seedData.getNext()
 
         except Exception as e:
             print("IO error")
@@ -193,6 +169,3 @@ class CounterScale(object):
                 self.writer.close()
             except Exception as e:
                 print("IO error")
-
-
-

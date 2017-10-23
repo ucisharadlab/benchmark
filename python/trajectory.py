@@ -1,44 +1,74 @@
-import helper
-from helper import Helper
+from parser import TrajectoryParser
+import uuid
+import json
+import random
+import datetime
+
 
 class TrajectoryScale(object):
 
-    def __init__(self):
-        self.outputFilename = "simulatedObs.json"
-        self.helper = Helper()
+    def __init__(self, dataDir, presenceOutFile, wifiOutFile, wifiMapFile, numUsers, startTime, days, speed):
+        self.presenceWriter = open(presenceOutFile, "w")
+        self.wifiWriter = open(wifiOutFile, "w")
+        self.dataDir = dataDir
+        self.wifiMapFile = wifiMapFile
+        self.numUsers = numUsers
+        self.startTime = startTime
+        self.days = days
+        self.speed = speed
 
-    def setOutputFileName(self, outputFileName):
-        self.outputFilename = outputFileName
+    def writeWiFiObject(self, timestamp, payload, sensor):
+        try:
+            object = {
+                "id": str(uuid.uuid4()),
+                "sensor": sensor,
+                "timeStamp": timestamp,
+                "payload": {
+                    "location": payload
+                }
+            }
+            self.wifiWriter.write(json.dumps(object) + '\n')
+        except Exception as e:
+            print (e)
+            print ("IO error")
 
-    def generatePersonPaths(self, personNum, timeInterval):
-        rand = Random()
+    def writePresenceObject(self, timestamp, payload, user):
+        try:
+            object = {
+                "id": str(uuid.uuid4()),
+                "semanticEntity": user,
+                "virtualSensor": self.virtualSensor,
+                "type_": self.presenceType,
+                "timeStamp": timestamp,
+                "payload": {
+                    "location": payload
+                }
+            }
+            self.presenceWriter.write(json.dumps(object) + '\n')
+        except Exception as e:
+            print (e)
+            print ("IO error")
 
-        traj = TrajectoryParser1()
+    def getSensorById(self):
+        return None
+
+    def generatePersonPaths(self):
+
+        traj = TrajectoryParser()
         traj.parseData(self.outputFilename)
         connectMap = traj.getConnectMap()
 
-        startTime = "2017-07-11 00:00:00"
-        obsNumPerDay = 24 * 60 / timeInterval
         keys = connectMap.keySet()
         keyArray = keys.toArray(String[keys.size()])
         keySize = keyArray.length
 
-        jsonWriter = None
         try:
-            jsonWriter = JsonWriter(FileWriter(self.outputFilename))
-            jsonWriter.setIndent("  ")
-            jsonWriter.beginArray()
-            for i in range(1, personNum+1):
-                jsonWriter.beginObject()
-                jsonWriter.name("id")
-                jsonWriter.value("Person" + i)
-                jsonWriter.name("path")
-                jsonWriter.beginArray()
-                keyIndex = rand.nextInt(keySize)
+            for i in range(1, self.numUsers+1):
+                keyIndex = random.randint(0, keySize)
                 area = keyArray[keyIndex]
-                timestamp = startTime
+                timestamp = self.startTime
 
-                for j in range(obsNumPerDay):
+                while timestamp < timestamp + datetime.timedelta(days=self.days):
 
                     jsonWriter.beginObject()
                     jsonWriter.name("area")
@@ -47,69 +77,18 @@ class TrajectoryScale(object):
                     jsonWriter.value(timestamp)
                     jsonWriter.endObject()
 
-
-                    timestamp = helper.increaseTime(timestamp, obsNumPerDay)
-
                     connectsOfArea = connectMap.get(area)
                     connectsOfArea.add(area)
                     connectSize = connectsOfArea.size()
-                    area = connectsOfArea.get(rand.nextInt(connectSize))
+                    area = connectsOfArea.get(random.randint(connectSize))
 
-            jsonWriter.endArray()
-            jsonWriter.endObject()
+                    timestamp += datetime.timedelta(seconds=self.speed)
 
-
-            jsonWriter.endArray()
         except Exception as e:
             print("IO error")
         finally:
             try:
-                jsonWriter.close()
+                self.presenceWriter.close()
+                self.wifiWriter.close()
             except Exception as e:
                 print("IO error")
-
-def generateWifiAP(self, timeInterval):
-    traj = TrajectoryParser2()
-    traj.parseData(self.outputFilename)
-    wifiMap = traj.getWifiMap()
-    areas = traj.getAreas()
-    Collections.sort(areas)
-
-    startTime = "2017-07-11 00:00:00"
-    obsNumPerDay = 24 * 60 / timeInterval
-
-    timestamp = startTime
-
-    jsonWriter = None
-    try:
-        jsonWriter = JsonWriter(FileWriter("SimulatedData/wifiAP.json"))
-        jsonWriter.setIndent("  ")
-        jsonWriter.beginArray()
-        for i in range(obsNumPerDay):
-            for area in areas:
-                users = wifiMap.get(area).get(timestamp)
-                if users != None:
-                    jsonWriter.beginObject()
-                    jsonWriter.name("id")
-                    jsonWriter.value(area)
-                    jsonWriter.name("timestamp")
-                    jsonWriter.value(timestamp)
-                    jsonWriter.name("users")
-                    jsonWriter.beginArray()
-                    l = users.size()
-                    j = 0
-                    while j<l:
-                        j+=1
-                        jsonWriter.value(users.get(j))
-
-                    jsonWriter.endArray()
-                    jsonWriter.endObject()
-            timestamp = helper.increaseTime(timestamp, obsNumPerDay)
-        jsonWriter.endArray()
-    except Exception as e:
-        print("IO error")
-    finally:
-        try:
-            jsonWriter.close()
-        except Exception as e:
-            print("IO error")
