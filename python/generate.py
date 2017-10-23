@@ -9,7 +9,7 @@ from semanticobservation import semanticobservations
 
 common = ["location.json", "infrastructureType.json", "infrastructure.json",
           "sensorType.json", "group.json", "platformType.json", "virtualSensorType.json", "virtualSensor.json",
-          "semanticObservationType.json"]
+          "semanticObservationType.json", "wifiMap.json", "observation.json", "semanticObservation.json"]
 
 
 def readConfiguration(configFile):
@@ -44,23 +44,37 @@ def createSensors(config):
                           config['others']["output-dir"])
 
 
-def createObservations(config):
-    start = datetime.datetime.strptime(config['observation']['start_timestamp'], "%Y-%m-%d %H:%M:%S")
-    end = start + datetime.timedelta(days=int(config['observation']['days']))
-    step =  datetime.timedelta(seconds=int(config['observation']['step']))
-    observations.createObservations(start, end, step, config['others']["data-dir"], config['others']["output-dir"])
-
-def createSemanticObservations(config):
+def createObservations(config, pattern):
     start = datetime.datetime.strptime(config['observation']['start_timestamp'], "%Y-%m-%d %H:%M:%S")
     end = start + datetime.timedelta(days=int(config['observation']['days']))
     step = datetime.timedelta(seconds=int(config['observation']['step']))
-    semanticobservations.createObservations(start, end, step, config['others']["data-dir"], config['others']["output-dir"])
+
+    if pattern == "random":
+        observations.createObservations(start, end, step, config['others']["data-dir"], config['others']["output-dir"])
+    elif pattern == "intelligent":
+        observations.createIntelligentObservations(start, int(config['observation']['days']),
+                                                   int(config['observation']['step']), config['others']["data-dir"],
+                                                   config['others']["output-dir"])
+
+def createSemanticObservations(config, pattern):
+    start = datetime.datetime.strptime(config['observation']['start_timestamp'], "%Y-%m-%d %H:%M:%S")
+    end = start + datetime.timedelta(days=int(config['observation']['days']))
+    step = datetime.timedelta(seconds=int(config['observation']['step']))
+
+    if pattern == "random":
+        semanticobservations.createObservations(start, end, step, config['others']["data-dir"], config['others']["output-dir"])
+    elif pattern == "intelligent":
+        pass
 
 if __name__ == "__main__":
     configFile = sys.argv[1]
     configDict = readConfiguration(configFile)
+    pattern = configDict['others']["pattern"]
     copyFiles(common, configDict['others']["data-dir"], configDict['others']["output-dir"])
+
     createUsers(configDict)
-    createSensors(configDict)
-    createObservations(configDict)
-    createSemanticObservations(configDict)
+    if pattern == "random":
+        createSensors(configDict)
+
+    createObservations(configDict, pattern)
+    createSemanticObservations(configDict, pattern)

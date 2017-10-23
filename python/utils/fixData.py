@@ -31,13 +31,13 @@ def createPlatforms():
         platform = {
             "id": id,
             "name": "platform{}".format(i),
-            "owner": users[random.randint(1, len(users) - 1)],
-            "type_": pts[random.randint(1, len(pts) - 1)],
+            "owner": user,
+            "type_": pts[random.randint(0, len(pts) - 1)],
             "hashedMac": id
         }
         platfoms.append(platform)
-        with open(dest + 'platform.json', 'w') as writer:
-            json.dump(platfoms, writer, indent=4)
+    with open(dest + 'platform.json', 'w') as writer:
+        json.dump(platfoms, writer, indent=4)
 
 
 def fixPlatformsFromPlatform():
@@ -89,4 +89,4 @@ def fixSensors():
 def fixObservations():
     pass
 
-fixPlatformsFromPlatform()
+createPlatforms()

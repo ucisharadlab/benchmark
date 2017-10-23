@@ -3,6 +3,9 @@ import random
 import json
 import uuid
 
+from trajectory import TrajectoryScale
+
+
 def createWiFiObservations(dt, end, step, dataDir):
 
     with open(dataDir + 'sensor.json') as data_file:
@@ -42,3 +45,9 @@ def createWiFiObservations(dt, end, step, dataDir):
         dt += step
 
     fpObj.close()
+
+
+def createIntelligentWiFiObs(dt, days, step, dataDir):
+    trajectoryScale = TrajectoryScale(dataDir, "data/presenceData.json", "data/wifiAPdata.json", "wifiMap.json",
+                                      dt, days, step)
+    trajectoryScale.generatePersonPaths()

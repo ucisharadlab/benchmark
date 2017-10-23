@@ -109,7 +109,6 @@ class CounterScale(object):
             except Exception as e:
                 print("IO error")
 
-
     def getCopyOfSensor(self, sensor, numCopy):
         return sensor
 

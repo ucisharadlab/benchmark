@@ -1,5 +1,6 @@
 import json
 
+
 class Parser(object):
 
     def __init__(self, seedFile):
@@ -10,7 +11,3 @@ class Parser(object):
             json.load(self.fp.readline())
         except Exception as e:
             return None
-
-
-class TrajectoryParser(object):
-    pass
