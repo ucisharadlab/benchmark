@@ -64,7 +64,10 @@ def createSemanticObservations(config, pattern):
     if pattern == "random":
         semanticobservations.createObservations(start, end, step, config['others']["data-dir"], config['others']["output-dir"])
     elif pattern == "intelligent":
-        pass
+        semanticobservations.createIntelligentObservations(int(config['seed']["days"]), int(config['observation']["days"]),
+                                                           int(config['seed']["step"]), int(config['observation']["step"]),
+                                                           float(config['seed']["speed-noise"]), float(config['seed']["time-noise"]),
+                                                           config['others']["data-dir"], config['others']["output-dir"])
 
 if __name__ == "__main__":
     configFile = sys.argv[1]

@@ -38,7 +38,8 @@ def createObservations(dt, end, step, dataDir, outputDir):
     finalObj.close()
 
 
-def createIntelligentObservations(dt, end, step, dataDir, outputDir):
+def createIntelligentObservations(origDays, extendDays, origSpeed, extendSpeed, speedScaleNoise,
+                               timeScaleNoise, dataDir, outputDir):
 
     line = None
     finalObj = open(outputDir + 'semanticObservation.json', 'w')
@@ -50,7 +51,8 @@ def createIntelligentObservations(dt, end, step, dataDir, outputDir):
         finalObj.write(line + ",\n")
     prObj.close()
 
-    occupancy.createOccupancy(dt, end, step, dataDir)
+    occupancy.createIntelligentOccupancy(origDays, extendDays, origSpeed, extendSpeed, speedScaleNoise,
+                               timeScaleNoise, dataDir)
     ocObj = open("data/occupancyData.json")
     for line in ocObj:
         finalObj.write(line + ",\n")

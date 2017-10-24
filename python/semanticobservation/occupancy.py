@@ -3,6 +3,8 @@ import random
 import json
 import uuid
 
+from extrapolate import Scale, SemanticScale
+
 MAX_OCCUPANCY = 100
 
 
@@ -35,7 +37,7 @@ def createOccupancy(dt, end, step, dataDir):
     while dt < end:
 
         for i in range(numSenors/8):
-            for j in range(numRooms/10):
+            for j in range(numRooms/50):
                 id = str(uuid.uuid4())
                 sobs = {
                     "id": id,
@@ -51,3 +53,24 @@ def createOccupancy(dt, end, step, dataDir):
         dt += step
 
     fpObj.close()
+
+
+def createIntelligentOccupancy(origDays, extendDays, origSpeed, extendSpeed, speedScaleNoise,
+                               timeScaleNoise, dataDir):
+
+    with open(dataDir + 'semanticObservation.json') as data_file:
+        observations = json.load(data_file)
+
+    seedFile = open("data/seedPresence.json", "w")
+    for observation in observations:
+        if observation['type_']['id'] == "occupancy":
+            seedFile.write(json.dumps(observation) + '\n')
+    seedFile.close()
+
+    seedFile = "data/seedPresence.json"
+    outputFile = "data/occupancyData.json"
+    scale = SemanticScale(dataDir, seedFile, outputFile, origDays, extendDays, origSpeed, extendSpeed,
+                          "occupancy", speedScaleNoise, timeScaleNoise, None, int)
+
+    scale.speedScale()
+    scale.timeScale()

@@ -8,6 +8,6 @@ class Parser(object):
 
     def getNext(self):
         try:
-            json.load(self.fp.readline())
+            return json.loads(self.fp.readline())
         except Exception as e:
             return None
