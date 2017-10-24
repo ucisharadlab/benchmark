@@ -1,324 +1,318 @@
 [
     {
         "owner": {
-            "emailId": "nisha@uci.edu", 
-            "name": "Nisha", 
-            "googleAuthToken": "91ba6c8b-4f7d-4e7b-9a27-fcc052a1a868", 
-            "groups": [
-                {
-                    "description": "Information Systems Group", 
-                    "id": "ISG", 
-                    "name": "ISG"
-                }
-            ], 
-            "id": "user13"
+            "id": "admin", 
+            "emailId": "admin@uci.edu", 
+            "name": "Admin", 
+            "groups": [], 
+            "googleAuthToken": "a9a41d99-1557-45a0-aed0-3aca3e0fd36a"
         }, 
+        "hashedMac": "a0515892-c37e-4c85-89fc-388d8e98eb9a", 
         "type_": {
-            "id": "pt3", 
-            "description": "Laptop Devices", 
-            "name": "Laptop"
+            "description": "Mobile Phone Devices", 
+            "id": "pt1", 
+            "name": "Mobile Phone"
         }, 
-        "id": "81bcb60e-6cfd-4cf1-86bc-fb0d1bc23cb0", 
-        "hashedMac": "81bcb60e-6cfd-4cf1-86bc-fb0d1bc23cb0", 
+        "id": "a0515892-c37e-4c85-89fc-388d8e98eb9a", 
         "name": "platform1"
     }, 
     {
         "owner": {
-            "emailId": "roberto@uci.edu", 
-            "name": "Roberto", 
-            "googleAuthToken": "b1ba6c8b-4f7d-4e7b-9a27-fcc052a1a868", 
+            "id": "user1", 
+            "emailId": "peeyush@uci.edu", 
+            "name": "Peeyush Gupta", 
             "groups": [
                 {
-                    "description": "Information Systems Group", 
                     "id": "ISG", 
+                    "description": "Information Systems Group", 
                     "name": "ISG"
                 }
             ], 
-            "id": "user4"
+            "googleAuthToken": "b9a41d99-1557-45a0-aed0-3aca3e0fd36a"
         }, 
+        "hashedMac": "0e15dcf2-d7b5-43ca-8c6d-ea3ea631d918", 
         "type_": {
-            "id": "pt3", 
             "description": "Laptop Devices", 
+            "id": "pt3", 
             "name": "Laptop"
         }, 
-        "id": "4c64d95d-eb6d-4559-ab5e-2e5c95c267fa", 
-        "hashedMac": "4c64d95d-eb6d-4559-ab5e-2e5c95c267fa", 
+        "id": "0e15dcf2-d7b5-43ca-8c6d-ea3ea631d918", 
         "name": "platform2"
     }, 
     {
         "owner": {
-            "emailId": "nisha@uci.edu", 
-            "name": "Nisha", 
-            "googleAuthToken": "91ba6c8b-4f7d-4e7b-9a27-fcc052a1a868", 
+            "id": "user2", 
+            "emailId": "dhrub@uci.edu", 
+            "name": "Dhrub", 
             "groups": [
                 {
-                    "description": "Information Systems Group", 
                     "id": "ISG", 
+                    "description": "Information Systems Group", 
                     "name": "ISG"
                 }
             ], 
-            "id": "user13"
+            "googleAuthToken": "81ba6c8b-4f7d-4e7b-9a27-fcc052a1a868"
         }, 
+        "hashedMac": "6094df3c-e93e-4175-a333-f37945b10fc5", 
         "type_": {
-            "id": "pt2", 
-            "description": "Raspberry Pi Devices", 
-            "name": "Raspberry Pi"
+            "description": "Mobile Phone Devices", 
+            "id": "pt1", 
+            "name": "Mobile Phone"
         }, 
-        "id": "95add2a2-b8e4-4b64-9be3-d19137425dee", 
-        "hashedMac": "95add2a2-b8e4-4b64-9be3-d19137425dee", 
+        "id": "6094df3c-e93e-4175-a333-f37945b10fc5", 
         "name": "platform3"
     }, 
     {
         "owner": {
-            "emailId": "sameera@uci.edu", 
-            "name": "Sameera", 
-            "googleAuthToken": "11ba6c8b-4f7d-4e7b-9a27-fcc052a1a868", 
+            "id": "user3", 
+            "emailId": "primal@uci.edu", 
+            "name": "Primal", 
             "groups": [
                 {
-                    "description": "Information Systems Group", 
                     "id": "ISG", 
+                    "description": "Information Systems Group", 
                     "name": "ISG"
                 }
             ], 
-            "id": "user6"
+            "googleAuthToken": "53682347-f287-4666-9c19-d3d9f804fd39"
         }, 
+        "hashedMac": "5d744e41-74e8-493a-b609-4c74fd440cfd", 
         "type_": {
-            "id": "pt3", 
             "description": "Laptop Devices", 
+            "id": "pt3", 
             "name": "Laptop"
         }, 
-        "id": "484bf343-1554-4c9b-b11c-f95d663c5e75", 
-        "hashedMac": "484bf343-1554-4c9b-b11c-f95d663c5e75", 
+        "id": "5d744e41-74e8-493a-b609-4c74fd440cfd", 
         "name": "platform4"
     }, 
     {
         "owner": {
-            "emailId": "shantanu@uci.edu", 
-            "name": "Shantanu", 
-            "googleAuthToken": "71ba6c8b-4f7d-4e7b-9a27-fcc052a1a868", 
+            "id": "user4", 
+            "emailId": "roberto@uci.edu", 
+            "name": "Roberto", 
             "groups": [
                 {
-                    "description": "Information Systems Group", 
                     "id": "ISG", 
+                    "description": "Information Systems Group", 
                     "name": "ISG"
                 }
             ], 
-            "id": "user12"
+            "googleAuthToken": "b1ba6c8b-4f7d-4e7b-9a27-fcc052a1a868"
         }, 
+        "hashedMac": "4c583f28-1028-4e2f-816f-adcafcde738a", 
         "type_": {
-            "id": "pt2", 
             "description": "Raspberry Pi Devices", 
+            "id": "pt2", 
             "name": "Raspberry Pi"
         }, 
-        "id": "5fe48b68-b77a-4c60-aa57-efa69dea3a31", 
-        "hashedMac": "5fe48b68-b77a-4c60-aa57-efa69dea3a31", 
+        "id": "4c583f28-1028-4e2f-816f-adcafcde738a", 
         "name": "platform5"
     }, 
     {
         "owner": {
-            "emailId": "nisha@uci.edu", 
-            "name": "Nisha", 
-            "googleAuthToken": "91ba6c8b-4f7d-4e7b-9a27-fcc052a1a868", 
+            "id": "user5", 
+            "emailId": "joyce@uci.edu", 
+            "name": "Joyce", 
             "groups": [
                 {
-                    "description": "Information Systems Group", 
                     "id": "ISG", 
+                    "description": "Information Systems Group", 
                     "name": "ISG"
                 }
             ], 
-            "id": "user13"
+            "googleAuthToken": "a1ba6c8b-4f7d-4e7b-9a27-fcc052a1a868"
         }, 
+        "hashedMac": "6522b800-2119-4786-bcce-e5f2ca80dd7d", 
         "type_": {
-            "id": "pt3", 
-            "description": "Laptop Devices", 
-            "name": "Laptop"
+            "description": "Raspberry Pi Devices", 
+            "id": "pt2", 
+            "name": "Raspberry Pi"
         }, 
-        "id": "54108dde-8e4e-46e1-84d2-ad103658577d", 
-        "hashedMac": "54108dde-8e4e-46e1-84d2-ad103658577d", 
+        "id": "6522b800-2119-4786-bcce-e5f2ca80dd7d", 
         "name": "platform6"
     }, 
     {
         "owner": {
-            "emailId": "nalini@uci.edu", 
-            "name": "Nalini", 
-            "googleAuthToken": "41ba6c8b-4f7d-4e7b-9a27-fcc052a1a868", 
+            "id": "user6", 
+            "emailId": "sameera@uci.edu", 
+            "name": "Sameera", 
             "groups": [
                 {
-                    "description": "Information Systems Group", 
                     "id": "ISG", 
+                    "description": "Information Systems Group", 
                     "name": "ISG"
                 }
             ], 
-            "id": "user9"
+            "googleAuthToken": "11ba6c8b-4f7d-4e7b-9a27-fcc052a1a868"
         }, 
+        "hashedMac": "878bd4ec-f6ef-4636-b55e-2447aebe81b8", 
         "type_": {
-            "id": "pt2", 
-            "description": "Raspberry Pi Devices", 
-            "name": "Raspberry Pi"
+            "description": "Laptop Devices", 
+            "id": "pt3", 
+            "name": "Laptop"
         }, 
-        "id": "eeb09e5a-5d32-4258-9b12-6ca927b9f24f", 
-        "hashedMac": "eeb09e5a-5d32-4258-9b12-6ca927b9f24f", 
+        "id": "878bd4ec-f6ef-4636-b55e-2447aebe81b8", 
         "name": "platform7"
     }, 
     {
         "owner": {
-            "emailId": "alfred@uci.edu", 
-            "name": "Alfred", 
-            "googleAuthToken": "51ba6c8b-4f7d-4e7b-9a27-fcc052a1a868", 
+            "id": "user7", 
+            "emailId": "sumaya@uci.edu", 
+            "name": "Sumaya", 
             "groups": [
                 {
-                    "description": "Information Systems Group", 
                     "id": "ISG", 
+                    "description": "Information Systems Group", 
                     "name": "ISG"
                 }
             ], 
-            "id": "user10"
+            "googleAuthToken": "21ba6c8b-4f7d-4e7b-9a27-fcc052a1a868"
         }, 
+        "hashedMac": "a54a9d10-8f47-4ca4-b176-e2121ddfa1bd", 
         "type_": {
-            "id": "pt2", 
-            "description": "Raspberry Pi Devices", 
-            "name": "Raspberry Pi"
+            "description": "Mobile Phone Devices", 
+            "id": "pt1", 
+            "name": "Mobile Phone"
         }, 
-        "id": "20ba3fdd-37a4-4688-96f8-f71c6a5ea31a", 
-        "hashedMac": "20ba3fdd-37a4-4688-96f8-f71c6a5ea31a", 
+        "id": "a54a9d10-8f47-4ca4-b176-e2121ddfa1bd", 
         "name": "platform8"
     }, 
     {
         "owner": {
-            "emailId": "shantanu@uci.edu", 
-            "name": "Shantanu", 
-            "googleAuthToken": "71ba6c8b-4f7d-4e7b-9a27-fcc052a1a868", 
+            "id": "user8", 
+            "emailId": "sharad@uci.edu", 
+            "name": "Sharad", 
             "groups": [
                 {
-                    "description": "Information Systems Group", 
                     "id": "ISG", 
+                    "description": "Information Systems Group", 
                     "name": "ISG"
                 }
             ], 
-            "id": "user12"
+            "googleAuthToken": "31ba6c8b-4f7d-4e7b-9a27-fcc052a1a868"
         }, 
+        "hashedMac": "02b93ffb-2327-4956-8223-b4b2684a0a47", 
         "type_": {
-            "id": "pt2", 
-            "description": "Raspberry Pi Devices", 
-            "name": "Raspberry Pi"
+            "description": "Mobile Phone Devices", 
+            "id": "pt1", 
+            "name": "Mobile Phone"
         }, 
-        "id": "aacc1e4a-cd61-4d81-bd7d-2ba6d8f56744", 
-        "hashedMac": "aacc1e4a-cd61-4d81-bd7d-2ba6d8f56744", 
+        "id": "02b93ffb-2327-4956-8223-b4b2684a0a47", 
         "name": "platform9"
     }, 
     {
         "owner": {
-            "emailId": "primal@uci.edu", 
-            "name": "Primal", 
-            "googleAuthToken": "53682347-f287-4666-9c19-d3d9f804fd39", 
+            "id": "user9", 
+            "emailId": "nalini@uci.edu", 
+            "name": "Nalini", 
             "groups": [
                 {
-                    "description": "Information Systems Group", 
                     "id": "ISG", 
+                    "description": "Information Systems Group", 
                     "name": "ISG"
                 }
             ], 
-            "id": "user3"
+            "googleAuthToken": "41ba6c8b-4f7d-4e7b-9a27-fcc052a1a868"
         }, 
+        "hashedMac": "4b001310-f5d8-4ff0-a900-f8968b0804f2", 
         "type_": {
-            "id": "pt2", 
             "description": "Raspberry Pi Devices", 
+            "id": "pt2", 
             "name": "Raspberry Pi"
         }, 
-        "id": "c949e2f0-84c4-4d32-9be1-1e62187b8097", 
-        "hashedMac": "c949e2f0-84c4-4d32-9be1-1e62187b8097", 
+        "id": "4b001310-f5d8-4ff0-a900-f8968b0804f2", 
         "name": "platform10"
     }, 
     {
         "owner": {
-            "emailId": "nalini@uci.edu", 
-            "name": "Nalini", 
-            "googleAuthToken": "41ba6c8b-4f7d-4e7b-9a27-fcc052a1a868", 
+            "id": "user10", 
+            "emailId": "alfred@uci.edu", 
+            "name": "Alfred", 
             "groups": [
                 {
-                    "description": "Information Systems Group", 
                     "id": "ISG", 
+                    "description": "Information Systems Group", 
                     "name": "ISG"
                 }
             ], 
-            "id": "user9"
+            "googleAuthToken": "51ba6c8b-4f7d-4e7b-9a27-fcc052a1a868"
         }, 
+        "hashedMac": "c7b889cf-82e3-4662-b7e9-6e5da9c226c0", 
         "type_": {
-            "id": "pt3", 
-            "description": "Laptop Devices", 
-            "name": "Laptop"
+            "description": "Mobile Phone Devices", 
+            "id": "pt1", 
+            "name": "Mobile Phone"
         }, 
-        "id": "3517c41c-806f-4970-a704-cebb4ceba3e4", 
-        "hashedMac": "3517c41c-806f-4970-a704-cebb4ceba3e4", 
+        "id": "c7b889cf-82e3-4662-b7e9-6e5da9c226c0", 
         "name": "platform11"
     }, 
     {
         "owner": {
-            "emailId": "sharad@uci.edu", 
-            "name": "Sharad", 
-            "googleAuthToken": "31ba6c8b-4f7d-4e7b-9a27-fcc052a1a868", 
+            "id": "user11", 
+            "emailId": "abdul@uci.edu", 
+            "name": "abdul", 
             "groups": [
                 {
-                    "description": "Information Systems Group", 
                     "id": "ISG", 
+                    "description": "Information Systems Group", 
                     "name": "ISG"
                 }
             ], 
-            "id": "user8"
+            "googleAuthToken": "61ba6c8b-4f7d-4e7b-9a27-fcc052a1a868"
         }, 
+        "hashedMac": "70f4c6cf-0be0-46ac-87c0-7eae6bc5b148", 
         "type_": {
-            "id": "pt3", 
-            "description": "Laptop Devices", 
-            "name": "Laptop"
+            "description": "Mobile Phone Devices", 
+            "id": "pt1", 
+            "name": "Mobile Phone"
         }, 
-        "id": "a37dc377-e173-4578-a2ab-74f66da34ffa", 
-        "hashedMac": "a37dc377-e173-4578-a2ab-74f66da34ffa", 
+        "id": "70f4c6cf-0be0-46ac-87c0-7eae6bc5b148", 
         "name": "platform12"
     }, 
     {
         "owner": {
-            "emailId": "sameera@uci.edu", 
-            "name": "Sameera", 
-            "googleAuthToken": "11ba6c8b-4f7d-4e7b-9a27-fcc052a1a868", 
+            "id": "user12", 
+            "emailId": "shantanu@uci.edu", 
+            "name": "Shantanu", 
             "groups": [
                 {
-                    "description": "Information Systems Group", 
                     "id": "ISG", 
+                    "description": "Information Systems Group", 
                     "name": "ISG"
                 }
             ], 
-            "id": "user6"
+            "googleAuthToken": "71ba6c8b-4f7d-4e7b-9a27-fcc052a1a868"
         }, 
+        "hashedMac": "1eeeda4e-2edf-49a8-adab-62853c89207f", 
         "type_": {
-            "id": "pt2", 
-            "description": "Raspberry Pi Devices", 
-            "name": "Raspberry Pi"
+            "description": "Laptop Devices", 
+            "id": "pt3", 
+            "name": "Laptop"
         }, 
-        "id": "fed2b0e5-497a-4398-a43c-c53713c9337c", 
-        "hashedMac": "fed2b0e5-497a-4398-a43c-c53713c9337c", 
+        "id": "1eeeda4e-2edf-49a8-adab-62853c89207f", 
         "name": "platform13"
     }, 
     {
         "owner": {
-            "emailId": "sharad@uci.edu", 
-            "name": "Sharad", 
-            "googleAuthToken": "31ba6c8b-4f7d-4e7b-9a27-fcc052a1a868", 
+            "id": "user13", 
+            "emailId": "nisha@uci.edu", 
+            "name": "Nisha", 
             "groups": [
                 {
-                    "description": "Information Systems Group", 
                     "id": "ISG", 
+                    "description": "Information Systems Group", 
                     "name": "ISG"
                 }
             ], 
-            "id": "user8"
+            "googleAuthToken": "91ba6c8b-4f7d-4e7b-9a27-fcc052a1a868"
         }, 
+        "hashedMac": "ce3891bf-496e-471e-a0fa-4c74112b5a57", 
         "type_": {
-            "id": "pt3", 
             "description": "Laptop Devices", 
+            "id": "pt3", 
             "name": "Laptop"
         }, 
-        "id": "dabbfab7-a880-4079-a723-72c5da68682e", 
-        "hashedMac": "dabbfab7-a880-4079-a723-72c5da68682e", 
+        "id": "ce3891bf-496e-471e-a0fa-4c74112b5a57", 
         "name": "platform14"
     }
 ]
