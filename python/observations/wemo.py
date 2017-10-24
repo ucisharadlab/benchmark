@@ -3,6 +3,8 @@ import random
 import json
 import uuid
 
+from extrapolate import Scale
+
 
 def createWemoObservations(dt, end, step, dataDir):
 
@@ -38,3 +40,26 @@ def createWemoObservations(dt, end, step, dataDir):
         dt += step
 
     fpObj.close()
+
+
+def createIntelligentWemoObs(origDays, extendDays, origSpeed, extendSpeed, origSensor, extendSensor, speedScaleNoise,
+                               timeScaleNoise, deviceScaleNoise, dataDir):
+
+    with open(dataDir + 'observation.json') as data_file:
+        observations = json.load(data_file)
+
+    seedFile = open("data/seedWemo.json", "w")
+    for observation in observations:
+        if observation['sensor']['type_']['id'] == "WeMo":
+            seedFile.write(json.dumps(observation) + '\n')
+    seedFile.close()
+
+    seedFile = "data/seedWemo.json"
+    outputFile = "data/wemoData.json"
+    scale = Scale(dataDir, seedFile, outputFile, origDays, extendDays, origSpeed, extendSpeed,
+                  origSensor, extendSensor, ["currentMilliWatts", "onTodaySeconds"], speedScaleNoise, timeScaleNoise,
+                  deviceScaleNoise, int)
+
+    scale.speedScale()
+    scale.deviceScale()
+    scale.timeScale()

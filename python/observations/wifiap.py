@@ -25,7 +25,7 @@ def createWiFiObservations(dt, end, step, dataDir):
     clientIds = [platform['hashedMac'] for platform in platforms]
     numClients = len(clientIds)
 
-    fpObj = open('data/wifiAPdata.json', 'w')
+    fpObj = open('data/wifiAPData.json', 'w')
 
     while dt < end:
 
@@ -48,6 +48,6 @@ def createWiFiObservations(dt, end, step, dataDir):
 
 
 def createIntelligentWiFiObs(dt, days, step, dataDir):
-    trajectoryScale = TrajectoryScale(dataDir, "data/presenceData.json", "data/wifiAPdata.json", "wifiMap.json",
+    trajectoryScale = TrajectoryScale(dataDir, "data/presenceData.json", "data/wifiAPData.json", "wifiMap.json",
                                       dt, days, step)
     trajectoryScale.generatePersonPaths()

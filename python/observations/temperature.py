@@ -3,6 +3,8 @@ import random
 import json
 import uuid
 
+from extrapolate import Scale
+
 
 def createTemperatureObservations(dt, end, step, dataDir):
 
@@ -36,3 +38,26 @@ def createTemperatureObservations(dt, end, step, dataDir):
         dt += step
 
     fpObj.close()
+
+
+def createIntelligentTempObs(origDays, extendDays, origSpeed, extendSpeed, origSensor, extendSensor, speedScaleNoise,
+                               timeScaleNoise, deviceScaleNoise, dataDir):
+
+    with open(dataDir + 'observation.json') as data_file:
+        observations = json.load(data_file)
+
+    seedFile = open("data/seedTemperature.json", "w")
+    for observation in observations:
+        if observation['sensor']['type_']['id'] == "Thermometer":
+            seedFile.write(json.dumps(observation) + '\n')
+    seedFile.close()
+
+    seedFile = "data/seedTemperature.json"
+    outputFile = "data/temperatureData.json"
+    scale = Scale(dataDir, seedFile, outputFile, origDays, extendDays, origSpeed, extendSpeed,
+                  origSensor, extendSensor, "temperature", speedScaleNoise, timeScaleNoise,
+                  deviceScaleNoise, int)
+
+    scale.speedScale()
+    scale.deviceScale()
+    scale.timeScale()

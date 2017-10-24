@@ -70,7 +70,7 @@ def createIntelligentOccupancy(origDays, extendDays, origSpeed, extendSpeed, spe
     seedFile = "data/seedPresence.json"
     outputFile = "data/occupancyData.json"
     scale = SemanticScale(dataDir, seedFile, outputFile, origDays, extendDays, origSpeed, extendSpeed,
-                          "occupancy", speedScaleNoise, timeScaleNoise, None, int)
+                          "occupancy", speedScaleNoise, timeScaleNoise, int)
 
     scale.speedScale()
     scale.timeScale()
