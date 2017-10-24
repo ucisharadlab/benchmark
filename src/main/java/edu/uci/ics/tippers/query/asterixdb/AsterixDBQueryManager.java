@@ -170,7 +170,6 @@ public class AsterixDBQueryManager extends BaseQueryManager{
 
     }
 
-
     @Override
     public Duration runQuery6(List<String> sensorIds, Date startTime, Date endTime) throws BenchmarkException {
         switch (mapping) {
@@ -195,6 +194,123 @@ public class AsterixDBQueryManager extends BaseQueryManager{
                                         " }} AND timeStamp >= datetime(\"%s\") AND timeStamp <= datetime(\"%s\") " +
                                         "GROUP BY sensorId, get_date_from_datetime(timeStamp)) AS obs GROUP BY obs.sensorId",
                                 sdf.format(startTime), sdf.format(endTime)), 6
+                );
+            default:
+                throw new BenchmarkException("No Such Mapping");
+        }
+
+    }
+
+    public Duration runQuery7(String startLocation, String endLocation, Date date) throws BenchmarkException {
+        switch (mapping) {
+            case 1:
+                return runTimedQuery(
+                        String.format("SELECT s1.semanticEntity.name " +
+                                " FROM SemanticObservation s1, SemanticObservation s2 " +
+                                " WHERE get_date_from_datetime(s1.timeStamp) = date(\"%s\") AND " +
+                                " get_date_from_datetime(s2.timeStamp) = date(\"%s\") AND " +
+                                " s1.type_.name = s2.type_.name AND s2.type_.name = \"Presence\" AND " +
+                                " s1.payload.location = \"%s\" AND s2.payload.location = \"%s\" " +
+                                " AND s1.timeStamp < s2.timeStamp AND s1.semanticEntity.id = s2.semanticEntity.id",
+                                sdf.format(date), sdf.format(date), startLocation, endLocation), 7
+                );
+            case 2:
+                return runTimedQuery(
+                        String.format("SELECT se.name " +
+                                        " FROM SemanticObservation s1, SemanticObservation s2, User se, SemanticObservationType st" +
+                                        " WHERE get_date_from_datetime(s1.timeStamp) = date(\"%s\") AND " +
+                                        " get_date_from_datetime(s2.timeStamp) = date(\"%s\") AND " +
+                                        " s1.typeId = s2.typeId AND s2.typeId = st.id AND st.name = \"Presence\" AND " +
+                                        " s1.payload.location = \"%s\" AND s2.payload.location = \"%s\" " +
+                                        " AND s1.timeStamp < s2.timeStamp AND s1.semanticEntityId = s2.semanticEntityId " +
+                                        " AND s2.semanticEntityId = se.id",
+                                sdf.format(date), sdf.format(date), startLocation, endLocation), 7
+                );
+            default:
+                throw new BenchmarkException("No Such Mapping");
+        }
+
+    }
+
+    public Duration runQuery8(String userId, Date date) throws BenchmarkException {
+        switch (mapping) {
+            case 1:
+                return runTimedQuery(
+                        String.format("SELECT s1.semanticEntity.name, s1.payload.location " +
+                                        " FROM SemanticObservation s1, SemanticObservation s2 " +
+                                        " WHERE get_date_from_datetime(s1.timeStamp) = date(\"%s\") AND " +
+                                        " get_date_from_datetime(s2.timeStamp) = date(\"%s\") AND " +
+                                        " s1.type_.name = s2.type_.name AND s2.type_.name = \"Presence\" AND " +
+                                        " s1.payload.location = s2.payload.location " +
+                                        " AND s1.timeStamp = s2.timeStamp AND s1.semanticEntity.id = \"%s\" ",
+                                sdf.format(date), sdf.format(date), userId), 8
+                );
+            case 2:
+                return runTimedQuery(
+                        String.format("SELECT se.name, s1.payload.location " +
+                                        " FROM SemanticObservation s1, SemanticObservation s2, User se, SemanticObservationType st" +
+                                        " WHERE get_date_from_datetime(s1.timeStamp) = date(\"%s\") AND " +
+                                        " get_date_from_datetime(s2.timeStamp) = date(\"%s\") AND " +
+                                        " s1.typeId = s2.typeId AND s2.typeId = st.id AND st.name = \"Presence\" AND " +
+                                        " s1.payload.location = s2.payload.location " +
+                                        " AND s1.timeStamp = s2.timeStamp AND s1.semanticEntityId = \"%s\" " +
+                                        " AND s2.semanticEntityId = se.id",
+                                sdf.format(date), sdf.format(date), userId), 8
+                );
+            default:
+                throw new BenchmarkException("No Such Mapping");
+        }
+    }
+
+    public Duration runQuery9(String userId, String infraTypeName) throws BenchmarkException {
+        switch (mapping) {
+            case 1:
+                return runTimedQuery(
+                        String.format("SELECT AVG(timeSpent) AS avgTimePerDay FROM " +
+                                        " (SELECT get_date_from_datetime(timeStamp), count(*)*10  AS timeSpent " +
+                                        " FROM SemanticObservation so, Infrastructure infra " +
+                                        " WHERE so.type_.name=\"Presence\" AND s1.semanticEntity.id=\"%s\" " +
+                                        " AND s1.payload.location = infra.id AND infra.type_.name = \"%s\"" +
+                                        " GROUP BY get_date_from_datetime(timeStamp)) ",
+                                userId, infraTypeName), 9
+                );
+            case 2:
+                return runTimedQuery(
+                        String.format("SELECT AVG(timeSpent) AS avgTimePerDay FROM " +
+                                        " (SELECT get_date_from_datetime(timeStamp), count(*)*10  AS timeSpent " +
+                                        " FROM SemanticObservation so, Infrastructure infra, SemanticObservationType st " +
+                                        " WHERE so.typeId = st.id AND st.name = \"Presence\" AND s1.semanticEntityId=\"%s\" " +
+                                        " AND s1.payload.location = infra.id AND infra.type_.name = \"%s\"" +
+                                        " GROUP BY get_date_from_datetime(timeStamp)) ",
+                                userId, infraTypeName), 9
+                );
+            default:
+                throw new BenchmarkException("No Such Mapping");
+        }
+
+    }
+
+    public Duration runQuery10(Date startTime, Date endTime) throws BenchmarkException {
+        switch (mapping) {
+            case 1:
+                return runTimedQuery(
+                        String.format("SELECT infra.name, (" +
+                                        "SELECT so.timeStamp, so.payload.occupancy " +
+                                        "FROM SemanticObservation so " +
+                                        "WHERE so.timeStamp > datetime(\"%s\") AND so.timeStamp < datetime(\"%s\") " +
+                                        "AND so.type_.name = \"Occupancy\" AND so.semanticEntity.id = infra.id " +
+                                        "ORDER BY so.semanticEntity.id, so.timeStamp) AS histogram " +
+                                        "FROM Infrastructure infra", sdf.format(startTime), sdf.format(endTime)), 6
+                );
+            case 2:
+                return runTimedQuery(
+                        String.format("SELECT infra.name, (" +
+                                "SELECT so.timeStamp, so.payload.occupancy " +
+                                "FROM SemanticObservation so, SemanticObservationType st " +
+                                "WHERE so.timeStamp > datetime(\"%s\") AND so.timeStamp < datetime(\"%s\") " +
+                                "AND so.typeId = st.id AND st.name = \"Occupancy\" AND so.semanticEntity.id = infra.id " +
+                                "ORDER BY so.semanticEntity.id, so.timeStamp) AS histogram " +
+                                "FROM Infrastructure infra", sdf.format(startTime), sdf.format(endTime)), 6
                 );
             default:
                 throw new BenchmarkException("No Such Mapping");

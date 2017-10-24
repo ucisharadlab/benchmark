@@ -1,6 +1,9 @@
 package edu.uci.ics.tippers.data.cassandra;
 
+import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.Session;
 import edu.uci.ics.tippers.common.Database;
+import edu.uci.ics.tippers.connection.cassandra.CassandraConnectionManager;
 import edu.uci.ics.tippers.data.BaseDataUploader;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 
@@ -11,8 +14,12 @@ import java.time.Duration;
  */
 public class CassandraDataUploader extends BaseDataUploader{
 
+    private Cluster cluster;
+    private Session session;
+
     public CassandraDataUploader(int mapping, String dataDir) {
         super(mapping, dataDir);
+        session = CassandraConnectionManager.getInstance().getSession();
     }
 
     @Override

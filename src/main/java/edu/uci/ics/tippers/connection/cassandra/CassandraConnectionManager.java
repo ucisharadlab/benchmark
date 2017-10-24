@@ -18,7 +18,7 @@ public class CassandraConnectionManager {
     private Properties props;
     private static String SERVER;
     private static String PORT;
-    private static String DATAVERSE;
+    private static String KEY_SPACE;
     private static Session session;
 
     private CassandraConnectionManager() {
@@ -30,7 +30,7 @@ public class CassandraConnectionManager {
 
             SERVER = props.getProperty("server");
             PORT = props.getProperty("port");
-            DATAVERSE = props.getProperty("dataverse");
+            KEY_SPACE = props.getProperty("keyspace");
 
             cluster = Cluster.builder()
                     .addContactPoint(SERVER)
@@ -49,5 +49,11 @@ public class CassandraConnectionManager {
     public Session getSession() {
         return session;
     }
+
+    public String getKeySpaceName() {
+        return KEY_SPACE;
+    }
+
+
 
 }

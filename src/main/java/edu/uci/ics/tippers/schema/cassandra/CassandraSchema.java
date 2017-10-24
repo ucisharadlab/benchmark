@@ -10,17 +10,15 @@ import edu.uci.ics.tippers.schema.BaseSchema;
 
 import java.util.ArrayList;
 
-/**
- * Created by peeyush on 21/9/17.
- */
 public class CassandraSchema extends BaseSchema {
 
     private Session session;
-    private String space_name = "TippersDB";
+    private String space_name;
 
     public CassandraSchema(int mapping, String dataDir) {
         super(mapping, dataDir);
         session = CassandraConnectionManager.getInstance().getSession();
+        space_name = CassandraConnectionManager.getInstance().getKeySpaceName();
         create_keyspace(space_name, "SimpleStrategy");
     }
 
@@ -31,7 +29,6 @@ public class CassandraSchema extends BaseSchema {
                 .append(" with replication={'class':'"+ VarA + "', 'replication_factor' : 1};");
         String create = createspace.toString();
         session.execute(create);
-        //System.out.println(create);
     }
 
     //FLAG is used to decide whether to order
@@ -48,7 +45,6 @@ public class CassandraSchema extends BaseSchema {
             createtable.append("WITH CLUSTERING ORDER BY " + order_condition);
         }
         String tab = createtable.toString();
-        System.out.println("---------" + tab);
         session.execute(tab);
     }
 
@@ -79,7 +75,7 @@ public class CassandraSchema extends BaseSchema {
         table_name = "User";
         list.add("emailId varchar");
         list.add("name varchar");
-        list.add("groupIds varchar");
+        list.add("groupIds list<varchar>");
         list.add("id varchar");
         list.add("googleAuthToken varchar");
         primary_key = "(emailId)";
@@ -93,29 +89,6 @@ public class CassandraSchema extends BaseSchema {
         list.add("x double");
         list.add("y double");
         list.add("z double");
-        primary_key = "(id)";
-        order_condition = "";
-        create_keycolmns(primary_key, order_condition, list, space_name, table_name, 0);
-
-
-        //Add Region
-        list.clear();
-        table_name = "Region";
-        list.add("id varchar");
-        list.add("name varchar");
-        list.add("floor INT");
-        list.add("geometry list<varchar>");
-        primary_key = "(id)";
-        order_condition = "";
-        create_keycolmns(primary_key, order_condition, list, space_name, table_name, 0);
-
-        //Add Region——test
-        list.clear();
-        table_name = "Region_test";
-        list.add("id varchar");
-        list.add("name varchar");
-        list.add("floor INT");
-        list.add("geometry list<varchar>");
         primary_key = "(id)";
         order_condition = "";
         create_keycolmns(primary_key, order_condition, list, space_name, table_name, 0);
@@ -135,19 +108,9 @@ public class CassandraSchema extends BaseSchema {
         table_name = "Infrastructure";
         list.add("id varchar");
         list.add("name varchar");
-        list.add("type_ varchar");//只存里面的id
-        list.add("region varchar");// store region id
-        primary_key = "(id)";
-        order_condition = "";
-        create_keycolmns(primary_key, order_condition, list, space_name, table_name, 0);
-
-        //Infrastructure_test
-        list.clear();
-        table_name = "Infrastructure_test";
-        list.add("id varchar");
-        list.add("name varchar");
-        list.add("type_ varchar");//只存里面的id
-        list.add("region varchar");// store region id
+        list.add("type_ varchar");
+        list.add("floor INT");
+        list.add("geometry list<varchar>");
         primary_key = "(id)";
         order_condition = "";
         create_keycolmns(primary_key, order_condition, list, space_name, table_name, 0);
@@ -158,26 +121,6 @@ public class CassandraSchema extends BaseSchema {
         list.add("id varchar");
         list.add("name varchar");
         list.add("description varchar");
-        primary_key = "(id)";
-        order_condition = "";
-        create_keycolmns(primary_key, order_condition, list, space_name, table_name, 0);
-
-        //Coverage
-        list.clear();
-        table_name = "Coverage";
-        list.add("radius double");
-        list.add("id varchar");
-        list.add("entitiesCovered list<varchar>");
-        primary_key = "(id)";
-        order_condition = "";
-        create_keycolmns(primary_key, order_condition, list, space_name, table_name, 0);
-
-        //Coverage_test
-        list.clear();
-        table_name = "Coverage_test";
-        list.add("radius double");
-        list.add("id varchar");
-        list.add("entitiesCovered list<varchar>");
         primary_key = "(id)";
         order_condition = "";
         create_keycolmns(primary_key, order_condition, list, space_name, table_name, 0);
@@ -201,7 +144,7 @@ public class CassandraSchema extends BaseSchema {
         list.add("description varchar");
         list.add("mobility varchar");
         list.add("captureFunctionality varchar");
-        list.add("observationTypeId varchar");
+        list.add("payloadSchema varchar");
         primary_key = "(id)";
         order_condition = "";
         create_keycolmns(primary_key, order_condition, list, space_name, table_name, 0);
@@ -211,42 +154,15 @@ public class CassandraSchema extends BaseSchema {
         table_name = "Sensor";
         list.add("id varchar");
         list.add("name varchar");
-        list.add("coverage varchar");
         list.add("sensorConfig varchar");
-        list.add("sensorType varchar");
+        list.add("typeId varchar");
         list.add("infrastructure varchar");
-        list.add("platform varchar");
-        list.add("owner varchar");
+        list.add("platformId varchar");
+        list.add("ownerId varchar");
+        list.add("entitiesCovered list<varchar>");
         primary_key = "(id)";
         order_condition = "";
         create_keycolmns(primary_key, order_condition, list, space_name, table_name, 0);
-
-        //Sensor_test
-        list.clear();
-        table_name = "Sensor_test";
-        list.add("id varchar");
-        list.add("name varchar");
-        list.add("coverage varchar");
-        list.add("sensorConfig varchar");
-        list.add("sensorType varchar");
-        list.add("infrastructure varchar");
-        list.add("platform varchar");
-        list.add("owner varchar");
-        primary_key = "(id)";
-        order_condition = "";
-        create_keycolmns(primary_key, order_condition, list, space_name, table_name, 0);
-
-        //ObservationType
-        list.clear();
-        table_name = "ObservationType";
-        list.add("id varchar");
-        list.add("name varchar");
-        list.add("description varchar");
-        list.add("payloadschema varchar");
-        primary_key = "(id)";
-        order_condition = "";
-        create_keycolmns(primary_key, order_condition, list, space_name, table_name, 0);
-
 
         //SemanticObservationType
         list.clear();
@@ -284,62 +200,54 @@ public class CassandraSchema extends BaseSchema {
         order_condition = "";
         create_keycolmns(primary_key, order_condition, list, space_name, table_name, 0);
 
-        //Observation & SemanticObservation they are in one single table, mapping 1
-        list.clear();
-        table_name = "Observation_1";
-        list.add("typeId varchar");
-        list.add("sensorId varchar");
-        list.add("timestamp varchar");
-        list.add("payload text");
-        primary_key = "((sensorId, typeId), timestamp)";
-        order_condition = "";
-        create_keycolmns(primary_key, order_condition, list, space_name, table_name, 0);
+        switch(mapping) {
+            case 1:
+                //Observation & SemanticObservation they are in one single table, mapping 1
+                list.clear();
+                table_name = "Observation";
+                list.add("typeId varchar");
+                list.add("sensorId varchar");
+                list.add("timestamp varchar");
+                list.add("payload text");
+                primary_key = "((sensorId, typeId), timestamp)";
+                order_condition = "";
+                create_keycolmns(primary_key, order_condition, list, space_name, table_name, 0);
+                break;
+            case 2:
+                //Observation & SemanticObservation they are in one single table, mapping 2
+                list.clear();
+                table_name = "Observation";
+                list.add("id varchar");
+                list.add("sensorId varchar");
+                list.add("timeStamp varchar");
+                list.add("payload varchar");
+                primary_key = "(sensorId, timestamp)";
+                order_condition = "";
+                create_keycolmns(primary_key, order_condition, list, space_name, table_name, 0);
+                break;
 
-        list.clear();
-        table_name = "Observation_test";
-        list.add("typeId varchar");
-        list.add("sensorId varchar");
-        list.add("timestamp varchar");
-        list.add("payload varchar");
-        primary_key = "((sensorId, typeId), timestamp)";
-        order_condition = "";
-        create_keycolmns(primary_key, order_condition, list, space_name, table_name, 0);
-
-        //Observation & SemanticObservation they are in one single table, mapping 2
-        list.clear();
-        table_name = "Observation_2";
-        list.add("typeId varchar");
-        list.add("sensorId varchar");
-        list.add("timestamp varchar");
-        list.add("payload varchar");
-        primary_key = "(sensorId, timestamp)";
-        order_condition = "";
-        create_keycolmns(primary_key, order_condition, list, space_name, table_name, 0);
-
-		/*//Observation & SemanticObservation they are in one single table, mapping 3
+            case 3:
 				list.clear();
-				table_name = "Observation_3";
+				table_name = "Observation";
 				list.add("id varchar");
-				list.add("sensor varchar");
+				list.add("sensorId varchar");
 				list.add("timestamp varchar");
 				list.add("payload varchar");
-				list.add("type varchar");
 				primary_key = "((sensor, id), timestamp)";
 				order_condition = "";
-				client.create_keycolmns(primary_key, order_condition, list, space_name, table_name, 0);
+				create_keycolmns(primary_key, order_condition, list, space_name, table_name, 0);
 
-		//Observation & SemanticObservation they are in one single table, mapping 4
+            case 4:
 				list.clear();
-				table_name = "Observation_4";
+				table_name = "Observation";
 				list.add("id varchar");
-				list.add("sensor varchar");
+				list.add("sensorId varchar");
 				list.add("timestamp varchar");
 				list.add("payload varchar");
-				list.add("type varchar");
 				primary_key = "((sensor, id), timestamp)";
 				order_condition = "";
-				client.create_keycolmns(primary_key, order_condition, list, space_name, table_name, 0);*/
-
+				create_keycolmns(primary_key, order_condition, list, space_name, table_name, 0);
+        }
     }
 
     @Override
