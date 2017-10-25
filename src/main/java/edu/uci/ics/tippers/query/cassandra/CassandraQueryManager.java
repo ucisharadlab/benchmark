@@ -56,4 +56,24 @@ public class CassandraQueryManager extends BaseQueryManager {
     public Duration runQuery6(List<String> sensorIds, Date startTime, Date endTime) throws BenchmarkException {
         return null;
     }
+
+    @Override
+    public Duration runQuery7(String startLocation, String endLocation, Date date) throws BenchmarkException {
+        return null;
+    }
+
+    @Override
+    public Duration runQuery8(String userId, Date date) throws BenchmarkException {
+        return null;
+    }
+
+    @Override
+    public Duration runQuery9(String userId, String infraTypeName) throws BenchmarkException {
+        return null;
+    }
+
+    @Override
+    public Duration runQuery10(Date startTime, Date endTime) throws BenchmarkException {
+        return null;
+    }
 }

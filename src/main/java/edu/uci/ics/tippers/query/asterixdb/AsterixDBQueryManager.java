@@ -201,6 +201,7 @@ public class AsterixDBQueryManager extends BaseQueryManager{
 
     }
 
+    @Override
     public Duration runQuery7(String startLocation, String endLocation, Date date) throws BenchmarkException {
         switch (mapping) {
             case 1:
@@ -232,6 +233,7 @@ public class AsterixDBQueryManager extends BaseQueryManager{
 
     }
 
+    @Override
     public Duration runQuery8(String userId, Date date) throws BenchmarkException {
         switch (mapping) {
             case 1:
@@ -262,6 +264,7 @@ public class AsterixDBQueryManager extends BaseQueryManager{
         }
     }
 
+    @Override
     public Duration runQuery9(String userId, String infraTypeName) throws BenchmarkException {
         switch (mapping) {
             case 1:
@@ -290,6 +293,7 @@ public class AsterixDBQueryManager extends BaseQueryManager{
 
     }
 
+    @Override
     public Duration runQuery10(Date startTime, Date endTime) throws BenchmarkException {
         switch (mapping) {
             case 1:

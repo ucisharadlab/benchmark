@@ -53,6 +53,7 @@ public class MongoDBDataUploader extends BaseDataUploader{
         addDeviceData();
         addSensorData();
         addObservationData();
+        virtualSensorData();
         addSemanticObservationData();
 
         Instant end = Instant.now();

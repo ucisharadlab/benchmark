@@ -226,6 +226,94 @@ public abstract class BaseQueryManager {
             e.printStackTrace();
             queryRunTimes.put(6, Constants.MAX_DURATION);
         }
+
+        // Query 7
+        numQueries = 0;
+        runTime = Duration.ZERO;
+        reader = new QueryCSVReader(queriesDir + getFileFromQuery(7));
+        try {
+            while ((values = reader.readNextLine()) != null) {
+                String startLocation = values[1];
+                String endLocation = values[2];
+                Date date;
+                try {
+                    date = sdf.parse(values[3]);
+                    runTime = runTime.plus(runWithThread(() -> runQuery7(startLocation, endLocation, date)));
+                    numQueries++;
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Queries, Incorrect Date Format");
+                }
+            }
+            queryRunTimes.put(7, runTime.dividedBy(numQueries));
+        } catch (Exception | Error e) {
+            e.printStackTrace();
+            queryRunTimes.put(7, Constants.MAX_DURATION);
+        }
+
+        // Query 8
+        numQueries = 0;
+        runTime = Duration.ZERO;
+        reader = new QueryCSVReader(queriesDir + getFileFromQuery(8));
+        try {
+            while ((values = reader.readNextLine()) != null) {
+                String userId = values[1];
+                Date date;
+                try {
+                    date = sdf.parse(values[2]);
+                    runTime = runTime.plus(runWithThread(() -> runQuery8(userId, date)));
+                    numQueries++;
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Queries, Incorrect Date Format");
+                }
+            }
+            queryRunTimes.put(8, runTime.dividedBy(numQueries));
+        } catch (Exception | Error e) {
+            e.printStackTrace();
+            queryRunTimes.put(8, Constants.MAX_DURATION);
+        }
+
+        // Query 9
+        numQueries = 0;
+        runTime = Duration.ZERO;
+        reader = new QueryCSVReader(queriesDir + getFileFromQuery(9));
+        try {
+            while ((values = reader.readNextLine()) != null) {
+                String userId = values[1];
+                String infraTypeName = values[2];
+                runTime = runTime.plus(runWithThread(() -> runQuery9(userId, infraTypeName)));
+                numQueries++;
+
+            }
+            queryRunTimes.put(9, runTime.dividedBy(numQueries));
+        } catch (Exception | Error e) {
+            e.printStackTrace();
+            queryRunTimes.put(9, Constants.MAX_DURATION);
+        }
+
+        // Query 10
+        numQueries = 0;
+        runTime = Duration.ZERO;
+        reader = new QueryCSVReader(queriesDir + getFileFromQuery(10));
+        try {
+            while ((values = reader.readNextLine()) != null) {
+                Date start, end;
+                try {
+                    start = sdf.parse(values[1]);
+                    end = sdf.parse(values[2]);
+                    runTime = runTime.plus(runWithThread(() -> runQuery10(start, end)));
+                    numQueries++;
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Queries, Incorrect Date Format");
+                }
+            }
+            queryRunTimes.put(10, runTime.dividedBy(numQueries));
+        } catch (Exception | Error e) {
+            e.printStackTrace();
+            queryRunTimes.put(10, Constants.MAX_DURATION);
+        }
         return queryRunTimes;
     }
 
@@ -243,4 +331,12 @@ public abstract class BaseQueryManager {
                                    Object startPayloadValue, Object endPayloadValue) throws BenchmarkException;
 
     public abstract Duration runQuery6(List<String> sensorIds, Date startTime, Date endTime) throws BenchmarkException;
+
+    public abstract Duration runQuery7(String startLocation, String endLocation, Date date) throws BenchmarkException;
+
+    public abstract Duration runQuery8(String userId, Date date) throws BenchmarkException;
+
+    public abstract Duration runQuery9(String userId, String infraTypeName) throws BenchmarkException;
+
+    public abstract Duration runQuery10(Date startTime, Date endTime) throws BenchmarkException;
 }

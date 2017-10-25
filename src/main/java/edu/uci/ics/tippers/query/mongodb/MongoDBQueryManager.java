@@ -1,5 +1,6 @@
 package edu.uci.ics.tippers.query.mongodb;
 
+import com.mongodb.Mongo;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoIterable;
@@ -15,11 +16,11 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 
 import static com.mongodb.client.model.Accumulators.*;
@@ -32,6 +33,7 @@ import static edu.uci.ics.tippers.common.util.Helper.getFileFromQuery;
 public class MongoDBQueryManager extends BaseQueryManager{
 
     private MongoDatabase database;
+    private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     public MongoDBQueryManager(int mapping, String queriesDir, String outputDir, boolean writeOutput, long timeout) {
         super(mapping, queriesDir, outputDir, writeOutput, timeout);
@@ -340,69 +342,122 @@ public class MongoDBQueryManager extends BaseQueryManager{
         }
     }
 
-    public Duration runQuery7(List<String> sensorIds, Date startTime, Date endTime) throws BenchmarkException {
+    @Override
+    public Duration runQuery7(String startLocation, String endLocation, Date date) throws BenchmarkException {
         switch (mapping) {
             case 1:
                 Instant start = Instant.now();
 
-                MongoCollection<Document> collection = database.getCollection("Observation");
+                MongoCollection collection = database.getCollection("SemanticObservation");
+                Date startTime = date;
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(date);
+                cal.add(Calendar.DATE, 1);
+                Date endTime = cal.getTime();
 
-                Bson match = match(and(
-                        in("sensor.id", sensorIds),
+                Bson match1 = match(and(
+                        eq("type_.name", "presence"),
                         gt("timeStamp", startTime),
-                        lt("timeStamp", endTime)));
+                        lt("timeStamp", endTime),
+                        eq("payload.location", startLocation)
+                ));
 
-                Bson project = project(
+                Bson lookUp = lookup("SemanticObservation", "semanticEntity.id",
+                        "semanticEntity.id", "semantics");
+
+                Bson unwind = unwind("$semantics");
+
+                Bson project1 = project(
                         fields(
                                 excludeId(),
-                                include("sensor.id"),
-                                computed(
-                                        "date",
-                                        new Document("$dateToString", new Document("format", "%Y-%m-%d")
-                                                .append("date", "$timeStamp"))
-                                )
+                                include("timeStamp"),
+                                include("semantics"),
+                                include("semanticEntity"),
+                                include("payload"),
+                                computed("timeCheck",
+                                        new Document("$gt", Arrays.asList("$semantics.timeStamp", "$timeStamp")))
                         )
                 );
 
-                Bson group1 = group(new Document("date", "$date").append("sensorId", "$sensor.id"),
-                        sum("count", 1));
-                Bson group2 = group(new Document("sensorId", "$_id.sensorId"), avg("averagePerDay", "$count"));
+                Bson match2 = match(and(
+                        eq("semantics.type_.name", "presence"),
+                        lt("semantics.timeStamp", endTime),
+                        eq("semantics.payload.location", endLocation),
+                        eq("timeCheck", true)
+                ));
 
-                MongoIterable<Document> iterable = collection.aggregate(Arrays.asList(match, project, group1, group2));
+                Bson project2 = project(
+                        fields(
+                                include("semanticEntity.name")
+                        )
+                );
 
-                getResults(iterable, 6);
+                MongoIterable iterable = collection.aggregate(Arrays.asList(match1, lookUp, unwind, project1, match2, project2));
+
+                getResults(iterable, 7);
 
                 Instant end = Instant.now();
                 return Duration.between(start, end);
             case 2:
                 start = Instant.now();
 
-                collection = database.getCollection("Observation");
+                collection = database.getCollection("SemanticObservation");
+                startTime = date;
+                cal = Calendar.getInstance();
+                cal.setTime(date);
+                cal.add(Calendar.DATE, 1);
+                endTime = cal.getTime();
 
-                match = match(and(
-                        in("sensorId", sensorIds),
+                Bson lookUp1 = lookup("SemanticObservationType", "typeId", "id", "type_");
+
+                match1 = match(and(
+                        eq("type_.name", "presence"),
                         gt("timeStamp", startTime),
-                        lt("timeStamp", endTime)));
+                        lt("timeStamp", endTime),
+                        eq("payload.location", startLocation)
+                ));
 
-                project = project(
+                Bson lookUp2 = lookup("SemanticObservation", "semanticEntityId",
+                        "semanticEntityId", "semantics");
+
+                unwind = unwind("$semantics");
+
+                project1 = project(
                         fields(
                                 excludeId(),
-                                include("sensorId"),
-                                computed(
-                                        "date",
-                                        new Document("$dateToString", new Document("format", "%Y-%m-%d")
-                                                .append("date", "$timeStamp"))
-                                )
+                                include("timeStamp"),
+                                include("semantics"),
+                                include("semanticEntityId"),
+                                include("payload"),
+                                computed("timeCheck",
+                                        new Document("$gt", Arrays.asList("$semantics.timeStamp", "$timeStamp"))),
+                                computed("typeCheck",
+                                        new Document("$eq", Arrays.asList("$semantics.typeId", "$typeId")))
                         )
                 );
 
-                group1 = group(new Document("date", "$date").append("sensorId", "$sensorId"),
-                        sum("count", 1));
-                group2 = group(new Document("sensorId", "$_id.sensorId"), avg("averagePerDay", "$count"));
+                match2 = match(and(
+                        lt("semantics.timeStamp", endTime),
+                        eq("semantics.payload.location", endLocation),
+                        eq("timeCheck", true),
+                        eq("typeCheck", true)
+                ));
 
-                iterable = collection.aggregate(Arrays.asList(match, project, group1, group2));
+                Bson lookUp3 = lookup("User", "semanticEntityId",
+                        "id", "semanticEntity");
 
-                getResults(iterable, 6);
+                Bson unwind2 = unwind("$semanticEntity");
+
+                project2 = project(
+                        fields(
+                                include("semanticEntity.name")
+                        )
+                );
+
+                iterable = collection.aggregate(Arrays.asList(lookUp1, match1, lookUp2, unwind, project1,
+                        match2, lookUp3, unwind2, project2));
+
+                getResults(iterable, 7);
 
                 end = Instant.now();
                 return Duration.between(start, end);
@@ -411,69 +466,124 @@ public class MongoDBQueryManager extends BaseQueryManager{
         }
     }
 
-    public Duration runQuery8(List<String> sensorIds, Date startTime, Date endTime) throws BenchmarkException {
+    @Override
+    public Duration runQuery8(String userId, Date date) throws BenchmarkException {
         switch (mapping) {
             case 1:
                 Instant start = Instant.now();
 
-                MongoCollection<Document> collection = database.getCollection("Observation");
+                MongoCollection collection = database.getCollection("SemanticObservation");
+                Date startTime = date;
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(date);
+                cal.add(Calendar.DATE, 1);
+                Date endTime = cal.getTime();
 
-                Bson match = match(and(
-                        in("sensor.id", sensorIds),
+                Bson match1 = match(and(
+                        eq("type_.name", "presence"),
                         gt("timeStamp", startTime),
-                        lt("timeStamp", endTime)));
+                        lt("timeStamp", endTime),
+                        eq("semanticEntity.id", userId)
+                ));
 
-                Bson project = project(
+                Bson lookUp = lookup("SemanticObservation", "semanticEntity.id",
+                        "semanticEntity.id", "semantics");
+
+                Bson unwind = unwind("$semantics");
+
+                Bson project1 = project(
                         fields(
                                 excludeId(),
-                                include("sensor.id"),
-                                computed(
-                                        "date",
-                                        new Document("$dateToString", new Document("format", "%Y-%m-%d")
-                                                .append("date", "$timeStamp"))
-                                )
+                                include("timeStamp"),
+                                include("semantics"),
+                                include("semanticEntity"),
+                                include("payload"),
+                                computed("timeCheck",
+                                        new Document("$eq", Arrays.asList("$semantics.timeStamp", "$timeStamp"))),
+                                computed("placeCheck",
+                                        new Document("$eq", Arrays.asList("$semantics.payload.location", "$payload.location")))
                         )
                 );
 
-                Bson group1 = group(new Document("date", "$date").append("sensorId", "$sensor.id"),
-                        sum("count", 1));
-                Bson group2 = group(new Document("sensorId", "$_id.sensorId"), avg("averagePerDay", "$count"));
+                Bson match2 = match(and(
+                        eq("semantics.type_.name", "presence"),
+                        lt("semantics.timeStamp", endTime),
+                        eq("timeCheck", true),
+                        eq("timeCheck", true)
+                ));
 
-                MongoIterable<Document> iterable = collection.aggregate(Arrays.asList(match, project, group1, group2));
+                Bson project2 = project(
+                        fields(
+                                include("semantics.semanticEntity.name")
+                        )
+                );
 
-                getResults(iterable, 6);
+                MongoIterable iterable = collection.aggregate(Arrays.asList(match1, lookUp, unwind, project1, match2, project2));
+
+                getResults(iterable, 7);
 
                 Instant end = Instant.now();
                 return Duration.between(start, end);
             case 2:
                 start = Instant.now();
 
-                collection = database.getCollection("Observation");
+                collection = database.getCollection("SemanticObservation");
+                startTime = date;
+                cal = Calendar.getInstance();
+                cal.setTime(date);
+                cal.add(Calendar.DATE, 1);
+                endTime = cal.getTime();
 
-                match = match(and(
-                        in("sensorId", sensorIds),
+                Bson lookUp1 = lookup("SemanticObservationType", "typeId", "id", "type_");
+
+                match1 = match(and(
+                        eq("type_.name", "presence"),
                         gt("timeStamp", startTime),
-                        lt("timeStamp", endTime)));
+                        lt("timeStamp", endTime),
+                        eq("semanticEntityId", userId)
+                ));
 
-                project = project(
+                Bson lookUp2 = lookup("SemanticObservation", "payload.location",
+                        "payload.location", "semantics");
+
+                unwind = unwind("$semantics");
+
+                project1 = project(
                         fields(
                                 excludeId(),
-                                include("sensorId"),
-                                computed(
-                                        "date",
-                                        new Document("$dateToString", new Document("format", "%Y-%m-%d")
-                                                .append("date", "$timeStamp"))
-                                )
+                                include("timeStamp"),
+                                include("semantics"),
+                                include("semanticEntityId"),
+                                include("payload"),
+                                computed("timeCheck",
+                                        new Document("$eq", Arrays.asList("$semantics.timeStamp", "$timeStamp"))),
+                                computed("typeCheck",
+                                        new Document("$eq", Arrays.asList("$semantics.typeId", "$typeId")))
                         )
                 );
 
-                group1 = group(new Document("date", "$date").append("sensorId", "$sensorId"),
-                        sum("count", 1));
-                group2 = group(new Document("sensorId", "$_id.sensorId"), avg("averagePerDay", "$count"));
+                match2 = match(and(
+                        ne("semantics.semanticEntityId", userId),
+                        lt("semantics.timeStamp", endTime),
+                        eq("timeCheck", true),
+                        eq("typeCheck", true)
+                ));
 
-                iterable = collection.aggregate(Arrays.asList(match, project, group1, group2));
+                Bson lookUp3 = lookup("User", "semantics.semanticEntityId",
+                        "id", "semanticEntity");
 
-                getResults(iterable, 6);
+                Bson unwind2 = unwind("$semanticEntity");
+
+                project2 = project(
+                        fields(
+                                include("semanticEntity.name")
+                        )
+                );
+
+                iterable = collection.aggregate(Arrays.asList(lookUp1, match1, lookUp2, unwind, project1,
+                        match2, lookUp3, unwind2, project2));
+
+                getResults(iterable, 8);
 
                 end = Instant.now();
                 return Duration.between(start, end);
@@ -482,22 +592,25 @@ public class MongoDBQueryManager extends BaseQueryManager{
         }
     }
 
-    public Duration runQuery9(List<String> sensorIds, Date startTime, Date endTime) throws BenchmarkException {
+    @Override
+    public Duration runQuery9(String userId, String infraTypeName) throws BenchmarkException {
         switch (mapping) {
             case 1:
                 Instant start = Instant.now();
 
-                MongoCollection<Document> collection = database.getCollection("Observation");
+                MongoCollection<Document> collection = database.getCollection("SemanticObservation");
+
+                Bson lookUp1 = lookup("Infrastructure", "payload.location", "id", "infra");
+
+                Bson unwind = unwind("$infra");
 
                 Bson match = match(and(
-                        in("sensor.id", sensorIds),
-                        gt("timeStamp", startTime),
-                        lt("timeStamp", endTime)));
+                        eq("infra.type_.name", infraTypeName),
+                        eq("semanticEntityId", userId)));
 
                 Bson project = project(
                         fields(
                                 excludeId(),
-                                include("sensor.id"),
                                 computed(
                                         "date",
                                         new Document("$dateToString", new Document("format", "%Y-%m-%d")
@@ -506,30 +619,32 @@ public class MongoDBQueryManager extends BaseQueryManager{
                         )
                 );
 
-                Bson group1 = group(new Document("date", "$date").append("sensorId", "$sensor.id"),
-                        sum("count", 1));
-                Bson group2 = group(new Document("sensorId", "$_id.sensorId"), avg("averagePerDay", "$count"));
+                Bson group1 = group(new Document("date", "$date"), sum("count", 1));
+                Bson group2 = group(null, avg("averageMinsPerDay", "$count"));
 
-                MongoIterable<Document> iterable = collection.aggregate(Arrays.asList(match, project, group1, group2));
+                MongoIterable<Document> iterable = collection.aggregate(Arrays.asList(lookUp1, unwind, match, project,
+                        group1, group2));
 
-                getResults(iterable, 6);
+                getResults(iterable, 9);
 
                 Instant end = Instant.now();
                 return Duration.between(start, end);
             case 2:
                 start = Instant.now();
 
-                collection = database.getCollection("Observation");
+                collection = database.getCollection("SemanticObservation");
+
+                lookUp1 = lookup("Infrastructure", "payload.location", "id", "infra");
+
+                unwind = unwind("$infra");
 
                 match = match(and(
-                        in("sensorId", sensorIds),
-                        gt("timeStamp", startTime),
-                        lt("timeStamp", endTime)));
+                        eq("infra.type_.name", infraTypeName),
+                        eq("semanticEntityId", userId)));
 
                 project = project(
                         fields(
                                 excludeId(),
-                                include("sensorId"),
                                 computed(
                                         "date",
                                         new Document("$dateToString", new Document("format", "%Y-%m-%d")
@@ -538,13 +653,13 @@ public class MongoDBQueryManager extends BaseQueryManager{
                         )
                 );
 
-                group1 = group(new Document("date", "$date").append("sensorId", "$sensorId"),
-                        sum("count", 1));
-                group2 = group(new Document("sensorId", "$_id.sensorId"), avg("averagePerDay", "$count"));
+                group1 = group(new Document("date", "$date"), sum("count", 10));
 
-                iterable = collection.aggregate(Arrays.asList(match, project, group1, group2));
+                group2 = group(null, avg("averageMinsPerDay", "$count"));
 
-                getResults(iterable, 6);
+                iterable = collection.aggregate(Arrays.asList(lookUp1, unwind, match, project, group1, group2));
+
+                getResults(iterable, 9);
 
                 end = Instant.now();
                 return Duration.between(start, end);
@@ -553,69 +668,70 @@ public class MongoDBQueryManager extends BaseQueryManager{
         }
     }
 
-    public Duration runQuery10(List<String> sensorIds, Date startTime, Date endTime) throws BenchmarkException {
+    @Override
+    public Duration runQuery10(Date startTime, Date endTime) throws BenchmarkException {
         switch (mapping) {
             case 1:
                 Instant start = Instant.now();
 
-                MongoCollection<Document> collection = database.getCollection("Observation");
+                MongoCollection<Document> collection = database.getCollection("SemanticObservation");
 
                 Bson match = match(and(
-                        in("sensor.id", sensorIds),
                         gt("timeStamp", startTime),
-                        lt("timeStamp", endTime)));
+                        lt("timeStamp", endTime),
+                        eq("type_.name", "occupancy")
+                ));
+
+                Bson sort = sort(new Document("semanticEntity.id", 1).append("timeStamp", 1));
 
                 Bson project = project(
                         fields(
                                 excludeId(),
-                                include("sensor.id"),
-                                computed(
-                                        "date",
-                                        new Document("$dateToString", new Document("format", "%Y-%m-%d")
-                                                .append("date", "$timeStamp"))
-                                )
+                                include("timeStamp"),
+                                include("semanticEntity.name"),
+                                include("payload.occupancy")
                         )
                 );
 
-                Bson group1 = group(new Document("date", "$date").append("sensorId", "$sensor.id"),
-                        sum("count", 1));
-                Bson group2 = group(new Document("sensorId", "$_id.sensorId"), avg("averagePerDay", "$count"));
+                MongoIterable<Document> iterable = collection.aggregate(Arrays.asList(match, sort, project));
 
-                MongoIterable<Document> iterable = collection.aggregate(Arrays.asList(match, project, group1, group2));
-
-                getResults(iterable, 6);
+                getResults(iterable, 10);
 
                 Instant end = Instant.now();
                 return Duration.between(start, end);
             case 2:
                 start = Instant.now();
 
-                collection = database.getCollection("Observation");
+                collection = database.getCollection("SemanticObservation");
+
+                Bson lookUp1 = lookup("SemanticObservationType", "typeId", "id", "type_");
 
                 match = match(and(
-                        in("sensorId", sensorIds),
                         gt("timeStamp", startTime),
-                        lt("timeStamp", endTime)));
+                        lt("timeStamp", endTime),
+                        eq("type_.name", "occupancy")
+                ));
+
+
+
+                sort = sort(new Document("semanticEntityId", 1).append("timeStamp", 1));
+
+                Bson lookUp2 = lookup("Infrastructure", "semanticEntityId", "id", "infra");
+
+                Bson unwind = unwind("$infra");
 
                 project = project(
                         fields(
                                 excludeId(),
-                                include("sensorId"),
-                                computed(
-                                        "date",
-                                        new Document("$dateToString", new Document("format", "%Y-%m-%d")
-                                                .append("date", "$timeStamp"))
-                                )
+                                include("timeStamp"),
+                                include("infra.name"),
+                                include("payload.occupancy")
                         )
                 );
 
-                group1 = group(new Document("date", "$date").append("sensorId", "$sensorId"),
-                        sum("count", 1));
-                group2 = group(new Document("sensorId", "$_id.sensorId"), avg("averagePerDay", "$count"));
+                iterable = collection.aggregate(Arrays.asList(lookUp1, match, sort, lookUp2, unwind, project));
 
-                iterable = collection.aggregate(Arrays.asList(match, project, group1, group2));
-
-                getResults(iterable, 6);
+                getResults(iterable, 10);
 
                 end = Instant.now();
                 return Duration.between(start, end);
