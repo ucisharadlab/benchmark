@@ -339,4 +339,288 @@ public class MongoDBQueryManager extends BaseQueryManager{
                 throw new BenchmarkException("No Such Mapping");
         }
     }
+
+    public Duration runQuery7(List<String> sensorIds, Date startTime, Date endTime) throws BenchmarkException {
+        switch (mapping) {
+            case 1:
+                Instant start = Instant.now();
+
+                MongoCollection<Document> collection = database.getCollection("Observation");
+
+                Bson match = match(and(
+                        in("sensor.id", sensorIds),
+                        gt("timeStamp", startTime),
+                        lt("timeStamp", endTime)));
+
+                Bson project = project(
+                        fields(
+                                excludeId(),
+                                include("sensor.id"),
+                                computed(
+                                        "date",
+                                        new Document("$dateToString", new Document("format", "%Y-%m-%d")
+                                                .append("date", "$timeStamp"))
+                                )
+                        )
+                );
+
+                Bson group1 = group(new Document("date", "$date").append("sensorId", "$sensor.id"),
+                        sum("count", 1));
+                Bson group2 = group(new Document("sensorId", "$_id.sensorId"), avg("averagePerDay", "$count"));
+
+                MongoIterable<Document> iterable = collection.aggregate(Arrays.asList(match, project, group1, group2));
+
+                getResults(iterable, 6);
+
+                Instant end = Instant.now();
+                return Duration.between(start, end);
+            case 2:
+                start = Instant.now();
+
+                collection = database.getCollection("Observation");
+
+                match = match(and(
+                        in("sensorId", sensorIds),
+                        gt("timeStamp", startTime),
+                        lt("timeStamp", endTime)));
+
+                project = project(
+                        fields(
+                                excludeId(),
+                                include("sensorId"),
+                                computed(
+                                        "date",
+                                        new Document("$dateToString", new Document("format", "%Y-%m-%d")
+                                                .append("date", "$timeStamp"))
+                                )
+                        )
+                );
+
+                group1 = group(new Document("date", "$date").append("sensorId", "$sensorId"),
+                        sum("count", 1));
+                group2 = group(new Document("sensorId", "$_id.sensorId"), avg("averagePerDay", "$count"));
+
+                iterable = collection.aggregate(Arrays.asList(match, project, group1, group2));
+
+                getResults(iterable, 6);
+
+                end = Instant.now();
+                return Duration.between(start, end);
+            default:
+                throw new BenchmarkException("No Such Mapping");
+        }
+    }
+
+    public Duration runQuery8(List<String> sensorIds, Date startTime, Date endTime) throws BenchmarkException {
+        switch (mapping) {
+            case 1:
+                Instant start = Instant.now();
+
+                MongoCollection<Document> collection = database.getCollection("Observation");
+
+                Bson match = match(and(
+                        in("sensor.id", sensorIds),
+                        gt("timeStamp", startTime),
+                        lt("timeStamp", endTime)));
+
+                Bson project = project(
+                        fields(
+                                excludeId(),
+                                include("sensor.id"),
+                                computed(
+                                        "date",
+                                        new Document("$dateToString", new Document("format", "%Y-%m-%d")
+                                                .append("date", "$timeStamp"))
+                                )
+                        )
+                );
+
+                Bson group1 = group(new Document("date", "$date").append("sensorId", "$sensor.id"),
+                        sum("count", 1));
+                Bson group2 = group(new Document("sensorId", "$_id.sensorId"), avg("averagePerDay", "$count"));
+
+                MongoIterable<Document> iterable = collection.aggregate(Arrays.asList(match, project, group1, group2));
+
+                getResults(iterable, 6);
+
+                Instant end = Instant.now();
+                return Duration.between(start, end);
+            case 2:
+                start = Instant.now();
+
+                collection = database.getCollection("Observation");
+
+                match = match(and(
+                        in("sensorId", sensorIds),
+                        gt("timeStamp", startTime),
+                        lt("timeStamp", endTime)));
+
+                project = project(
+                        fields(
+                                excludeId(),
+                                include("sensorId"),
+                                computed(
+                                        "date",
+                                        new Document("$dateToString", new Document("format", "%Y-%m-%d")
+                                                .append("date", "$timeStamp"))
+                                )
+                        )
+                );
+
+                group1 = group(new Document("date", "$date").append("sensorId", "$sensorId"),
+                        sum("count", 1));
+                group2 = group(new Document("sensorId", "$_id.sensorId"), avg("averagePerDay", "$count"));
+
+                iterable = collection.aggregate(Arrays.asList(match, project, group1, group2));
+
+                getResults(iterable, 6);
+
+                end = Instant.now();
+                return Duration.between(start, end);
+            default:
+                throw new BenchmarkException("No Such Mapping");
+        }
+    }
+
+    public Duration runQuery9(List<String> sensorIds, Date startTime, Date endTime) throws BenchmarkException {
+        switch (mapping) {
+            case 1:
+                Instant start = Instant.now();
+
+                MongoCollection<Document> collection = database.getCollection("Observation");
+
+                Bson match = match(and(
+                        in("sensor.id", sensorIds),
+                        gt("timeStamp", startTime),
+                        lt("timeStamp", endTime)));
+
+                Bson project = project(
+                        fields(
+                                excludeId(),
+                                include("sensor.id"),
+                                computed(
+                                        "date",
+                                        new Document("$dateToString", new Document("format", "%Y-%m-%d")
+                                                .append("date", "$timeStamp"))
+                                )
+                        )
+                );
+
+                Bson group1 = group(new Document("date", "$date").append("sensorId", "$sensor.id"),
+                        sum("count", 1));
+                Bson group2 = group(new Document("sensorId", "$_id.sensorId"), avg("averagePerDay", "$count"));
+
+                MongoIterable<Document> iterable = collection.aggregate(Arrays.asList(match, project, group1, group2));
+
+                getResults(iterable, 6);
+
+                Instant end = Instant.now();
+                return Duration.between(start, end);
+            case 2:
+                start = Instant.now();
+
+                collection = database.getCollection("Observation");
+
+                match = match(and(
+                        in("sensorId", sensorIds),
+                        gt("timeStamp", startTime),
+                        lt("timeStamp", endTime)));
+
+                project = project(
+                        fields(
+                                excludeId(),
+                                include("sensorId"),
+                                computed(
+                                        "date",
+                                        new Document("$dateToString", new Document("format", "%Y-%m-%d")
+                                                .append("date", "$timeStamp"))
+                                )
+                        )
+                );
+
+                group1 = group(new Document("date", "$date").append("sensorId", "$sensorId"),
+                        sum("count", 1));
+                group2 = group(new Document("sensorId", "$_id.sensorId"), avg("averagePerDay", "$count"));
+
+                iterable = collection.aggregate(Arrays.asList(match, project, group1, group2));
+
+                getResults(iterable, 6);
+
+                end = Instant.now();
+                return Duration.between(start, end);
+            default:
+                throw new BenchmarkException("No Such Mapping");
+        }
+    }
+
+    public Duration runQuery10(List<String> sensorIds, Date startTime, Date endTime) throws BenchmarkException {
+        switch (mapping) {
+            case 1:
+                Instant start = Instant.now();
+
+                MongoCollection<Document> collection = database.getCollection("Observation");
+
+                Bson match = match(and(
+                        in("sensor.id", sensorIds),
+                        gt("timeStamp", startTime),
+                        lt("timeStamp", endTime)));
+
+                Bson project = project(
+                        fields(
+                                excludeId(),
+                                include("sensor.id"),
+                                computed(
+                                        "date",
+                                        new Document("$dateToString", new Document("format", "%Y-%m-%d")
+                                                .append("date", "$timeStamp"))
+                                )
+                        )
+                );
+
+                Bson group1 = group(new Document("date", "$date").append("sensorId", "$sensor.id"),
+                        sum("count", 1));
+                Bson group2 = group(new Document("sensorId", "$_id.sensorId"), avg("averagePerDay", "$count"));
+
+                MongoIterable<Document> iterable = collection.aggregate(Arrays.asList(match, project, group1, group2));
+
+                getResults(iterable, 6);
+
+                Instant end = Instant.now();
+                return Duration.between(start, end);
+            case 2:
+                start = Instant.now();
+
+                collection = database.getCollection("Observation");
+
+                match = match(and(
+                        in("sensorId", sensorIds),
+                        gt("timeStamp", startTime),
+                        lt("timeStamp", endTime)));
+
+                project = project(
+                        fields(
+                                excludeId(),
+                                include("sensorId"),
+                                computed(
+                                        "date",
+                                        new Document("$dateToString", new Document("format", "%Y-%m-%d")
+                                                .append("date", "$timeStamp"))
+                                )
+                        )
+                );
+
+                group1 = group(new Document("date", "$date").append("sensorId", "$sensorId"),
+                        sum("count", 1));
+                group2 = group(new Document("sensorId", "$_id.sensorId"), avg("averagePerDay", "$count"));
+
+                iterable = collection.aggregate(Arrays.asList(match, project, group1, group2));
+
+                getResults(iterable, 6);
+
+                end = Instant.now();
+                return Duration.between(start, end);
+            default:
+                throw new BenchmarkException("No Such Mapping");
+        }
+    }
 }
