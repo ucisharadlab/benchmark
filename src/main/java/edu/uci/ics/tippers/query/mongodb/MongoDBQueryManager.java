@@ -514,7 +514,8 @@ public class MongoDBQueryManager extends BaseQueryManager{
 
                 Bson project2 = project(
                         fields(
-                                include("semantics.semanticEntity.name")
+                                include("semantics.semanticEntity.name"),
+                                include("payload.location")
                         )
                 );
 
@@ -576,7 +577,8 @@ public class MongoDBQueryManager extends BaseQueryManager{
 
                 project2 = project(
                         fields(
-                                include("semanticEntity.name")
+                                include("semanticEntity.name"),
+                                include("payload.location")
                         )
                 );
 

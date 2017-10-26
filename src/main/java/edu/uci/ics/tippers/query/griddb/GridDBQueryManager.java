@@ -295,12 +295,108 @@ public class GridDBQueryManager extends BaseQueryManager {
 
     @Override
     public Duration runQuery7(String startLocation, String endLocation, Date date) throws BenchmarkException {
-        return Constants.MAX_DURATION;
+        // TODO: Fix Error Due to TimeZone
+        Instant start = Instant.now();
+        Date startTime = date;
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.add(Calendar.DATE, 1);
+        Date endTime = cal.getTime();
+
+        try {
+            List<String[]> users = runQueryWithRows("User",
+                    "SELECT * FROM User")
+                    .stream().map(e -> {
+                        try {
+                            return new String[]{e.getString(0), e.getString(1)};
+                        } catch (GSException e1) {
+                            e1.printStackTrace();
+                            return null;
+                        }
+                    }).collect(Collectors.toList());
+
+            RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(7));
+
+            for (String[] user : users) {
+                String collectionName = Constants.GRIDDB_SO_PREFIX + user[0];
+                Container<String, Row> container = gridStore.getContainer(collectionName);
+                Query<Row> gridDBQuery = container.query(String.format("SELECT * FROM %s WHERE timeStamp >= TIMESTAMP('%s') " +
+                                "AND timeStamp <= TIMESTAMP('%s') AND location = '%s'",
+                        collectionName, sdf.format(startTime), sdf.format(endTime), startLocation));
+                RowSet<Row> rows = gridDBQuery.fetch();
+                while (rows.hasNext()) {
+
+                    Row row = rows.next();
+                    String query = String.format("SELECT * FROM %s WHERE timeStamp >= TIMESTAMP('%s') " +
+                            "AND timeStamp <= TIMESTAMP('%s') AND location = '%s'", collectionName,
+                            sdf.format(row.getTimestamp(0)), sdf.format(endTime), endLocation);
+                    List<Row> observations = runQueryWithRows(collectionName, query);
+
+                    if (observations.size() > 0 && writeOutput) {
+                        writer.writeString(user[1] + ", " + row.getString(4));
+                    }
+                }
+            }
+            writer.close();
+            Instant end = Instant.now();
+            return Duration.between(start, end);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new BenchmarkException("Error Running Query");
+        }
     }
 
     @Override
     public Duration runQuery8(String userId, Date date) throws BenchmarkException {
-        return Constants.MAX_DURATION;
+        // TODO: Fix Error Due to TimeZone
+        Instant start = Instant.now();
+        Date startTime = date;
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.add(Calendar.DATE, 1);
+        Date endTime = cal.getTime();
+
+        try {
+            List<String[]> users = runQueryWithRows("User",
+                    String.format("SELECT * FROM User WHERE id != '%s'", userId))
+                    .stream().map(e -> {
+                        try {
+                            return new String[]{e.getString(0), e.getString(1)};
+                        } catch (GSException e1) {
+                            e1.printStackTrace();
+                            return null;
+                        }
+                    }).collect(Collectors.toList());
+
+            RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(8));
+
+            Container<String, Row> container = gridStore.getContainer(Constants.GRIDDB_SO_PREFIX + userId);
+            Query<Row> gridDBQuery = container.query(String.format("SELECT * FROM %s WHERE timeStamp >= TIMESTAMP('%s') " +
+                    "AND timeStamp <= TIMESTAMP('%s')",
+                    Constants.GRIDDB_SO_PREFIX + userId, sdf.format(startTime), sdf.format(endTime)));
+            RowSet<Row> rows = gridDBQuery.fetch();
+
+            while (rows.hasNext()) {
+
+                Row row = rows.next();
+                for (String[] user : users) {
+                    String collectionName = Constants.GRIDDB_SO_PREFIX + user[0];
+                    String query = String.format("SELECT * FROM %s WHERE timeStamp = TIMESTAMP('%s') " +
+                            "AND location='%s", collectionName, sdf.format(row.getTimestamp(0)), row.getString(4));
+                    List<Row> observations = runQueryWithRows(collectionName, query);
+
+                    if (observations.size() > 0 && writeOutput) {
+                        writer.writeString(user[1] + ", " + row.getString(4));
+                    }
+                }
+            }
+            writer.close();
+            Instant end = Instant.now();
+            return Duration.between(start, end);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new BenchmarkException("Error Running Query");
+        }
     }
 
     @Override
