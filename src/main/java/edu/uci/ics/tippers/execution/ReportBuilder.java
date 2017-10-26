@@ -4,7 +4,7 @@ import edu.uci.ics.tippers.common.Database;
 import edu.uci.ics.tippers.common.ReportFormat;
 import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.exception.BenchmarkException;
-import javafx.util.Pair;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;

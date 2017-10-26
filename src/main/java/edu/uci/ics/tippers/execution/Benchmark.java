@@ -25,7 +25,8 @@ import edu.uci.ics.tippers.schema.cratedb.CrateDBSchema;
 import edu.uci.ics.tippers.schema.griddb.GridDBSchema;
 import edu.uci.ics.tippers.schema.mongodb.MongoDBSchema;
 import edu.uci.ics.tippers.schema.postgresql.PgSQLSchema;
-import javafx.util.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.ini4j.Ini;
 import org.ini4j.IniPreferences;
 
@@ -65,31 +66,31 @@ public class Benchmark {
 
             // Creating schema on a particular database and particular mapping
             System.out.println("Creating Schema ...");
-            //schemaCreator.createSchema();
+            schemaCreator.createSchema();
 
             // Inserting data into the database system after schema creation
             System.out.println("Inserting Data ...");
             Map<Integer, Duration> runTimePerMapping = new HashMap<Integer, Duration>();
-            //runTimePerMapping.put(0, dataUploader.addAllData());
+            runTimePerMapping.put(0, dataUploader.addAllData());
 
             // Running benchmark queries and gathering query runtimes
             System.out.println("Running Queries ...");
             runTimePerMapping.putAll(queryManager.runQueries());
 
-            runTimes.put(new Pair<>(queryManager.getDatabase(), queryManager.getMapping()), runTimePerMapping);
+            runTimes.put(new ImmutablePair<>(queryManager.getDatabase(), queryManager.getMapping()), runTimePerMapping);
 
             // Cleaning up inserted data and dropping created schema
             System.out.println("Cleaning Up Database, Removing Data And Schema ...\n");
-            //schemaCreator.dropSchema();
+            schemaCreator.dropSchema();
 
             System.out.println("---------------------------------------------------------------\n");
 
         } catch (Exception | Error be) {
             be.printStackTrace();
-            runTimes.put(new Pair<>(queryManager.getDatabase(), queryManager.getMapping()), null);
+            runTimes.put(new ImmutablePair<>(queryManager.getDatabase(), queryManager.getMapping()), null);
             try {
                 System.out.println("Cleaning Up Database, Removing Data And Schema ...\n");
-                //schemaCreator.dropSchema();
+                schemaCreator.dropSchema();
             } catch (Exception | Error e) {
                 e.printStackTrace();
             }
