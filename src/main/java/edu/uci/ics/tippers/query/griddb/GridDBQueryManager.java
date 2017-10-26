@@ -17,6 +17,7 @@ import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static edu.uci.ics.tippers.common.util.Helper.getFileFromQuery;
 
@@ -304,11 +305,113 @@ public class GridDBQueryManager extends BaseQueryManager {
 
     @Override
     public Duration runQuery9(String userId, String infraTypeName) throws BenchmarkException {
-        return Constants.MAX_DURATION;
+        // TODO: Fix Error Due to TimeZone
+        Instant start = Instant.now();
+
+        try {
+            String infraTypeId = runQueryWithRows("InfrastructureType",
+                    String.format("SELECT * FROM InfrastructureType WHERE name='%s'", infraTypeName)).get(0).getString(0);
+
+            List<String> infras = runQueryWithRows("Infrastructure",
+                    String.format("SELECT * FROM Infrastructure WHERE typeId='%s'", infraTypeId))
+                    .stream().map(e -> {
+                        try {
+                            return e.getString(0);
+                        } catch (GSException e1) {
+                            e1.printStackTrace();
+                            return null;
+                        }
+                    }).collect(Collectors.toList());
+
+            RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(9));
+            String collectionName = Constants.GRIDDB_SO_PREFIX + userId;
+            String query = "SELECT * FROM %s";
+            List<Row> observations = runQueryWithRows(collectionName, query);
+
+            JSONArray jsonObservations = new JSONArray();
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+            observations.forEach(e -> {
+                JSONObject object = new JSONObject();
+                try {
+                    if (infras.contains(e.getString(4))) {
+                        object.put("date", dateFormat.format(e.getTimestamp(0)));
+                        jsonObservations.put(object);
+                    }
+                } catch (GSException e1) {
+                    e1.printStackTrace();
+                }
+            });
+
+            GroupBy groupBy = new GroupBy();
+            JSONArray groups = groupBy.doGroupBy(jsonObservations, Arrays.asList("date"));
+            final int[] sum = {0};
+
+            groups.iterator().forEachRemaining(e-> {
+                sum[0] += ((JSONArray)e).length();
+            });
+
+            if (writeOutput) {
+                if (groups.length() != 0)
+                    writer.writeString(userId + ", " + sum[0] /groups.length());
+            }
+
+            writer.close();
+            Instant end = Instant.now();
+            return Duration.between(start, end);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new BenchmarkException("Error Running Query");
+        }
     }
 
     @Override
     public Duration runQuery10(Date startTime, Date endTime) throws BenchmarkException {
-        return Constants.MAX_DURATION;
+        // TODO: Fix Error Due to TimeZone
+        Instant start = Instant.now();
+        try {
+            List<String> infras = runQueryWithRows("Infrastructure",
+                    "SELECT * FROM Infrastructure")
+                    .stream().map(e -> {
+                        try {
+                            return e.getString(0);
+                        } catch (GSException e1) {
+                            e1.printStackTrace();
+                            return null;
+                        }
+                    }).collect(Collectors.toList());
+
+            RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(6));
+            for (String infra: infras) {
+                String collectionName = Constants.GRIDDB_SO_PREFIX + infra;
+                String query = String.format("SELECT * FROM %s WHERE timeStamp >= TIMESTAMP('%s') " +
+                        "AND timeStamp <= TIMESTAMP('%s') ORDER BY timeStamp", collectionName, sdf.format(startTime), sdf.format(endTime));
+                List<Row> observations = runQueryWithRows(collectionName, query);
+
+                observations.forEach(e->{
+                    if (writeOutput) {
+                        ContainerInfo containerInfo = null;
+                        try {
+                            StringBuilder line = new StringBuilder("");
+                            containerInfo = e.getSchema();
+                            int columnCount = containerInfo.getColumnCount();
+                            for (int i = 0; i < columnCount; i++) {
+                                line.append(e.getValue(i)).append("\t");
+                            }
+                            writer.writeString(line.toString());
+                        } catch (IOException e1) {
+                            e1.printStackTrace();
+                            throw new BenchmarkException("Error Running Query On GridDB");
+                        }
+                    }
+                });
+            }
+            writer.close();
+            Instant end = Instant.now();
+            return Duration.between(start, end);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new BenchmarkException("Error Running Query");
+        }
     }
 }
