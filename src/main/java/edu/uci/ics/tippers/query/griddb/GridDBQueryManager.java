@@ -300,7 +300,7 @@ public class GridDBQueryManager extends BaseQueryManager {
         Date startTime = date;
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
-        cal.add(Calendar.DATE, 1);
+        cal.add(Calendar.DATE, 2);
         Date endTime = cal.getTime();
 
         try {
@@ -308,7 +308,7 @@ public class GridDBQueryManager extends BaseQueryManager {
                     "SELECT * FROM User")
                     .stream().map(e -> {
                         try {
-                            return new String[]{e.getString(0), e.getString(1)};
+                            return new String[]{e.getString(0), e.getString(2)};
                         } catch (GSException e1) {
                             e1.printStackTrace();
                             return null;
@@ -319,21 +319,18 @@ public class GridDBQueryManager extends BaseQueryManager {
 
             for (String[] user : users) {
                 String collectionName = Constants.GRIDDB_SO_PREFIX + user[0];
-                Container<String, Row> container = gridStore.getContainer(collectionName);
-                Query<Row> gridDBQuery = container.query(String.format("SELECT * FROM %s WHERE timeStamp >= TIMESTAMP('%s') " +
+                List<Row> rows = runQueryWithRows(collectionName, String.format("SELECT * FROM %s WHERE timeStamp >= TIMESTAMP('%s') " +
                                 "AND timeStamp <= TIMESTAMP('%s') AND location = '%s'",
                         collectionName, sdf.format(startTime), sdf.format(endTime), startLocation));
-                RowSet<Row> rows = gridDBQuery.fetch();
-                while (rows.hasNext()) {
+                for (Row row: rows) {
 
-                    Row row = rows.next();
                     String query = String.format("SELECT * FROM %s WHERE timeStamp >= TIMESTAMP('%s') " +
                             "AND timeStamp <= TIMESTAMP('%s') AND location = '%s'", collectionName,
                             sdf.format(row.getTimestamp(0)), sdf.format(endTime), endLocation);
                     List<Row> observations = runQueryWithRows(collectionName, query);
 
                     if (observations.size() > 0 && writeOutput) {
-                        writer.writeString(user[1] + ", " + row.getString(4));
+                        writer.writeString(user[1]);
                     }
                 }
             }
@@ -361,7 +358,7 @@ public class GridDBQueryManager extends BaseQueryManager {
                     String.format("SELECT * FROM User WHERE id != '%s'", userId))
                     .stream().map(e -> {
                         try {
-                            return new String[]{e.getString(0), e.getString(1)};
+                            return new String[]{e.getString(0), e.getString(2)};
                         } catch (GSException e1) {
                             e1.printStackTrace();
                             return null;
@@ -382,11 +379,11 @@ public class GridDBQueryManager extends BaseQueryManager {
                 for (String[] user : users) {
                     String collectionName = Constants.GRIDDB_SO_PREFIX + user[0];
                     String query = String.format("SELECT * FROM %s WHERE timeStamp = TIMESTAMP('%s') " +
-                            "AND location='%s", collectionName, sdf.format(row.getTimestamp(0)), row.getString(4));
+                            "AND location='%s'", collectionName, sdf.format(row.getTimestamp(0)), row.getString(3));
                     List<Row> observations = runQueryWithRows(collectionName, query);
 
                     if (observations.size() > 0 && writeOutput) {
-                        writer.writeString(user[1] + ", " + row.getString(4));
+                        writer.writeString(user[1] + ", " + row.getString(3));
                     }
                 }
             }
@@ -421,7 +418,7 @@ public class GridDBQueryManager extends BaseQueryManager {
 
             RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(9));
             String collectionName = Constants.GRIDDB_SO_PREFIX + userId;
-            String query = "SELECT * FROM %s";
+            String query = String.format("SELECT * FROM %s", collectionName);
             List<Row> observations = runQueryWithRows(collectionName, query);
 
             JSONArray jsonObservations = new JSONArray();
@@ -430,7 +427,7 @@ public class GridDBQueryManager extends BaseQueryManager {
             observations.forEach(e -> {
                 JSONObject object = new JSONObject();
                 try {
-                    if (infras.contains(e.getString(4))) {
+                    if (infras.contains(e.getString(3))) {
                         object.put("date", dateFormat.format(e.getTimestamp(0)));
                         jsonObservations.put(object);
                     }
@@ -449,7 +446,7 @@ public class GridDBQueryManager extends BaseQueryManager {
 
             if (writeOutput) {
                 if (groups.length() != 0)
-                    writer.writeString(userId + ", " + sum[0] /groups.length());
+                    writer.writeString(userId + ", " + sum[0]*10 /groups.length());
             }
 
             writer.close();
@@ -477,7 +474,7 @@ public class GridDBQueryManager extends BaseQueryManager {
                         }
                     }).collect(Collectors.toList());
 
-            RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(6));
+            RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(10));
             for (String infra: infras) {
                 String collectionName = Constants.GRIDDB_SO_PREFIX + infra;
                 String query = String.format("SELECT * FROM %s WHERE timeStamp >= TIMESTAMP('%s') " +

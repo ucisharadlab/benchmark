@@ -340,25 +340,21 @@ public class GridDBDataMapping1 extends GridDBBaseDataMapping {
             SemanticObservation sobs = null;
 
             while ((sobs = reader.readNext()) != null) {
-                String collectionName = Constants.GRIDDB_SO_PREFIX + sobs.getType_().getId();
+                String collectionName = Constants.GRIDDB_SO_PREFIX + sobs.getSemanticEntity().get("id").getAsString();
 
-                //TimeSeries<Row> timeSeries = gridStore.getTimeSeries(collectionName);
+                TimeSeries<Row> timeSeries = gridStore.getTimeSeries(collectionName);
 
-                collection = gridStore.getCollection(collectionName);
-
-                row = collection.createRow();
-                row.setValue(0, sobs.getId());
-                row.setValue(1, sobs.getTimeStamp());
-                row.setValue(2, sobs.getSemanticEntity().get("id").getAsString());
-                row.setValue(3, sobs.getVirtualSensor().getId());
-                row.setValue(4, sobs.getType_().getId());
+                row = timeSeries.createRow();
+                row.setValue(1, sobs.getId());
+                row.setValue(0, sobs.getTimeStamp());
+                row.setValue(2, sobs.getVirtualSensor().getId());
 
                 if (sobs.getType_().getId().equals("occupancy")) {
-                    row.setValue(5, sobs.getPayload().get("occupancy").getAsInt());
+                    row.setValue(3, sobs.getPayload().get("occupancy").getAsInt());
                 } else if (sobs.getType_().getId().equals("presence")) {
-                    row.setValue(5, sobs.getPayload().get("location").getAsString());
-                }
-                collection.put(row);
+                    row.setValue(3, sobs.getPayload().get("location").getAsString());
+            }
+                timeSeries.put(row);
             }
 
         }

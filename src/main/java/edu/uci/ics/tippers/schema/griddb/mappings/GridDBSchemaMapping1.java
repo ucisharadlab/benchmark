@@ -49,13 +49,55 @@ public class GridDBSchemaMapping1 extends GridDBBaseSchemaMapping {
 
         gridStore.dropCollection("Sensor");
 
-        // TODO: Dropping Observation Collection
+        // Dropping Time series Observation Containers, One per each Sensor
+        JSONArray sensorList = null;
+        try {
+            sensorList = (JSONArray) parser.parse(new InputStreamReader(
+                    new FileInputStream(dataDir + DataFiles.SENSOR.getPath())));
+        } catch (IOException | ParseException e) {
+            e.printStackTrace();
+        }
+
+        for(int i =0;i<sensorList.size();i++){
+            JSONObject temp=(JSONObject)sensorList.get(i);
+            String collectionName = Constants.GRIDDB_OBS_PREFIX + temp.get("id");
+            gridStore.dropTimeSeries(collectionName);
+        }
+
 
         gridStore.dropCollection("SemanticObservationType");
         gridStore.dropCollection("VirtualSensorType");
         gridStore.dropCollection("VirtualSensor");
 
-        // TODO: Dropping Semantic Observation Collection
+        // Dropping Time series Presence Containers, One per each User
+        JSONArray userList = null;
+        try {
+            userList = (JSONArray) parser.parse(new InputStreamReader(
+                    new FileInputStream(dataDir + DataFiles.USER.getPath())));
+        } catch (IOException | ParseException e) {
+            e.printStackTrace();
+        }
+
+        for(int i =0;i<userList.size();i++) {
+            JSONObject temp = (JSONObject) userList.get(i);
+            String collectionName = Constants.GRIDDB_SO_PREFIX + temp.get("id");
+            gridStore.dropTimeSeries(collectionName);
+        }
+
+        // Creating Time series Occupancy Containers, One per each Room
+        JSONArray infraList = null;
+        try {
+            infraList = (JSONArray) parser.parse(new InputStreamReader(
+                    new FileInputStream(dataDir + DataFiles.INFRA.getPath())));
+        } catch (IOException | ParseException e) {
+            e.printStackTrace();
+        }
+
+        for(int i =0;i<infraList.size();i++) {
+            JSONObject temp = (JSONObject) infraList.get(i);
+            String collectionName = Constants.GRIDDB_SO_PREFIX + temp.get("id");
+            gridStore.dropTimeSeries(collectionName);
+        }
 
 
     }
@@ -248,58 +290,66 @@ public class GridDBSchemaMapping1 extends GridDBBaseSchemaMapping {
 
         gridStore.putCollection("VirtualSensor", containerInfo, true);
 
-        // Creating Semantic Observation Containers, One per each Semantic Observation Type
-        JSONArray soTypeList = null;
+        // Creating Time series Presence Containers, One per each User
+        JSONArray userList = null;
         try {
-            soTypeList = (JSONArray) parser.parse(new InputStreamReader(
-                    new FileInputStream(dataDir + DataFiles.SO_TYPE.getPath())));
-        } catch (IOException | ParseException e) {
+            userList = (JSONArray) parser.parse(new InputStreamReader(
+                    new FileInputStream(dataDir + DataFiles.USER.getPath())));
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
             e.printStackTrace();
         }
 
+        for(int i =0;i<userList.size();i++) {
+            JSONObject temp = (JSONObject) userList.get(i);
 
-        for(int i =0;i<soTypeList.size();i++) {
-            JSONObject temp=(JSONObject)soTypeList.get(i);
-            String collectionName = Constants.GRIDDB_SO_PREFIX + temp.get("id");
             containerInfo = new ContainerInfo();
             List<ColumnInfo> tempColumnInfoList = new ArrayList<>();
+            String collectionName = Constants.GRIDDB_SO_PREFIX + temp.get("id");
             containerInfo.setName(collectionName);
-            containerInfo.setType(ContainerType.COLLECTION);
+            containerInfo.setType(ContainerType.TIME_SERIES);
 
-            tempColumnInfoList.add(new ColumnInfo("id", GSType.STRING));
             tempColumnInfoList.add(new ColumnInfo("timeStamp", GSType.TIMESTAMP));
-            tempColumnInfoList.add(new ColumnInfo("semanticEntityId", GSType.STRING));
+            tempColumnInfoList.add(new ColumnInfo("id", GSType.STRING));
             tempColumnInfoList.add(new ColumnInfo("virtualSensorId", GSType.STRING));
-            tempColumnInfoList.add(new ColumnInfo("typeId", GSType.STRING));
+            tempColumnInfoList.add(new ColumnInfo("location", GSType.STRING));
 
-            JSONArray schema = null;
-            try {
-                schema = (JSONArray) parser.parse((String)temp.get("payloadSchema"));
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-
-            Iterator<JSONObject> iterator = schema.iterator();
-
-            iterator.forEachRemaining( e-> {
-                Set<String> keys =  e.keySet();
-
-                keys.forEach(k-> {
-                    GSType type = null;
-                    if (e.get(k).equals("STRING"))
-                        type = GSType.STRING;
-                    if (e.get(k).equals("DOUBLE"))
-                        type = GSType.DOUBLE;
-                    if (e.get(k).equals("INTEGER"))
-                        type = GSType.INTEGER;
-
-                    tempColumnInfoList.add(new ColumnInfo(k, type));
-                });
-            });
             containerInfo.setColumnInfoList(tempColumnInfoList);
             containerInfo.setRowKeyAssigned(true);
 
-            gridStore.putCollection(collectionName, containerInfo, true);
+            gridStore.putTimeSeries(collectionName, containerInfo, true);
+        }
+
+        // Creating Time series Occupancy Containers, One per each Room
+        JSONArray infraList = null;
+        try {
+            infraList = (JSONArray) parser.parse(new InputStreamReader(
+                    new FileInputStream(dataDir + DataFiles.INFRA.getPath())));
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        for(int i =0;i<infraList.size();i++) {
+            JSONObject temp = (JSONObject) infraList.get(i);
+
+            containerInfo = new ContainerInfo();
+            List<ColumnInfo> tempColumnInfoList = new ArrayList<>();
+            String collectionName = Constants.GRIDDB_SO_PREFIX + temp.get("id");
+            containerInfo.setName(collectionName);
+            containerInfo.setType(ContainerType.TIME_SERIES);
+
+            tempColumnInfoList.add(new ColumnInfo("timeStamp", GSType.TIMESTAMP));
+            tempColumnInfoList.add(new ColumnInfo("id", GSType.STRING));
+            tempColumnInfoList.add(new ColumnInfo("virtualSensorId", GSType.STRING));
+            tempColumnInfoList.add(new ColumnInfo("occupancy", GSType.INTEGER));
+
+            containerInfo.setColumnInfoList(tempColumnInfoList);
+            containerInfo.setRowKeyAssigned(true);
+
+            gridStore.putTimeSeries(collectionName, containerInfo, true);
         }
     }
 

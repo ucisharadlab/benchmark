@@ -65,12 +65,12 @@ public class Benchmark {
 
             // Creating schema on a particular database and particular mapping
             System.out.println("Creating Schema ...");
-            schemaCreator.createSchema();
+            //schemaCreator.createSchema();
 
             // Inserting data into the database system after schema creation
             System.out.println("Inserting Data ...");
             Map<Integer, Duration> runTimePerMapping = new HashMap<Integer, Duration>();
-            runTimePerMapping.put(0, dataUploader.addAllData());
+            //runTimePerMapping.put(0, dataUploader.addAllData());
 
             // Running benchmark queries and gathering query runtimes
             System.out.println("Running Queries ...");
