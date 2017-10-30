@@ -529,7 +529,7 @@ public class PgSQLQueryManager extends BaseQueryManager{
                         "  AND substring(so.payload, 0, 5) = infra.id " +
                         "  AND infra.INFRASTRUCTURE_TYPE_ID = infraType.id AND infraType.name = ? " +
                         "  AND so.semantic_entity_id = ? " +
-                        "  GROUP BY  date(so.timeStamp)) AS timeSpentPerDay";
+                        "  GROUP BY  date_trunc('day', so.timeStamp)) AS timeSpentPerDay";
 
                 try {
                     PreparedStatement stmt = connection.prepareStatement(query);
