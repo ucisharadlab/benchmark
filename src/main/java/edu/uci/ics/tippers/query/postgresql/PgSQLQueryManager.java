@@ -461,21 +461,121 @@ public class PgSQLQueryManager extends BaseQueryManager{
 
     @Override
     public Duration runQuery7(String startLocation, String endLocation, Date date) throws BenchmarkException {
-        return Constants.MAX_DURATION;
+        switch(mapping){
+            case 1:
+                String query = "SELECT u.name " +
+                        "FROM SEMANTIC_OBSERVATION s1, SEMANTIC_OBSERVATION s2, SEMANTIC_OBSERVATION_TYPE st, USERS u " +
+                        "WHERE date_trunc('day', s1.timeStamp) = ? " +
+                        "AND st.type = “Presence” AND st.id = s1.type_id AND st.id = s2.type_id " +
+                        "AND s1.semantic_entity_id = s2.semantic_entity_id \n" +
+                        "AND SUBSTRING (s1.payload, 0, 5) = ? AND SUBSTRING (s1.payload, 0, 5) = ? " +
+                        "AND s1.timeStamp < s2.timeStamp " +
+                        "AND s1.semantic_entity_id = u.id ";
+                try {
+                    PreparedStatement stmt = connection.prepareStatement(query);
+                    stmt.setDate (1, (java.sql.Date) date);
+                    stmt.setString(2, startLocation);
+                    stmt.setString(3, endLocation);
+                    
+                    return runTimedQuery(stmt, 7);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
+            case 2:
+                return Constants.MAX_DURATION;
+            default:
+                throw new BenchmarkException("No Such Mapping");
+        }
     }
 
     @Override
     public Duration runQuery8(String userId, Date date) throws BenchmarkException {
-        return Constants.MAX_DURATION;
+        switch(mapping){
+            case 1:
+                String query = "SELECT s2.semantic_entity_id " +
+                        "FROM SEMANTIC_OBSERVATION s1, SEMANTIC_OBSERVATION s2, SEMANTIC_OBSERVATION_TYPE st " +
+                        "WHERE date_trunc('day', s1.timeStamp) = ? " +
+                        "AND date_trunc('day', s2.timeStamp) = date_trunc('day', s1.timeStamp) " +
+                        "AND st.type = “Presence” AND s1.type_id = s2.type_id AND st.type_id = s1.type_id  " +
+                        "AND s1.semantic_entity_id = ? " +
+                        "AND SUBSTRING (s1.payload, 0, 5) = SUBSTRING (s2.payload, 0, 5) ";
+                try {
+                    PreparedStatement stmt = connection.prepareStatement(query);
+                    stmt.setDate (1, (java.sql.Date) date);
+                    stmt.setString(2, userId);
+                    
+                    return runTimedQuery(stmt, 8);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
+
+            case 2:
+                return Constants.MAX_DURATION;
+            default:
+                throw new BenchmarkException("No Such Mapping");
+        }
+
     }
 
     @Override
     public Duration runQuery9(String userId, String infraTypeName) throws BenchmarkException {
-        return Constants.MAX_DURATION;
+        switch(mapping){
+            case 1:
+                String query = "SELECT Avg(timeSpent) as avgTimeSpent FROM " +
+                        " (SELECT date_trunc('day', so.timeStamp), count(*)*10 as timeSpent " +
+                        "  FROM SEMANTIC_OBSERVATION so, Infrastructure infra, SEMANTIC_OBSERVATION_TYPE st " +
+                        "  WHERE st.type = “Presence” AND so.type_id = st.type_id " +
+                        "  AND substring(so.payload, 0, 5) = infra.id " +
+                        "  AND infra.type = ? " +
+                        "  AND so.semantic_entity_id = ? " +
+                        "  GROUP BY  date(so.timeStamp))";
+
+                try {
+                    PreparedStatement stmt = connection.prepareStatement(query);
+                    stmt.setString (1, infraTypeName);
+                    stmt.setString(2, userId);
+
+                    return runTimedQuery(stmt, 9);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
+            case 2:
+                return Constants.MAX_DURATION;
+            default:
+                throw new BenchmarkException("No Such Mapping");
+
+        }
+
     }
 
     @Override
     public Duration runQuery10(Date startTime, Date endTime) throws BenchmarkException {
-        return Constants.MAX_DURATION;
+        switch(mapping){
+            case 1:
+                String query = "SELECT infra.name, so.timeStamp, so.payload.occupancy " +
+                        "FROM SEMANTIC_OBSERVATION so, INFRASTRUCTURE infra " +
+                        "WHERE so.timeStamp > ? AND so.timeStamp < ? " +
+                        "AND so.type_.name = “Occupancy” AND so.semanticEntity.id = infra.id " +
+                        "ORDER BY so.semantic_entity_id, so.timeStamp";
+
+                try {
+                    PreparedStatement stmt = connection.prepareStatement(query);
+                    stmt.setTimestamp (1, new Timestamp(startTime.getTime()));
+                    stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
+                    return runTimedQuery(stmt, 10);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
+            case 2:
+                return Constants.MAX_DURATION;
+            default:
+                throw new BenchmarkException("No Such Mapping");
+
+
+        }
     }
 }

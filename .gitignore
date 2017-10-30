@@ -25,6 +25,7 @@ hs_err_pid*
 target/
 
 .idea/
+*.iml
 
 python/data/
 data/
