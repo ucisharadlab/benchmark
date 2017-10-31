@@ -23,7 +23,7 @@ def createUsers(numUsers, src, dest):
         id = str(uuid.uuid4())
         groupList = [groups[random.randint(0, numGroups-1)]]
         user = {
-            "id": id,
+            "id": id.replace('-', '_'),
             "googleAuthToken": id,
             "name": "simUser{}".format(i),
             "emailId": "simUser{}@uci.edu".format(i) ,
@@ -33,7 +33,7 @@ def createUsers(numUsers, src, dest):
 
         id = str(uuid.uuid4())
         platform = {
-            "id": id,
+            "id": id.replace('-', '_'),
             "name": "simPlatform{}".format(i),
             "owner": user,
             "type_": platformsTypes[random.randint(1, len(platformsTypes) - 1)],
