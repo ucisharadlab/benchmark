@@ -466,7 +466,7 @@ public class PgSQLQueryManager extends BaseQueryManager{
                 String query = "SELECT u.name " +
                         "FROM SEMANTIC_OBSERVATION s1, SEMANTIC_OBSERVATION s2, SEMANTIC_OBSERVATION_TYPE st, USERS u " +
                         "WHERE date_trunc('day', s1.timeStamp) = ? " +
-                        "AND st.name = 'Presence' AND st.id = s1.type_id AND st.id = s2.type_id " +
+                        "AND st.name = 'presence' AND st.id = s1.type_id AND st.id = s2.type_id " +
                         "AND s1.semantic_entity_id = s2.semantic_entity_id " +
                         "AND SUBSTRING (s1.payload, 0, 5) = ? AND SUBSTRING (s1.payload, 0, 5) = ? " +
                         "AND s1.timeStamp < s2.timeStamp " +
@@ -496,9 +496,9 @@ public class PgSQLQueryManager extends BaseQueryManager{
                         "FROM SEMANTIC_OBSERVATION s1, SEMANTIC_OBSERVATION s2, SEMANTIC_OBSERVATION_TYPE st " +
                         "WHERE date_trunc('day', s1.timeStamp) = ? " +
                         "AND date_trunc('day', s2.timeStamp) = date_trunc('day', s1.timeStamp) " +
-                        "AND st.name = 'Presence' AND s1.type_id = s2.type_id AND st.id = s1.type_id  " +
-                        "AND s1.semantic_entity_id = ? " +
-                        "AND SUBSTRING (s1.payload, 0, 5) = SUBSTRING (s2.payload, 0, 5) ";
+                        "AND st.name = 'presence' AND s1.type_id = s2.type_id AND st.id = s1.type_id  " +
+                        "AND s1.semantic_entity_id = ? AND s1.semantic_entity_id != s2.semantic_entity_id " +
+                        "AND s1.payload = s2.payload ";
                 try {
                     PreparedStatement stmt = connection.prepareStatement(query);
                     stmt.setDate (1, new java.sql.Date(date.getTime()));
@@ -525,7 +525,7 @@ public class PgSQLQueryManager extends BaseQueryManager{
                 String query = "SELECT Avg(timeSpent) as avgTimeSpent FROM " +
                         " (SELECT date_trunc('day', so.timeStamp), count(*)*10 as timeSpent " +
                         "  FROM SEMANTIC_OBSERVATION so, Infrastructure infra, Infrastructure_Type infraType, SEMANTIC_OBSERVATION_TYPE st " +
-                        "  WHERE st.name = 'Presence' AND so.type_id = st.id " +
+                        "  WHERE st.name = 'presence' AND so.type_id = st.id " +
                         "  AND substring(so.payload, 0, 5) = infra.id " +
                         "  AND infra.INFRASTRUCTURE_TYPE_ID = infraType.id AND infraType.name = ? " +
                         "  AND so.semantic_entity_id = ? " +
@@ -554,10 +554,10 @@ public class PgSQLQueryManager extends BaseQueryManager{
     public Duration runQuery10(Date startTime, Date endTime) throws BenchmarkException {
         switch(mapping){
             case 1:
-                String query = "SELECT infra.name, so.timeStamp, so.payload.occupancy " +
-                        "FROM SEMANTIC_OBSERVATION so, INFRASTRUCTURE infra " +
+                String query = "SELECT infra.name, so.timeStamp, so.payload " +
+                        "FROM SEMANTIC_OBSERVATION so, INFRASTRUCTURE infra, SEMANTIC_OBSERVATION_TYPE st " +
                         "WHERE so.timeStamp > ? AND so.timeStamp < ? " +
-                        "AND so.type_.name = “Occupancy” AND so.semanticEntity.id = infra.id " +
+                        "AND so.type_id = 'occupancy' AND so.type_id = st.id AND so.semantic_entity_id = infra.id " +
                         "ORDER BY so.semantic_entity_id, so.timeStamp";
 
                 try {
