@@ -6,6 +6,7 @@ import sys
 from metadata import sensors, users
 from observations import observations
 from semanticobservation import semanticobservations
+from queries import Queries
 
 common = ["location.json", "infrastructureType.json", "infrastructure.json",
           "sensorType.json", "group.json", "platformType.json", "virtualSensorType.json", "virtualSensor.json",
@@ -80,15 +81,24 @@ def createSemanticObservations(config, pattern):
                                                            float(config['seed']["speed-noise"]), float(config['seed']["time-noise"]),
                                                            config['others']["data-dir"], config['others']["output-dir"])
 
+
+def createQueries(config):
+    q = Queries(int(config['query']['runs']), config['others']['output-dir'], config['query']['output-dir'],
+                config['observation']['start_timestamp'], int(config['observation']['days']),
+                int(config['query']['num-locations']), int(config['query']['num-sensors']),
+                int(config['query']['time-delta']))
+    q.generateQueries()
+
 if __name__ == "__main__":
     configFile = sys.argv[1]
     configDict = readConfiguration(configFile)
     pattern = configDict['others']["pattern"]
-    copyFiles(common, configDict['others']["data-dir"], configDict['others']["output-dir"])
-
-    createUsers(configDict)
-
-    createSensors(configDict, pattern)
-
-    createObservations(configDict, pattern)
-    createSemanticObservations(configDict, pattern)
+    # copyFiles(common, configDict['others']["data-dir"], configDict['others']["output-dir"])
+    #
+    # createUsers(configDict)
+    #
+    # createSensors(configDict, pattern)
+    #
+    # createObservations(configDict, pattern)
+    # createSemanticObservations(configDict, pattern)
+    createQueries(configDict)
