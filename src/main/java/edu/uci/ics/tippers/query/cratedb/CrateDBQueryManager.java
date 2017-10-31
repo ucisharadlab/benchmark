@@ -290,21 +290,45 @@ public class CrateDBQueryManager extends BaseQueryManager {
 
     @Override
     public Duration runQuery7(String startLocation, String endLocation, Date date) throws BenchmarkException {
-        return Constants.MAX_DURATION;
+        switch (mapping) {
+            case 1:
+            case 2:
+                return externalQueryManager.runQuery7(startLocation, endLocation, date);
+            default:
+                throw new BenchmarkException("No Such Mapping");
+        }
     }
 
     @Override
     public Duration runQuery8(String userId, Date date) throws BenchmarkException {
-        return Constants.MAX_DURATION;
+        switch (mapping) {
+            case 1:
+            case 2:
+                return externalQueryManager.runQuery8(userId, date);
+            default:
+                throw new BenchmarkException("No Such Mapping");
+        }
     }
 
     @Override
     public Duration runQuery9(String userId, String infraTypeName) throws BenchmarkException {
-        return Constants.MAX_DURATION;
+        switch (mapping) {
+            case 1:
+            case 2:
+                return externalQueryManager.runQuery9(userId, infraTypeName);
+            default:
+                throw new BenchmarkException("No Such Mapping");
+        }
     }
 
     @Override
     public Duration runQuery10(Date startTime, Date endTime) throws BenchmarkException {
-        return Constants.MAX_DURATION;
+        switch (mapping) {
+            case 1:
+            case 2:
+                return externalQueryManager.runQuery10(startTime, endTime);
+            default:
+                throw new BenchmarkException("No Such Mapping");
+        }
     }
 }
