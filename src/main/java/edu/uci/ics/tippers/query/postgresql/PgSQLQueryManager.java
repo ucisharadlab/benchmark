@@ -463,12 +463,13 @@ public class PgSQLQueryManager extends BaseQueryManager{
     public Duration runQuery7(String startLocation, String endLocation, Date date) throws BenchmarkException {
         switch(mapping){
             case 1:
+                // TODO: FIX QUERY
                 String query = "SELECT u.name " +
                         "FROM SEMANTIC_OBSERVATION s1, SEMANTIC_OBSERVATION s2, SEMANTIC_OBSERVATION_TYPE st, USERS u " +
                         "WHERE date_trunc('day', s1.timeStamp) = ? " +
                         "AND st.name = 'presence' AND st.id = s1.type_id AND st.id = s2.type_id " +
                         "AND s1.semantic_entity_id = s2.semantic_entity_id " +
-                        "AND SUBSTRING (s1.payload, 0, 5) = ? AND SUBSTRING (s1.payload, 0, 5) = ? " +
+                        "AND SUBSTRING (s1.payload, 0, 5) = ? AND SUBSTRING (s2.payload, 0, 5) = ? " +
                         "AND s1.timeStamp < s2.timeStamp " +
                         "AND s1.semantic_entity_id = u.id ";
                 try {
@@ -483,7 +484,24 @@ public class PgSQLQueryManager extends BaseQueryManager{
                     throw new BenchmarkException("Error Running Query");
                 }
             case 2:
-                return Constants.MAX_DURATION;
+                 query = "SELECT u.name " +
+                        "FROM PRESENCE s1, PRESENCE s2, USERS u " +
+                        "WHERE date_trunc('day', s1.timeStamp) = ? " +
+                        "AND s1.semantic_entity_id = s2.semantic_entity_id " +
+                        "AND s1.location = ? AND s2.location = ? " +
+                        "AND s1.timeStamp < s2.timeStamp " +
+                        "AND s1.semantic_entity_id = u.id ";
+                try {
+                    PreparedStatement stmt = connection.prepareStatement(query);
+                    stmt.setDate (1, new java.sql.Date(date.getTime()));
+                    stmt.setString(2, startLocation);
+                    stmt.setString(3, endLocation);
+
+                    return runTimedQuery(stmt, 7);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
             default:
                 throw new BenchmarkException("No Such Mapping");
         }
@@ -511,7 +529,22 @@ public class PgSQLQueryManager extends BaseQueryManager{
                 }
 
             case 2:
-                return Constants.MAX_DURATION;
+                query = "SELECT s2.semantic_entity_id " +
+                        "FROM PRESENCE s1, PRESENCE s2 " +
+                        "WHERE date_trunc('day', s1.timeStamp) = ? " +
+                        "AND date_trunc('day', s2.timeStamp) = date_trunc('day', s1.timeStamp) " +
+                        "AND s1.semantic_entity_id = ? AND s1.semantic_entity_id != s2.semantic_entity_id " +
+                        "AND s1.location = s2.location ";
+                try {
+                    PreparedStatement stmt = connection.prepareStatement(query);
+                    stmt.setDate (1, new java.sql.Date(date.getTime()));
+                    stmt.setString(2, userId);
+
+                    return runTimedQuery(stmt, 8);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
             default:
                 throw new BenchmarkException("No Such Mapping");
         }
@@ -542,7 +575,24 @@ public class PgSQLQueryManager extends BaseQueryManager{
                     throw new BenchmarkException("Error Running Query");
                 }
             case 2:
-                return Constants.MAX_DURATION;
+                query = "SELECT Avg(timeSpent) as avgTimeSpent FROM " +
+                        " (SELECT date_trunc('day', so.timeStamp), count(*)*10 as timeSpent " +
+                        "  FROM PRESENCE so, Infrastructure infra, Infrastructure_Type infraType " +
+                        "  WHERE so.location = infra.id " +
+                        "  AND infra.INFRASTRUCTURE_TYPE_ID = infraType.id AND infraType.name = ? " +
+                        "  AND so.semantic_entity_id = ? " +
+                        "  GROUP BY  date_trunc('day', so.timeStamp)) AS timeSpentPerDay";
+
+                try {
+                    PreparedStatement stmt = connection.prepareStatement(query);
+                    stmt.setString (1, infraTypeName);
+                    stmt.setString(2, userId);
+
+                    return runTimedQuery(stmt, 9);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
             default:
                 throw new BenchmarkException("No Such Mapping");
 
@@ -570,7 +620,21 @@ public class PgSQLQueryManager extends BaseQueryManager{
                     throw new BenchmarkException("Error Running Query");
                 }
             case 2:
-                return Constants.MAX_DURATION;
+                query = "SELECT infra.name, so.timeStamp, so.occupancy " +
+                        "FROM OCCUPANCY so, INFRASTRUCTURE infra " +
+                        "WHERE so.timeStamp > ? AND so.timeStamp < ? " +
+                        "AND so.semantic_entity_id = infra.id " +
+                        "ORDER BY so.semantic_entity_id, so.timeStamp";
+
+                try {
+                    PreparedStatement stmt = connection.prepareStatement(query);
+                    stmt.setTimestamp (1, new Timestamp(startTime.getTime()));
+                    stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
+                    return runTimedQuery(stmt, 10);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
             default:
                 throw new BenchmarkException("No Such Mapping");
 
