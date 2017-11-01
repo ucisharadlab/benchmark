@@ -25,7 +25,7 @@ public enum Query {
 
     static {
         for (Query d : Query.values()) {
-            lookup.put(d.getqNum(), d);
+            lookup.put(d.getQNum(), d);
         }
     }
 
@@ -34,7 +34,7 @@ public enum Query {
         this.description = description;
     }
 
-    public int getqNum() {
+    public int getQNum() {
         return qNum;
     }
 

@@ -95,12 +95,12 @@ public class AsterixDBDataUploader extends BaseDataUploader {
         }
     }
 
-    public void observationInsertThroughFeed() {
-        AsterixDataFeed feed = new AsterixDataFeed("Observation", connectionManager);
+    public void observationInsertThroughFeed(String dataset, DataFiles dataFile) {
+        AsterixDataFeed feed = new AsterixDataFeed(dataset, connectionManager);
 
         switch (mapping) {
             case 1:
-                BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
+                BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + dataFile.getPath(),
                         Observation.class);
                 Gson gson = new GsonBuilder()
                         .registerTypeAdapter(JSONObject.class, Converter.<JSONObject>getJSONSerializer())
@@ -115,7 +115,7 @@ public class AsterixDBDataUploader extends BaseDataUploader {
                 break;
             case 2:
                 // TODO: Fast Insertion Code
-                reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
+                reader = new BigJsonReader<>(dataDir + dataFile.getPath(),
                         Observation.class);
                 gson = new GsonBuilder()
                         .registerTypeAdapter(JSONObject.class, Converter.<JSONObject>getJSONSerializer())
@@ -134,12 +134,12 @@ public class AsterixDBDataUploader extends BaseDataUploader {
         feed.stopFeed();
     }
 
-    public void semanticObservationInsertThroughFeed() {
-        AsterixDataFeed feed = new AsterixDataFeed("SemanticObservation", connectionManager);
+    public void semanticObservationInsertThroughFeed(String dataset, DataFiles dataFile) {
+        AsterixDataFeed feed = new AsterixDataFeed(dataset, connectionManager);
 
         switch (mapping) {
             case 1:
-                BigJsonReader<SemanticObservation> reader = new BigJsonReader<>(dataDir + DataFiles.SO.getPath(),
+                BigJsonReader<SemanticObservation> reader = new BigJsonReader<>(dataDir + dataFile.getPath(),
                         SemanticObservation.class);
                 Gson gson = new GsonBuilder()
                         .registerTypeAdapter(JSONObject.class, Converter.<JSONObject>getJSONSerializer())
@@ -154,7 +154,7 @@ public class AsterixDBDataUploader extends BaseDataUploader {
                 break;
             case 2:
                 // TODO: Fast Insertion Code
-                reader = new BigJsonReader<>(dataDir + DataFiles.SO.getPath(),
+                reader = new BigJsonReader<>(dataDir + dataFile.getPath(),
                         SemanticObservation.class);
                 gson = new GsonBuilder()
                         .registerTypeAdapter(JSONObject.class, Converter.<JSONObject>getJSONSerializer())
@@ -281,7 +281,7 @@ public class AsterixDBDataUploader extends BaseDataUploader {
 
     @Override
     public void addObservationData() throws BenchmarkException {
-        observationInsertThroughFeed();
+        observationInsertThroughFeed("Observation", DataFiles.OBS);
     }
 
     @Override
@@ -298,7 +298,15 @@ public class AsterixDBDataUploader extends BaseDataUploader {
 
     @Override
     public void addSemanticObservationData() {
-        semanticObservationInsertThroughFeed();
+        semanticObservationInsertThroughFeed("SemanticObservation", DataFiles.SO);
+    }
+
+    @Override
+    public Duration insertPerformance() throws BenchmarkException {
+        Instant start = Instant.now();
+        observationInsertThroughFeed("Observation", DataFiles.INSERT_TEST);
+        Instant end = Instant.now();
+        return Duration.between(start, end);
     }
 
 }

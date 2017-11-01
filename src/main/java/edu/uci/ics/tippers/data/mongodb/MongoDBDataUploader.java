@@ -264,4 +264,12 @@ public class MongoDBDataUploader extends BaseDataUploader{
     public void addSemanticObservationData() {
         addSemanticObservations("SemanticObservation", DataFiles.SO);
     }
+
+    @Override
+    public Duration insertPerformance() throws BenchmarkException {
+        Instant start = Instant.now();
+        addObservations("Observation", DataFiles.INSERT_TEST);
+        Instant end = Instant.now();
+        return Duration.between(start, end);
+    }
 }

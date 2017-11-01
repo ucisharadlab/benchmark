@@ -17,4 +17,6 @@ public abstract class PgSQLBaseDataMapping {
 
     public abstract void addAll();
 
+    public abstract void insertPerformance();
+
 }

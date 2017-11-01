@@ -66,4 +66,9 @@ public class CassandraDataUploader extends BaseDataUploader{
     public void addSemanticObservationData() {
 
     }
+
+    @Override
+    public Duration insertPerformance() throws BenchmarkException {
+        return null;
+    }
 }

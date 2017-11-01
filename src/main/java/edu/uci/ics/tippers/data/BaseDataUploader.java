@@ -49,4 +49,6 @@ public abstract class BaseDataUploader {
     public abstract void virtualSensorData();
 
     public abstract void addSemanticObservationData();
+
+    public abstract Duration insertPerformance() throws BenchmarkException;
 }

@@ -1,6 +1,7 @@
 package edu.uci.ics.tippers.execution;
 
 import edu.uci.ics.tippers.common.Database;
+import edu.uci.ics.tippers.common.Query;
 import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.data.BaseDataUploader;
 import edu.uci.ics.tippers.data.asterixdb.AsterixDBDataUploader;
@@ -71,7 +72,10 @@ public class Benchmark {
             // Inserting data into the database system after schema creation
             System.out.println("Inserting Data ...");
             Map<Integer, Duration> runTimePerMapping = new HashMap<Integer, Duration>();
-            runTimePerMapping.put(0, dataUploader.addAllData());
+            runTimePerMapping.put(Query.INSERT_COMPLETE.getQNum(), dataUploader.addAllData());
+
+            // Insert Tests
+            runTimePerMapping.put(Query.INSERT_SINGLE.getQNum(), dataUploader.insertPerformance());
 
             // Running benchmark queries and gathering query runtimes
             System.out.println("Running Queries ...");

@@ -16,7 +16,8 @@ public enum DataFiles {
     VS_TYPE ("virtualSensorType.json"),
     VS ("virtualSensor.json"),
     SO_TYPE ("semanticObservationType.json"),
-    SO ("semanticObservation.json");
+    SO ("semanticObservation.json"),
+    INSERT_TEST ("insertTestData.json");
 
     private final String path;
 

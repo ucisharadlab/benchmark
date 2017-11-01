@@ -458,5 +458,73 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
 
     }
 
+    public void insertPerformance() {
+        PreparedStatement stmt;
+        String insert;
+
+        try {
+            String wifiInsert = "INSERT INTO WiFiAPObservation " +
+                    "(ID, TIMESTAMP, SENSOR_ID, clientId) VALUES (?, ?, ?, ?)";
+
+            String wemoInsert = "INSERT INTO WeMoObservation " +
+                    "(ID, TIMESTAMP, SENSOR_ID, currentMilliWatts, onTodaySeconds) VALUES (?, ?, ?, ?, ?)";
+
+            String temperatureInsert = "INSERT INTO ThermometerObservation " +
+                    "(ID, TIMESTAMP, SENSOR_ID, temperature) VALUES (?, ?, ?, ?)";
+
+            BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
+                    Observation.class);
+            Observation obs = null;
+
+            PreparedStatement wifiStmt = connection.prepareStatement(wifiInsert);
+            PreparedStatement wemoStmt = connection.prepareStatement(wemoInsert);
+            PreparedStatement temStmt = connection.prepareStatement(temperatureInsert);
+
+            int batchSize = 100;
+            int wifiCount = 0, wemoCount = 0, thermoCount = 0;
+            while ((obs = reader.readNext()) != null) {
+
+                if (obs.getSensor().getType_().getId().equals("Thermometer")) {
+                    temStmt.setInt(4, obs.getPayload().get("temperature").getAsInt());
+                    temStmt.setString(3, obs.getSensor().getId());
+                    temStmt.setTimestamp(2, new Timestamp(obs.getTimeStamp().getTime()));
+                    temStmt.setString(1, obs.getId());
+                    temStmt.addBatch();
+                    thermoCount ++;
+                } else if (obs.getSensor().getType_().getId().equals("WiFiAP")) {
+                    wifiStmt.setString(4, obs.getPayload().get("clientId").getAsString());
+                    wifiStmt.setString(3, obs.getSensor().getId());
+                    wifiStmt.setTimestamp(2, new Timestamp(obs.getTimeStamp().getTime()));
+                    wifiStmt.setString(1, obs.getId());
+                    wifiStmt.addBatch();
+                    wifiCount ++;
+                } else if (obs.getSensor().getType_().getId().equals("WeMo")) {
+                    wemoStmt.setInt(4, obs.getPayload().get("currentMilliWatts").getAsInt());
+                    wemoStmt.setInt(5, obs.getPayload().get("onTodaySeconds").getAsInt());
+                    wemoStmt.setString(3, obs.getSensor().getId());
+                    wemoStmt.setTimestamp(2, new Timestamp(obs.getTimeStamp().getTime()));
+                    wemoStmt.setString(1, obs.getId());
+                    wemoStmt.addBatch();
+                    wemoCount ++;
+                }
+
+                if (wemoCount % batchSize == 0)
+                    wemoStmt.executeBatch();
+                if (wifiCount % batchSize == 0)
+                    wifiStmt.executeBatch();
+                if (thermoCount % batchSize == 0)
+                    temStmt.executeBatch();
+            }
+            wemoStmt.executeBatch();
+            wifiStmt.executeBatch();
+            temStmt.executeBatch();
+
+        }
+        catch(SQLException e) {
+            e.printStackTrace();
+        }
+
+    }
+
 }
 

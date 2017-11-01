@@ -410,5 +410,40 @@ public class PgSQLDataMapping1 extends PgSQLBaseDataMapping {
 
     }
 
+    public void insertPerformance() {
+        PreparedStatement stmt;
+        String insert;
+
+        try {
+            insert = "INSERT INTO OBSERVATION " +
+                    "(ID, PAYLOAD, TIMESTAMP, SENSOR_ID) VALUES (?, ?, ?, ?)";
+
+            BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + DataFiles.INSERT_TEST.getPath(),
+                    Observation.class);
+            Observation obs = null;
+
+            stmt = connection.prepareStatement(insert);
+            int batchSize = 100;
+            int count = 0;
+            while ((obs = reader.readNext()) != null) {
+
+                stmt.setString(4, obs.getSensor().getId());
+                stmt.setTimestamp(3, new Timestamp(obs.getTimeStamp().getTime()));
+                stmt.setString(1, obs.getId());
+                stmt.setString(2, obs.getPayload().toString());
+                stmt.addBatch();
+
+                count ++;
+                if (count % batchSize == 0)
+                    stmt.executeBatch();
+            }
+            stmt.executeBatch();
+
+        }
+        catch(SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
 

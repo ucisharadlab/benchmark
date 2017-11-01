@@ -78,4 +78,13 @@ public class PgSQLDataUploader extends BaseDataUploader{
     public void addSemanticObservationData() {
 
     }
+
+    @Override
+    public Duration insertPerformance() throws BenchmarkException {
+        Instant start = Instant.now();
+        dataMapping.insertPerformance();
+        Instant end = Instant.now();
+        return Duration.between(start, end);
+
+    }
 }

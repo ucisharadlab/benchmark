@@ -87,4 +87,12 @@ public class CrateDBDataUploader extends BaseDataUploader{
     public void addSemanticObservationData() {
 
     }
+
+    @Override
+    public Duration insertPerformance() throws BenchmarkException {
+        Instant start = Instant.now();
+        externalDataMapping.insertPerformance();
+        Instant end = Instant.now();
+        return Duration.between(start, end);
+    }
 }
