@@ -510,13 +510,13 @@ public class PgSQLQueryManager extends BaseQueryManager{
     public Duration runQuery8(String userId, Date date) throws BenchmarkException {
         switch(mapping){
             case 1:
-                String query = "SELECT s2.semantic_entity_id " +
-                        "FROM SEMANTIC_OBSERVATION s1, SEMANTIC_OBSERVATION s2, SEMANTIC_OBSERVATION_TYPE st " +
+                String query = "SELECT u.name, s1.payload " +
+                        "FROM SEMANTIC_OBSERVATION s1, SEMANTIC_OBSERVATION s2, SEMANTIC_OBSERVATION_TYPE st, USERS u " +
                         "WHERE date_trunc('day', s1.timeStamp) = ? " +
-                        "AND date_trunc('day', s2.timeStamp) = date_trunc('day', s1.timeStamp) " +
+                        "AND s2.timeStamp = s1.timeStamp " +
                         "AND st.name = 'presence' AND s1.type_id = s2.type_id AND st.id = s1.type_id  " +
                         "AND s1.semantic_entity_id = ? AND s1.semantic_entity_id != s2.semantic_entity_id " +
-                        "AND s1.payload = s2.payload ";
+                        "AND s1.payload = s2.payload AND s2.semantic_entity_id = u.id ";
                 try {
                     PreparedStatement stmt = connection.prepareStatement(query);
                     stmt.setDate (1, new java.sql.Date(date.getTime()));
@@ -529,12 +529,12 @@ public class PgSQLQueryManager extends BaseQueryManager{
                 }
 
             case 2:
-                query = "SELECT s2.semantic_entity_id " +
-                        "FROM PRESENCE s1, PRESENCE s2 " +
+                query = "SELECT u.name, s1.location " +
+                        "FROM PRESENCE s1, PRESENCE s2, USERS u " +
                         "WHERE date_trunc('day', s1.timeStamp) = ? " +
-                        "AND date_trunc('day', s2.timeStamp) = date_trunc('day', s1.timeStamp) " +
+                        "AND s2.timeStamp = s1.timeStamp " +
                         "AND s1.semantic_entity_id = ? AND s1.semantic_entity_id != s2.semantic_entity_id " +
-                        "AND s1.location = s2.location ";
+                        "AND s2.semantic_entity_id = u.id AND s1.location = s2.location ";
                 try {
                     PreparedStatement stmt = connection.prepareStatement(query);
                     stmt.setDate (1, new java.sql.Date(date.getTime()));

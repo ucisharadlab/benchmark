@@ -49,6 +49,7 @@ public class AsterixDBDataUploader extends BaseDataUploader {
         addDeviceData();
         addSensorData();
         addObservationData();
+        virtualSensorData();
         addSemanticObservationData();
 
         Instant end = Instant.now();
@@ -166,7 +167,8 @@ public class AsterixDBDataUploader extends BaseDataUploader {
                     docToInsert.remove("virtualSensor");
                     docToInsert.put("typeId", sobs.getType_().getId());
                     docToInsert.remove("type_");
-                    docToInsert.put("semanticEntityId", sobs.getSemanticEntity().get("id"));
+                    docToInsert.put("semanticEntityId", sobs.getSemanticEntity().get("id").getAsString());
+                    docToInsert.remove("semanticEntity");
                     docToInsert.remove("type_");
                     docToInsert.put("timeStamp", String.format("datetime(\"%s\")", sdf.format(sobs.getTimeStamp())));
                     String docString = docToInsert.toString().replaceAll("\"(datetime\\(.*\\))\"", "$1");

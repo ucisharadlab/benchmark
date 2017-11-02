@@ -22,6 +22,7 @@ public class AsterixDBQueryManager extends BaseQueryManager{
 
     private AsterixDBConnectionManager connectionManager;
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+    private static SimpleDateFormat dateOnlyFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     public AsterixDBQueryManager(int mapping, String queriesDir, String outputDir, boolean writeOutput, long timeout){
         super(mapping, queriesDir, outputDir, writeOutput, timeout);
@@ -210,10 +211,10 @@ public class AsterixDBQueryManager extends BaseQueryManager{
                                 " FROM SemanticObservation s1, SemanticObservation s2 " +
                                 " WHERE get_date_from_datetime(s1.timeStamp) = date(\"%s\") AND " +
                                 " get_date_from_datetime(s2.timeStamp) = date(\"%s\") AND " +
-                                " s1.type_.name = s2.type_.name AND s2.type_.name = \"Presence\" AND " +
+                                " s1.type_.name = s2.type_.name AND s2.type_.name = \"presence\" AND " +
                                 " s1.payload.location = \"%s\" AND s2.payload.location = \"%s\" " +
                                 " AND s1.timeStamp < s2.timeStamp AND s1.semanticEntity.id = s2.semanticEntity.id",
-                                sdf.format(date), sdf.format(date), startLocation, endLocation), 7
+                                dateOnlyFormat.format(date), dateOnlyFormat.format(date), startLocation, endLocation), 7
                 );
             case 2:
                 return runTimedQuery(
@@ -221,11 +222,11 @@ public class AsterixDBQueryManager extends BaseQueryManager{
                                         " FROM SemanticObservation s1, SemanticObservation s2, User se, SemanticObservationType st" +
                                         " WHERE get_date_from_datetime(s1.timeStamp) = date(\"%s\") AND " +
                                         " get_date_from_datetime(s2.timeStamp) = date(\"%s\") AND " +
-                                        " s1.typeId = s2.typeId AND s2.typeId = st.id AND st.name = \"Presence\" AND " +
+                                        " s1.typeId = s2.typeId AND s2.typeId = st.id AND st.name = \"presence\" AND " +
                                         " s1.payload.location = \"%s\" AND s2.payload.location = \"%s\" " +
                                         " AND s1.timeStamp < s2.timeStamp AND s1.semanticEntityId = s2.semanticEntityId " +
                                         " AND s2.semanticEntityId = se.id",
-                                sdf.format(date), sdf.format(date), startLocation, endLocation), 7
+                                dateOnlyFormat.format(date), dateOnlyFormat.format(date), startLocation, endLocation), 7
                 );
             default:
                 throw new BenchmarkException("No Such Mapping");
@@ -238,14 +239,15 @@ public class AsterixDBQueryManager extends BaseQueryManager{
         switch (mapping) {
             case 1:
                 return runTimedQuery(
-                        String.format("SELECT s1.semanticEntity.name, s1.payload.location " +
+                        String.format("SELECT s2.semanticEntity.name, s1.payload.location " +
                                         " FROM SemanticObservation s1, SemanticObservation s2 " +
                                         " WHERE get_date_from_datetime(s1.timeStamp) = date(\"%s\") AND " +
                                         " get_date_from_datetime(s2.timeStamp) = date(\"%s\") AND " +
-                                        " s1.type_.name = s2.type_.name AND s2.type_.name = \"Presence\" AND " +
+                                        " s1.type_.name = s2.type_.name AND s2.type_.name = \"presence\" AND " +
                                         " s1.payload.location = s2.payload.location " +
-                                        " AND s1.timeStamp = s2.timeStamp AND s1.semanticEntity.id = \"%s\" ",
-                                sdf.format(date), sdf.format(date), userId), 8
+                                        " AND s1.timeStamp = s2.timeStamp AND s1.semanticEntity.id = \"%s\" " +
+                                        " AND s2.semanticEntity.id != s1.semanticEntity.id",
+                                dateOnlyFormat.format(date), dateOnlyFormat.format(date), userId), 8
                 );
             case 2:
                 return runTimedQuery(
@@ -253,38 +255,37 @@ public class AsterixDBQueryManager extends BaseQueryManager{
                                         " FROM SemanticObservation s1, SemanticObservation s2, User se, SemanticObservationType st" +
                                         " WHERE get_date_from_datetime(s1.timeStamp) = date(\"%s\") AND " +
                                         " get_date_from_datetime(s2.timeStamp) = date(\"%s\") AND " +
-                                        " s1.typeId = s2.typeId AND s2.typeId = st.id AND st.name = \"Presence\" AND " +
+                                        " s1.typeId = s2.typeId AND s2.typeId = st.id AND st.name = \"presence\" AND " +
                                         " s1.payload.location = s2.payload.location " +
                                         " AND s1.timeStamp = s2.timeStamp AND s1.semanticEntityId = \"%s\" " +
-                                        " AND s2.semanticEntityId = se.id",
-                                sdf.format(date), sdf.format(date), userId), 8
+                                        " AND s2.semanticEntityId = se.id AND s2.semanticEntityId != s1.semanticEntityId",
+                                dateOnlyFormat.format(date), dateOnlyFormat.format(date), userId), 8
                 );
             default:
                 throw new BenchmarkException("No Such Mapping");
         }
     }
-
     @Override
     public Duration runQuery9(String userId, String infraTypeName) throws BenchmarkException {
         switch (mapping) {
             case 1:
                 return runTimedQuery(
-                        String.format("SELECT AVG(timeSpent) AS avgTimePerDay FROM " +
-                                        " (SELECT get_date_from_datetime(timeStamp), count(*)*10  AS timeSpent " +
+                        String.format("SELECT AVG(groups.timeSpent) AS avgTimePerDay FROM " +
+                                        " (SELECT get_date_from_datetime(so.timeStamp), count(*)*10  AS timeSpent " +
                                         " FROM SemanticObservation so, Infrastructure infra " +
-                                        " WHERE so.type_.name=\"Presence\" AND s1.semanticEntity.id=\"%s\" " +
-                                        " AND s1.payload.location = infra.id AND infra.type_.name = \"%s\"" +
-                                        " GROUP BY get_date_from_datetime(timeStamp)) ",
+                                        " WHERE so.type_.name=\"presence\" AND so.semanticEntity.id=\"%s\" " +
+                                        " AND so.payload.location = infra.id AND infra.type_.name = \"%s\"" +
+                                        " GROUP BY get_date_from_datetime(so.timeStamp))  AS groups ",
                                 userId, infraTypeName), 9
                 );
             case 2:
                 return runTimedQuery(
-                        String.format("SELECT AVG(timeSpent) AS avgTimePerDay FROM " +
-                                        " (SELECT get_date_from_datetime(timeStamp), count(*)*10  AS timeSpent " +
+                        String.format("SELECT AVG(groups.timeSpent) AS avgTimePerDay FROM " +
+                                        " (SELECT get_date_from_datetime(so.timeStamp), count(*)*10  AS timeSpent " +
                                         " FROM SemanticObservation so, Infrastructure infra, SemanticObservationType st " +
-                                        " WHERE so.typeId = st.id AND st.name = \"Presence\" AND s1.semanticEntityId=\"%s\" " +
-                                        " AND s1.payload.location = infra.id AND infra.type_.name = \"%s\"" +
-                                        " GROUP BY get_date_from_datetime(timeStamp)) ",
+                                        " WHERE so.typeId = st.id AND st.name = \"presence\" AND so.semanticEntityId=\"%s\" " +
+                                        " AND so.payload.location = infra.id AND infra.type_.name = \"%s\"" +
+                                        " GROUP BY get_date_from_datetime(so.timeStamp)) AS groups ",
                                 userId, infraTypeName), 9
                 );
             default:
@@ -302,9 +303,9 @@ public class AsterixDBQueryManager extends BaseQueryManager{
                                         "SELECT so.timeStamp, so.payload.occupancy " +
                                         "FROM SemanticObservation so " +
                                         "WHERE so.timeStamp > datetime(\"%s\") AND so.timeStamp < datetime(\"%s\") " +
-                                        "AND so.type_.name = \"Occupancy\" AND so.semanticEntity.id = infra.id " +
+                                        "AND so.type_.name = \"occupancy\" AND so.semanticEntity.id = infra.id " +
                                         "ORDER BY so.semanticEntity.id, so.timeStamp) AS histogram " +
-                                        "FROM Infrastructure infra", sdf.format(startTime), sdf.format(endTime)), 6
+                                        "FROM Infrastructure infra", sdf.format(startTime), sdf.format(endTime)), 10
                 );
             case 2:
                 return runTimedQuery(
@@ -312,9 +313,9 @@ public class AsterixDBQueryManager extends BaseQueryManager{
                                 "SELECT so.timeStamp, so.payload.occupancy " +
                                 "FROM SemanticObservation so, SemanticObservationType st " +
                                 "WHERE so.timeStamp > datetime(\"%s\") AND so.timeStamp < datetime(\"%s\") " +
-                                "AND so.typeId = st.id AND st.name = \"Occupancy\" AND so.semanticEntity.id = infra.id " +
-                                "ORDER BY so.semanticEntity.id, so.timeStamp) AS histogram " +
-                                "FROM Infrastructure infra", sdf.format(startTime), sdf.format(endTime)), 6
+                                "AND so.typeId = st.id AND st.name = \"occupancy\" AND so.semanticEntityId = infra.id " +
+                                "ORDER BY so.semanticEntityId, so.timeStamp) AS histogram " +
+                                "FROM Infrastructure infra", sdf.format(startTime), sdf.format(endTime)), 10
                 );
             default:
                 throw new BenchmarkException("No Such Mapping");

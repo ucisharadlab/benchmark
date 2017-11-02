@@ -108,8 +108,7 @@ CREATE TYPE VirtualSensorTypeType AS {
 	name: string,
 	description: string,
 	inputType: SensorTypeType,
-	semanticObservationType: SemanticObservationTypeType,
-	payloadSchema: string
+	semanticObservationType: SemanticObservationTypeType
 };
 
 
@@ -124,7 +123,7 @@ CREATE TYPE VirtualSensorType As {
 
 CREATE TYPE SemanticObservationType AS {
 	id: string,
-	virtualSensor: SensorType,
+	virtualSensor: VirtualSensorType,
 	payload: PayloadType,
 	timeStamp: datetime,
 	semanticEntity: SemanticEntityType,
@@ -177,7 +176,7 @@ PRIMARY KEY id;
 
 CREATE FEED ObservationFeed using socket_adapter
     (
-       ("sockets"="localhost:39010"),
+       ("sockets"="localhost:39011"),
        ("address-type_"="IP"),
        ("type-name"="ObservationType"),
        ("format"="adm")
@@ -188,7 +187,7 @@ CONNECT FEED ObservationFeed TO DATASET Observation;
 
 CREATE FEED SemanticObservationFeed using socket_adapter
     (
-       ("sockets"="localhost:39010"),
+       ("sockets"="localhost:39011"),
        ("address-type_"="IP"),
        ("type-name"="SemanticObservationType"),
        ("format"="adm")

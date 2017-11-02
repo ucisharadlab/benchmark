@@ -75,7 +75,8 @@ public class Benchmark {
             runTimePerMapping.put(Query.INSERT_COMPLETE.getQNum(), dataUploader.addAllData());
 
             // Insert Tests
-            runTimePerMapping.put(Query.INSERT_SINGLE.getQNum(), dataUploader.insertPerformance());
+            System.out.println("Inserting Insert Test Data ...");
+            //runTimePerMapping.put(Query.INSERT_SINGLE.getQNum(), dataUploader.insertPerformance());
 
             // Running benchmark queries and gathering query runtimes
             System.out.println("Running Queries ...");
@@ -85,7 +86,7 @@ public class Benchmark {
 
             // Cleaning up inserted data and dropping created schema
             System.out.println("Cleaning Up Database, Removing Data And Schema ...\n");
-            schemaCreator.dropSchema();
+            //schemaCreator.dropSchema();
 
             System.out.println("---------------------------------------------------------------\n");
 
