@@ -555,6 +555,7 @@ public class PgSQLQueryManager extends BaseQueryManager{
     public Duration runQuery9(String userId, String infraTypeName) throws BenchmarkException {
         switch(mapping){
             case 1:
+                // TODO: Fix Query
                 String query = "SELECT Avg(timeSpent) as avgTimeSpent FROM " +
                         " (SELECT date_trunc('day', so.timeStamp), count(*)*10 as timeSpent " +
                         "  FROM SEMANTIC_OBSERVATION so, Infrastructure infra, Infrastructure_Type infraType, SEMANTIC_OBSERVATION_TYPE st " +
