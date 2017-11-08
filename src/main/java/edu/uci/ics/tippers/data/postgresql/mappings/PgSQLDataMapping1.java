@@ -237,7 +237,7 @@ public class PgSQLDataMapping1 extends PgSQLBaseDataMapping {
 
             // Adding Observations
             insert = "INSERT INTO OBSERVATION " +
-                    "(ID, PAYLOAD, TIMESTAMP, SENSOR_ID) VALUES (?, ?, ?, ?)";
+                    "(ID, PAYLOAD, TIMESTAMP, SENSOR_ID) VALUES (?, ?::JSON, ?, ?)";
 
             BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
                     Observation.class);
@@ -251,7 +251,7 @@ public class PgSQLDataMapping1 extends PgSQLBaseDataMapping {
                 stmt.setString(4, obs.getSensor().getId());
                 stmt.setTimestamp(3, new Timestamp(obs.getTimeStamp().getTime()));
                 stmt.setString(1, obs.getId());
-                stmt.setString(2, obs.getPayload().toString());
+                stmt.setObject(2, obs.getPayload().toString());
                 stmt.addBatch();
 
                 count ++;
@@ -380,7 +380,7 @@ public class PgSQLDataMapping1 extends PgSQLBaseDataMapping {
             SemanticObservation sobs = null;
 
             insert = "INSERT INTO SEMANTIC_OBSERVATION " +
-                    "(ID, SEMANTIC_ENTITY_ID, PAYLOAD, TIMESTAMP, VIRTUAL_SENSOR_ID, TYPE_ID) VALUES (?, ?, ?, ?, ?, ?)";
+                    "(ID, SEMANTIC_ENTITY_ID, PAYLOAD, TIMESTAMP, VIRTUAL_SENSOR_ID, TYPE_ID) VALUES (?, ?, ?::JSON, ?, ?, ?)";
             stmt = connection.prepareStatement(insert);
             int batchSize = 100;
             int count = 0;
@@ -391,7 +391,7 @@ public class PgSQLDataMapping1 extends PgSQLBaseDataMapping {
                 stmt.setTimestamp(4, new Timestamp(sobs.getTimeStamp().getTime()));
                 stmt.setString(1, sobs.getId());
                 stmt.setString(2, sobs.getSemanticEntity().get("id").getAsString());
-                stmt.setString(3, sobs.getPayload().toString());
+                stmt.setObject(3, sobs.getPayload().toString());
 
                 stmt.addBatch();
 
@@ -416,7 +416,7 @@ public class PgSQLDataMapping1 extends PgSQLBaseDataMapping {
 
         try {
             insert = "INSERT INTO OBSERVATION " +
-                    "(ID, PAYLOAD, TIMESTAMP, SENSOR_ID) VALUES (?, ?, ?, ?)";
+                    "(ID, PAYLOAD, TIMESTAMP, SENSOR_ID) VALUES (?, ?::JSON, ?, ?)";
 
             BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + DataFiles.INSERT_TEST.getPath(),
                     Observation.class);
@@ -430,7 +430,7 @@ public class PgSQLDataMapping1 extends PgSQLBaseDataMapping {
                 stmt.setString(4, obs.getSensor().getId());
                 stmt.setTimestamp(3, new Timestamp(obs.getTimeStamp().getTime()));
                 stmt.setString(1, obs.getId());
-                stmt.setString(2, obs.getPayload().toString());
+                stmt.setObject(2, obs.getPayload().toString());
                 stmt.addBatch();
 
                 count ++;

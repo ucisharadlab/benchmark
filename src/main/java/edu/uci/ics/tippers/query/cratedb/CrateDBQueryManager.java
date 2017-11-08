@@ -292,6 +292,25 @@ public class CrateDBQueryManager extends BaseQueryManager {
     public Duration runQuery7(String startLocation, String endLocation, Date date) throws BenchmarkException {
         switch (mapping) {
             case 1:
+                String query = "SELECT u.name " +
+                        "FROM SEMANTIC_OBSERVATION s1, SEMANTIC_OBSERVATION s2, SEMANTIC_OBSERVATION_TYPE st, USERS u " +
+                        "WHERE date_trunc('day', s1.timeStamp) = ? " +
+                        "AND st.name = 'presence' AND st.id = s1.type_id AND st.id = s2.type_id " +
+                        "AND s1.semantic_entity_id = s2.semantic_entity_id " +
+                        "AND s1.payload.location = ? AND s2.payload.location = ? " +
+                        "AND s1.timeStamp < s2.timeStamp " +
+                        "AND s1.semantic_entity_id = u.id ";
+                try {
+                    PreparedStatement stmt = connection.prepareStatement(query);
+                    stmt.setDate (1, new java.sql.Date(date.getTime()));
+                    stmt.setString(2, startLocation);
+                    stmt.setString(3, endLocation);
+
+                    return externalQueryManager.runTimedQuery(stmt, 7);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
             case 2:
                 return externalQueryManager.runQuery7(startLocation, endLocation, date);
             default:
@@ -303,6 +322,24 @@ public class CrateDBQueryManager extends BaseQueryManager {
     public Duration runQuery8(String userId, Date date) throws BenchmarkException {
         switch (mapping) {
             case 1:
+                String query = "SELECT u.name, s1.payload " +
+                        "FROM SEMANTIC_OBSERVATION s1, SEMANTIC_OBSERVATION s2, SEMANTIC_OBSERVATION_TYPE st, USERS u " +
+                        "WHERE date_trunc('day', s1.timeStamp) = ? " +
+                        "AND s2.timeStamp = s1.timeStamp " +
+                        "AND st.name = 'presence' AND s1.type_id = s2.type_id AND st.id = s1.type_id  " +
+                        "AND s1.semantic_entity_id = ? AND s1.semantic_entity_id != s2.semantic_entity_id " +
+                        "AND s1.payload.location = s2.payload.location AND s2.semantic_entity_id = u.id ";
+                try {
+                    PreparedStatement stmt = connection.prepareStatement(query);
+                    stmt.setDate (1, new java.sql.Date(date.getTime()));
+                    stmt.setString(2, userId);
+
+                    return externalQueryManager.runTimedQuery(stmt, 8);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
+
             case 2:
                 return externalQueryManager.runQuery8(userId, date);
             default:
@@ -314,6 +351,25 @@ public class CrateDBQueryManager extends BaseQueryManager {
     public Duration runQuery9(String userId, String infraTypeName) throws BenchmarkException {
         switch (mapping) {
             case 1:
+                String query = "SELECT Avg(timeSpent) as avgTimeSpent FROM " +
+                        " (SELECT date_trunc('day', so.timeStamp), count(*)*10 as timeSpent " +
+                        "  FROM SEMANTIC_OBSERVATION so, Infrastructure infra, Infrastructure_Type infraType, SEMANTIC_OBSERVATION_TYPE st " +
+                        "  WHERE st.name = 'presence' AND so.type_id = st.id " +
+                        "  AND so.payload.location = infra.id " +
+                        "  AND infra.INFRASTRUCTURE_TYPE_ID = infraType.id AND infraType.name = ? " +
+                        "  AND so.semantic_entity_id = ? " +
+                        "  GROUP BY  date_trunc('day', so.timeStamp)) AS timeSpentPerDay";
+
+                try {
+                    PreparedStatement stmt = connection.prepareStatement(query);
+                    stmt.setString (1, infraTypeName);
+                    stmt.setString(2, userId);
+
+                    return externalQueryManager.runTimedQuery(stmt, 9);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
             case 2:
                 return externalQueryManager.runQuery9(userId, infraTypeName);
             default:

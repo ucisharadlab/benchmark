@@ -463,13 +463,12 @@ public class PgSQLQueryManager extends BaseQueryManager{
     public Duration runQuery7(String startLocation, String endLocation, Date date) throws BenchmarkException {
         switch(mapping){
             case 1:
-                // TODO: FIX QUERY
                 String query = "SELECT u.name " +
                         "FROM SEMANTIC_OBSERVATION s1, SEMANTIC_OBSERVATION s2, SEMANTIC_OBSERVATION_TYPE st, USERS u " +
                         "WHERE date_trunc('day', s1.timeStamp) = ? " +
                         "AND st.name = 'presence' AND st.id = s1.type_id AND st.id = s2.type_id " +
                         "AND s1.semantic_entity_id = s2.semantic_entity_id " +
-                        "AND SUBSTRING (s1.payload, 0, 5) = ? AND SUBSTRING (s2.payload, 0, 5) = ? " +
+                        "AND s1.payload::json->>'location' = ? AND s2.payload::json->>'location' = ? " +
                         "AND s1.timeStamp < s2.timeStamp " +
                         "AND s1.semantic_entity_id = u.id ";
                 try {
@@ -516,7 +515,7 @@ public class PgSQLQueryManager extends BaseQueryManager{
                         "AND s2.timeStamp = s1.timeStamp " +
                         "AND st.name = 'presence' AND s1.type_id = s2.type_id AND st.id = s1.type_id  " +
                         "AND s1.semantic_entity_id = ? AND s1.semantic_entity_id != s2.semantic_entity_id " +
-                        "AND s1.payload = s2.payload AND s2.semantic_entity_id = u.id ";
+                        "AND s1.payload::json->>'location' = s2.payload::json->>'location' AND s2.semantic_entity_id = u.id ";
                 try {
                     PreparedStatement stmt = connection.prepareStatement(query);
                     stmt.setDate (1, new java.sql.Date(date.getTime()));
@@ -555,12 +554,11 @@ public class PgSQLQueryManager extends BaseQueryManager{
     public Duration runQuery9(String userId, String infraTypeName) throws BenchmarkException {
         switch(mapping){
             case 1:
-                // TODO: Fix Query
                 String query = "SELECT Avg(timeSpent) as avgTimeSpent FROM " +
                         " (SELECT date_trunc('day', so.timeStamp), count(*)*10 as timeSpent " +
                         "  FROM SEMANTIC_OBSERVATION so, Infrastructure infra, Infrastructure_Type infraType, SEMANTIC_OBSERVATION_TYPE st " +
                         "  WHERE st.name = 'presence' AND so.type_id = st.id " +
-                        "  AND substring(so.payload, 0, 5) = infra.id " +
+                        "  AND so.payload::json->>'location' = infra.id " +
                         "  AND infra.INFRASTRUCTURE_TYPE_ID = infraType.id AND infraType.name = ? " +
                         "  AND so.semantic_entity_id = ? " +
                         "  GROUP BY  date_trunc('day', so.timeStamp)) AS timeSpentPerDay";

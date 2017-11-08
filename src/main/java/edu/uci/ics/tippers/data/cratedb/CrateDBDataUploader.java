@@ -4,6 +4,7 @@ import edu.uci.ics.tippers.common.Database;
 import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.connection.cratedb.CrateDBConnectionManager;
 import edu.uci.ics.tippers.data.BaseDataUploader;
+import edu.uci.ics.tippers.data.cratedb.mappings.CrateDBDataMapping1;
 import edu.uci.ics.tippers.data.postgresql.PgSQLBaseDataMapping;
 import edu.uci.ics.tippers.data.postgresql.mappings.PgSQLDataMapping1;
 import edu.uci.ics.tippers.data.postgresql.mappings.PgSQLDataMapping2;
@@ -43,6 +44,8 @@ public class CrateDBDataUploader extends BaseDataUploader{
         Instant start = Instant.now();
         switch (mapping){
             case 1:
+                new CrateDBDataMapping1(connection, dataDir).addAll();
+                break;
             case 2:
                 externalDataMapping.addAll();
                 break;
