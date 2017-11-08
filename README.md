@@ -2,6 +2,7 @@
 
 <h3> Resources </h3>
 Benchmark overview can be seen at https://docs.google.com/presentation/d/1h9OSWiqfvZumuT9OkEtUiJ5WohPddMXvBfIYo9HgW_Y/edit#slide=id.p
+
 A Report with the results and more information can be seen at https://docs.google.com/document/d/1Zx955dnXWX8SIgtl3BAaEXgGcSIep5M67kmhdMiekvo/edit
 
 At present the Benchmark compares the following databases:
