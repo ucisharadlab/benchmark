@@ -465,7 +465,7 @@ public class PgSQLQueryManager extends BaseQueryManager{
             case 1:
                 String query = "SELECT u.name " +
                         "FROM SEMANTIC_OBSERVATION s1, SEMANTIC_OBSERVATION s2, SEMANTIC_OBSERVATION_TYPE st, USERS u " +
-                        "WHERE date_trunc('day', s1.timeStamp) = ? " +
+                        "WHERE date_trunc('day', s1.timeStamp) = ? AND date_trunc('day', s2.timeStamp) = ? " +
                         "AND st.name = 'presence' AND st.id = s1.type_id AND st.id = s2.type_id " +
                         "AND s1.semantic_entity_id = s2.semantic_entity_id " +
                         "AND s1.payload::json->>'location' = ? AND s2.payload::json->>'location' = ? " +
@@ -474,8 +474,9 @@ public class PgSQLQueryManager extends BaseQueryManager{
                 try {
                     PreparedStatement stmt = connection.prepareStatement(query);
                     stmt.setDate (1, new java.sql.Date(date.getTime()));
-                    stmt.setString(2, startLocation);
-                    stmt.setString(3, endLocation);
+                    stmt.setDate (2, new java.sql.Date(date.getTime()));
+                    stmt.setString(3, startLocation);
+                    stmt.setString(4, endLocation);
                     
                     return runTimedQuery(stmt, 7);
                 } catch (SQLException e) {
@@ -485,7 +486,7 @@ public class PgSQLQueryManager extends BaseQueryManager{
             case 2:
                  query = "SELECT u.name " +
                         "FROM PRESENCE s1, PRESENCE s2, USERS u " +
-                        "WHERE date_trunc('day', s1.timeStamp) = ? " +
+                        "WHERE date_trunc('day', s1.timeStamp) = ? AND date_trunc('day', s2.timeStamp) = ? " +
                         "AND s1.semantic_entity_id = s2.semantic_entity_id " +
                         "AND s1.location = ? AND s2.location = ? " +
                         "AND s1.timeStamp < s2.timeStamp " +
@@ -493,8 +494,9 @@ public class PgSQLQueryManager extends BaseQueryManager{
                 try {
                     PreparedStatement stmt = connection.prepareStatement(query);
                     stmt.setDate (1, new java.sql.Date(date.getTime()));
-                    stmt.setString(2, startLocation);
-                    stmt.setString(3, endLocation);
+                    stmt.setDate (2, new java.sql.Date(date.getTime()));
+                    stmt.setString(3, startLocation);
+                    stmt.setString(4, endLocation);
 
                     return runTimedQuery(stmt, 7);
                 } catch (SQLException e) {

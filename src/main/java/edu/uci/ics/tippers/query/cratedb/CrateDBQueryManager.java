@@ -11,6 +11,7 @@ import java.sql.*;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -292,19 +293,27 @@ public class CrateDBQueryManager extends BaseQueryManager {
     public Duration runQuery7(String startLocation, String endLocation, Date date) throws BenchmarkException {
         switch (mapping) {
             case 1:
+                Date startTime = date;
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(date);
+                cal.add(Calendar.DATE, 1);
+                Date endTime = cal.getTime();
+
                 String query = "SELECT u.name " +
                         "FROM SEMANTIC_OBSERVATION s1, SEMANTIC_OBSERVATION s2, SEMANTIC_OBSERVATION_TYPE st, USERS u " +
-                        "WHERE date_trunc('day', s1.timeStamp) = ? " +
+                        "WHERE s1.timeStamp >= ? AND s1.timeStamp <= ?  AND s2.timeStamp <= ? " +
                         "AND st.name = 'presence' AND st.id = s1.type_id AND st.id = s2.type_id " +
                         "AND s1.semantic_entity_id = s2.semantic_entity_id " +
-                        "AND s1.payload.location = ? AND s2.payload.location = ? " +
+                        "AND s1.payload['location'] = ? AND s2.payload['location'] = ? " +
                         "AND s1.timeStamp < s2.timeStamp " +
                         "AND s1.semantic_entity_id = u.id ";
                 try {
                     PreparedStatement stmt = connection.prepareStatement(query);
-                    stmt.setDate (1, new java.sql.Date(date.getTime()));
-                    stmt.setString(2, startLocation);
-                    stmt.setString(3, endLocation);
+                    stmt.setTimestamp (1, new Timestamp(startTime.getTime()));
+                    stmt.setTimestamp (2, new Timestamp(endTime.getTime()));
+                    stmt.setTimestamp (3, new Timestamp(endTime.getTime()));
+                    stmt.setString(4, startLocation);
+                    stmt.setString(5, endLocation);
 
                     return externalQueryManager.runTimedQuery(stmt, 7);
                 } catch (SQLException e) {
@@ -312,7 +321,31 @@ public class CrateDBQueryManager extends BaseQueryManager {
                     throw new BenchmarkException("Error Running Query");
                 }
             case 2:
-                return externalQueryManager.runQuery7(startLocation, endLocation, date);
+                startTime = date;
+                cal = Calendar.getInstance();
+                cal.setTime(date);
+                cal.add(Calendar.DATE, 1);
+                endTime = cal.getTime();
+                query = "SELECT u.name " +
+                        "FROM PRESENCE s1, PRESENCE s2, USERS u " +
+                        "WHERE s1.timeStamp >= ? AND s1.timeStamp <= ?  AND s2.timeStamp <= ? " +
+                        "AND s1.semantic_entity_id = s2.semantic_entity_id " +
+                        "AND s1.location = ? AND s2.location = ? " +
+                        "AND s1.timeStamp < s2.timeStamp " +
+                        "AND s1.semantic_entity_id = u.id ";
+                try {
+                    PreparedStatement stmt = connection.prepareStatement(query);
+                    stmt.setTimestamp (1, new Timestamp(startTime.getTime()));
+                    stmt.setTimestamp (2, new Timestamp(endTime.getTime()));
+                    stmt.setTimestamp (3, new Timestamp(endTime.getTime()));
+                    stmt.setString(4, startLocation);
+                    stmt.setString(5, endLocation);
+
+                    return externalQueryManager.runTimedQuery(stmt, 7);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
             default:
                 throw new BenchmarkException("No Such Mapping");
         }
@@ -322,17 +355,24 @@ public class CrateDBQueryManager extends BaseQueryManager {
     public Duration runQuery8(String userId, Date date) throws BenchmarkException {
         switch (mapping) {
             case 1:
+                Date startTime = date;
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(date);
+                cal.add(Calendar.DATE, 1);
+                Date endTime = cal.getTime();
+
                 String query = "SELECT u.name, s1.payload " +
                         "FROM SEMANTIC_OBSERVATION s1, SEMANTIC_OBSERVATION s2, SEMANTIC_OBSERVATION_TYPE st, USERS u " +
-                        "WHERE date_trunc('day', s1.timeStamp) = ? " +
+                        "WHERE s1.timeStamp >= ? AND s1.timeStamp <= ? " +
                         "AND s2.timeStamp = s1.timeStamp " +
                         "AND st.name = 'presence' AND s1.type_id = s2.type_id AND st.id = s1.type_id  " +
                         "AND s1.semantic_entity_id = ? AND s1.semantic_entity_id != s2.semantic_entity_id " +
-                        "AND s1.payload.location = s2.payload.location AND s2.semantic_entity_id = u.id ";
+                        "AND s1.payload['location'] = s2.payload['location'] AND s2.semantic_entity_id = u.id ";
                 try {
                     PreparedStatement stmt = connection.prepareStatement(query);
-                    stmt.setDate (1, new java.sql.Date(date.getTime()));
-                    stmt.setString(2, userId);
+                    stmt.setTimestamp (1, new Timestamp(startTime.getTime()));
+                    stmt.setTimestamp (2, new Timestamp(endTime.getTime()));
+                    stmt.setString(3, userId);
 
                     return externalQueryManager.runTimedQuery(stmt, 8);
                 } catch (SQLException e) {
@@ -341,7 +381,28 @@ public class CrateDBQueryManager extends BaseQueryManager {
                 }
 
             case 2:
-                return externalQueryManager.runQuery8(userId, date);
+                startTime = date;
+                cal = Calendar.getInstance();
+                cal.setTime(date);
+                cal.add(Calendar.DATE, 1);
+                endTime = cal.getTime();
+                query = "SELECT u.name, s1.location " +
+                        "FROM PRESENCE s1, PRESENCE s2, USERS u " +
+                        "WHERE s1.timeStamp >= ? AND s1.timeStamp <= ? " +
+                        "AND s2.timeStamp = s1.timeStamp " +
+                        "AND s1.semantic_entity_id = ? AND s1.semantic_entity_id != s2.semantic_entity_id " +
+                        "AND s2.semantic_entity_id = u.id AND s1.location = s2.location ";
+                try {
+                    PreparedStatement stmt = connection.prepareStatement(query);
+                    stmt.setTimestamp (1, new Timestamp(startTime.getTime()));
+                    stmt.setTimestamp (2, new Timestamp(endTime.getTime()));
+                    stmt.setString(3, userId);
+
+                    return externalQueryManager.runTimedQuery(stmt, 8);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
             default:
                 throw new BenchmarkException("No Such Mapping");
         }
@@ -355,7 +416,7 @@ public class CrateDBQueryManager extends BaseQueryManager {
                         " (SELECT date_trunc('day', so.timeStamp), count(*)*10 as timeSpent " +
                         "  FROM SEMANTIC_OBSERVATION so, Infrastructure infra, Infrastructure_Type infraType, SEMANTIC_OBSERVATION_TYPE st " +
                         "  WHERE st.name = 'presence' AND so.type_id = st.id " +
-                        "  AND so.payload.location = infra.id " +
+                        "  AND so.payload['location'] = infra.id " +
                         "  AND infra.INFRASTRUCTURE_TYPE_ID = infraType.id AND infraType.name = ? " +
                         "  AND so.semantic_entity_id = ? " +
                         "  GROUP BY  date_trunc('day', so.timeStamp)) AS timeSpentPerDay";
