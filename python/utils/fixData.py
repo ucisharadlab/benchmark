@@ -86,7 +86,51 @@ def fixSensors():
     with open(dest + 'sensor.json', 'w') as writer:
         json.dump(sensors, writer, indent=4)
 
+
+def readCoverage():
+    coverageMap = {}
+    with open("../data/coverageEstimation.txt") as f:
+        for line in f:
+            if line.startswith("3"):
+                id, coverage = line.split("|")
+                id = id.strip().replace('-', '_')
+                coverage = coverage.strip().split(",")
+                coverageMap[id] = coverage
+    return coverageMap
+
+
+def fixSensorCoverage():
+    with open(src+'sensor.json') as data_file:
+        data = json.load(data_file)
+
+    sensors = []
+    others = []
+
+    for sensor in data:
+        if sensor['type_']['id'] == "WiFiAP":
+            sensors.append(sensor)
+        else:
+            others.append(sensor)
+
+    with open(src+'infrastructure.json') as data_file:
+        infras = json.load(data_file)
+
+    coverageMap = readCoverage()
+    for sensor in sensors:
+        sensor['coverage'] = []
+        for i in range(len(coverageMap[sensor['id']])):
+            infraId = coverageMap[sensor['id']][i]
+            for infra in infras:
+                if infraId == infra['id']:
+                    sensor['coverage'].append(infra)
+
+    sensors.extend(others)
+
+    with open(dest + 'sensor.json', 'w') as writer:
+        json.dump(sensors, writer, indent=4)
+
+
 def fixObservations():
     pass
 
-createPlatforms()
+fixSensorCoverage()
