@@ -73,7 +73,7 @@ class Queries(object):
     def query2(self, numLocations):
         queries = []
         for i in range(self.runs):
-            locations = [self.infra[x]['id'] for x in np.random.choice(len(self.infra), numLocations)]
+            locations = [self.infra[x]['id'] for x in np.random.choice(len(self.infra), numLocations, replace=False)]
             sensorType = SEN_TYPES[random.randint(0, 2)]
             queries.append("{},{},{}\n".format(i, sensorType, ';'.join(locations)))
 
@@ -91,7 +91,7 @@ class Queries(object):
     def query4(self, numSensors, timeDelta):
         queries = []
         for i in range(self.runs):
-            sensors = [self.sensors[x]['id'] for x in np.random.choice(len(self.sensors), numSensors)]
+            sensors = [self.sensors[x]['id'] for x in np.random.choice(len(self.sensors), numSensors, replace=False)]
             t1, t2 = self.randomTimeRange(self.startTime, self.maxDays, timeDelta)
             queries.append("{},{},{},{}\n".format(i, ';'.join(sensors), t1, t2))
 
@@ -112,7 +112,7 @@ class Queries(object):
     def query6(self, numSensors, timeDelta):
         queries = []
         for i in range(self.runs):
-            sensors = [self.sensors[x]['id'] for x in np.random.choice(len(self.sensors), numSensors)]
+            sensors = [self.sensors[x]['id'] for x in np.random.choice(len(self.sensors), numSensors, replace=False)]
             t1, t2 = self.randomTimeRange(self.startTime, self.maxDays, timeDelta)
             queries.append("{},{},{},{}\n".format(i, ';'.join(sensors), t1, t2))
 
@@ -121,7 +121,7 @@ class Queries(object):
     def query7(self):
         queries = []
         for i in range(self.runs):
-            startLocation, endLocation = [self.infra[x]['id'] for x in np.random.choice(len(self.infra), 2)]
+            startLocation, endLocation = [self.infra[x]['id'] for x in np.random.choice(len(self.infra), 2, replace=False)]
             date = self.randomDate(self.startTime, self.maxDays)
             queries.append("{},{},{},{}\n".format(i, startLocation, endLocation, date))
 

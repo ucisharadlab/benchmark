@@ -2,6 +2,7 @@ import datetime
 import random
 import json
 import uuid
+import numpy as np
 
 
 def createPresence(dt, end, step, dataDir):
@@ -32,20 +33,19 @@ def createPresence(dt, end, step, dataDir):
     fpObj = open('data/presenceData.json', 'w')
 
     while dt < end:
-        for i in range(numSenors/8):
-            for j in range(numUsers/8):
-                id = str(uuid.uuid4())
-                sobs = {
-                    "id": id,
-                    "timeStamp": dt.strftime('%Y-%m-%d %H:%M:%S'),
-                    "virtualSensor": pickedSensor,
-                    "type_": pickedSensor["type_"]["semanticObservationType"],
-                    "semanticEntity": users[random.randint(0, numUsers-1)],
-                    "payload": {
-                        "location": rooms[random.randint(0, numRooms-1)]['id']
-                    }
+        for j in np.random.choice(numUsers, numUsers/2, replace=False):
+            id = str(uuid.uuid4())
+            sobs = {
+                "id": id,
+                "timeStamp": dt.strftime('%Y-%m-%d %H:%M:%S'),
+                "virtualSensor": pickedSensor,
+                "type_": pickedSensor["type_"]["semanticObservationType"],
+                "semanticEntity": users[j],
+                "payload": {
+                    "location": rooms[random.randint(0, numRooms-1)]['id']
                 }
-                fpObj.write(json.dumps(sobs) + '\n')
+            }
+            fpObj.write(json.dumps(sobs) + '\n')
         dt += step
 
     fpObj.close()

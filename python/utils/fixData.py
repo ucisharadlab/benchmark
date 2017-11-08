@@ -1,6 +1,7 @@
 import json
 import uuid
 import random
+import datetime
 
 src = "/home/benchmark/benchmark/benchmark/src/main/resources/data/"
 dest = "/home/benchmark/benchmark/benchmark/data/"
@@ -131,6 +132,61 @@ def fixSensorCoverage():
 
 
 def fixObservations():
-    pass
+    with open(src+'observation.json') as data_file:
+        observations = json.load(data_file)
 
-fixSensorCoverage()
+    # observations = []
+    # others = []
+    #
+    # for observation in data:
+    #     if observation['sensor']['type_']['id'] != "WiFiAP":
+    #         observations.append(observation)
+    #     else:
+    #         others.append(observation)
+
+    observations = sorted(observations, key=lambda x: (x['sensor']['id'], datetime.datetime.strptime(x['timeStamp'],'%Y-%m-%d %H:%M:%S')))
+
+    # newObservations = [observations[0]]
+    # for observation in observations[1:]:
+    #     if newObservations[-1]['timeStamp'] != observation['timeStamp']:
+    #         newObservations.append(observation)
+    # observations = newObservations
+
+    with open(dest + 'observation.json', 'w') as writer:
+        writer.write("[\n")
+        for observation in observations[:-1]:
+            writer.write(json.dumps(observation) + ',\n')
+
+        writer.write(json.dumps(observations[-1]) + '\n]')
+
+
+def fixSemanticObservations():
+    with open(src+'semanticObservation.json') as data_file:
+        observations = json.load(data_file)
+
+    # observations = []
+    # others = []
+    #
+    # for observation in data:
+    #     if observation['sensor']['type_']['id'] != "WiFiAP":
+    #         observations.append(observation)
+    #     else:
+    #         others.append(observation)
+
+    observations = sorted(observations, key=lambda x: (x['semanticEntity']['id'], datetime.datetime.strptime(x['timeStamp'],'%Y-%m-%d %H:%M:%S')))
+
+    # newObservations = [observations[0]]
+    # for observation in observations[1:]:
+    #     if newObservations[-1]['timeStamp'] != observation['timeStamp']:
+    #         newObservations.append(observation)
+    # observations = newObservations
+
+    with open(dest + 'semanticObservation.json', 'w') as writer:
+        writer.write("[\n")
+        for observation in observations[:-1]:
+            writer.write(json.dumps(observation) + ',\n')
+
+        writer.write(json.dumps(observations[-1]) + '\n]')
+
+
+fixSemanticObservations()

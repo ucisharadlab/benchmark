@@ -2,6 +2,7 @@ import datetime
 import random
 import json
 import uuid
+import numpy as np
 
 from extrapolate import Scale, SemanticScale
 
@@ -36,20 +37,19 @@ def createOccupancy(dt, end, step, dataDir):
 
     while dt < end:
 
-        for i in range(numSenors/8):
-            for j in range(numRooms/50):
-                id = str(uuid.uuid4())
-                sobs = {
-                    "id": id,
-                    "timeStamp": dt.strftime('%Y-%m-%d %H:%M:%S'),
-                    "virtualSensor": pickedSensor,
-                    "type_": pickedSensor["type_"]["semanticObservationType"],
-                    "semanticEntity": rooms[random.randint(0, numRooms-1)],
-                    "payload": {
-                        "occupancy": random.randint(0, MAX_OCCUPANCY)
-                    }
+        for j in np.random.choice(numRooms, numRooms/15, replace=False):
+            id = str(uuid.uuid4())
+            sobs = {
+                "id": id,
+                "timeStamp": dt.strftime('%Y-%m-%d %H:%M:%S'),
+                "virtualSensor": pickedSensor,
+                "type_": pickedSensor["type_"]["semanticObservationType"],
+                "semanticEntity": rooms[j],
+                "payload": {
+                    "occupancy": random.randint(0, MAX_OCCUPANCY)
                 }
-                fpObj.write(json.dumps(sobs) + '\n')
+            }
+            fpObj.write(json.dumps(sobs) + '\n')
         dt += step
 
     fpObj.close()

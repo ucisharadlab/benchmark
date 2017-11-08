@@ -15,9 +15,9 @@ def createObservations(dt, end, step, dataDir, outputDir):
     with open(dataDir+'observation.json') as data_file:
         seedObservations = json.load(data_file)
 
-    for observation in seedObservations:
-        line = json.dumps(observation) + "\n"
-        finalObj.write(line + ",\n")
+    # for observation in seedObservations:
+    #     line = json.dumps(observation) + "\n"
+    #     finalObj.write(line + ",\n")
 
     wifiap.createWiFiObservations(dt, end, step, dataDir)
     wifiObj = open("data/wifiAPData.json")

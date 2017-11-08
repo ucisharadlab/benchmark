@@ -2,6 +2,7 @@ import datetime
 import random
 import json
 import uuid
+import numpy as np
 
 from extrapolate import Scale
 
@@ -22,8 +23,8 @@ def createTemperatureObservations(dt, end, step, dataDir):
 
     while dt < end:
 
-        for i in range(num/2):
-            pickedSensor = sensors[random.randint(0, num - 1)]
+        for i in np.random.choice(num, num/2, replace=False):
+            pickedSensor = sensors[i]
             id = str(uuid.uuid4())
             obs = {
                 "id": id,

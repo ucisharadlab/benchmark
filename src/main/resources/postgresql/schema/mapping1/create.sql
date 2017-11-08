@@ -106,7 +106,7 @@ CREATE TABLE COVERAGE_INFRASTRUCTURE (
 
 CREATE TABLE OBSERVATION (
   id varchar(255) NOT NULL,
-  payload varchar(255) DEFAULT NULL,
+  payload json DEFAULT NULL,
   timeStamp timestamp NOT NULL,
   sensor_id varchar(255) DEFAULT NULL,
   PRIMARY KEY (id),
@@ -145,7 +145,7 @@ CREATE TABLE VIRTUAL_SENSOR (
 CREATE TABLE SEMANTIC_OBSERVATION (
   id varchar(255) NOT NULL,
   semantic_entity_id varchar(255) NOT NULL,
-  payload varchar(255) DEFAULT NULL,
+  payload json DEFAULT NULL,
   timeStamp timestamp NOT NULL,
   virtual_sensor_id varchar(255) DEFAULT NULL,
   type_id varchar(255) DEFAULT NULL,

@@ -94,7 +94,7 @@ CREATE TABLE IF NOT EXISTS COVERAGE_INFRASTRUCTURE (
 
 CREATE TABLE IF NOT EXISTS OBSERVATION (
   id string NOT NULL,
-  payload string ,
+  payload object ,
   timeStamp timestamp NOT NULL,
   sensor_id string ,
   PRIMARY KEY (id)
@@ -129,7 +129,7 @@ CREATE TABLE IF NOT EXISTS VIRTUAL_SENSOR (
 CREATE TABLE IF NOT EXISTS SEMANTIC_OBSERVATION (
   id string NOT NULL,
   semantic_entity_id string NOT NULL,
-  payload string,
+  payload object,
   timeStamp timestamp NOT NULL,
   virtual_sensor_id string,
   type_id string,
