@@ -109,402 +109,887 @@ public class GridDBQueryManager extends BaseQueryManager {
 
     @Override
     public Duration runQuery1(String sensorId) throws BenchmarkException {
-        return runTimedQuery("Sensor", String.format("SELECT * FROM Sensor WHERE id='%s'",sensorId), 1);
+        switch (mapping) {
+            case 1:
+            case 2:
+                return runTimedQuery("Sensor", String.format("SELECT * FROM Sensor WHERE id='%s'",sensorId), 1);
+            default:
+                throw new BenchmarkException("No Such Mapping");
+        }
+
     }
 
     @Override
     public Duration runQuery2(String sensorTypeName, List<String> locationIds) throws BenchmarkException {
-        Instant startTime = Instant.now();
-        List<Row> sensorTypes = runQueryWithRows("SensorType",
-                String.format("SELECT * FROM SensorType WHERE name='%s'", sensorTypeName));
+        switch (mapping) {
+            case 1:
+            case 2:
+                Instant startTime = Instant.now();
+                List<Row> sensorTypes = runQueryWithRows("SensorType",
+                        String.format("SELECT * FROM SensorType WHERE name='%s'", sensorTypeName));
 
-        try {
-            List<Row> sensors = runQueryWithRows("Sensor",
-                    String.format("SELECT * FROM Sensor WHERE typeId='%s'", sensorTypes.get(0).getString(0)));
-            RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(2));
-            for(Row row : sensors) {
-                String[] entitiesCovered = row.getStringArray(5);
+                try {
+                    List<Row> sensors = runQueryWithRows("Sensor",
+                            String.format("SELECT * FROM Sensor WHERE typeId='%s'", sensorTypes.get(0).getString(0)));
+                    RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(2));
+                    for(Row row : sensors) {
+                        String[] entitiesCovered = row.getStringArray(5);
 
-                locationIds.forEach(e-> {
-                    for (String s : entitiesCovered) {
-                        if (s.equals(e)) {
+                        locationIds.forEach(e-> {
+                            for (String s : entitiesCovered) {
+                                if (s.equals(e)) {
+                                    if (writeOutput) {
+                                        try {
+                                            writer.writeString(row.getString(0));
+                                        } catch (IOException e1) {
+                                            e1.printStackTrace();
+                                            throw new BenchmarkException("Error Running Query On GridDB");
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
+                    writer.close();
+                    Instant endTime = Instant.now();
+                    return Duration.between(startTime, endTime);
+                } catch (IOException e) {
+                    throw new BenchmarkException("Error running query on griddb");
+                }
+            default:
+                throw new BenchmarkException("No Such Mapping");
+        }
+
+    }
+
+    @Override
+    public Duration runQuery3(String sensorId, Date startTime, Date endTime) throws BenchmarkException {
+        switch (mapping) {
+            case 1:
+                String collectionName = Constants.GRIDDB_OBS_PREFIX + sensorId;
+                String query = String.format("SELECT * FROM %s WHERE timeStamp > TIMESTAMP('%s') " +
+                        "AND timeStamp < TIMESTAMP('%s')", collectionName, sdf.format(startTime), sdf.format(endTime));
+                return runTimedQuery(collectionName, query, 3);
+            case 2:
+                try {
+                    List<Row> sensorTypes = runQueryWithRows("Sensor",
+                            String.format("SELECT * FROM Sensor WHERE typeId='%s'", sensorId));
+                    collectionName = sensorTypes.get(0).getString(1);
+                    query = String.format("SELECT * FROM %s WHERE timeStamp > TIMESTAMP('%s') " +
+                            "AND timeStamp < TIMESTAMP('%s')", collectionName, sdf.format(startTime), sdf.format(endTime));
+                    return runTimedQuery("WiFiAPObservation", query, 3);
+                } catch (GSException e) {
+                    e.printStackTrace();
+                }
+            default:
+                throw  new BenchmarkException("No Such Mapping");
+        }
+
+    }
+
+    @Override
+    public Duration runQuery4(List<String> sensorIds, Date startTime, Date endTime) throws BenchmarkException {
+        switch (mapping) {
+            case 1:
+                Instant start = Instant.now();
+                try {
+                    RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(4));
+
+                    for (String sensorId : sensorIds) {
+                        String collectionName = Constants.GRIDDB_OBS_PREFIX + sensorId;
+                        String query = String.format("SELECT * FROM %s WHERE timeStamp > TIMESTAMP('%s') " +
+                                "AND timeStamp < TIMESTAMP('%s')", collectionName, sdf.format(startTime), sdf.format(endTime));
+                        List<Row> observations = runQueryWithRows(collectionName, query);
+
+
+                        observations.forEach(e -> {
                             if (writeOutput) {
+                                ContainerInfo containerInfo = null;
                                 try {
-                                    writer.writeString(row.getString(0));
+                                    StringBuilder line = new StringBuilder("");
+                                    containerInfo = e.getSchema();
+                                    int columnCount = containerInfo.getColumnCount();
+                                    for (int i = 0; i < columnCount; i++) {
+                                        line.append(e.getValue(i)).append("\t");
+                                    }
+                                    writer.writeString(line.toString());
                                 } catch (IOException e1) {
                                     e1.printStackTrace();
                                     throw new BenchmarkException("Error Running Query On GridDB");
                                 }
                             }
-                        }
+                        });
                     }
-                });
-            }
-            writer.close();
-            Instant endTime = Instant.now();
-            return Duration.between(startTime, endTime);
-        } catch (IOException e) {
-            throw new BenchmarkException("Error running query on griddb");        }
-    }
+                    writer.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
 
-    @Override
-    public Duration runQuery3(String sensorId, Date startTime, Date endTime) throws BenchmarkException {
-        String collectionName = Constants.GRIDDB_OBS_PREFIX + sensorId;
-        String query = String.format("SELECT * FROM %s WHERE timeStamp > TIMESTAMP('%s') " +
-                "AND timeStamp < TIMESTAMP('%s')", collectionName, sdf.format(startTime), sdf.format(endTime));
-        return runTimedQuery(collectionName, query, 3);
-    }
+                Instant end = Instant.now();
+                return Duration.between(start, end);
+            case 2:
+                try {
+                    start = Instant.now();
+                    String typeId = null;
+                    List<String> wifiSensors = new ArrayList<>();
+                    List<String> wemoSensors = new ArrayList<>();
+                    List<String> thermoSensors = new ArrayList<>();
 
-    @Override
-    public Duration runQuery4(List<String> sensorIds, Date startTime, Date endTime) throws BenchmarkException {
+                    RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(4));
+                    for (String sensorId : sensorIds) {
+                        typeId = runQueryWithRows("Sensor",
+                                String.format("SELECT * FROM Sensor WHERE typeId='%s'", sensorId)).get(0).getString(2);
+                        if ("Thermometer".equals(typeId))
+                            thermoSensors.add(sensorId);
+                        else if ("WeMo".equals(typeId))
+                            wemoSensors.add(sensorId);
+                        else if ("WiFiAP".equals(typeId))
+                            wifiSensors.add(sensorId);
+                    }
 
-        Instant start = Instant.now();
-        try {
-            RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(4));
+                    if (!thermoSensors.isEmpty()) {
+                        String query = String.format("SELECT * FROM ThermometerObservation WHERE timeStamp > TIMESTAMP('%s') " +
+                                "AND timeStamp < TIMESTAMP('%s') AND ( "
+                                + thermoSensors.stream().map(e -> "sensorId = '" + e + "'" ).collect(Collectors.joining(" OR "))
+                                + ");", sdf.format(startTime), sdf.format(endTime));
+                        List<Row> observations = runQueryWithRows("ThermometerObservation", query);
 
-            for (String sensorId : sensorIds) {
-                String collectionName = Constants.GRIDDB_OBS_PREFIX + sensorId;
-                String query = String.format("SELECT * FROM %s WHERE timeStamp > TIMESTAMP('%s') " +
-                        "AND timeStamp < TIMESTAMP('%s')", collectionName, sdf.format(startTime), sdf.format(endTime));
-                List<Row> observations = runQueryWithRows(collectionName, query);
-
-
-                observations.forEach(e -> {
-                    if (writeOutput) {
-                        ContainerInfo containerInfo = null;
-                        try {
-                            StringBuilder line = new StringBuilder("");
-                            containerInfo = e.getSchema();
-                            int columnCount = containerInfo.getColumnCount();
-                            for (int i = 0; i < columnCount; i++) {
-                                line.append(e.getValue(i)).append("\t");
+                        observations.forEach(e -> {
+                            if (writeOutput) {
+                                ContainerInfo containerInfo = null;
+                                try {
+                                    StringBuilder line = new StringBuilder("");
+                                    containerInfo = e.getSchema();
+                                    int columnCount = containerInfo.getColumnCount();
+                                    for (int i = 0; i < columnCount; i++) {
+                                        line.append(e.getValue(i)).append("\t");
+                                    }
+                                    writer.writeString(line.toString());
+                                } catch (IOException e1) {
+                                    e1.printStackTrace();
+                                    throw new BenchmarkException("Error Running Query On GridDB");
+                                }
                             }
-                            writer.writeString(line.toString());
-                        } catch (IOException e1) {
-                            e1.printStackTrace();
-                            throw new BenchmarkException("Error Running Query On GridDB");
-                        }
+                        });
                     }
-                });
-            }
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new BenchmarkException("Error Running Query");
-        }
+                    else if (!wemoSensors.isEmpty()) {
+                        String query = String.format("SELECT * FROM WeMoObservation WHERE timeStamp > TIMESTAMP('%s') " +
+                                "AND timeStamp < TIMESTAMP('%s') AND ( "
+                                + thermoSensors.stream().map(e -> "sensorId = '" + e + "'" ).collect(Collectors.joining(" OR "))
+                                + ");", sdf.format(startTime), sdf.format(endTime));
+                        List<Row> observations = runQueryWithRows("WeMoObservation", query);
 
-        Instant end = Instant.now();
-        return Duration.between(start, end);
+                        observations.forEach(e -> {
+                            if (writeOutput) {
+                                ContainerInfo containerInfo = null;
+                                try {
+                                    StringBuilder line = new StringBuilder("");
+                                    containerInfo = e.getSchema();
+                                    int columnCount = containerInfo.getColumnCount();
+                                    for (int i = 0; i < columnCount; i++) {
+                                        line.append(e.getValue(i)).append("\t");
+                                    }
+                                    writer.writeString(line.toString());
+                                } catch (IOException e1) {
+                                    e1.printStackTrace();
+                                    throw new BenchmarkException("Error Running Query On GridDB");
+                                }
+                            }
+                        });
+                    }
+                    else if ("WiFiAP".equals(typeId)) {
+                        String query = String.format("SELECT * FROM WiFiAPObservation WHERE timeStamp > TIMESTAMP('%s') " +
+                                "AND timeStamp < TIMESTAMP('%s') AND ( "
+                                + thermoSensors.stream().map(e -> "sensorId = '" + e + "'" ).collect(Collectors.joining(" OR "))
+                                + ");", sdf.format(startTime), sdf.format(endTime));
+                        List<Row> observations = runQueryWithRows("WiFiAPObservation", query);
+
+
+                        observations.forEach(e -> {
+                            if (writeOutput) {
+                                ContainerInfo containerInfo = null;
+                                try {
+                                    StringBuilder line = new StringBuilder("");
+                                    containerInfo = e.getSchema();
+                                    int columnCount = containerInfo.getColumnCount();
+                                    for (int i = 0; i < columnCount; i++) {
+                                        line.append(e.getValue(i)).append("\t");
+                                    }
+                                    writer.writeString(line.toString());
+                                } catch (IOException e1) {
+                                    e1.printStackTrace();
+                                    throw new BenchmarkException("Error Running Query On GridDB");
+                                }
+                            }
+                        });
+                    }
+
+                    end = Instant.now();
+                    return Duration.between(start, end);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
+            default:
+                throw new BenchmarkException("No Such Mapping");
+        }
 
     }
 
     @Override
     public Duration runQuery5(String sensorTypeName, Date startTime, Date endTime, String payloadAttribute,
                               Object startPayloadValue, Object endPayloadValue) throws BenchmarkException {
-        Instant start = Instant.now();
-        List<Row> sensorTypes = runQueryWithRows("SensorType",
-                String.format("SELECT * FROM SensorType WHERE name='%s'", sensorTypeName));
+        switch (mapping) {
+            case 1:
+                Instant start = Instant.now();
+                List<Row> sensorTypes = runQueryWithRows("SensorType",
+                        String.format("SELECT * FROM SensorType WHERE name='%s'", sensorTypeName));
 
-        try {
-            List<Row> sensors = runQueryWithRows("Sensor",
-                    String.format("SELECT * FROM Sensor WHERE typeId='%s'", sensorTypes.get(0).getString(0)));
+                try {
+                    List<Row> sensors = runQueryWithRows("Sensor",
+                            String.format("SELECT * FROM Sensor WHERE typeId='%s'", sensorTypes.get(0).getString(0)));
 
-            RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(5));
-            for (Row row : sensors) {
-                String collectionName = Constants.GRIDDB_OBS_PREFIX + row.getString(0);
-                String query = String.format("SELECT * FROM %s WHERE timeStamp > TIMESTAMP('%s') " +
-                        "AND timeStamp < TIMESTAMP('%s') AND %s >= %s AND %s <= %s ",
-                        collectionName, sdf.format(startTime), sdf.format(endTime), payloadAttribute, startPayloadValue,
-                        payloadAttribute, endPayloadValue);
-                List<Row> observations = runQueryWithRows(collectionName, query);
+                    RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(5));
+                    for (Row row : sensors) {
+                        String collectionName = Constants.GRIDDB_OBS_PREFIX + row.getString(0);
+                        String query = String.format("SELECT * FROM %s WHERE timeStamp > TIMESTAMP('%s') " +
+                                        "AND timeStamp < TIMESTAMP('%s') AND %s >= %s AND %s <= %s ",
+                                collectionName, sdf.format(startTime), sdf.format(endTime), payloadAttribute, startPayloadValue,
+                                payloadAttribute, endPayloadValue);
+                        List<Row> observations = runQueryWithRows(collectionName, query);
 
-                observations.forEach(e->{
-                    if (writeOutput) {
-                        ContainerInfo containerInfo = null;
-                        try {
-                            StringBuilder line = new StringBuilder("");
-                            containerInfo = e.getSchema();
-                            int columnCount = containerInfo.getColumnCount();
-                            for (int i = 0; i < columnCount; i++) {
-                                line.append(e.getValue(i)).append("\t");
+                        observations.forEach(e -> {
+                            if (writeOutput) {
+                                ContainerInfo containerInfo = null;
+                                try {
+                                    StringBuilder line = new StringBuilder("");
+                                    containerInfo = e.getSchema();
+                                    int columnCount = containerInfo.getColumnCount();
+                                    for (int i = 0; i < columnCount; i++) {
+                                        line.append(e.getValue(i)).append("\t");
+                                    }
+                                    writer.writeString(line.toString());
+                                } catch (IOException e1) {
+                                    e1.printStackTrace();
+                                    throw new BenchmarkException("Error Running Query On GridDB");
+                                }
                             }
-                            writer.writeString(line.toString());
-                        } catch (IOException e1) {
-                            e1.printStackTrace();
-                            throw new BenchmarkException("Error Running Query On GridDB");
-                        }
-                    }
-                });
+                        });
 
-            }
-            writer.close();
-            Instant end = Instant.now();
-            return Duration.between(start, end);
-        } catch (IOException ge) {
-            ge.printStackTrace();
-            throw new BenchmarkException("Error Running Query");
+                    }
+                    writer.close();
+                    Instant end = Instant.now();
+                    return Duration.between(start, end);
+                } catch (IOException ge) {
+                    ge.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
+            case 2:
+                start = Instant.now();
+                try {
+
+                    RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(5));
+                    String collectionName = sensorTypeName + "Observation";
+
+                    String query = String.format("SELECT * FROM %s WHERE timeStamp > TIMESTAMP('%s') " +
+                                    "AND timeStamp < TIMESTAMP('%s') AND %s >= %s AND %s <= %s ",
+                            collectionName, sdf.format(startTime), sdf.format(endTime), payloadAttribute, startPayloadValue,
+                            payloadAttribute, endPayloadValue);
+                    List<Row> observations = runQueryWithRows(collectionName, query);
+
+                    observations.forEach(e -> {
+                        if (writeOutput) {
+                            ContainerInfo containerInfo = null;
+                            try {
+                                StringBuilder line = new StringBuilder("");
+                                containerInfo = e.getSchema();
+                                int columnCount = containerInfo.getColumnCount();
+                                for (int i = 0; i < columnCount; i++) {
+                                    line.append(e.getValue(i)).append("\t");
+                                }
+                                writer.writeString(line.toString());
+                            } catch (IOException e1) {
+                                e1.printStackTrace();
+                                throw new BenchmarkException("Error Running Query On GridDB");
+                            }
+                        }
+                    });
+
+
+                    writer.close();
+                    Instant end = Instant.now();
+                    return Duration.between(start, end);
+                } catch (IOException ge) {
+                    ge.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
+            default:
+                throw new BenchmarkException("No such mapping");
         }
     }
 
     @Override
     public Duration runQuery6(List<String> sensorIds, Date startTime, Date endTime) throws BenchmarkException {
         // TODO: Fix Error Due to TimeZone
-        Instant start = Instant.now();
-        try {
-            RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(6));
-            for (String sensorId : sensorIds) {
-                String collectionName = Constants.GRIDDB_OBS_PREFIX + sensorId;
-                String query = String.format("SELECT * FROM %s WHERE timeStamp >= TIMESTAMP('%s') " +
-                        "AND timeStamp <= TIMESTAMP('%s')", collectionName, sdf.format(startTime), sdf.format(endTime));
-                List<Row> observations = runQueryWithRows(collectionName, query);
+        switch (mapping) {
+            case 1:
+                Instant start = Instant.now();
+                try {
+                    RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(6));
+                    for (String sensorId : sensorIds) {
+                        String collectionName = Constants.GRIDDB_OBS_PREFIX + sensorId;
+                        String query = String.format("SELECT * FROM %s WHERE timeStamp >= TIMESTAMP('%s') " +
+                                "AND timeStamp <= TIMESTAMP('%s')", collectionName, sdf.format(startTime), sdf.format(endTime));
+                        List<Row> observations = runQueryWithRows(collectionName, query);
 
-                JSONArray jsonObservations = new JSONArray();
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                        JSONArray jsonObservations = new JSONArray();
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-                observations.forEach(e -> {
-                    JSONObject object = new JSONObject();
-                    try {
-                        object.put("date", dateFormat.format(e.getTimestamp(0)));
-                        jsonObservations.put(object);
-                    } catch (GSException e1) {
-                        e1.printStackTrace();
+                        observations.forEach(e -> {
+                            JSONObject object = new JSONObject();
+                            try {
+                                object.put("date", dateFormat.format(e.getTimestamp(0)));
+                                jsonObservations.put(object);
+                            } catch (GSException e1) {
+                                e1.printStackTrace();
+                            }
+                        });
+
+                        GroupBy groupBy = new GroupBy();
+                        JSONArray groups = groupBy.doGroupBy(jsonObservations, Arrays.asList("date"));
+                        final int[] sum = {0};
+
+                        groups.iterator().forEachRemaining(e -> {
+                            sum[0] += ((JSONArray) e).length();
+                        });
+
+                        if (writeOutput) {
+                            if (groups.length() != 0)
+                                writer.writeString(sensorId + ", " + sum[0] / groups.length());
+                        }
                     }
-                });
-
-                GroupBy groupBy = new GroupBy();
-                JSONArray groups = groupBy.doGroupBy(jsonObservations, Arrays.asList("date"));
-                final int[] sum = {0};
-
-                groups.iterator().forEachRemaining(e-> {
-                    sum[0] += ((JSONArray)e).length();
-                });
-
-                if (writeOutput) {
-                    if (groups.length() != 0)
-                        writer.writeString(sensorId + ", " + sum[0] /groups.length());
+                    writer.close();
+                    Instant end = Instant.now();
+                    return Duration.between(start, end);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
                 }
-            }
-            writer.close();
-            Instant end = Instant.now();
-            return Duration.between(start, end);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new BenchmarkException("Error Running Query");
+            case 2:
+                start = Instant.now();
+                try {
+                    RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(6));
+                    List<Row> observations = null;
+
+                    for (String sensorId : sensorIds) {
+                        String typeId = runQueryWithRows("Sensor",
+                                String.format("SELECT * FROM Sensor WHERE typeId='%s'", sensorId)).get(0).getString(2);
+
+                        if ("Thermometer".equals(typeId)) {
+                            String query = String.format("SELECT * FROM ThermometerObservation WHERE timeStamp > TIMESTAMP('%s') " +
+                                    "AND timeStamp < TIMESTAMP('%s') AND sensorId = '%s'", sdf.format(startTime), sdf.format(endTime));
+                            observations = runQueryWithRows("ThermometerObservation", query);
+                        }
+                        else if ("WeMo".equals(typeId)){
+                            String query = String.format("SELECT * FROM WeMoObservation WHERE timeStamp > TIMESTAMP('%s') " +
+                                    "AND timeStamp < TIMESTAMP('%s') AND sensorId = '%s'", sdf.format(startTime), sdf.format(endTime));
+                            observations = runQueryWithRows("WeMoObservation", query);
+                        }
+                        else if ("WiFiAP".equals(typeId)){
+                            String query = String.format("SELECT * FROM WiFiAPObservation WHERE timeStamp > TIMESTAMP('%s') " +
+                                    "AND timeStamp < TIMESTAMP('%s') AND sensorId = '%s'", sdf.format(startTime), sdf.format(endTime));
+                            observations = runQueryWithRows("WiFiAPObservation", query);
+                        }
+
+                        JSONArray jsonObservations = new JSONArray();
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+                        observations.forEach(e -> {
+                            JSONObject object = new JSONObject();
+                            try {
+                                object.put("date", dateFormat.format(e.getTimestamp(0)));
+                                jsonObservations.put(object);
+                            } catch (GSException e1) {
+                                e1.printStackTrace();
+                            }
+                        });
+
+                        GroupBy groupBy = new GroupBy();
+                        JSONArray groups = groupBy.doGroupBy(jsonObservations, Arrays.asList("date"));
+                        final int[] sum = {0};
+
+                        groups.iterator().forEachRemaining(e -> {
+                            sum[0] += ((JSONArray) e).length();
+                        });
+
+                        if (writeOutput) {
+                            if (groups.length() != 0)
+                                writer.writeString(sensorId + ", " + sum[0] / groups.length());
+                        }
+                    }
+                    writer.close();
+                    Instant end = Instant.now();
+                    return Duration.between(start, end);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
+            default:
+                throw new BenchmarkException("No such mapping");
         }
     }
 
     @Override
     public Duration runQuery7(String startLocation, String endLocation, Date date) throws BenchmarkException {
         // TODO: Fix Error Due to TimeZone
-        Instant start = Instant.now();
-        Date startTime = date;
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(date);
-        cal.add(Calendar.DATE, 2);
-        Date endTime = cal.getTime();
+        switch (mapping) {
+            case 1:
+                Instant start = Instant.now();
+                Date startTime = date;
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(date);
+                cal.add(Calendar.DATE, 2);
+                Date endTime = cal.getTime();
 
-        try {
-            List<String[]> users = runQueryWithRows("User",
-                    "SELECT * FROM User")
-                    .stream().map(e -> {
-                        try {
-                            return new String[]{e.getString(0), e.getString(2)};
-                        } catch (GSException e1) {
-                            e1.printStackTrace();
-                            return null;
+                try {
+                    List<String[]> users = runQueryWithRows("User",
+                            "SELECT * FROM User")
+                            .stream().map(e -> {
+                                try {
+                                    return new String[]{e.getString(0), e.getString(2)};
+                                } catch (GSException e1) {
+                                    e1.printStackTrace();
+                                    return null;
+                                }
+                            }).collect(Collectors.toList());
+
+                    RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(7));
+
+                    for (String[] user : users) {
+                        String collectionName = Constants.GRIDDB_SO_PREFIX + user[0];
+                        List<Row> rows = runQueryWithRows(collectionName, String.format("SELECT * FROM %s WHERE timeStamp >= TIMESTAMP('%s') " +
+                                        "AND timeStamp <= TIMESTAMP('%s') AND location = '%s'",
+                                collectionName, sdf.format(startTime), sdf.format(endTime), startLocation));
+                        for (Row row : rows) {
+
+                            String query = String.format("SELECT * FROM %s WHERE timeStamp >= TIMESTAMP('%s') " +
+                                            "AND timeStamp <= TIMESTAMP('%s') AND location = '%s'", collectionName,
+                                    sdf.format(row.getTimestamp(0)), sdf.format(endTime), endLocation);
+                            List<Row> observations = runQueryWithRows(collectionName, query);
+
+                            if (observations.size() > 0 && writeOutput) {
+                                writer.writeString(user[1]);
+                            }
                         }
-                    }).collect(Collectors.toList());
-
-            RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(7));
-
-            for (String[] user : users) {
-                String collectionName = Constants.GRIDDB_SO_PREFIX + user[0];
-                List<Row> rows = runQueryWithRows(collectionName, String.format("SELECT * FROM %s WHERE timeStamp >= TIMESTAMP('%s') " +
-                                "AND timeStamp <= TIMESTAMP('%s') AND location = '%s'",
-                        collectionName, sdf.format(startTime), sdf.format(endTime), startLocation));
-                for (Row row: rows) {
-
-                    String query = String.format("SELECT * FROM %s WHERE timeStamp >= TIMESTAMP('%s') " +
-                            "AND timeStamp <= TIMESTAMP('%s') AND location = '%s'", collectionName,
-                            sdf.format(row.getTimestamp(0)), sdf.format(endTime), endLocation);
-                    List<Row> observations = runQueryWithRows(collectionName, query);
-
-                    if (observations.size() > 0 && writeOutput) {
-                        writer.writeString(user[1]);
                     }
+                    writer.close();
+                    Instant end = Instant.now();
+                    return Duration.between(start, end);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
                 }
-            }
-            writer.close();
-            Instant end = Instant.now();
-            return Duration.between(start, end);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new BenchmarkException("Error Running Query");
+            case 2:
+                start = Instant.now();
+                startTime = date;
+                cal = Calendar.getInstance();
+                cal.setTime(date);
+                cal.add(Calendar.DATE, 2);
+                endTime = cal.getTime();
+
+                try {
+                    List<String[]> users = runQueryWithRows("User",
+                            "SELECT * FROM User")
+                            .stream().map(e -> {
+                                try {
+                                    return new String[]{e.getString(0), e.getString(2)};
+                                } catch (GSException e1) {
+                                    e1.printStackTrace();
+                                    return null;
+                                }
+                            }).collect(Collectors.toList());
+
+                    RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(7));
+
+
+                    List<Row> rows = runQueryWithRows("Presence",
+                            String.format("SELECT * FROM Presence WHERE timeStamp >= TIMESTAMP('%s') " +
+                                    "AND timeStamp <= TIMESTAMP('%s') AND location = '%s'",
+                            sdf.format(startTime), sdf.format(endTime), startLocation));
+                    for (Row row : rows) {
+
+                        String query = String.format("SELECT * FROM Presence WHERE timeStamp >= TIMESTAMP('%s') " +
+                                        "AND timeStamp <= TIMESTAMP('%s') AND location = '%s' AND semanticEntityId = '%s'",
+                                sdf.format(row.getTimestamp(0)), sdf.format(endTime), endLocation, row.getString(4));
+                        List<Row> observations = runQueryWithRows("Presence", query);
+
+                        observations.forEach(e->{
+                            if (writeOutput) {
+                                try {
+                                    writer.writeString(row.getString(4) + ", " +e.getString(4));
+                                } catch (IOException e1) {
+                                    e1.printStackTrace();
+                                }
+
+                            }
+                        });
+                    }
+
+                    writer.close();
+                    Instant end = Instant.now();
+                    return Duration.between(start, end);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
+            default:
+                throw new BenchmarkException("No Such Mapping");
         }
     }
 
     @Override
     public Duration runQuery8(String userId, Date date) throws BenchmarkException {
         // TODO: Fix Error Due to TimeZone
-        Instant start = Instant.now();
-        Date startTime = date;
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(date);
-        cal.add(Calendar.DATE, 1);
-        Date endTime = cal.getTime();
+        switch (mapping) {
+            case 1:
+                Instant start = Instant.now();
+                Date startTime = date;
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(date);
+                cal.add(Calendar.DATE, 1);
+                Date endTime = cal.getTime();
 
-        try {
-            List<String[]> users = runQueryWithRows("User",
-                    String.format("SELECT * FROM User WHERE id != '%s'", userId))
-                    .stream().map(e -> {
-                        try {
-                            return new String[]{e.getString(0), e.getString(2)};
-                        } catch (GSException e1) {
-                            e1.printStackTrace();
-                            return null;
+                try {
+                    List<String[]> users = runQueryWithRows("User",
+                            String.format("SELECT * FROM User WHERE id != '%s'", userId))
+                            .stream().map(e -> {
+                                try {
+                                    return new String[]{e.getString(0), e.getString(2)};
+                                } catch (GSException e1) {
+                                    e1.printStackTrace();
+                                    return null;
+                                }
+                            }).collect(Collectors.toList());
+
+                    RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(8));
+
+                    Container<String, Row> container = gridStore.getContainer(Constants.GRIDDB_SO_PREFIX + userId);
+                    Query<Row> gridDBQuery = container.query(String.format("SELECT * FROM %s WHERE timeStamp >= TIMESTAMP('%s') " +
+                                    "AND timeStamp <= TIMESTAMP('%s')",
+                            Constants.GRIDDB_SO_PREFIX + userId, sdf.format(startTime), sdf.format(endTime)));
+                    RowSet<Row> rows = gridDBQuery.fetch();
+
+                    while (rows.hasNext()) {
+
+                        Row row = rows.next();
+                        for (String[] user : users) {
+                            String collectionName = Constants.GRIDDB_SO_PREFIX + user[0];
+                            String query = String.format("SELECT * FROM %s WHERE timeStamp = TIMESTAMP('%s') " +
+                                    "AND location='%s'", collectionName, sdf.format(row.getTimestamp(0)), row.getString(3));
+                            List<Row> observations = runQueryWithRows(collectionName, query);
+
+                            if (observations.size() > 0 && writeOutput) {
+                                writer.writeString(user[1] + ", " + row.getString(3));
+                            }
                         }
-                    }).collect(Collectors.toList());
-
-            RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(8));
-
-            Container<String, Row> container = gridStore.getContainer(Constants.GRIDDB_SO_PREFIX + userId);
-            Query<Row> gridDBQuery = container.query(String.format("SELECT * FROM %s WHERE timeStamp >= TIMESTAMP('%s') " +
-                    "AND timeStamp <= TIMESTAMP('%s')",
-                    Constants.GRIDDB_SO_PREFIX + userId, sdf.format(startTime), sdf.format(endTime)));
-            RowSet<Row> rows = gridDBQuery.fetch();
-
-            while (rows.hasNext()) {
-
-                Row row = rows.next();
-                for (String[] user : users) {
-                    String collectionName = Constants.GRIDDB_SO_PREFIX + user[0];
-                    String query = String.format("SELECT * FROM %s WHERE timeStamp = TIMESTAMP('%s') " +
-                            "AND location='%s'", collectionName, sdf.format(row.getTimestamp(0)), row.getString(3));
-                    List<Row> observations = runQueryWithRows(collectionName, query);
-
-                    if (observations.size() > 0 && writeOutput) {
-                        writer.writeString(user[1] + ", " + row.getString(3));
                     }
+                    writer.close();
+                    Instant end = Instant.now();
+                    return Duration.between(start, end);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
                 }
-            }
-            writer.close();
-            Instant end = Instant.now();
-            return Duration.between(start, end);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new BenchmarkException("Error Running Query");
+            case 2:
+                start = Instant.now();
+                startTime = date;
+                cal = Calendar.getInstance();
+                cal.setTime(date);
+                cal.add(Calendar.DATE, 1);
+                endTime = cal.getTime();
+
+                try {
+                    List<String[]> users = runQueryWithRows("User",
+                            String.format("SELECT * FROM User WHERE id != '%s'", userId))
+                            .stream().map(e -> {
+                                try {
+                                    return new String[]{e.getString(0), e.getString(2)};
+                                } catch (GSException e1) {
+                                    e1.printStackTrace();
+                                    return null;
+                                }
+                            }).collect(Collectors.toList());
+
+                    RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(8));
+
+                    Container<String, Row> container = gridStore.getContainer("Presence");
+                    Query<Row> gridDBQuery = container.query(String.format("SELECT * FROM Presence WHERE semanticEntityId = '%s' " +
+                                    "timeStamp >= TIMESTAMP('%s') AND timeStamp <= TIMESTAMP('%s')",
+                            userId, sdf.format(startTime), sdf.format(endTime)));
+                    RowSet<Row> rows = gridDBQuery.fetch();
+
+                    while (rows.hasNext()) {
+
+                        Row row = rows.next();
+
+                        String query = String.format("SELECT * FROM Presence WHERE timeStamp = TIMESTAMP('%s') " +
+                                "AND location='%s' AND semanticEntityId != '%s'", sdf.format(row.getTimestamp(0)),
+                                row.getString(3), userId);
+                        List<Row> observations = runQueryWithRows("Presence", query);
+
+                        observations.forEach(e->{
+                            if (writeOutput) {
+                                try {
+                                    writer.writeString(e.getString(4) + ", " +e.getString(3));
+                                } catch (IOException e1) {
+                                    e1.printStackTrace();
+                                }
+
+                            }
+                        });
+                    }
+                    writer.close();
+                    Instant end = Instant.now();
+                    return Duration.between(start, end);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
+            default:
+                throw new BenchmarkException("No such mapping");
         }
     }
 
     @Override
     public Duration runQuery9(String userId, String infraTypeName) throws BenchmarkException {
         // TODO: Fix Error Due to TimeZone
-        Instant start = Instant.now();
+        switch (mapping) {
+            case 1:
+                Instant start = Instant.now();
 
-        try {
-            String infraTypeId = runQueryWithRows("InfrastructureType",
-                    String.format("SELECT * FROM InfrastructureType WHERE name='%s'", infraTypeName)).get(0).getString(0);
+                try {
+                    String infraTypeId = runQueryWithRows("InfrastructureType",
+                            String.format("SELECT * FROM InfrastructureType WHERE name='%s'", infraTypeName)).get(0).getString(0);
 
-            List<String> infras = runQueryWithRows("Infrastructure",
-                    String.format("SELECT * FROM Infrastructure WHERE typeId='%s'", infraTypeId))
-                    .stream().map(e -> {
+                    List<String> infras = runQueryWithRows("Infrastructure",
+                            String.format("SELECT * FROM Infrastructure WHERE typeId='%s'", infraTypeId))
+                            .stream().map(e -> {
+                                try {
+                                    return e.getString(0);
+                                } catch (GSException e1) {
+                                    e1.printStackTrace();
+                                    return null;
+                                }
+                            }).collect(Collectors.toList());
+
+                    RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(9));
+                    String collectionName = Constants.GRIDDB_SO_PREFIX + userId;
+                    String query = String.format("SELECT * FROM %s", collectionName);
+                    List<Row> observations = runQueryWithRows(collectionName, query);
+
+                    JSONArray jsonObservations = new JSONArray();
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+                    observations.forEach(e -> {
+                        JSONObject object = new JSONObject();
                         try {
-                            return e.getString(0);
+                            if (infras.contains(e.getString(3))) {
+                                object.put("date", dateFormat.format(e.getTimestamp(0)));
+                                jsonObservations.put(object);
+                            }
                         } catch (GSException e1) {
                             e1.printStackTrace();
-                            return null;
                         }
-                    }).collect(Collectors.toList());
+                    });
 
-            RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(9));
-            String collectionName = Constants.GRIDDB_SO_PREFIX + userId;
-            String query = String.format("SELECT * FROM %s", collectionName);
-            List<Row> observations = runQueryWithRows(collectionName, query);
+                    GroupBy groupBy = new GroupBy();
+                    JSONArray groups = groupBy.doGroupBy(jsonObservations, Arrays.asList("date"));
+                    final int[] sum = {0};
 
-            JSONArray jsonObservations = new JSONArray();
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                    groups.iterator().forEachRemaining(e -> {
+                        sum[0] += ((JSONArray) e).length();
+                    });
 
-            observations.forEach(e -> {
-                JSONObject object = new JSONObject();
-                try {
-                    if (infras.contains(e.getString(3))) {
-                        object.put("date", dateFormat.format(e.getTimestamp(0)));
-                        jsonObservations.put(object);
+                    if (writeOutput) {
+                        if (groups.length() != 0)
+                            writer.writeString(userId + ", " + sum[0] * 10 / groups.length());
                     }
-                } catch (GSException e1) {
-                    e1.printStackTrace();
+
+                    writer.close();
+                    Instant end = Instant.now();
+                    return Duration.between(start, end);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
                 }
-            });
+            case 2:
+                start = Instant.now();
 
-            GroupBy groupBy = new GroupBy();
-            JSONArray groups = groupBy.doGroupBy(jsonObservations, Arrays.asList("date"));
-            final int[] sum = {0};
+                try {
+                    String infraTypeId = runQueryWithRows("InfrastructureType",
+                            String.format("SELECT * FROM InfrastructureType WHERE name='%s'", infraTypeName)).get(0).getString(0);
 
-            groups.iterator().forEachRemaining(e-> {
-                sum[0] += ((JSONArray)e).length();
-            });
+                    List<String> infras = runQueryWithRows("Infrastructure",
+                            String.format("SELECT * FROM Infrastructure WHERE typeId='%s'", infraTypeId))
+                            .stream().map(e -> {
+                                try {
+                                    return e.getString(0);
+                                } catch (GSException e1) {
+                                    e1.printStackTrace();
+                                    return null;
+                                }
+                            }).collect(Collectors.toList());
 
-            if (writeOutput) {
-                if (groups.length() != 0)
-                    writer.writeString(userId + ", " + sum[0]*10 /groups.length());
-            }
+                    RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(9));
+                    String query = String.format("SELECT * FROM Presence WHERE semanticEntityId='%s'", userId);
+                    List<Row> observations = runQueryWithRows("Presence", query);
 
-            writer.close();
-            Instant end = Instant.now();
-            return Duration.between(start, end);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new BenchmarkException("Error Running Query");
+                    JSONArray jsonObservations = new JSONArray();
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+                    observations.forEach(e -> {
+                        JSONObject object = new JSONObject();
+                        try {
+                            if (infras.contains(e.getString(3))) {
+                                object.put("date", dateFormat.format(e.getTimestamp(0)));
+                                jsonObservations.put(object);
+                            }
+                        } catch (GSException e1) {
+                            e1.printStackTrace();
+                        }
+                    });
+
+                    GroupBy groupBy = new GroupBy();
+                    JSONArray groups = groupBy.doGroupBy(jsonObservations, Arrays.asList("date"));
+                    final int[] sum = {0};
+
+                    groups.iterator().forEachRemaining(e -> {
+                        sum[0] += ((JSONArray) e).length();
+                    });
+
+                    if (writeOutput) {
+                        if (groups.length() != 0)
+                            writer.writeString(userId + ", " + sum[0] * 10 / groups.length());
+                    }
+
+                    writer.close();
+                    Instant end = Instant.now();
+                    return Duration.between(start, end);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
+            default:
+                throw new BenchmarkException("No Such Mapping");
         }
     }
 
     @Override
     public Duration runQuery10(Date startTime, Date endTime) throws BenchmarkException {
         // TODO: Fix Error Due to TimeZone
-        Instant start = Instant.now();
-        try {
-            List<String> infras = runQueryWithRows("Infrastructure",
-                    "SELECT * FROM Infrastructure")
-                    .stream().map(e -> {
-                        try {
-                            return e.getString(0);
-                        } catch (GSException e1) {
-                            e1.printStackTrace();
-                            return null;
-                        }
-                    }).collect(Collectors.toList());
+        switch (mapping) {
+            case 1:
+                Instant start = Instant.now();
+                try {
+                    List<String> infras = runQueryWithRows("Infrastructure",
+                            "SELECT * FROM Infrastructure")
+                            .stream().map(e -> {
+                                try {
+                                    return e.getString(0);
+                                } catch (GSException e1) {
+                                    e1.printStackTrace();
+                                    return null;
+                                }
+                            }).collect(Collectors.toList());
 
-            RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(10));
-            for (String infra: infras) {
-                String collectionName = Constants.GRIDDB_SO_PREFIX + infra;
-                String query = String.format("SELECT * FROM %s WHERE timeStamp >= TIMESTAMP('%s') " +
-                        "AND timeStamp <= TIMESTAMP('%s') ORDER BY timeStamp", collectionName, sdf.format(startTime), sdf.format(endTime));
-                List<Row> observations = runQueryWithRows(collectionName, query);
+                    RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(10));
+                    for (String infra : infras) {
+                        String collectionName = Constants.GRIDDB_SO_PREFIX + infra;
+                        String query = String.format("SELECT * FROM %s WHERE timeStamp >= TIMESTAMP('%s') " +
+                                "AND timeStamp <= TIMESTAMP('%s') ORDER BY timeStamp", collectionName, sdf.format(startTime), sdf.format(endTime));
+                        List<Row> observations = runQueryWithRows(collectionName, query);
 
-                observations.forEach(e->{
-                    if (writeOutput) {
-                        ContainerInfo containerInfo = null;
-                        try {
-                            StringBuilder line = new StringBuilder("");
-                            containerInfo = e.getSchema();
-                            int columnCount = containerInfo.getColumnCount();
-                            for (int i = 0; i < columnCount; i++) {
-                                line.append(e.getValue(i)).append("\t");
+                        observations.forEach(e -> {
+                            if (writeOutput) {
+                                ContainerInfo containerInfo = null;
+                                try {
+                                    StringBuilder line = new StringBuilder("");
+                                    containerInfo = e.getSchema();
+                                    int columnCount = containerInfo.getColumnCount();
+                                    for (int i = 0; i < columnCount; i++) {
+                                        line.append(e.getValue(i)).append("\t");
+                                    }
+                                    writer.writeString(line.toString());
+                                } catch (IOException e1) {
+                                    e1.printStackTrace();
+                                    throw new BenchmarkException("Error Running Query On GridDB");
+                                }
                             }
-                            writer.writeString(line.toString());
-                        } catch (IOException e1) {
-                            e1.printStackTrace();
-                            throw new BenchmarkException("Error Running Query On GridDB");
-                        }
+                        });
                     }
-                });
-            }
-            writer.close();
-            Instant end = Instant.now();
-            return Duration.between(start, end);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new BenchmarkException("Error Running Query");
+                    writer.close();
+                    Instant end = Instant.now();
+                    return Duration.between(start, end);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
+            case 2:
+                start = Instant.now();
+                try {
+                    Map<String, String> infraMap = runQueryWithRows("Infrastructure",
+                            "SELECT * FROM Infrastructure")
+                            .stream().collect(Collectors.toMap(e -> {
+                                try {
+                                    return e.getString(0);
+                                } catch (GSException e1) {
+                                    e1.printStackTrace();
+                                    return null;
+                                }
+                            }, e -> {
+                                try {
+                                    return e.getString(1);
+                                } catch (GSException e1) {
+                                    e1.printStackTrace();
+                                    return null;
+                                }
+                            }));
+
+                    RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(10));
+                    String query = String.format("SELECT * FROM Occupancy WHERE timeStamp >= TIMESTAMP('%s') " +
+                            "AND timeStamp <= TIMESTAMP('%s') ORDER BY semanticEntityId, timeStamp, ",
+                            sdf.format(startTime), sdf.format(endTime));
+                    List<Row> observations = runQueryWithRows("Occupancy", query);
+
+                    observations.forEach(e -> {
+                        if (writeOutput) {
+                            ContainerInfo containerInfo = null;
+                            try {
+                                StringBuilder line = new StringBuilder("");
+                                containerInfo = e.getSchema();
+                                int columnCount = containerInfo.getColumnCount();
+                                for (int i = 0; i < columnCount; i++) {
+                                    if (i==4) line.append(infraMap.get(e.getValue(i))).append("\t");
+                                    line.append(e.getValue(i)).append("\t");
+                                }
+                                writer.writeString(line.toString());
+                            } catch (IOException e1) {
+                                e1.printStackTrace();
+                                throw new BenchmarkException("Error Running Query On GridDB");
+                            }
+                        }
+                    });
+
+                    writer.close();
+                    Instant end = Instant.now();
+                    return Duration.between(start, end);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
+            default:
+                throw new BenchmarkException("No Such Mapping");
         }
     }
 }

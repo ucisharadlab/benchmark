@@ -1,9 +1,6 @@
 package edu.uci.ics.tippers.data.griddb;
 
-import com.toshiba.mwcloud.gs.GSException;
-import com.toshiba.mwcloud.gs.GridStore;
-import com.toshiba.mwcloud.gs.Row;
-import com.toshiba.mwcloud.gs.TimeSeries;
+import com.toshiba.mwcloud.gs.*;
 import edu.uci.ics.tippers.common.DataFiles;
 import edu.uci.ics.tippers.common.Database;
 import edu.uci.ics.tippers.common.constants.Constants;
@@ -11,6 +8,7 @@ import edu.uci.ics.tippers.common.util.BigJsonReader;
 import edu.uci.ics.tippers.connection.griddb.StoreManager;
 import edu.uci.ics.tippers.data.BaseDataUploader;
 import edu.uci.ics.tippers.data.griddb.mappings.GridDBDataMapping1;
+import edu.uci.ics.tippers.data.griddb.mappings.GridDBDataMapping2;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.model.observation.Observation;
 
@@ -28,6 +26,9 @@ public class GridDBDataUploader extends BaseDataUploader {
         switch (mapping) {
             case 1:
                 dataMapping = new GridDBDataMapping1(gridStore, dataDir);
+                break;
+            case 2:
+                dataMapping = new GridDBDataMapping2(gridStore, dataDir);
                 break;
             default:
                 throw new BenchmarkException("No Such Mapping");
@@ -93,7 +94,7 @@ public class GridDBDataUploader extends BaseDataUploader {
         switch (mapping) {
             case 1:
                 Row row;
-                BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
+                BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + DataFiles.INSERT_TEST.getPath(),
                         Observation.class);
                 Observation obs = null;
                 try {
@@ -120,6 +121,43 @@ public class GridDBDataUploader extends BaseDataUploader {
                         timeSeries.put(row);
                     }
                 } catch(GSException e){
+                    e.printStackTrace();
+                }
+                break;
+            case 2:
+                reader = new BigJsonReader<>(dataDir + DataFiles.INSERT_TEST.getPath(),
+                        Observation.class);
+
+                try {
+                    while ((obs = reader.readNext()) != null) {
+                        String collectionName = null;
+                        if (obs.getSensor().getType_().getId().equals("Thermometer")) {
+                            collectionName = "WiFiAPObservation";
+                        } else if (obs.getSensor().getType_().getId().equals("WiFiAP")) {
+                            collectionName = "WeMoObservation";
+                        } else if (obs.getSensor().getType_().getId().equals("WeMo")) {
+                            collectionName = "ThermometerObservation";
+                        }
+
+                        Collection<String, Row> collection = gridStore.getCollection(collectionName);
+
+
+                        row = collection.createRow();
+                        row.setValue(0, obs.getTimeStamp());
+                        row.setValue(1, obs.getId());
+                        row.setValue(2, obs.getSensor().getId());
+
+                        if (obs.getSensor().getType_().getId().equals("Thermometer")) {
+                            row.setValue(3, obs.getPayload().get("temperature").getAsInt());
+                        } else if (obs.getSensor().getType_().getId().equals("WiFiAP")) {
+                            row.setValue(3, obs.getPayload().get("clientId").getAsString());
+                        } else if (obs.getSensor().getType_().getId().equals("WeMo")) {
+                            row.setValue(3, obs.getPayload().get("currentMilliWatts").getAsInt());
+                            row.setValue(4, obs.getPayload().get("onTodaySeconds").getAsInt());
+                        }
+                        collection.put(row);
+                    }
+                } catch (GSException e) {
                     e.printStackTrace();
                 }
                 break;

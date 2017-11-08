@@ -7,6 +7,7 @@ import edu.uci.ics.tippers.connection.griddb.StoreManager;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.schema.BaseSchema;
 import edu.uci.ics.tippers.schema.griddb.mappings.GridDBSchemaMapping1;
+import edu.uci.ics.tippers.schema.griddb.mappings.GridDBSchemaMapping2;
 
 public class GridDBSchema extends BaseSchema {
 
@@ -19,6 +20,9 @@ public class GridDBSchema extends BaseSchema {
         switch (mapping) {
             case 1:
                 schemaMapping = new GridDBSchemaMapping1(gridStore, dataDir);
+                break;
+            case 2:
+                schemaMapping = new GridDBSchemaMapping2(gridStore, dataDir);
                 break;
             default:
                 throw new BenchmarkException("No Such Mapping");

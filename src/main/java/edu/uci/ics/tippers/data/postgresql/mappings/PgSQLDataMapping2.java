@@ -472,7 +472,7 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
             String temperatureInsert = "INSERT INTO ThermometerObservation " +
                     "(ID, TIMESTAMP, SENSOR_ID, temperature) VALUES (?, ?, ?, ?)";
 
-            BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
+            BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + DataFiles.INSERT_TEST.getPath(),
                     Observation.class);
             Observation obs = null;
 
