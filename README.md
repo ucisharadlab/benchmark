@@ -1,5 +1,9 @@
 # IoT Database Benchmark v0.1
 
+<h3> Resources </h3>
+Benchmark overview can be seen at https://docs.google.com/presentation/d/1h9OSWiqfvZumuT9OkEtUiJ5WohPddMXvBfIYo9HgW_Y/edit#slide=id.p
+A Report with the results and more information can be seen at https://docs.google.com/document/d/1Zx955dnXWX8SIgtl3BAaEXgGcSIep5M67kmhdMiekvo/edit
+
 At present the Benchmark compares the following databases:
 
 MongoDB CE (3.4.9)
@@ -33,7 +37,6 @@ reports-dir = /home/benchmark/benchmark/benchmark/reports/
 report-format = text
 ```
 
-
 There are some third party jars that are required to be added to maven repository.
 
 <h4>Third Pary GridDB jar</h4>
@@ -53,9 +56,10 @@ mvn clean install
 ```
 mvn exec:java 
 ```
+
 <h3>Data Generation</h3>
 Benchmark data can be generated for a given number of days, users and devices.
-in order to generate data change parameters in one of the configuration files provided in python/config or create a new configuration file.
+in order to generate data change parameters in one of the configuration files provided in python/config or create a new configuration file. The tool can also generate query parameters and separate insert test data.
 
 <h3>Runnign Data Generation</h3>
 
