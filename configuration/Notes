@@ -1,0 +1,3 @@
+PostgreSQL conf file location /etc/postgresql/9.6/main/postgresql.conf
+CrateDB conf file /etc/crate/crate.yml
+For cratedb set environmental variable CRATE_HEAP_SIZE=4g
