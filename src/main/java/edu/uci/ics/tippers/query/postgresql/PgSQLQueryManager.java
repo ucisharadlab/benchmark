@@ -231,7 +231,7 @@ public class PgSQLQueryManager extends BaseQueryManager{
                         stmt.setArray(3, sensorIdArray);
                         runTimedQuery(stmt, 4);
                     }
-                    else if (!wemoSensors.isEmpty()) {
+                    if (!wemoSensors.isEmpty()) {
                         query = "SELECT timeStamp, currentMilliWatts, onTodaySeconds FROM WeMoObservation  WHERE timestamp>? AND timestamp<? " +
                                 "AND SENSOR_ID=ANY(?)";
                         stmt = connection.prepareStatement(query);
@@ -242,7 +242,7 @@ public class PgSQLQueryManager extends BaseQueryManager{
                         stmt.setArray(3, sensorIdArray);
                         runTimedQuery(stmt, 4);
                     }
-                    else if (!wifiSensors.isEmpty()) {
+                    if (!wifiSensors.isEmpty()) {
                         query = "SELECT timeStamp, clientId FROM WiFiAPObservation  WHERE timestamp>? AND timestamp<? " +
                                 "AND SENSOR_ID=ANY(?)";
                         stmt = connection.prepareStatement(query);
@@ -417,7 +417,7 @@ public class PgSQLQueryManager extends BaseQueryManager{
                         stmt.setArray(3, sensorIdArray);
                         runTimedQuery(stmt, 6);
                     }
-                    else if (!wemoSensors.isEmpty()) {
+                    if (!wemoSensors.isEmpty()) {
                         query = "SELECT obs.sensor_id, avg(counts) FROM " +
                                 "(SELECT sensor_id, date_trunc('day', timestamp), " +
                                 "count(*) as counts " +
@@ -432,7 +432,7 @@ public class PgSQLQueryManager extends BaseQueryManager{
                         stmt.setArray(3, sensorIdArray);
                         runTimedQuery(stmt, 6);
                     }
-                    else if (!wifiSensors.isEmpty()) {
+                    if (!wifiSensors.isEmpty()) {
                         query = "SELECT obs.sensor_id, avg(counts) FROM " +
                                 "(SELECT sensor_id, date_trunc('day', timestamp), " +
                                 "count(*) as counts " +

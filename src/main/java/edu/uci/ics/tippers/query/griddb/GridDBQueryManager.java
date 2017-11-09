@@ -173,11 +173,11 @@ public class GridDBQueryManager extends BaseQueryManager {
             case 2:
                 try {
                     List<Row> sensorTypes = runQueryWithRows("Sensor",
-                            String.format("SELECT * FROM Sensor WHERE typeId='%s'", sensorId));
-                    collectionName = sensorTypes.get(0).getString(1);
+                            String.format("SELECT * FROM Sensor WHERE id='%s'", sensorId));
+                    collectionName = sensorTypes.get(0).getString(2) + "Observation";
                     query = String.format("SELECT * FROM %s WHERE timeStamp > TIMESTAMP('%s') " +
                             "AND timeStamp < TIMESTAMP('%s')", collectionName, sdf.format(startTime), sdf.format(endTime));
-                    return runTimedQuery("WiFiAPObservation", query, 3);
+                    return runTimedQuery(collectionName, query, 3);
                 } catch (GSException e) {
                     e.printStackTrace();
                 }
@@ -239,7 +239,7 @@ public class GridDBQueryManager extends BaseQueryManager {
                     RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(4));
                     for (String sensorId : sensorIds) {
                         typeId = runQueryWithRows("Sensor",
-                                String.format("SELECT * FROM Sensor WHERE typeId='%s'", sensorId)).get(0).getString(2);
+                                String.format("SELECT * FROM Sensor WHERE id='%s'", sensorId)).get(0).getString(2);
                         if ("Thermometer".equals(typeId))
                             thermoSensors.add(sensorId);
                         else if ("WeMo".equals(typeId))
@@ -273,10 +273,10 @@ public class GridDBQueryManager extends BaseQueryManager {
                             }
                         });
                     }
-                    else if (!wemoSensors.isEmpty()) {
+                    if (!wemoSensors.isEmpty()) {
                         String query = String.format("SELECT * FROM WeMoObservation WHERE timeStamp > TIMESTAMP('%s') " +
                                 "AND timeStamp < TIMESTAMP('%s') AND ( "
-                                + thermoSensors.stream().map(e -> "sensorId = '" + e + "'" ).collect(Collectors.joining(" OR "))
+                                + wemoSensors.stream().map(e -> "sensorId = '" + e + "'" ).collect(Collectors.joining(" OR "))
                                 + ");", sdf.format(startTime), sdf.format(endTime));
                         List<Row> observations = runQueryWithRows("WeMoObservation", query);
 
@@ -298,10 +298,10 @@ public class GridDBQueryManager extends BaseQueryManager {
                             }
                         });
                     }
-                    else if ("WiFiAP".equals(typeId)) {
+                    if (!wifiSensors.isEmpty()) {
                         String query = String.format("SELECT * FROM WiFiAPObservation WHERE timeStamp > TIMESTAMP('%s') " +
                                 "AND timeStamp < TIMESTAMP('%s') AND ( "
-                                + thermoSensors.stream().map(e -> "sensorId = '" + e + "'" ).collect(Collectors.joining(" OR "))
+                                + wifiSensors.stream().map(e -> "sensorId = '" + e + "'" ).collect(Collectors.joining(" OR "))
                                 + ");", sdf.format(startTime), sdf.format(endTime));
                         List<Row> observations = runQueryWithRows("WiFiAPObservation", query);
 
@@ -324,7 +324,7 @@ public class GridDBQueryManager extends BaseQueryManager {
                             }
                         });
                     }
-
+                    writer.close();
                     end = Instant.now();
                     return Duration.between(start, end);
                 } catch (IOException e) {
@@ -484,21 +484,24 @@ public class GridDBQueryManager extends BaseQueryManager {
 
                     for (String sensorId : sensorIds) {
                         String typeId = runQueryWithRows("Sensor",
-                                String.format("SELECT * FROM Sensor WHERE typeId='%s'", sensorId)).get(0).getString(2);
+                                String.format("SELECT * FROM Sensor WHERE id='%s'", sensorId)).get(0).getString(2);
 
                         if ("Thermometer".equals(typeId)) {
                             String query = String.format("SELECT * FROM ThermometerObservation WHERE timeStamp > TIMESTAMP('%s') " +
-                                    "AND timeStamp < TIMESTAMP('%s') AND sensorId = '%s'", sdf.format(startTime), sdf.format(endTime));
+                                    "AND timeStamp < TIMESTAMP('%s') AND sensorId = '%s'",
+                                    sdf.format(startTime), sdf.format(endTime), sensorId);
                             observations = runQueryWithRows("ThermometerObservation", query);
                         }
                         else if ("WeMo".equals(typeId)){
                             String query = String.format("SELECT * FROM WeMoObservation WHERE timeStamp > TIMESTAMP('%s') " +
-                                    "AND timeStamp < TIMESTAMP('%s') AND sensorId = '%s'", sdf.format(startTime), sdf.format(endTime));
+                                    "AND timeStamp < TIMESTAMP('%s') AND sensorId = '%s'",
+                                    sdf.format(startTime), sdf.format(endTime), sensorId);
                             observations = runQueryWithRows("WeMoObservation", query);
                         }
                         else if ("WiFiAP".equals(typeId)){
                             String query = String.format("SELECT * FROM WiFiAPObservation WHERE timeStamp > TIMESTAMP('%s') " +
-                                    "AND timeStamp < TIMESTAMP('%s') AND sensorId = '%s'", sdf.format(startTime), sdf.format(endTime));
+                                    "AND timeStamp < TIMESTAMP('%s') AND sensorId = '%s'",
+                                    sdf.format(startTime), sdf.format(endTime), sensorId);
                             observations = runQueryWithRows("WiFiAPObservation", query);
                         }
 
@@ -710,22 +713,11 @@ public class GridDBQueryManager extends BaseQueryManager {
                 endTime = cal.getTime();
 
                 try {
-                    List<String[]> users = runQueryWithRows("User",
-                            String.format("SELECT * FROM User WHERE id != '%s'", userId))
-                            .stream().map(e -> {
-                                try {
-                                    return new String[]{e.getString(0), e.getString(2)};
-                                } catch (GSException e1) {
-                                    e1.printStackTrace();
-                                    return null;
-                                }
-                            }).collect(Collectors.toList());
-
                     RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(8));
 
                     Container<String, Row> container = gridStore.getContainer("Presence");
                     Query<Row> gridDBQuery = container.query(String.format("SELECT * FROM Presence WHERE semanticEntityId = '%s' " +
-                                    "timeStamp >= TIMESTAMP('%s') AND timeStamp <= TIMESTAMP('%s')",
+                                    "AND timeStamp >= TIMESTAMP('%s') AND timeStamp <= TIMESTAMP('%s')",
                             userId, sdf.format(startTime), sdf.format(endTime)));
                     RowSet<Row> rows = gridDBQuery.fetch();
 
@@ -958,7 +950,7 @@ public class GridDBQueryManager extends BaseQueryManager {
 
                     RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(10));
                     String query = String.format("SELECT * FROM Occupancy WHERE timeStamp >= TIMESTAMP('%s') " +
-                            "AND timeStamp <= TIMESTAMP('%s') ORDER BY semanticEntityId, timeStamp, ",
+                            "AND timeStamp <= TIMESTAMP('%s') ORDER BY semanticEntityId, timeStamp ",
                             sdf.format(startTime), sdf.format(endTime));
                     List<Row> observations = runQueryWithRows("Occupancy", query);
 

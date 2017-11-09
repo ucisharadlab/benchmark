@@ -178,7 +178,7 @@ public class GridDBSchemaMapping2 extends GridDBBaseSchemaMapping {
         columnInfoList.add(new ColumnInfo("timeStamp", GSType.TIMESTAMP));
         columnInfoList.add(new ColumnInfo("id", GSType.STRING, indexSet));
         columnInfoList.add(new ColumnInfo("sensorId", GSType.STRING));
-        columnInfoList.add(new ColumnInfo("temperature", GSType.DOUBLE));
+        columnInfoList.add(new ColumnInfo("temperature", GSType.INTEGER));
 
         containerInfo.setColumnInfoList(columnInfoList);
         containerInfo.setRowKeyAssigned(true);

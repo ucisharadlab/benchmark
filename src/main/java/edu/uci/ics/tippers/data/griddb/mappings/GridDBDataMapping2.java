@@ -201,11 +201,11 @@ public class GridDBDataMapping2 extends GridDBBaseDataMapping {
 
             while ((obs = reader.readNext()) != null) {
                 String collectionName = null;
-                if (obs.getSensor().getType_().getId().equals("Thermometer")) {
+                if (obs.getSensor().getType_().getId().equals("WiFiAP")) {
                     collectionName = "WiFiAPObservation";
-                } else if (obs.getSensor().getType_().getId().equals("WiFiAP")) {
-                    collectionName = "WeMoObservation";
                 } else if (obs.getSensor().getType_().getId().equals("WeMo")) {
+                    collectionName = "WeMoObservation";
+                } else if (obs.getSensor().getType_().getId().equals("Thermometer")) {
                     collectionName = "ThermometerObservation";
                 }
 
