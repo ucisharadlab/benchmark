@@ -9,9 +9,10 @@ import edu.uci.ics.tippers.common.util.Converter;
 import edu.uci.ics.tippers.connection.asterixdb.AsterixDBConnectionManager;
 import edu.uci.ics.tippers.data.BaseDataUploader;
 import edu.uci.ics.tippers.exception.BenchmarkException;
+import edu.uci.ics.tippers.model.metadata.user.User;
 import edu.uci.ics.tippers.model.observation.Observation;
+import edu.uci.ics.tippers.model.platform.Platform;
 import edu.uci.ics.tippers.model.semanticObservation.SemanticObservation;
-import org.apache.commons.text.StringEscapeUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -179,6 +180,19 @@ public class AsterixDBDataUploader extends BaseDataUploader {
         feed.stopFeed();
     }
 
+    public <T> void  genericInsertThroughFeed(String dataset, DataFiles dataFile , Class<T> clazz) {
+        AsterixDataFeed feed = new AsterixDataFeed(dataset, connectionManager);
+        BigJsonReader<T> reader = new BigJsonReader<>(dataDir + dataFile.getPath(), clazz);
+        Gson gson = new GsonBuilder().create();
+        T sobs;
+        while ((sobs = reader.readNext()) != null) {
+            JSONObject docToInsert = new JSONObject(gson.toJson(sobs, clazz));
+            feed.sendDataToFeed(docToInsert.toString());
+        }
+        feed.stopFeed();
+    }
+
+
     public String prepareInsertQuery(String dataset, DataFiles dataFile) throws BenchmarkException {
 
         String values = null;
@@ -210,7 +224,8 @@ public class AsterixDBDataUploader extends BaseDataUploader {
             case 1:
             case 2:
                 connectionManager.sendQuery(prepareInsertQuery("UserGroup", DataFiles.GROUP));
-                connectionManager.sendQuery(prepareInsertQuery("User", DataFiles.USER));
+                genericInsertThroughFeed("User", DataFiles.USER, User.class);
+                // connectionManager.sendQuery(prepareInsertQuery("User", DataFiles.USER));
                 break;
         }
     }
@@ -257,7 +272,8 @@ public class AsterixDBDataUploader extends BaseDataUploader {
         switch (mapping) {
             case 1:
                 connectionManager.sendQuery(prepareInsertQuery("PlatformType", DataFiles.PLT_TYPE));
-                connectionManager.sendQuery(prepareInsertQuery("Platform", DataFiles.PLT));
+                genericInsertThroughFeed("Platform", DataFiles.PLT, Platform.class);
+                // connectionManager.sendQuery(prepareInsertQuery("Platform", DataFiles.PLT));
                 break;
             case 2:
                 connectionManager.sendQuery(prepareInsertQuery("PlatformType", DataFiles.PLT_TYPE));
@@ -270,13 +286,16 @@ public class AsterixDBDataUploader extends BaseDataUploader {
                     throw new BenchmarkException("Error Reading Data Files");
                 }
                 JSONArray jsonArray = new JSONArray(values);
+                AsterixDataFeed feed = new AsterixDataFeed("Platform", connectionManager);
                 jsonArray.forEach(e-> {
                     JSONObject docToInsert = (JSONObject)e;
                     docToInsert.put("ownerId", docToInsert.getJSONObject("owner").getString("id"));
                     docToInsert.remove("owner");
-                    String docString = e.toString();
-                    connectionManager.sendQuery(String.format(QUERY_FORMAT, "Platform", docString));
+                    //String docString = e.toString();
+                    feed.sendDataToFeed(docToInsert.toString());
+                    //connectionManager.sendQuery(String.format(QUERY_FORMAT, "Platform", docString));
                 });
+                feed.stopFeed();
                 break;
         }
     }

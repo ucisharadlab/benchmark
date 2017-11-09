@@ -191,7 +191,25 @@ CREATE FEED SemanticObservationFeed using socket_adapter
 
 CONNECT FEED SemanticObservationFeed TO DATASET SemanticObservation;
 
+CREATE FEED UserFeed using socket_adapter
+    (
+       ("sockets"="localhost:39011"),
+       ("address-type_"="IP"),
+       ("type-name"="UserType"),
+       ("format"="adm")
+    );
 
+CONNECT FEED UserFeed TO DATASET User;
+
+CREATE FEED PlatformFeed using socket_adapter
+    (
+       ("sockets"="localhost:39011"),
+       ("address-type_"="IP"),
+       ("type-name"="PlatformType"),
+       ("format"="adm")
+    );
+
+CONNECT FEED PlatformFeed TO DATASET Platform;
 
 
 
