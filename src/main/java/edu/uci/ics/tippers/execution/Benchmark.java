@@ -76,7 +76,7 @@ public class Benchmark {
 
             // Insert Tests
             System.out.println("Inserting Insert Test Data ...");
-            //runTimePerMapping.put(Query.INSERT_SINGLE.getQNum(), dataUploader.insertPerformance());
+            runTimePerMapping.put(Query.INSERT_SINGLE.getQNum(), dataUploader.insertPerformance());
 
             // Running benchmark queries and gathering query runtimes
             System.out.println("Running Queries ...");
@@ -86,7 +86,7 @@ public class Benchmark {
 
             // Cleaning up inserted data and dropping created schema
             System.out.println("Cleaning Up Database, Removing Data And Schema ...\n");
-            //schemaCreator.dropSchema();
+            schemaCreator.dropSchema();
 
             System.out.println("---------------------------------------------------------------\n");
 
@@ -123,7 +123,7 @@ public class Benchmark {
             //dbmsManager.startServers();
 
             for (Database database: configuration.getDatabases()) {
-                //dbmsManager.startServer(database);
+                dbmsManager.startServer(database);
                 switch (database) {
                     case GRIDDB:
                         configuration.getMappings().get(Database.GRIDDB).forEach(
@@ -182,7 +182,7 @@ public class Benchmark {
                     default:
                         throw new BenchmarkException("Database Not Supported");
                 }
-                //dbmsManager.stopServer(database);
+                dbmsManager.stopServer(database);
             }
 
             DataSize dataSize = new DataSize(configuration.getDataDir());

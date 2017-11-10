@@ -6,15 +6,13 @@ import org.apache.commons.text.StringEscapeUtils;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.PrintStream;
 import java.net.Socket;
 import java.util.concurrent.TimeUnit;
 
 public class AsterixDataFeed {
 
     private String START_FEED_STMT = "start feed %sFeed;";
-    private String STOP_FEED_STMT = "stop feed %sFeed; disconnect feed %sFeed from dataset %s;";
+    private String STOP_FEED_STMT = "stop feed %sFeed;";
     private String collectionName;
     private AsterixDBConnectionManager connectionManager;
     private Socket client;

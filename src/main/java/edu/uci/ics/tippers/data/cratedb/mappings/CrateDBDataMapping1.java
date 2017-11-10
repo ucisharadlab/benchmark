@@ -1,11 +1,13 @@
 package edu.uci.ics.tippers.data.cratedb.mappings;
 
 import edu.uci.ics.tippers.common.DataFiles;
+import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.common.util.BigJsonReader;
 import edu.uci.ics.tippers.data.cratedb.CrateDBBaseDataMapping;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.model.observation.Observation;
 import edu.uci.ics.tippers.model.semanticObservation.SemanticObservation;
+import org.apache.log4j.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -22,6 +24,7 @@ import java.text.SimpleDateFormat;
 
 public class CrateDBDataMapping1 extends CrateDBBaseDataMapping {
 
+    private static final Logger LOGGER = Logger.getLogger(CrateDBDataMapping1.class);
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     private JSONParser parser = new JSONParser();
@@ -38,6 +41,7 @@ public class CrateDBDataMapping1 extends CrateDBBaseDataMapping {
             addSensorsAndObservations();
             addVSAndSemanticObservations();
             connection.commit();
+            connection.setAutoCommit(true);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -257,6 +261,8 @@ public class CrateDBDataMapping1 extends CrateDBBaseDataMapping {
                 count ++;
                 if (count % batchSize == 0)
                     stmt.executeBatch();
+
+                if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s Observations", count));
             }
             stmt.executeBatch();
 
@@ -398,6 +404,8 @@ public class CrateDBDataMapping1 extends CrateDBBaseDataMapping {
                 count ++;
                 if (count % batchSize == 0)
                     stmt.executeBatch();
+
+                if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s S Observations", count));
             }
             stmt.executeBatch();
 

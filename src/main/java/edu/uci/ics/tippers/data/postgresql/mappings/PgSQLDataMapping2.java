@@ -1,11 +1,13 @@
 package edu.uci.ics.tippers.data.postgresql.mappings;
 
 import edu.uci.ics.tippers.common.DataFiles;
+import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.common.util.BigJsonReader;
 import edu.uci.ics.tippers.data.postgresql.PgSQLBaseDataMapping;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.model.observation.Observation;
 import edu.uci.ics.tippers.model.semanticObservation.SemanticObservation;
+import org.apache.log4j.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -22,6 +24,7 @@ import java.text.SimpleDateFormat;
 
 public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
 
+    private static final Logger LOGGER = Logger.getLogger(PgSQLDataMapping2.class);
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     private JSONParser parser = new JSONParser();
@@ -38,6 +41,7 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
             addSensorsAndObservations();
             addVSAndSemanticObservations();
             connection.commit();
+            connection.setAutoCommit(true);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -253,7 +257,7 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
             PreparedStatement temStmt = connection.prepareStatement(temperatureInsert);
 
             int batchSize = 100;
-            int wifiCount = 0, wemoCount = 0, thermoCount = 0;
+            int wifiCount = 0, wemoCount = 0, thermoCount = 0, count = 0;
             while ((obs = reader.readNext()) != null) {
 
                 if (obs.getSensor().getType_().getId().equals("Thermometer")) {
@@ -286,10 +290,15 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
                     wifiStmt.executeBatch();
                 if (thermoCount % batchSize == 0)
                     temStmt.executeBatch();
+
+                if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s Observations", count));
+                count ++;
             }
             wemoStmt.executeBatch();
             wifiStmt.executeBatch();
             temStmt.executeBatch();
+
+
 
         }
         catch(ParseException | SQLException | IOException e) {
@@ -421,7 +430,7 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
             PreparedStatement occupancyStmt = connection.prepareStatement(occupancyInsert);
 
             int batchSize = 100;
-            int presenceCount = 0, occupancyCount = 0;
+            int presenceCount = 0, occupancyCount = 0, count = 0;
             while ((sobs = reader.readNext()) != null) {
 
                 if (sobs.getType_().getId().equals("presence")) {
@@ -447,9 +456,13 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
                     presenceStmt.executeBatch();
                 if (occupancyCount % batchSize == 0)
                     occupancyStmt.executeBatch();
+
+                if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s S Observations", count));
+                count ++;
             }
             presenceStmt.executeBatch();
             occupancyStmt.executeBatch();
+
 
         }
         catch(ParseException | IOException | SQLException e) {

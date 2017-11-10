@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import edu.uci.ics.tippers.common.DataFiles;
 import edu.uci.ics.tippers.common.Database;
+import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.common.util.BigJsonReader;
 import edu.uci.ics.tippers.common.util.Converter;
 import edu.uci.ics.tippers.connection.asterixdb.AsterixDBConnectionManager;
@@ -13,6 +14,7 @@ import edu.uci.ics.tippers.model.metadata.user.User;
 import edu.uci.ics.tippers.model.observation.Observation;
 import edu.uci.ics.tippers.model.platform.Platform;
 import edu.uci.ics.tippers.model.semanticObservation.SemanticObservation;
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -25,6 +27,8 @@ import java.time.Duration;
 import java.time.Instant;
 
 public class AsterixDBDataUploader extends BaseDataUploader {
+
+    private static final Logger LOGGER = Logger.getLogger(AsterixDBDataUploader.class);
 
     private AsterixDBConnectionManager connectionManager;
     private static final String QUERY_FORMAT = "INSERT INTO %s(%s)";
@@ -99,7 +103,7 @@ public class AsterixDBDataUploader extends BaseDataUploader {
 
     public void observationInsertThroughFeed(String dataset, DataFiles dataFile) {
         AsterixDataFeed feed = new AsterixDataFeed(dataset, connectionManager);
-
+        int count = 0;
         switch (mapping) {
             case 1:
                 BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + dataFile.getPath(),
@@ -113,6 +117,8 @@ public class AsterixDBDataUploader extends BaseDataUploader {
                     docToInsert.put("timeStamp", String.format("datetime(\"%s\")", sdf.format(obs.getTimeStamp())));
                     String docString = docToInsert.toString().replaceAll("\"(datetime\\(.*\\))\"", "$1");
                     feed.sendDataToFeed(docString);
+                    if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s Observations", count));
+                    count ++;
                 }
                 break;
             case 2:
@@ -130,6 +136,8 @@ public class AsterixDBDataUploader extends BaseDataUploader {
                     docToInsert.put("timeStamp", String.format("datetime(\"%s\")", sdf.format(obs.getTimeStamp())));
                     String docString = docToInsert.toString().replaceAll("\"(datetime\\(.*\\))\"", "$1");
                     feed.sendDataToFeed(docString);
+                    if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s Observations", count));
+                    count ++;
                 }
                 break;
         }
@@ -139,6 +147,7 @@ public class AsterixDBDataUploader extends BaseDataUploader {
     public void semanticObservationInsertThroughFeed(String dataset, DataFiles dataFile) {
         AsterixDataFeed feed = new AsterixDataFeed(dataset, connectionManager);
 
+        int count = 0;
         switch (mapping) {
             case 1:
                 BigJsonReader<SemanticObservation> reader = new BigJsonReader<>(dataDir + dataFile.getPath(),
@@ -152,6 +161,8 @@ public class AsterixDBDataUploader extends BaseDataUploader {
                     docToInsert.put("timeStamp", String.format("datetime(\"%s\")", sdf.format(sobs.getTimeStamp())));
                     String docString = docToInsert.toString().replaceAll("\"(datetime\\(.*\\))\"", "$1");
                     feed.sendDataToFeed(docString);
+                    if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s S Observations", count));
+                    count ++;
                 }
                 break;
             case 2:
@@ -174,6 +185,8 @@ public class AsterixDBDataUploader extends BaseDataUploader {
                     docToInsert.put("timeStamp", String.format("datetime(\"%s\")", sdf.format(sobs.getTimeStamp())));
                     String docString = docToInsert.toString().replaceAll("\"(datetime\\(.*\\))\"", "$1");
                     feed.sendDataToFeed(docString);
+                    if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s S Observations", count));
+                    count ++;
                 }
                 break;
         }
