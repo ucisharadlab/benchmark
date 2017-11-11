@@ -248,7 +248,7 @@ public class CrateDBDataMapping1 extends CrateDBBaseDataMapping {
             Observation obs = null;
 
             stmt = connection.prepareStatement(insert);
-            int batchSize = 100;
+            int batchSize = 10000;
             int count = 0;
             while ((obs = reader.readNext()) != null) {
 
@@ -388,7 +388,7 @@ public class CrateDBDataMapping1 extends CrateDBBaseDataMapping {
             insert = "INSERT INTO SEMANTIC_OBSERVATION " +
                     "(ID, SEMANTIC_ENTITY_ID, PAYLOAD, TIMESTAMP, VIRTUAL_SENSOR_ID, TYPE_ID) VALUES (?, ?, ?, ?, ?, ?)";
             stmt = connection.prepareStatement(insert);
-            int batchSize = 100;
+            int batchSize = 10000;
             int count = 0;
             while ((sobs = reader.readNext()) != null) {
 

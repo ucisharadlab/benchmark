@@ -94,7 +94,14 @@ public class CrateDBDataUploader extends BaseDataUploader{
     @Override
     public Duration insertPerformance() throws BenchmarkException {
         Instant start = Instant.now();
-        externalDataMapping.insertPerformance();
+        switch (mapping) {
+	    case 1:	
+		new CrateDBDataMapping1(connection, dataDir).insertPerformance();
+		break;
+            case 2:
+		externalDataMapping.insertPerformance();
+		break;
+	}
         Instant end = Instant.now();
         return Duration.between(start, end);
     }
