@@ -602,16 +602,23 @@ public class GridDBQueryManager extends BaseQueryManager {
                 endTime = cal.getTime();
 
                 try {
-                    List<String[]> users = runQueryWithRows("User",
+                    Map<String, String> userMap = runQueryWithRows("User",
                             "SELECT * FROM User")
-                            .stream().map(e -> {
+                            .stream().collect(Collectors.toMap(e -> {
                                 try {
-                                    return new String[]{e.getString(0), e.getString(2)};
+                                    return e.getString(0);
                                 } catch (GSException e1) {
                                     e1.printStackTrace();
                                     return null;
                                 }
-                            }).collect(Collectors.toList());
+                            }, e -> {
+                                try {
+                                    return e.getString(2);
+                                } catch (GSException e1) {
+                                    e1.printStackTrace();
+                                    return null;
+                                }
+                            }));
 
                     RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(7));
 
@@ -630,7 +637,7 @@ public class GridDBQueryManager extends BaseQueryManager {
                         observations.forEach(e->{
                             if (writeOutput) {
                                 try {
-                                    writer.writeString(row.getString(4) + ", " +e.getString(4));
+                                    writer.writeString(userMap.get(e.getString(4)));
                                 } catch (IOException e1) {
                                     e1.printStackTrace();
                                 }
@@ -713,6 +720,24 @@ public class GridDBQueryManager extends BaseQueryManager {
                 endTime = cal.getTime();
 
                 try {
+                    Map<String, String> userMap = runQueryWithRows("User",
+                            "SELECT * FROM User")
+                            .stream().collect(Collectors.toMap(e -> {
+                                try {
+                                    return e.getString(0);
+                                } catch (GSException e1) {
+                                    e1.printStackTrace();
+                                    return null;
+                                }
+                            }, e -> {
+                                try {
+                                    return e.getString(2);
+                                } catch (GSException e1) {
+                                    e1.printStackTrace();
+                                    return null;
+                                }
+                            }));
+
                     RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(8));
 
                     Container<String, Row> container = gridStore.getContainer("Presence");
@@ -733,7 +758,7 @@ public class GridDBQueryManager extends BaseQueryManager {
                         observations.forEach(e->{
                             if (writeOutput) {
                                 try {
-                                    writer.writeString(e.getString(4) + ", " +e.getString(3));
+                                    writer.writeString(userMap.get(e.getString(4)) + ", " +e.getString(3));
                                 } catch (IOException e1) {
                                     e1.printStackTrace();
                                 }
@@ -952,7 +977,6 @@ public class GridDBQueryManager extends BaseQueryManager {
                     String query = String.format("SELECT * FROM Occupancy WHERE timeStamp >= TIMESTAMP('%s') " +
                             "AND timeStamp <= TIMESTAMP('%s') ORDER BY semanticEntityId, timeStamp ",
                             sdf.format(startTime), sdf.format(endTime));
-                    query = String.format("SELECT * FROM Occupancy");
                     List<Row> observations = runQueryWithRows("Occupancy", query);
 
                     observations.forEach(e -> {
