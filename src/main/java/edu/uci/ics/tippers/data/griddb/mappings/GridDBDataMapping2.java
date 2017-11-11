@@ -1,12 +1,16 @@
 package edu.uci.ics.tippers.data.griddb.mappings;
 
-import com.toshiba.mwcloud.gs.*;
+import com.toshiba.mwcloud.gs.Collection;
+import com.toshiba.mwcloud.gs.GSException;
+import com.toshiba.mwcloud.gs.GridStore;
+import com.toshiba.mwcloud.gs.Row;
 import edu.uci.ics.tippers.common.DataFiles;
 import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.common.util.BigJsonReader;
 import edu.uci.ics.tippers.data.griddb.GridDBBaseDataMapping;
 import edu.uci.ics.tippers.model.observation.Observation;
 import edu.uci.ics.tippers.model.semanticObservation.SemanticObservation;
+import org.apache.log4j.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -20,6 +24,7 @@ import java.text.SimpleDateFormat;
 
 public class GridDBDataMapping2 extends GridDBBaseDataMapping {
 
+    private static final Logger LOGGER = Logger.getLogger(GridDBDataMapping2.class);
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     private JSONParser parser = new JSONParser();
@@ -198,6 +203,7 @@ public class GridDBDataMapping2 extends GridDBBaseDataMapping {
             BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
                     Observation.class);
             Observation obs = null;
+            int count = 0;
 
             while ((obs = reader.readNext()) != null) {
                 String collectionName = null;
@@ -212,8 +218,8 @@ public class GridDBDataMapping2 extends GridDBBaseDataMapping {
                 collection = gridStore.getCollection(collectionName);
 
                 row = collection.createRow();
-                row.setValue(0, obs.getTimeStamp());
-                row.setValue(1, obs.getId());
+                row.setValue(1, obs.getTimeStamp());
+                row.setValue(0, obs.getId());
                 row.setValue(2, obs.getSensor().getId());
 
                 if (obs.getSensor().getType_().getId().equals("Thermometer")) {
@@ -225,6 +231,8 @@ public class GridDBDataMapping2 extends GridDBBaseDataMapping {
                     row.setValue(4, obs.getPayload().get("onTodaySeconds").getAsInt());
                 }
                 collection.put(row);
+                if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s Observations", count));
+                count ++;
             }
 
         }
@@ -346,7 +354,7 @@ public class GridDBDataMapping2 extends GridDBBaseDataMapping {
             BigJsonReader<SemanticObservation> reader = new BigJsonReader<>(dataDir + DataFiles.SO.getPath(),
                     SemanticObservation.class);
             SemanticObservation sobs = null;
-
+            int count = 0;
             while ((sobs = reader.readNext()) != null) {
                 String collectionName = null;
                 if (sobs.getType_().getId().equals("occupancy")) {
@@ -358,8 +366,8 @@ public class GridDBDataMapping2 extends GridDBBaseDataMapping {
                 collection = gridStore.getCollection(collectionName);
 
                 row = collection.createRow();
-                row.setValue(1, sobs.getId());
-                row.setValue(0, sobs.getTimeStamp());
+                row.setValue(0, sobs.getId());
+                row.setValue(1, sobs.getTimeStamp());
                 row.setValue(2, sobs.getVirtualSensor().getId());
                 row.setValue(4, sobs.getSemanticEntity().get("id").getAsString());
 
@@ -369,7 +377,12 @@ public class GridDBDataMapping2 extends GridDBBaseDataMapping {
                     row.setValue(3, sobs.getPayload().get("location").getAsString());
                 }
                 collection.put(row);
+
+                if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s S Observations", count));
+                count ++;
             }
+            gridStore.getCollection("Occupancy").flush();
+
 
         }
         catch(ParseException | IOException e) {

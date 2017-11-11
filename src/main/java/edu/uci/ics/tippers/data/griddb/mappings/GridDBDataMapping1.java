@@ -7,6 +7,7 @@ import edu.uci.ics.tippers.common.util.BigJsonReader;
 import edu.uci.ics.tippers.data.griddb.GridDBBaseDataMapping;
 import edu.uci.ics.tippers.model.observation.Observation;
 import edu.uci.ics.tippers.model.semanticObservation.SemanticObservation;
+import org.apache.log4j.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -20,6 +21,7 @@ import java.text.SimpleDateFormat;
 
 public class GridDBDataMapping1 extends GridDBBaseDataMapping {
 
+    private static final Logger LOGGER = Logger.getLogger(GridDBDataMapping1.class);
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     private JSONParser parser = new JSONParser();
@@ -198,6 +200,7 @@ public class GridDBDataMapping1 extends GridDBBaseDataMapping {
             BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
                     Observation.class);
             Observation obs = null;
+            int count = 0;
 
             while ((obs = reader.readNext()) != null) {
                 String collectionName = Constants.GRIDDB_OBS_PREFIX + obs.getSensor().getId();
@@ -217,6 +220,8 @@ public class GridDBDataMapping1 extends GridDBBaseDataMapping {
                     row.setValue(3, obs.getPayload().get("onTodaySeconds").getAsInt());
                 }
                 timeSeries.put(row);
+                if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s Observations", count));
+                count ++;
             }
 
         }
@@ -338,6 +343,7 @@ public class GridDBDataMapping1 extends GridDBBaseDataMapping {
             BigJsonReader<SemanticObservation> reader = new BigJsonReader<>(dataDir + DataFiles.SO.getPath(),
                     SemanticObservation.class);
             SemanticObservation sobs = null;
+            int count = 0;
 
             while ((sobs = reader.readNext()) != null) {
                 String collectionName = Constants.GRIDDB_SO_PREFIX + sobs.getSemanticEntity().get("id").getAsString();
@@ -353,8 +359,10 @@ public class GridDBDataMapping1 extends GridDBBaseDataMapping {
                     row.setValue(3, sobs.getPayload().get("occupancy").getAsInt());
                 } else if (sobs.getType_().getId().equals("presence")) {
                     row.setValue(3, sobs.getPayload().get("location").getAsString());
-            }
+                }
                 timeSeries.put(row);
+                if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s S Observations", count));
+                count ++;
             }
 
         }

@@ -143,8 +143,8 @@ public class GridDBDataUploader extends BaseDataUploader {
 
 
                         row = collection.createRow();
-                        row.setValue(0, obs.getTimeStamp());
-                        row.setValue(1, obs.getId());
+                        row.setValue(1, obs.getTimeStamp());
+                        row.setValue(0, obs.getId());
                         row.setValue(2, obs.getSensor().getId());
 
                         if (obs.getSensor().getType_().getId().equals("Thermometer")) {

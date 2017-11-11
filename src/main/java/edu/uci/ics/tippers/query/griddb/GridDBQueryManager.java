@@ -5,7 +5,6 @@ import edu.uci.ics.tippers.common.Database;
 import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.connection.griddb.StoreManager;
 import edu.uci.ics.tippers.exception.BenchmarkException;
-import edu.uci.ics.tippers.execution.Benchmark;
 import edu.uci.ics.tippers.operators.GroupBy;
 import edu.uci.ics.tippers.query.BaseQueryManager;
 import edu.uci.ics.tippers.writer.RowWriter;
@@ -176,7 +175,8 @@ public class GridDBQueryManager extends BaseQueryManager {
                             String.format("SELECT * FROM Sensor WHERE id='%s'", sensorId));
                     collectionName = sensorTypes.get(0).getString(2) + "Observation";
                     query = String.format("SELECT * FROM %s WHERE timeStamp > TIMESTAMP('%s') " +
-                            "AND timeStamp < TIMESTAMP('%s')", collectionName, sdf.format(startTime), sdf.format(endTime));
+                            "AND timeStamp < TIMESTAMP('%s') AND sensorId='%s'",
+                            collectionName, sdf.format(startTime), sdf.format(endTime), sensorId);
                     return runTimedQuery(collectionName, query, 3);
                 } catch (GSException e) {
                     e.printStackTrace();
@@ -511,7 +511,7 @@ public class GridDBQueryManager extends BaseQueryManager {
                         observations.forEach(e -> {
                             JSONObject object = new JSONObject();
                             try {
-                                object.put("date", dateFormat.format(e.getTimestamp(0)));
+                                object.put("date", dateFormat.format(e.getTimestamp(1)));
                                 jsonObservations.put(object);
                             } catch (GSException e1) {
                                 e1.printStackTrace();
@@ -552,7 +552,7 @@ public class GridDBQueryManager extends BaseQueryManager {
                 Date startTime = date;
                 Calendar cal = Calendar.getInstance();
                 cal.setTime(date);
-                cal.add(Calendar.DATE, 2);
+                cal.add(Calendar.DATE, 1);
                 Date endTime = cal.getTime();
 
                 try {
@@ -598,7 +598,7 @@ public class GridDBQueryManager extends BaseQueryManager {
                 startTime = date;
                 cal = Calendar.getInstance();
                 cal.setTime(date);
-                cal.add(Calendar.DATE, 2);
+                cal.add(Calendar.DATE, 1);
                 endTime = cal.getTime();
 
                 try {
@@ -624,7 +624,7 @@ public class GridDBQueryManager extends BaseQueryManager {
 
                         String query = String.format("SELECT * FROM Presence WHERE timeStamp >= TIMESTAMP('%s') " +
                                         "AND timeStamp <= TIMESTAMP('%s') AND location = '%s' AND semanticEntityId = '%s'",
-                                sdf.format(row.getTimestamp(0)), sdf.format(endTime), endLocation, row.getString(4));
+                                sdf.format(row.getTimestamp(1)), sdf.format(endTime), endLocation, row.getString(4));
                         List<Row> observations = runQueryWithRows("Presence", query);
 
                         observations.forEach(e->{
@@ -726,7 +726,7 @@ public class GridDBQueryManager extends BaseQueryManager {
                         Row row = rows.next();
 
                         String query = String.format("SELECT * FROM Presence WHERE timeStamp = TIMESTAMP('%s') " +
-                                "AND location='%s' AND semanticEntityId != '%s'", sdf.format(row.getTimestamp(0)),
+                                "AND location='%s' AND semanticEntityId != '%s'", sdf.format(row.getTimestamp(1)),
                                 row.getString(3), userId);
                         List<Row> observations = runQueryWithRows("Presence", query);
 
@@ -844,7 +844,7 @@ public class GridDBQueryManager extends BaseQueryManager {
                         JSONObject object = new JSONObject();
                         try {
                             if (infras.contains(e.getString(3))) {
-                                object.put("date", dateFormat.format(e.getTimestamp(0)));
+                                object.put("date", dateFormat.format(e.getTimestamp(1)));
                                 jsonObservations.put(object);
                             }
                         } catch (GSException e1) {
@@ -952,6 +952,7 @@ public class GridDBQueryManager extends BaseQueryManager {
                     String query = String.format("SELECT * FROM Occupancy WHERE timeStamp >= TIMESTAMP('%s') " +
                             "AND timeStamp <= TIMESTAMP('%s') ORDER BY semanticEntityId, timeStamp ",
                             sdf.format(startTime), sdf.format(endTime));
+                    query = String.format("SELECT * FROM Occupancy");
                     List<Row> observations = runQueryWithRows("Occupancy", query);
 
                     observations.forEach(e -> {
@@ -963,7 +964,7 @@ public class GridDBQueryManager extends BaseQueryManager {
                                 int columnCount = containerInfo.getColumnCount();
                                 for (int i = 0; i < columnCount; i++) {
                                     if (i==4) line.append(infraMap.get(e.getValue(i))).append("\t");
-                                    line.append(e.getValue(i)).append("\t");
+                                    else line.append(e.getValue(i)).append("\t");
                                 }
                                 writer.writeString(line.toString());
                             } catch (IOException e1) {
