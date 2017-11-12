@@ -78,6 +78,7 @@ public class CrateDBDataMapping1 extends CrateDBBaseDataMapping {
             String membership = "INSERT INTO USER_GROUP_MEMBERSHIP " + "(USER_ID, USER_GROUP_ID) VALUES (?, ?)";
             PreparedStatement memStmt = connection.prepareStatement(membership);
 
+            int count=0, batchSize=1000;
             for(int i =0;i<user_list.size();i++){
 
                 JSONObject temp=(JSONObject)user_list.get(i);
@@ -88,15 +89,22 @@ public class CrateDBDataMapping1 extends CrateDBBaseDataMapping {
                 stmt.setString(4, (String)temp.get("name"));
                 stmt.setString(3, (String)temp.get("googleAuthToken"));
 
-                stmt.executeUpdate();
+                stmt.addBatch();
 
 
                 groups=(JSONArray)temp.get("groups");
                 memStmt.setString(1, (String)temp.get("id"));
                 for(int x=0;x<groups.size();x++) {
                     memStmt.setString(2, ((JSONObject)groups.get(x)).get("id").toString());
-                    memStmt.executeUpdate();
+                    memStmt.addBatch();
                 }
+
+                count ++;
+                if (count % batchSize == 0) {
+                    stmt.executeBatch();
+                    memStmt.executeBatch();
+                }
+
             }
 
             // Adding Locations
@@ -437,7 +445,7 @@ public class CrateDBDataMapping1 extends CrateDBBaseDataMapping {
             Observation obs = null;
 
             stmt = connection.prepareStatement(insert);
-            int batchSize = 100;
+            int batchSize = 10000;
             int count = 0;
             while ((obs = reader.readNext()) != null) {
 
