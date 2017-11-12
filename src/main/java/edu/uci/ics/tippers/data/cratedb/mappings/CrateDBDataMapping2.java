@@ -22,14 +22,14 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 
-public class CrateDBDataMapping1 extends CrateDBBaseDataMapping {
+public class CrateDBDataMapping2 extends CrateDBBaseDataMapping {
 
-    private static final Logger LOGGER = Logger.getLogger(CrateDBDataMapping1.class);
+    private static final Logger LOGGER = Logger.getLogger(CrateDBDataMapping2.class);
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     private JSONParser parser = new JSONParser();
 
-    public CrateDBDataMapping1(Connection connection, String dataDir) {
+    public CrateDBDataMapping2(Connection connection, String dataDir) {
         super(connection, dataDir);
     }
 
@@ -42,10 +42,9 @@ public class CrateDBDataMapping1 extends CrateDBBaseDataMapping {
             addVSAndSemanticObservations();
             connection.commit();
             connection.setAutoCommit(true);
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
-
     }
 
     public void addMetadata() throws BenchmarkException {
@@ -78,6 +77,7 @@ public class CrateDBDataMapping1 extends CrateDBBaseDataMapping {
             String membership = "INSERT INTO USER_GROUP_MEMBERSHIP " + "(USER_ID, USER_GROUP_ID) VALUES (?, ?)";
             PreparedStatement memStmt = connection.prepareStatement(membership);
 
+            int count =0, batchSize = 1000;
             for(int i =0;i<user_list.size();i++){
 
                 JSONObject temp=(JSONObject)user_list.get(i);
@@ -88,15 +88,21 @@ public class CrateDBDataMapping1 extends CrateDBBaseDataMapping {
                 stmt.setString(4, (String)temp.get("name"));
                 stmt.setString(3, (String)temp.get("googleAuthToken"));
 
-                stmt.executeUpdate();
-
+                stmt.addBatch();
 
                 groups=(JSONArray)temp.get("groups");
                 memStmt.setString(1, (String)temp.get("id"));
                 for(int x=0;x<groups.size();x++) {
                     memStmt.setString(2, ((JSONObject)groups.get(x)).get("id").toString());
-                    memStmt.executeUpdate();
+                    memStmt.addBatch();
                 }
+
+                count ++;
+                if (count % batchSize == 0) {
+                    stmt.executeBatch();
+                    memStmt.executeBatch();
+                }
+
             }
 
             // Adding Locations
@@ -240,31 +246,66 @@ public class CrateDBDataMapping1 extends CrateDBBaseDataMapping {
             }
 
             // Adding Observations
-            insert = "INSERT INTO OBSERVATION " +
-                    "(ID, PAYLOAD, TIMESTAMP, SENSOR_ID) VALUES (?, ?, ?, ?)";
+            String wifiInsert = "INSERT INTO WiFiAPObservation " +
+                    "(ID, TIMESTAMP, SENSOR_ID, clientId) VALUES (?, ?, ?, ?)";
+
+            String wemoInsert = "INSERT INTO WeMoObservation " +
+                    "(ID, TIMESTAMP, SENSOR_ID, currentMilliWatts, onTodaySeconds) VALUES (?, ?, ?, ?, ?)";
+
+            String temperatureInsert = "INSERT INTO ThermometerObservation " +
+                    "(ID, TIMESTAMP, SENSOR_ID, temperature) VALUES (?, ?, ?, ?)";
 
             BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
                     Observation.class);
             Observation obs = null;
 
-            stmt = connection.prepareStatement(insert);
+            PreparedStatement wifiStmt = connection.prepareStatement(wifiInsert);
+            PreparedStatement wemoStmt = connection.prepareStatement(wemoInsert);
+            PreparedStatement temStmt = connection.prepareStatement(temperatureInsert);
+
             int batchSize = 10000;
-            int count = 0;
+            int wifiCount = 0, wemoCount = 0, thermoCount = 0, count = 0;
             while ((obs = reader.readNext()) != null) {
 
-                stmt.setString(4, obs.getSensor().getId());
-                stmt.setTimestamp(3, new Timestamp(obs.getTimeStamp().getTime()));
-                stmt.setString(1, obs.getId());
-                stmt.setObject(2, obs.getPayload().toString());
-                stmt.addBatch();
+                if (obs.getSensor().getType_().getId().equals("Thermometer")) {
+                    temStmt.setInt(4, obs.getPayload().get("temperature").getAsInt());
+                    temStmt.setString(3, obs.getSensor().getId());
+                    temStmt.setTimestamp(2, new Timestamp(obs.getTimeStamp().getTime()));
+                    temStmt.setString(1, obs.getId());
+                    temStmt.addBatch();
+                    thermoCount ++;
+                } else if (obs.getSensor().getType_().getId().equals("WiFiAP")) {
+                    wifiStmt.setString(4, obs.getPayload().get("clientId").getAsString());
+                    wifiStmt.setString(3, obs.getSensor().getId());
+                    wifiStmt.setTimestamp(2, new Timestamp(obs.getTimeStamp().getTime()));
+                    wifiStmt.setString(1, obs.getId());
+                    wifiStmt.addBatch();
+                    wifiCount ++;
+                } else if (obs.getSensor().getType_().getId().equals("WeMo")) {
+                    wemoStmt.setInt(4, obs.getPayload().get("currentMilliWatts").getAsInt());
+                    wemoStmt.setInt(5, obs.getPayload().get("onTodaySeconds").getAsInt());
+                    wemoStmt.setString(3, obs.getSensor().getId());
+                    wemoStmt.setTimestamp(2, new Timestamp(obs.getTimeStamp().getTime()));
+                    wemoStmt.setString(1, obs.getId());
+                    wemoStmt.addBatch();
+                    wemoCount ++;
+                }
 
-                count ++;
-                if (count % batchSize == 0)
-                    stmt.executeBatch();
+                if (wemoCount % batchSize == 0)
+                    wemoStmt.executeBatch();
+                if (wifiCount % batchSize == 0)
+                    wifiStmt.executeBatch();
+                if (thermoCount % batchSize == 0)
+                    temStmt.executeBatch();
 
                 if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s Observations", count));
+                count ++;
             }
-            stmt.executeBatch();
+            wemoStmt.executeBatch();
+            wifiStmt.executeBatch();
+            temStmt.executeBatch();
+
+
 
         }
         catch(ParseException | SQLException | IOException e) {
@@ -302,7 +343,7 @@ public class CrateDBDataMapping1 extends CrateDBBaseDataMapping {
             JSONArray platform_list = (JSONArray)parser.parse(new InputStreamReader(
                     new FileInputStream(dataDir + DataFiles.PLT.getPath())));
 
-            int count= 0, batchSize = 1000;
+            int count = 0, batchSize = 1000;
             for(int i =0;i<platform_list.size();i++){
                 stmt = connection.prepareStatement(insert);
                 JSONObject temp=(JSONObject)platform_list.get(i);
@@ -391,34 +432,53 @@ public class CrateDBDataMapping1 extends CrateDBBaseDataMapping {
                     SemanticObservation.class);
             SemanticObservation sobs = null;
 
-            insert = "INSERT INTO SEMANTIC_OBSERVATION " +
-                    "(ID, SEMANTIC_ENTITY_ID, PAYLOAD, TIMESTAMP, VIRTUAL_SENSOR_ID, TYPE_ID) VALUES (?, ?, ?, ?, ?, ?)";
-            stmt = connection.prepareStatement(insert);
+            String presenceInsert = "INSERT INTO PRESENCE " +
+                    "(ID, SEMANTIC_ENTITY_ID, LOCATION, TIMESTAMP, VIRTUAL_SENSOR_ID) VALUES (?, ?, ?, ?, ?)";
+
+            String occupancyInsert = "INSERT INTO OCCUPANCY " +
+                    "(ID, SEMANTIC_ENTITY_ID, OCCUPANCY, TIMESTAMP, VIRTUAL_SENSOR_ID) VALUES (?, ?, ?, ?, ?)";
+
+
+            PreparedStatement presenceStmt = connection.prepareStatement(presenceInsert);
+            PreparedStatement occupancyStmt = connection.prepareStatement(occupancyInsert);
+
             int batchSize = 10000;
-            int count = 0;
+            int presenceCount = 0, occupancyCount = 0, count = 0;
             while ((sobs = reader.readNext()) != null) {
 
-                stmt.setString(6, sobs.getType_().getId());
-                stmt.setString(5, sobs.getVirtualSensor().getId());
-                stmt.setTimestamp(4, new Timestamp(sobs.getTimeStamp().getTime()));
-                stmt.setString(1, sobs.getId());
-                stmt.setString(2, sobs.getSemanticEntity().get("id").getAsString());
-                stmt.setObject(3, sobs.getPayload().toString());
+                if (sobs.getType_().getId().equals("presence")) {
+                    presenceStmt.setString(3, sobs.getPayload().get("location").getAsString());
+                    presenceStmt.setString(5, sobs.getVirtualSensor().getId());
+                    presenceStmt.setTimestamp(4, new Timestamp(sobs.getTimeStamp().getTime()));
+                    presenceStmt.setString(1, sobs.getId());
+                    presenceStmt.setString(2, sobs.getSemanticEntity().get("id").getAsString());
+                    presenceStmt.addBatch();
+                    presenceCount ++;
+                } else if (sobs.getType_().getId().equals("occupancy")) {
+                    stmt = occupancyStmt;
+                    occupancyStmt.setInt(3, sobs.getPayload().get("occupancy").getAsInt());
+                    occupancyStmt.setString(5, sobs.getVirtualSensor().getId());
+                    occupancyStmt.setTimestamp(4, new Timestamp(sobs.getTimeStamp().getTime()));
+                    occupancyStmt.setString(1, sobs.getId());
+                    occupancyStmt.setString(2, sobs.getSemanticEntity().get("id").getAsString());
+                    occupancyStmt.addBatch();
+                    occupancyCount ++;
+                }
 
-                stmt.addBatch();
-
-                count ++;
-                if (count % batchSize == 0)
-                    stmt.executeBatch();
+                if (presenceCount % batchSize == 0)
+                    presenceStmt.executeBatch();
+                if (occupancyCount % batchSize == 0)
+                    occupancyStmt.executeBatch();
 
                 if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s S Observations", count));
+                count ++;
             }
-            stmt.executeBatch();
+            presenceStmt.executeBatch();
+            occupancyStmt.executeBatch();
+
 
         }
-        catch(ParseException | IOException e) {
-            e.printStackTrace();
-        } catch (SQLException e) {
+        catch(ParseException | IOException | SQLException e) {
             e.printStackTrace();
         }
 
@@ -429,34 +489,67 @@ public class CrateDBDataMapping1 extends CrateDBBaseDataMapping {
         String insert;
 
         try {
-            insert = "INSERT INTO OBSERVATION " +
-                    "(ID, PAYLOAD, TIMESTAMP, SENSOR_ID) VALUES (?, ?, ?, ?)";
+            String wifiInsert = "INSERT INTO WiFiAPObservation " +
+                    "(ID, TIMESTAMP, SENSOR_ID, clientId) VALUES (?, ?, ?, ?)";
+
+            String wemoInsert = "INSERT INTO WeMoObservation " +
+                    "(ID, TIMESTAMP, SENSOR_ID, currentMilliWatts, onTodaySeconds) VALUES (?, ?, ?, ?, ?)";
+
+            String temperatureInsert = "INSERT INTO ThermometerObservation " +
+                    "(ID, TIMESTAMP, SENSOR_ID, temperature) VALUES (?, ?, ?, ?)";
 
             BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + DataFiles.INSERT_TEST.getPath(),
                     Observation.class);
             Observation obs = null;
 
-            stmt = connection.prepareStatement(insert);
-            int batchSize = 100;
-            int count = 0;
+            PreparedStatement wifiStmt = connection.prepareStatement(wifiInsert);
+            PreparedStatement wemoStmt = connection.prepareStatement(wemoInsert);
+            PreparedStatement temStmt = connection.prepareStatement(temperatureInsert);
+
+            int batchSize = 10000;
+            int wifiCount = 0, wemoCount = 0, thermoCount = 0;
             while ((obs = reader.readNext()) != null) {
 
-                stmt.setString(4, obs.getSensor().getId());
-                stmt.setTimestamp(3, new Timestamp(obs.getTimeStamp().getTime()));
-                stmt.setString(1, obs.getId());
-                stmt.setObject(2, obs.getPayload().toString());
-                stmt.addBatch();
+                if (obs.getSensor().getType_().getId().equals("Thermometer")) {
+                    temStmt.setInt(4, obs.getPayload().get("temperature").getAsInt());
+                    temStmt.setString(3, obs.getSensor().getId());
+                    temStmt.setTimestamp(2, new Timestamp(obs.getTimeStamp().getTime()));
+                    temStmt.setString(1, obs.getId());
+                    temStmt.addBatch();
+                    thermoCount ++;
+                } else if (obs.getSensor().getType_().getId().equals("WiFiAP")) {
+                    wifiStmt.setString(4, obs.getPayload().get("clientId").getAsString());
+                    wifiStmt.setString(3, obs.getSensor().getId());
+                    wifiStmt.setTimestamp(2, new Timestamp(obs.getTimeStamp().getTime()));
+                    wifiStmt.setString(1, obs.getId());
+                    wifiStmt.addBatch();
+                    wifiCount ++;
+                } else if (obs.getSensor().getType_().getId().equals("WeMo")) {
+                    wemoStmt.setInt(4, obs.getPayload().get("currentMilliWatts").getAsInt());
+                    wemoStmt.setInt(5, obs.getPayload().get("onTodaySeconds").getAsInt());
+                    wemoStmt.setString(3, obs.getSensor().getId());
+                    wemoStmt.setTimestamp(2, new Timestamp(obs.getTimeStamp().getTime()));
+                    wemoStmt.setString(1, obs.getId());
+                    wemoStmt.addBatch();
+                    wemoCount ++;
+                }
 
-                count ++;
-                if (count % batchSize == 0)
-                    stmt.executeBatch();
+                if (wemoCount % batchSize == 0)
+                    wemoStmt.executeBatch();
+                if (wifiCount % batchSize == 0)
+                    wifiStmt.executeBatch();
+                if (thermoCount % batchSize == 0)
+                    temStmt.executeBatch();
             }
-            stmt.executeBatch();
+            wemoStmt.executeBatch();
+            wifiStmt.executeBatch();
+            temStmt.executeBatch();
 
         }
         catch(SQLException e) {
             e.printStackTrace();
         }
+
     }
 
 }
