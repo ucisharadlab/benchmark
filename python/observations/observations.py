@@ -12,12 +12,7 @@ def createObservations(dt, end, step, dataDir, outputDir):
     finalObj = open(outputDir + 'observation.json', 'w')
     finalObj.write("[\n")
 
-    with open(dataDir+'observation.json') as data_file:
-        seedObservations = json.load(data_file)
-
-    # for observation in seedObservations:
-    #     line = json.dumps(observation) + "\n"
-    #     finalObj.write(line + ",\n")
+    print ("Merging Random WiFiData")
 
     wifiap.createWiFiObservations(dt, end, step, dataDir)
     wifiObj = open("data/wifiAPData.json")
@@ -25,11 +20,15 @@ def createObservations(dt, end, step, dataDir, outputDir):
         finalObj.write(line + ",\n")
     wifiObj.close()
 
+    print ("Merging Random WeMoData")
+
     wemo.createWemoObservations(dt, end, step, dataDir)
     wemoObj = open("data/wemoData.json")
     for line in wemoObj:
         finalObj.write(line + ",\n")
     wemoObj.close()
+
+    print ("Merging Random Temperature Data")
 
     temperature.createTemperatureObservations(dt, end, step, dataDir)
     temperatureObj = open("data/temperatureData.json")

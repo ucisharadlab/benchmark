@@ -18,6 +18,7 @@ def readConfiguration(configFile):
     Config = ConfigParser.ConfigParser()
     Config.read(configFile)
 
+    print ("Reading Configuration File")
     configDict = {section:{} for section in Config.sections()}
 
     for section in Config.sections():
@@ -32,6 +33,8 @@ def readConfiguration(configFile):
 
 
 def copyFiles(files, src, dest):
+    print ("Copying Source Files")
+
     for file in files:
         shutil.copy2(src+file, dest+file)
 

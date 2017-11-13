@@ -21,6 +21,9 @@ def createTemperatureObservations(dt, end, step, dataDir):
 
     fpObj = open('data/temperatureData.json', 'w')
 
+    print ("Creating Random Temperature Observations")
+
+    count = 0
     while dt < end:
 
         for i in np.random.choice(num, num/2, replace=False):
@@ -35,6 +38,10 @@ def createTemperatureObservations(dt, end, step, dataDir):
                 }
             }
             fpObj.write(json.dumps(obs) + '\n')
+
+            if count % 200000 == 0:
+                print ("{} Random Temperature Observations".format(count))
+            count += 1
 
         dt += step
 

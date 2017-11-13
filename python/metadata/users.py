@@ -19,6 +19,8 @@ def createUsers(numUsers, src, dest):
 
     numGroups = len(groups)
 
+    print ("Creating Users And Platforms")
+
     for i in range(numUsers-len(users)):
         id = str(uuid.uuid4())
         groupList = [groups[random.randint(0, numGroups-1)]]

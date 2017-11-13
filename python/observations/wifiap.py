@@ -28,6 +28,7 @@ def createWiFiObservations(dt, end, step, dataDir):
 
     fpObj = open('data/wifiAPData.json', 'w')
 
+    count = 0
     while dt < end:
 
         for i in np.random.choice(numSenors, numSenors/8, replace=False):
@@ -43,6 +44,11 @@ def createWiFiObservations(dt, end, step, dataDir):
                     }
                 }
                 fpObj.write(json.dumps(obs) + '\n')
+
+                if count % 200000 == 0:
+                    print ("{} Random WiFiAP Observations".format(count))
+                count += 1
+
         dt += step
 
     fpObj.close()

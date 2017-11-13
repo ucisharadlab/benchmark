@@ -35,6 +35,8 @@ class Queries(object):
             self.infraTypes = json.load(data_file)
 
     def generateQueries(self):
+        print ("Generating Queries")
+
         self.query1()
         self.query2(self.numLocations)
         self.query3(self.timeDelta)

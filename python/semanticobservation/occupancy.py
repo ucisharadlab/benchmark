@@ -35,6 +35,9 @@ def createOccupancy(dt, end, step, dataDir):
 
     fpObj = open('data/occupancyData.json', 'w')
 
+    print ("Creating Random Occupancy Data")
+
+    count = 0
     while dt < end:
 
         for j in np.random.choice(numRooms, numRooms/15, replace=False):
@@ -50,6 +53,11 @@ def createOccupancy(dt, end, step, dataDir):
                 }
             }
             fpObj.write(json.dumps(sobs) + '\n')
+
+            if count % 200000 == 0:
+                print ("{} Random Occupancy Observations".format(count))
+            count += 1
+
         dt += step
 
     fpObj.close()

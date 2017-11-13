@@ -32,6 +32,9 @@ def createPresence(dt, end, step, dataDir):
 
     fpObj = open('data/presenceData.json', 'w')
 
+    print ("Creating Random Presence Data")
+
+    count = 0
     while dt < end:
         for j in np.random.choice(numUsers, numUsers/2, replace=False):
             id = str(uuid.uuid4())
@@ -46,6 +49,11 @@ def createPresence(dt, end, step, dataDir):
                 }
             }
             fpObj.write(json.dumps(sobs) + '\n')
+            
+            if count % 200000 == 0:
+                print ("{} Random Presence Observations".format(count))
+            count += 1
+
         dt += step
 
     fpObj.close()
