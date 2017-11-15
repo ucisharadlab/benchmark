@@ -1,0 +1,17 @@
+---------------Dataset Size---------------
+
+Number Of Groups: 5
+Number Of Users: 50000
+Number Of SensorTypes: 6
+Number Of Sensors: 2500
+Number Of InfraTypes: 16
+Number Of Infra: 340
+Number Of Observations: 6998401
+------------------------------------------
+
+------------- Insertion And Query Times----------
+
+Database   Mapping        Query;RunTime(ms)
+------------------------------------------------------------------------------------
+mongodb    1   8706528    277430         3         2       KIA       KIA       KIA       KIA       KIA       KIA       KIA       KIA
+------------------------------------------------------------------------------------

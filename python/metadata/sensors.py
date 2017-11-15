@@ -15,6 +15,8 @@ def createSensors(numWifi, numWemo, numTemperature, src, dest):
     wemoSensors = []
     temperatureSensors = []
 
+    print ("Creating Sensors")
+
     for sensor in sensors:
         if sensor['type_']['id'] == "WiFiAP":
             wifiSensors.append(sensor)
@@ -81,6 +83,8 @@ def createIntelligentSensors(numWemo, numTemperature, src, dest):
 
     wemoSensors = []
     temperatureSensors = []
+
+    print ("Creating Sensors")
 
     for sensor in sensors:
         if sensor['type_']['id'] == "Thermometer":
