@@ -1,0 +1,1333 @@
+options {
+
+
+       STATIC = false;
+
+}
+
+
+PARSER_BEGIN(TQLParser)
+
+package edu.uci.ics.tippers.tql.parser;
+
+// For SQL++ ParserTokenManager
+import java.util.ArrayDeque;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import edu.uci.ics.tippers.tql.lang.common.clause.GroupbyClause;
+import edu.uci.ics.tippers.tql.lang.common.expression.GbyVariableExpressionPair;
+
+import edu.uci.ics.tippers.tql.lang.tql.Declaration;
+import edu.uci.ics.tippers.tql.lang.tql.NamedCollection;
+import edu.uci.ics.tippers.tql.lang.tql.SensorToObservation;
+import edu.uci.ics.tippers.tql.lang.common.expression.CallExpr;
+
+import edu.uci.ics.tippers.common.exceptions.CompilationException;
+import edu.uci.ics.tippers.tql.lang.common.base.Expression;
+import edu.uci.ics.tippers.tql.lang.common.base.Literal;
+import edu.uci.ics.tippers.tql.lang.common.base.Statement;
+import edu.uci.ics.tippers.tql.lang.common.clause.LimitClause;
+import edu.uci.ics.tippers.tql.lang.common.clause.WhereClause;
+import edu.uci.ics.tippers.tql.lang.common.expression.AbstractAccessor;
+import edu.uci.ics.tippers.tql.lang.common.expression.FieldAccessor;
+
+import edu.uci.ics.tippers.tql.lang.common.expression.LiteralExpr;
+import edu.uci.ics.tippers.tql.lang.common.expression.OperatorExpr;
+import edu.uci.ics.tippers.tql.lang.common.expression.UnaryExpr;
+import edu.uci.ics.tippers.tql.lang.common.expression.VariableExpr;
+import edu.uci.ics.tippers.tql.lang.common.literal.DoubleLiteral;
+import edu.uci.ics.tippers.tql.lang.common.literal.FalseLiteral;
+import edu.uci.ics.tippers.tql.lang.common.literal.FloatLiteral;
+import edu.uci.ics.tippers.tql.lang.common.literal.LongIntegerLiteral;
+import edu.uci.ics.tippers.tql.lang.common.literal.MissingLiteral;
+import edu.uci.ics.tippers.tql.lang.common.literal.NullLiteral;
+import edu.uci.ics.tippers.tql.lang.common.literal.StringLiteral;
+import edu.uci.ics.tippers.tql.lang.common.literal.TrueLiteral;
+import edu.uci.ics.tippers.tql.lang.common.statement.Query;
+import edu.uci.ics.tippers.tql.lang.common.struct.Identifier;
+import edu.uci.ics.tippers.tql.lang.common.struct.VarIdentifier;
+import edu.uci.ics.tippers.tql.lang.sqlpp.clause.FromClause;
+import edu.uci.ics.tippers.tql.lang.sqlpp.clause.FromTerm;
+import edu.uci.ics.tippers.tql.lang.sqlpp.clause.JoinClause;
+import edu.uci.ics.tippers.tql.lang.sqlpp.clause.Projection;
+import edu.uci.ics.tippers.tql.lang.sqlpp.clause.SelectBlock;
+import edu.uci.ics.tippers.tql.lang.sqlpp.clause.SelectClause;
+import edu.uci.ics.tippers.tql.lang.sqlpp.clause.SelectRegular;
+import edu.uci.ics.tippers.tql.lang.sqlpp.clause.SelectSetOperation;
+
+import edu.uci.ics.tippers.tql.lang.sqlpp.expression.SelectExpression;
+import edu.uci.ics.tippers.tql.lang.sqlpp.struct.SetOperationInput;
+
+import edu.uci.ics.tippers.tql.util.Pair;
+import edu.uci.ics.tippers.tql.util.Triple;
+import edu.uci.ics.tippers.common.expressions.IExpressionAnnotation;
+
+public class TQLParser extends ScopeChecker {
+
+    // error configuration
+    protected static final boolean REPORT_EXPECTED_TOKENS = false;
+
+    public TQLParser(String s) {
+        this(new StringReader(s));
+    }
+
+    public static void main(String args[]) throws ParseException, TokenMgrError, IOException, FileNotFoundException, CompilationException {
+        File file = new File(args[0]);
+        Reader fis = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
+        TQLParser parser = new TQLParser(fis);
+        List<Statement> st = parser.parse();
+        //st.accept(new SQLPPPrintVisitor(), 0);
+    }
+
+    public List<Statement> parse() throws CompilationException {
+        try {
+            return Statement();
+        } catch (Error e) {
+            // this is here as the JavaCharStream that's below the lexer somtimes throws Errors that are not handled
+            // by the ANTLR-generated lexer or parser (e.g it does this for invalid backslash u + 4 hex digits escapes)
+            throw new CompilationException(new ParseException(e.getMessage()));
+        } catch (ParseException e) {
+            throw new CompilationException("Syntax error: ");
+        }
+    }
+
+}
+
+PARSER_END(TQLParser)
+
+String Identifier() throws ParseException:
+{
+  String lit = null;
+}
+{
+  (<IDENTIFIER>
+    {
+      return token.image;
+    }
+  | lit = QuotedString()
+    {
+      return lit;
+    }
+  )
+}
+
+
+List<Statement> Statement() throws ParseException:
+{
+  List<Statement> decls = new ArrayList<Statement>();
+  Statement stmt = null;
+}
+{
+
+  (
+  stmt = SingleStatement() (<SEMICOLON>)*
+    {
+      decls.add(stmt);
+    }
+  )*
+  (<SEMICOLON>)*
+  <EOF>
+  {
+    return decls;
+  }
+}
+
+Statement SingleStatement() throws ParseException:
+{
+  Statement stmt = null;
+}
+{
+  (
+    stmt = Query() <SEMICOLON>
+    | stmt = Declaration() <SEMICOLON>
+    | LOOKAHEAD(3) stmt = SensorToObservation() <SEMICOLON>
+    | stmt = NamedCollection() <SEMICOLON>
+
+  )
+  {
+    return stmt;
+  }
+}
+
+Pair<String, String> KeyValuePair() throws ParseException:
+{
+  String key;
+  String value;
+}
+{
+  <LEFTPAREN> key = ConstantString() <EQ> value = ConstantString()  <RIGHTPAREN>
+    {
+      return new Pair<String, String>(key, value);
+    }
+}
+
+Pair<Integer, List<String>> NestedField() throws ParseException:
+{
+  List<String> exprList = new ArrayList<String>();
+  String lit = null;
+  int source = 0;
+}
+{
+  lit = Identifier()
+  {
+    boolean meetParens = false;
+  }
+  (
+    LOOKAHEAD(1)
+    <LEFTPAREN><RIGHTPAREN>
+    {
+        if(!lit.toLowerCase().equals("meta")){
+            throw new ParseException("The string before () has to be \"meta\".");
+        }
+        meetParens = true;
+        source = 1;
+    }
+  )?
+  {
+    if(!meetParens){
+        exprList.add(lit);
+    }
+  }
+  (<DOT>
+    lit = Identifier()
+    {
+      exprList.add(lit);
+    }
+  )*
+  {
+    return new Pair<Integer, List<String>>(source, exprList);
+  }
+}
+
+String ConstantString() throws ParseException:
+{
+  String value = null;
+}
+{
+  (value = QuotedString() | value = StringLiteral())
+  {
+     return value;
+  }
+}
+
+
+String QuotedString() throws ParseException:
+{
+}
+{
+  <QUOTED_STRING>
+    {
+      return removeQuotesAndEscapes(token.image);
+    }
+}
+
+
+String StringLiteral() throws ParseException:
+{
+}
+{
+  <STRING_LITERAL>
+    {
+      return removeQuotesAndEscapes(token.image);
+    }
+}
+
+Pair<Identifier,Identifier> QualifiedName() throws ParseException:
+{
+  String first = null;
+  String second = null;
+}
+{
+  first = Identifier() (<DOT> second = Identifier())?
+  {
+    Identifier id1 = null;
+    Identifier id2 = null;
+    if (second == null) {
+      id2 = new Identifier(first);
+    } else
+    {
+      id1 = new Identifier(first);
+      id2 = new Identifier(second);
+    }
+    return new Pair<Identifier,Identifier>(id1, id2);
+  }
+}
+
+Triple<Identifier,Identifier,Identifier> DoubleQualifiedName() throws ParseException:
+{
+  String first = null;
+  String second = null;
+  String third = null;
+}
+{
+  first = Identifier() <DOT> second = Identifier() (<DOT> third = Identifier())?
+  {
+    Identifier id1 = null;
+    Identifier id2 = null;
+    Identifier id3 = null;
+    if (third == null) {
+      id2 = new Identifier(first);
+      id3 = new Identifier(second);
+    } else {
+      id1 = new Identifier(first);
+      id2 = new Identifier(second);
+      id3 = new Identifier(third);
+    }
+    return new Triple<Identifier,Identifier,Identifier>(id1, id2, id3);
+  }
+}
+
+Declaration Declaration() throws ParseException:
+{
+  List<String> identifiers = new ArrayList<String>();
+}
+{
+  <DECLARE>  (<SENSOR_COLLECTION> | <OBSERVATION_COLLECTION>)
+     {
+        String type = token.image.toLowerCase();
+        String identifier = null;
+     }
+     identifier = Identifier() { identifiers.add(identifier); }
+      ( LOOKAHEAD(2) <COMMA>
+         identifier = Identifier() { identifiers.add(identifier); }
+      )*
+     {
+       return new Declaration(identifiers, type);
+     }
+}
+
+NamedCollection NamedCollection() throws ParseException:
+{
+}
+{
+     {
+        String identifier = null;
+        Query query = null;
+     }
+     identifier = Identifier()
+     <EQ>
+     query = Query()
+     {
+       return new NamedCollection(identifier, query);
+     }
+}
+
+SensorToObservation SensorToObservation() throws ParseException:
+{
+}
+{
+     {
+        String sensor = null;
+        String observation = null;
+     }
+
+     observation = Identifier()
+
+     <EQ> <SENSOR_TO_OBSERVATION>
+
+     <LEFTPAREN>
+     sensor = Identifier()
+     <RIGHTPAREN>
+
+     {
+       return new SensorToObservation(sensor, observation);
+     }
+}
+
+Query Query() throws ParseException:
+{
+  Query query = new Query();
+  Expression expr;
+}
+{
+  (
+  expr = SelectExpression(false)
+  )
+  {
+    query.setBody(expr);
+    // we remove the pointers to the locked entities before we return the query object
+    return query;
+  }
+}
+
+SelectExpression SelectExpression(boolean subquery) throws ParseException:
+{
+  SelectSetOperation selectSetOperation;
+  LimitClause limitClause = null;
+}
+{
+    selectSetOperation = SelectSetOperation()
+    (limitClause = LimitClause() {})?
+    {
+      return new SelectExpression(selectSetOperation, limitClause, subquery);
+    }
+}
+
+SelectSetOperation SelectSetOperation() throws ParseException:
+{
+  SetOperationInput setOperationInputLeft;
+}
+{
+  {
+      SelectBlock selectBlockLeft = null;
+      SelectExpression subqueryLeft = null;
+      Expression expr = null;
+  }
+  selectBlockLeft = SelectBlock()
+  {
+     setOperationInputLeft = new SetOperationInput(selectBlockLeft);
+  }
+  {
+    return new SelectSetOperation(setOperationInputLeft);
+  }
+}
+
+SelectBlock SelectBlock() throws ParseException:
+{
+  SelectClause selectClause = null;
+  FromClause fromClause = null;
+  WhereClause whereClause = null;
+  GroupbyClause groupbyClause = null;
+
+}
+{
+  (
+     selectClause = SelectClause()
+     (
+        fromClause = FromClause()
+     )?
+     (whereClause = WhereClause())?
+     (groupbyClause = GroupbyClause())?
+    |
+     fromClause = FromClause()
+     (whereClause = WhereClause())?
+     (groupbyClause = GroupbyClause())?
+     selectClause = SelectClause()
+
+  )
+  {
+    return new SelectBlock(selectClause, fromClause, whereClause, groupbyClause);
+  }
+}
+
+GroupbyClause GroupbyClause()throws ParseException :
+{
+    GroupbyClause gbc = new GroupbyClause();
+    List<Expression> expressions = new ArrayList<Expression>();
+    Expression expr = null;
+
+}
+{
+
+    <GROUP>
+    <BY> (
+       expr = Expression()
+        {
+           expressions.add(expr);
+        }
+       ( LOOKAHEAD(1) <COMMA>
+
+         expr = Expression()
+         {
+             expressions.add(expr);
+         }
+        )*
+    )
+    {
+      gbc.setExpressions(expressions);
+      return gbc;
+    }
+}
+
+
+SelectClause SelectClause() throws ParseException:
+{
+  SelectRegular selectRegular = null;
+  boolean distinct = false;
+}
+{
+  <SELECT>
+  (
+    selectRegular = SelectRegular()
+  )?
+  {
+    if(selectRegular == null){
+        Projection projection = new Projection(null, null);
+        List<Projection> projections = new ArrayList<Projection>();
+        projections.add(projection);
+        selectRegular = new SelectRegular(projections);
+    }
+    return new SelectClause(selectRegular);
+  }
+}
+
+SelectRegular SelectRegular() throws ParseException:
+{
+  List<Projection> projections = new ArrayList<Projection>();
+}
+{
+   {
+      Projection projection = null;
+   }
+   projection = Projection() { projections.add(projection); }
+    ( LOOKAHEAD(2) <COMMA>
+       projection = Projection() {projections.add(projection);}
+    )*
+  {
+    return new SelectRegular(projections);
+  }
+}
+
+Projection Projection() throws ParseException :
+{
+  Expression expr = null;
+  Identifier identifier = null;
+  String name = null;
+}
+{
+  ( LOOKAHEAD(4)
+    expr = FunctionCallExpr()
+    |expr = Expression() ((<AS>)? name = Identifier())?
+
+  )
+  {
+    return new Projection(expr, name);
+  }
+}
+
+FromClause FromClause() throws ParseException :
+{
+  List<FromTerm> fromTerms = new ArrayList<FromTerm>();
+}
+{
+  {
+    FromTerm fromTerm = null;
+  }
+    <FROM> fromTerm = FromTerm() { fromTerms.add(fromTerm); }
+    (LOOKAHEAD(2) <COMMA> fromTerm = FromTerm() { fromTerms.add(fromTerm); } )*
+  {
+    return new FromClause(fromTerms);
+  }
+}
+
+FromTerm FromTerm() throws ParseException :
+{
+  Expression leftExpr = null;
+  VariableExpr leftVar = null;
+}
+{
+  leftExpr = Expression() ((<AS>)? leftVar = Variable())?
+  {
+    return new FromTerm(leftExpr, leftVar);
+  }
+}
+
+WhereClause WhereClause()throws ParseException :
+{
+  WhereClause wc = new WhereClause();
+  Expression whereExpr;
+}
+{
+    <WHERE> whereExpr = Expression()
+    {
+      wc.setWhereExpr(whereExpr);
+      return wc;
+    }
+}
+
+LimitClause LimitClause() throws ParseException:
+{
+    LimitClause lc = new LimitClause();
+    Expression expr;
+}
+{
+    <LIMIT> expr = Expression()    { lc.setLimitExpr(expr);    }
+  {
+    return lc;
+  }
+}
+
+
+Expression Expression():
+{
+  Expression expr = null;
+}
+{
+(
+    expr = OperatorExpr()
+)
+    {
+      return expr;
+    }
+}
+
+
+Expression FunctionCallExpr() throws ParseException:
+{
+  CallExpr callExpr;
+  List<Expression> argList = new ArrayList<Expression>();
+  Expression tmp = null;
+  String funcName = null;
+  boolean star = false;
+}
+{
+  funcName = Identifier()
+  <LEFTPAREN> ( ( tmp = Expression() | <MUL> { star = true; } )
+    {
+      if(star){
+        if(!funcName.toLowerCase().equals("count")){
+           throw new ParseException("The parameter * can only be used in COUNT().");
+        }
+        argList.add(new LiteralExpr(new LongIntegerLiteral(1L)));
+      } else {
+         argList.add(tmp);
+      }
+    }
+  (<COMMA> tmp = Expression()
+    {
+      argList.add(tmp);
+    }
+  )*)? <RIGHTPAREN>
+    {
+      callExpr = new CallExpr(funcName, argList);
+    }
+    {
+    return callExpr;
+    }
+}
+
+Expression OperatorExpr()throws ParseException:
+{
+  OperatorExpr op = null;
+  Expression operand = null;
+}
+{
+    operand = AndExpr()
+    (
+
+      <OR>
+      {
+        if (op == null) {
+          op = new OperatorExpr();
+          op.addOperand(operand);
+        op.setCurrentop(true);
+        }
+        try{
+            op.addOperator(token.image.toLowerCase());
+        } catch (Exception e){
+            throw new ParseException(e.getMessage());
+        }
+    }
+
+    operand = AndExpr()
+    {
+      op.addOperand(operand);
+    }
+
+    )*
+
+    {
+      return op==null? operand: op;
+    }
+}
+
+Expression AndExpr()throws ParseException:
+{
+  OperatorExpr op = null;
+  Expression operand = null;
+}
+{
+    operand = NotExpr()
+    (
+
+      <AND>
+      {
+        if (op == null) {
+          op = new OperatorExpr();
+          op.addOperand(operand);
+          op.setCurrentop(true);
+        }
+        try{
+           op.addOperator(token.image.toLowerCase());
+        } catch (CompilationException e){
+           throw new ParseException(e.getMessage());
+        }
+    }
+
+    operand = NotExpr()
+    {
+      op.addOperand(operand);
+    }
+
+    )*
+
+    {
+      return op==null? operand: op;
+    }
+}
+
+Expression NotExpr()throws ParseException:
+{
+   Expression inputExpr;
+   boolean not = false;
+}
+{
+  (<NOT> { not = true; } )? inputExpr = RelExpr()
+  {
+     return inputExpr;
+  }
+}
+
+Expression RelExpr()throws ParseException:
+{
+  boolean not = false;
+  OperatorExpr op = null;
+  Expression operand = null;
+  boolean broadcast = false;
+  IExpressionAnnotation annotation = null;
+}
+{
+    operand = IsExpr()
+
+    (
+      LOOKAHEAD(2)( <LT> | <GT> | <LE> | <GE> | <EQ> | <NE> | <LG> | (<NOT> { not = true; })? <IN>)
+        {
+
+          String operator = token.image.toLowerCase();
+          if (operator.equals("<>")){
+              operator = "!=";
+          }
+          if (not) {
+            operator = "not_" + operator;
+          }
+          if (op == null) {
+            op = new OperatorExpr();
+            op.addOperand(operand, false); // broadcast is always for the right branch
+            op.setCurrentop(true);
+          }
+          try{
+            op.addOperator(operator);
+          } catch (CompilationException e){
+            throw new ParseException(e.getMessage());
+          }
+        }
+
+       operand = IsExpr()
+       {
+         op.addOperand(operand, broadcast);
+       }
+    )?
+
+     {
+       return op==null? operand: op;
+     }
+}
+
+Expression IsExpr() throws ParseException:
+{
+    Expression expr = null;
+    Expression operand = null;
+    boolean not = false;
+}
+{
+    operand = LikeExpr()
+    {
+        return expr = expr==null? operand : expr;
+    }
+}
+
+
+Expression LikeExpr()throws ParseException:
+{
+  boolean not = false;
+  OperatorExpr op = null;
+  Expression operand = null;
+}
+{
+    operand = AddExpr()
+    (
+        LOOKAHEAD(2)
+        (<NOT> { not = true; })? <LIKE>
+        {
+          op = new OperatorExpr();
+          op.addOperand(operand);
+          op.setCurrentop(true);
+
+          String operator = token.image.toLowerCase();
+          if (not) {
+            operator = "not_" + operator;
+          }
+          try{
+            op.addOperator(operator);
+          } catch (CompilationException e){
+            throw new ParseException(e.getMessage());
+          }
+        }
+
+        operand = AddExpr()
+        {
+          op.addOperand(operand);
+        }
+     )?
+
+     {
+       return op == null ? operand : op;
+     }
+}
+
+Expression AddExpr()throws ParseException:
+{
+  OperatorExpr op = null;
+  Expression operand = null;
+}
+{
+    operand = MultExpr()
+    (
+      LOOKAHEAD(1)
+      (<PLUS> | <MINUS>)
+      {
+        if (op == null) {
+          op = new OperatorExpr();
+        op.addOperand(operand);
+        op.setCurrentop(true);
+        }
+        try{
+            ((OperatorExpr)op).addOperator(token.image);
+        } catch (Exception e){
+            throw new ParseException(e.getMessage());
+        }
+    }
+
+    operand = MultExpr()
+    {
+      op.addOperand(operand);
+    }
+    )*
+
+    {
+       return op==null? operand: op;
+    }
+}
+
+Expression MultExpr()throws ParseException:
+{
+  OperatorExpr op = null;
+  Expression operand = null;
+}
+{
+    operand = UnaryExpr()
+
+    (( <MUL> | <DIV> | <MOD>)
+      {
+        if (op == null) {
+          op = new OperatorExpr();
+          op.addOperand(operand);
+          op.setCurrentop(true);
+        }
+        try{
+            op.addOperator(token.image);
+        } catch (Exception e){
+            throw new ParseException(e.getMessage());
+        }
+    }
+    operand = UnaryExpr()
+    {
+       op.addOperand(operand);
+    }
+    )*
+
+     {
+       return op==null?operand:op;
+     }
+}
+
+Expression UnaryExpr() throws ParseException:
+{
+    boolean not = false;
+    UnaryExpr uexpr = null;
+    Expression expr = null;
+}
+{
+    ( (<PLUS> | <MINUS>)
+    {
+        String exprType = token.image.toLowerCase();
+        if(not){
+           exprType = "not_" + exprType;
+        }
+        uexpr = new UnaryExpr();
+        try{
+            uexpr.setExprType(exprType);
+        } catch (CompilationException e){
+            throw new ParseException(e.getMessage());
+        }
+    }
+    )?
+
+    expr = ValueExpr()
+    {
+       if(uexpr==null){
+            return expr;
+       }
+       uexpr.setExpr(expr);
+       return uexpr;
+    }
+}
+
+Expression ValueExpr()throws ParseException:
+{
+  Expression expr = null;
+  Identifier ident = null;
+  AbstractAccessor fa = null;
+  Expression indexExpr = null;
+}
+{
+  expr = PrimaryExpr() (
+     ident = Field()
+     {
+      fa = (fa == null ? new FieldAccessor(expr, ident)
+                       : new FieldAccessor(fa, ident));
+     }
+    )*
+    {
+      return fa == null ? expr : fa;
+    }
+}
+
+Identifier Field() throws ParseException:
+{
+  String ident = null;
+}
+{
+   <DOT> ident = Identifier()
+    {
+      return new Identifier(ident);
+    }
+}
+
+Expression PrimaryExpr()throws ParseException:
+{
+  Expression expr = null;
+}
+{
+  ( LOOKAHEAD(4)
+  expr = Literal()
+  | expr = VariableRef()
+  | expr = ParenthesizedExpression()
+  )
+    {
+      return expr;
+    }
+}
+
+Expression Literal() throws ParseException:
+{
+  LiteralExpr lit = new LiteralExpr();
+  String str = null;
+}
+{
+  ( str = StringLiteral()
+    {
+      lit.setValue(new StringLiteral(str));
+    }
+  | <INTEGER_LITERAL>
+    {
+        try {
+            lit.setValue(new LongIntegerLiteral(Long.valueOf(token.image)));
+        } catch (NumberFormatException e) {
+            throw new ParseException("Could not parse numeric literal \"" + token.image +'"');
+        }
+    }
+  | <FLOAT_LITERAL>
+    {
+        try {
+            lit.setValue(new FloatLiteral(Float.valueOf(token.image)));
+        } catch (NumberFormatException e) {
+            throw new ParseException("Could not parse numeric literal \"" + token.image +'"');
+        }
+    }
+  | <DOUBLE_LITERAL>
+    {
+        try {
+            lit.setValue(new DoubleLiteral(Double.valueOf(token.image)));
+        } catch (NumberFormatException e) {
+            throw new ParseException("Could not parse numeric literal \"" + token.image +'"');
+        }
+    }
+  | <MISSING>
+    {
+      lit.setValue(MissingLiteral.INSTANCE);
+    }
+  | <NULL>
+    {
+      lit.setValue(NullLiteral.INSTANCE);
+    }
+  | <TRUE>
+    {
+      lit.setValue(TrueLiteral.INSTANCE);
+    }
+  | <FALSE>
+    {
+      lit.setValue(FalseLiteral.INSTANCE);
+    }
+  )
+    {
+      return lit;
+    }
+}
+
+
+VariableExpr VariableRef() throws ParseException:
+{
+    VariableExpr varExp = new VariableExpr();
+    VarIdentifier var = new VarIdentifier();
+}
+{
+    { String id = null; }
+    (<IDENTIFIER> { id = token.image; } | id = QuotedString())
+    {
+       varExp.setVar(var);
+       varExp.setIsNewVar(false);
+       var.setValue(id);
+     return varExp;
+    }
+}
+
+
+VariableExpr Variable() throws ParseException:
+{
+    VariableExpr varExp = new VariableExpr();
+    VarIdentifier var = new VarIdentifier();
+}
+{
+    { String id = null; }
+    (<IDENTIFIER> { id = token.image; } | id = QuotedString())
+    {
+     varExp.setVar(var);
+     var.setValue(id);
+     return varExp;
+    }
+}
+
+List<Expression> ExpressionList() throws ParseException:
+{
+      Expression expr = null;
+      List<Expression> list = null;
+      List<Expression> exprList = new ArrayList<Expression>();
+}
+{
+    (
+      expr = Expression() { exprList.add(expr); }
+      (LOOKAHEAD(1) <COMMA> list = ExpressionList() { exprList.addAll(list); })?
+    )?
+    (LOOKAHEAD(1) Comma())?
+    {
+        return exprList;
+    }
+}
+
+void Comma():
+{}
+{
+   <COMMA>
+}
+
+Expression ParenthesizedExpression() throws ParseException:
+{
+  Expression expr;
+}
+{
+    (
+    LOOKAHEAD(2)
+    <LEFTPAREN> expr = Expression() <RIGHTPAREN>
+    |
+    expr = Subquery()
+    )
+    {
+      return expr;
+    }
+}
+
+SelectExpression Subquery() throws ParseException:
+{
+   SelectExpression selectExpr = null;
+}
+{
+  <LEFTPAREN> selectExpr = SelectExpression(true) {} <RIGHTPAREN>
+  {
+    return selectExpr;
+  }
+}
+
+TOKEN_MGR_DECLS:
+{
+    public int commentDepth = 0;
+    public ArrayDeque<Integer> lexerStateStack = new ArrayDeque<Integer>();
+
+    public void pushState() {
+      lexerStateStack.push( curLexState );
+    }
+
+    public void popState(String token) {
+      if (lexerStateStack.size() > 0) {
+         SwitchTo( lexerStateStack.pop() );
+      } else {
+         int errorLine = input_stream.getEndLine();
+         int errorColumn = input_stream.getEndColumn();
+         String msg = "Lexical error at line " + errorLine + ", column " + errorColumn + ". Encountered \"" + token
+             + "\" but state stack is empty.";
+         throw new TokenMgrError(msg, -1);
+      }
+    }
+}
+
+<DEFAULT,IN_DBL_BRACE>
+TOKEN [IGNORE_CASE]:
+{
+  <AND : "and">
+  | <AS : "as">
+  | <FROM : "from">
+  | <IN : "in">
+  | <LIKE : "like">
+  | <LIMIT : "limit">
+  | <NOT : "not">
+  | <OR : "or">
+  | <SELECT : "select">
+  | <WHERE : "where">
+  | <IS : "is">
+  | <DECLARE : "define">
+  | <SENSOR_COLLECTION : "sensor_collection">
+  | <OBSERVATION_COLLECTION : "observation_collection">
+  | <SENSOR_TO_OBSERVATION : "sensor_to_observation">
+  | <BY : "by">
+  | <GROUP : "grouped">
+}
+
+<DEFAULT,IN_DBL_BRACE>
+TOKEN :
+{
+  <DIV : "/">
+  | <MINUS : "-">
+  | <MOD : "%">
+  | <MUL : "*">
+  | <PLUS : "+">
+
+  | <LEFTPAREN : "(">
+  | <RIGHTPAREN : ")">
+  | <LEFTBRACKET : "[">
+  | <RIGHTBRACKET : "]">
+
+  | <COMMA : ",">
+  | <DOT : ".">
+  | <QUES : "?">
+  | <SEMICOLON : ";">
+
+  | <LT : "<">
+  | <GT : ">">
+  | <LE : "<=">
+  | <GE : ">=">
+  | <EQ : "=">
+  | <NE : "!=">
+  | <LG : "<>">
+}
+
+<DEFAULT,IN_DBL_BRACE>
+TOKEN :
+{
+    <LEFTBRACE : "{"> { pushState(); } : DEFAULT
+}
+
+<DEFAULT>
+TOKEN :
+{
+    <RIGHTBRACE : "}"> { popState("}"); }
+}
+
+<DEFAULT,IN_DBL_BRACE>
+TOKEN :
+{
+    <LEFTDBLBRACE : "{{"> { pushState(); } : IN_DBL_BRACE
+}
+
+<IN_DBL_BRACE>
+TOKEN :
+{
+    <RIGHTDBLBRACE : "}}"> { popState("}}"); }
+}
+
+<DEFAULT,IN_DBL_BRACE>
+TOKEN :
+{
+    <INTEGER_LITERAL : (<DIGIT>)+ >
+}
+
+<DEFAULT,IN_DBL_BRACE>
+TOKEN [IGNORE_CASE]:
+{
+  <MISSING : "missing">
+  |  <NULL : "null">
+  | <TRUE : "true">
+  | <FALSE : "false">
+}
+
+<DEFAULT,IN_DBL_BRACE>
+TOKEN :
+{
+    <#DIGIT : ["0" - "9"]>
+}
+
+<DEFAULT,IN_DBL_BRACE>
+TOKEN:
+{
+    < DOUBLE_LITERAL: <DIGITS> ( "." <DIGITS> )
+                      | "." <DIGITS>
+    >
+  | < FLOAT_LITERAL:  <DIGITS> ( "f" | "F" )
+                      | <DIGITS> ( "." <DIGITS> ( "f" | "F" ) )?
+                      | "." <DIGITS> ( "f" | "F" )
+    >
+  | <DIGITS : (<DIGIT>)+ >
+}
+
+<DEFAULT,IN_DBL_BRACE>
+TOKEN :
+{
+    <#LETTER : ["A" - "Z", "a" - "z"]>
+  | <SPECIALCHARS : ["$", "_"]>
+}
+
+<DEFAULT,IN_DBL_BRACE>
+TOKEN :
+{
+    // backslash u + 4 hex digits escapes are handled in the underlying JavaCharStream
+    <QUOTED_STRING : "`" (
+          <EscapeQuot>
+        | <EscapeBslash>
+        | <EscapeSlash>
+        | <EscapeBspace>
+        | <EscapeFormf>
+        | <EscapeNl>
+        | <EscapeCr>
+        | <EscapeTab>
+        | ~["`","\\"])* "`">
+  | <STRING_LITERAL : ("\"" (
+          <EscapeQuot>
+        | <EscapeBslash>
+        | <EscapeSlash>
+        | <EscapeBspace>
+        | <EscapeFormf>
+        | <EscapeNl>
+        | <EscapeCr>
+        | <EscapeTab>
+        | ~["\"","\\"])* "\"")
+      | ("\'"(
+          <EscapeApos>
+        | <EscapeBslash>
+        | <EscapeSlash>
+        | <EscapeBspace>
+        | <EscapeFormf>
+        | <EscapeNl>
+        | <EscapeCr>
+        | <EscapeTab>
+        | ~["\'","\\"])* "\'")>
+  | < #EscapeQuot: "\\\"" >
+  | < #EscapeApos: "\\\'" >
+  | < #EscapeBslash: "\\\\" >
+  | < #EscapeSlash: "\\/" >
+  | < #EscapeBspace: "\\b" >
+  | < #EscapeFormf: "\\f" >
+  | < #EscapeNl: "\\n" >
+  | < #EscapeCr: "\\r" >
+  | < #EscapeTab: "\\t" >
+}
+
+<DEFAULT,IN_DBL_BRACE>
+TOKEN :
+{
+    <IDENTIFIER : <LETTER> (<LETTER> | <DIGIT> | <SPECIALCHARS>)*>
+}
+
+<DEFAULT,IN_DBL_BRACE>
+SKIP:
+{
+    " "
+  | "\t"
+  | "\r"
+  | "\n"
+}
+
+<DEFAULT,IN_DBL_BRACE>
+SKIP:
+{
+    <"//" (~["\n"])* "\n">
+}
+
+<DEFAULT,IN_DBL_BRACE>
+SKIP:
+{
+    <"//" (~["\n","\r"])* ("\n"|"\r"|"\r\n")?>
+}
+
+<DEFAULT,IN_DBL_BRACE>
+SKIP:
+{
+    <"--" (~["\n"])* "\n">
+}
+
+
+<DEFAULT,IN_DBL_BRACE>
+SKIP:
+{
+    <"--" (~["\n","\r"])* ("\n"|"\r"|"\r\n")?>
+}
+
+<DEFAULT,IN_DBL_BRACE>
+SKIP:
+{
+    <"#" (~["\n"])* "\n">
+}
+
+
+<DEFAULT,IN_DBL_BRACE>
+SKIP:
+{
+    <"#" (~["\n","\r"])* ("\n"|"\r"|"\r\n")?>
+}
+
+<DEFAULT,IN_DBL_BRACE>
+SKIP:
+{
+    <"/*"> { pushState(); } : INSIDE_COMMENT
+}
+
+<INSIDE_COMMENT>
+SPECIAL_TOKEN:
+{
+    <"+"(" ")*(~["*"])*>
+}
+
+<INSIDE_COMMENT>
+SKIP:
+{
+    <"/*"> { pushState(); }
+}
+
+<INSIDE_COMMENT>
+SKIP:
+{
+    <"*/"> { popState("*/"); }
+  | <~[]>
+}
