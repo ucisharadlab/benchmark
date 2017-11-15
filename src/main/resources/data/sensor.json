@@ -678,30 +678,6 @@
             {
                 "geometry": [
                     {
-                        "y": 4, 
-                        "x": 19, 
-                        "z": 0, 
-                        "id": "fea5b760-f001-4681-b34e-a7a945bcedf1"
-                    }, 
-                    {
-                        "y": 12, 
-                        "x": 28, 
-                        "z": 0, 
-                        "id": "12acc986-d40e-4953-b170-70be3b2ea0bf"
-                    }
-                ], 
-                "type_": {
-                    "id": "class_room", 
-                    "name": "Class Rooms", 
-                    "description": "Class Room Description"
-                }, 
-                "id": "1420", 
-                "name": "1420", 
-                "floor": 1
-            }, 
-            {
-                "geometry": [
-                    {
                         "y": 28, 
                         "x": 15, 
                         "z": 0, 

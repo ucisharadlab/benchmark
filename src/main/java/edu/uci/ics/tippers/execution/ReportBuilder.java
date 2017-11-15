@@ -34,12 +34,44 @@ public class ReportBuilder {
         // TODO: Yet To Implement
     }
 
+    private void createCSVReport() {
+        BufferedWriter writer;
+        try {
+            writer = new BufferedWriter(new FileWriter(reportsDir + "report.csv"));
+            writer.write("Database, Mapping, Insert 90%, Insert 10%, Q1, Q2, Q3, Q4, Q5, Q6, Q7, Q8, Q9, Q10\n");
+
+            for(Pair<Database, Integer> key: runTimes.keySet()) {
+
+                String line = String.format("%s,%s",key.getKey().getName(), key.getValue());
+                Map<Integer, Duration> queryTimes = runTimes.get(key);
+
+                if (queryTimes == null) {
+                    line += String.format(",%s","None\n");
+                    writer.write(line);
+                    continue;
+                }
+                for (Integer query: queryTimes.keySet()) {
+                    if (queryTimes.get(query).compareTo(Constants.MAX_DURATION) < 0 )
+                        line += String.format(",%s", queryTimes.get(query).toMillis());
+                    else
+                        line += String.format(",%s",  "KIA" );
+                }
+                line += "\n";
+                writer.write(line);
+            }
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new BenchmarkException("Error Writing Report.csv");
+        }
+    }
+
     private void createTextReport() throws BenchmarkException {
         BufferedWriter writer;
         try {
             writer = new BufferedWriter(new FileWriter(reportsDir + "report.txt"));
 
-            dataSize.appendInfoToFile(writer);
+            //dataSize.appendInfoToFile(writer);
 
             writer.write("------------- Insertion And Query Times----------\n\n");
 
@@ -88,6 +120,9 @@ public class ReportBuilder {
                 break;
             case TEXT:
                 createTextReport();
+                break;
+            case CSV:
+                createCSVReport();
                 break;
         }
     }

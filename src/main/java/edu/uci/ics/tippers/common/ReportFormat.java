@@ -7,7 +7,8 @@ public enum ReportFormat {
 
     TEXT("text"),
     HTML("html"),
-    PDF("pdf");
+    PDF("pdf"),
+    CSV("csv");
 
     private final String name;
 

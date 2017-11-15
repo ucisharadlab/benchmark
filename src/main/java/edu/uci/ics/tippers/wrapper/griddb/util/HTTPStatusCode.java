@@ -1,6 +1,5 @@
 package edu.uci.ics.tippers.wrapper.griddb.util;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Enum HTTPStatusCode.
  */
