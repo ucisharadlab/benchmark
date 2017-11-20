@@ -3,6 +3,7 @@ package edu.uci.ics.tippers.schema.griddb.mappings;
 import com.toshiba.mwcloud.gs.*;
 import edu.uci.ics.tippers.common.DataFiles;
 import edu.uci.ics.tippers.common.constants.Constants;
+import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.schema.griddb.GridDBBaseSchemaMapping;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -101,7 +102,6 @@ public class GridDBSchemaMapping1 extends GridDBBaseSchemaMapping {
 
 
     }
-
 
     public void createDeviceSchema() throws GSException {
         ContainerInfo containerInfo = new ContainerInfo();
@@ -218,7 +218,7 @@ public class GridDBSchemaMapping1 extends GridDBBaseSchemaMapping {
                 keys.forEach(k-> {
                     GSType type = null;
                     if (e.get(k).equals("STRING"))
-                        type = GSType.STRING;
+                        type = GSType.STRING_ARRAY;
                     if (e.get(k).equals("DOUBLE"))
                         type = GSType.DOUBLE;
                     if (e.get(k).equals("INTEGER"))

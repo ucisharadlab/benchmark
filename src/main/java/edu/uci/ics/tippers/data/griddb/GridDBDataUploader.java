@@ -12,13 +12,19 @@ import edu.uci.ics.tippers.data.griddb.mappings.GridDBDataMapping2;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.model.observation.Observation;
 
+import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class GridDBDataUploader extends BaseDataUploader {
 
     private GridStore gridStore;
     private GridDBBaseDataMapping dataMapping;
+    private static SimpleDateFormat qsdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+
 
     public GridDBDataUploader(int mapping, String dataDir) throws BenchmarkException {
         super(mapping, dataDir);
@@ -113,7 +119,17 @@ public class GridDBDataUploader extends BaseDataUploader {
                         if (obs.getSensor().getType_().getId().equals("Thermometer")) {
                             row.setValue(2, obs.getPayload().get("temperature").getAsInt());
                         } else if (obs.getSensor().getType_().getId().equals("WiFiAP")) {
-                            row.setValue(2, obs.getPayload().get("clientId").getAsString());
+                            String query = String.format("SELECT * FROM %s WHERE timeStamp=TIMESTAMP('%s')",
+                                    collectionName, qsdf.format(obs.getTimeStamp()));
+                            List<Row> rowAdded = runQueryWithRows(collectionName, query);
+                            if (rowAdded == null || rowAdded.isEmpty()) {
+                                row.setValue(2, new String[]{obs.getPayload().get("clientId").getAsString()});
+                            } else {
+                                String[] arr = rowAdded.get(0).getStringArray(2);
+                                arr = Arrays.copyOf(arr, arr.length +1);
+                                arr[arr.length-1] = obs.getPayload().get("clientId").getAsString();
+                                row.setValue(2, arr);
+                            }
                         } else if (obs.getSensor().getType_().getId().equals("WeMo")) {
                             row.setValue(2, obs.getPayload().get("currentMilliWatts").getAsInt());
                             row.setValue(3, obs.getPayload().get("onTodaySeconds").getAsInt());
@@ -168,4 +184,22 @@ public class GridDBDataUploader extends BaseDataUploader {
         Instant end = Instant.now();
         return Duration.between(start, end);
     }
+
+    private List<Row> runQueryWithRows(String containerName, String query) throws BenchmarkException {
+        try {
+            Container<String, Row> container = gridStore.getContainer(containerName);
+            Query<Row> gridDBQuery = container.query(query);
+            RowSet<Row> rows = gridDBQuery.fetch();
+
+            List<Row> rowList = new ArrayList<>();
+            while (rows.hasNext()) {
+                rowList.add(rows.next());
+            }
+            return rowList;
+        } catch (GSException ge) {
+            ge.printStackTrace();
+            throw new BenchmarkException("Error Running Query On GridDB");
+        }
+    }
+
 }

@@ -5,6 +5,7 @@ import edu.uci.ics.tippers.common.DataFiles;
 import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.common.util.BigJsonReader;
 import edu.uci.ics.tippers.data.griddb.GridDBBaseDataMapping;
+import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.model.observation.Observation;
 import edu.uci.ics.tippers.model.semanticObservation.SemanticObservation;
 import org.apache.log4j.Logger;
@@ -18,11 +19,15 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class GridDBDataMapping1 extends GridDBBaseDataMapping {
 
     private static final Logger LOGGER = Logger.getLogger(GridDBDataMapping1.class);
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static SimpleDateFormat qsdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
     private JSONParser parser = new JSONParser();
 
@@ -36,6 +41,23 @@ public class GridDBDataMapping1 extends GridDBBaseDataMapping {
         addDevices();
         addVSAndSemanticObservations();
         addSensorsAndObservations();
+    }
+
+    private List<Row> runQueryWithRows(String containerName, String query) throws BenchmarkException {
+        try {
+            Container<String, Row> container = gridStore.getContainer(containerName);
+            Query<Row> gridDBQuery = container.query(query);
+            RowSet<Row> rows = gridDBQuery.fetch();
+
+            List<Row> rowList = new ArrayList<>();
+            while (rows.hasNext()) {
+                rowList.add(rows.next());
+            }
+            return rowList;
+        } catch (GSException ge) {
+            ge.printStackTrace();
+            throw new BenchmarkException("Error Running Query On GridDB");
+        }
     }
 
     public void addMetadata() throws GSException {
@@ -211,10 +233,22 @@ public class GridDBDataMapping1 extends GridDBBaseDataMapping {
                 row.setValue(0, obs.getTimeStamp());
                 row.setValue(1, obs.getId());
 
+
+
                 if (obs.getSensor().getType_().getId().equals("Thermometer")) {
                     row.setValue(2, obs.getPayload().get("temperature").getAsInt());
                 } else if (obs.getSensor().getType_().getId().equals("WiFiAP")) {
-                    row.setValue(2, obs.getPayload().get("clientId").getAsString());
+                    String query = String.format("SELECT * FROM %s WHERE timeStamp=TIMESTAMP('%s')",
+                            collectionName, qsdf.format(obs.getTimeStamp()));
+                    List<Row> rowAdded = runQueryWithRows(collectionName, query);
+                    if (rowAdded == null || rowAdded.isEmpty()) {
+                        row.setValue(2, new String[]{obs.getPayload().get("clientId").getAsString()});
+                    } else {
+                        String[] arr = rowAdded.get(0).getStringArray(2);
+                        arr = Arrays.copyOf(arr, arr.length +1);
+                        arr[arr.length-1] = obs.getPayload().get("clientId").getAsString();
+                        row.setValue(2, arr);
+                    }
                 } else if (obs.getSensor().getType_().getId().equals("WeMo")) {
                     row.setValue(2, obs.getPayload().get("currentMilliWatts").getAsInt());
                     row.setValue(3, obs.getPayload().get("onTodaySeconds").getAsInt());

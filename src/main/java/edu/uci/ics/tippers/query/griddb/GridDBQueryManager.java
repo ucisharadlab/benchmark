@@ -63,7 +63,10 @@ public class GridDBQueryManager extends BaseQueryManager {
                     containerInfo = row.getSchema();
                     int columnCount = containerInfo.getColumnCount();
                     for (int i = 0; i < columnCount; i++) {
-                        line.append(row.getValue(i)).append("\t");
+                        if (containerInfo.getColumnInfo(i).getType().equals(GSType.STRING_ARRAY))
+                            line.append(Arrays.toString(row.getStringArray(i))).append("\t");
+                        else
+                            line.append(row.getValue(i)).append("\t");
                     }
                     writer.writeString(line.toString());
                 }
