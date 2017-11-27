@@ -36,7 +36,7 @@ def createPresence(dt, end, step, dataDir):
 
     count = 0
     while dt < end:
-        for j in np.random.choice(numUsers, numUsers/2, replace=False):
+        for j in np.random.choice(numUsers, numUsers, replace=False):
             id = str(uuid.uuid4())
             sobs = {
                 "id": id,

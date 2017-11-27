@@ -26,7 +26,7 @@ def createTemperatureObservations(dt, end, step, dataDir):
     count = 0
     while dt < end:
 
-        for i in np.random.choice(num, num/2, replace=False):
+        for i in np.random.choice(num, num, replace=False):
             pickedSensor = sensors[i]
             id = str(uuid.uuid4())
             obs = {

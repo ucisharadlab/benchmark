@@ -32,7 +32,7 @@ def createWiFiObservations(dt, end, step, dataDir):
     while dt < end:
 
         for i in np.random.choice(numSenors, numSenors/8, replace=False):
-            for j in range(numClients/8):
+            for j in range(8):
                 pickedSensor = sensors[i]
                 id = str(uuid.uuid4())
                 obs = {

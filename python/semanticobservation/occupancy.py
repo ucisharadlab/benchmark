@@ -40,7 +40,7 @@ def createOccupancy(dt, end, step, dataDir):
     count = 0
     while dt < end:
 
-        for j in np.random.choice(numRooms, numRooms/15, replace=False):
+        for j in np.random.choice(numRooms, numRooms, replace=False):
             id = str(uuid.uuid4())
             sobs = {
                 "id": id,
