@@ -84,16 +84,16 @@ public class ReportBuilder {
                 Map<Integer, Duration> queryTimes = runTimes.get(key);
 
                 if (queryTimes == null) {
-                    line += String.format("%10s","None\n");
+                    line += String.format("%10s,","None\n");
                     writer.write(line);
                     writer.write("------------------------------------------------------------------------------------\n");
                     continue;
                 }
                 for (Integer query: queryTimes.keySet()) {
                     if (queryTimes.get(query).compareTo(Constants.MAX_DURATION) < 0 )
-                        line += String.format("%10s", queryTimes.get(query).toMillis());
+                        line += String.format("%10s,", queryTimes.get(query).toMillis());
                     else
-                        line += String.format("%10s",  "KIA" );
+                        line += String.format("%10s,",  "KIA" );
                 }
                 line += "\n";
                 writer.write(line);

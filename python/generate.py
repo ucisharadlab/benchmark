@@ -93,6 +93,11 @@ def createQueries(config):
                 int(config['query']['time-delta']))
     q.generateQueries()
 
+
+def directoryClenaup(config):
+    pass
+
+
 if __name__ == "__main__":
     configFile = sys.argv[1]
     configDict = readConfiguration(configFile)

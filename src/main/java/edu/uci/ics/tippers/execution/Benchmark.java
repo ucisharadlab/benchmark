@@ -28,12 +28,14 @@ import edu.uci.ics.tippers.schema.mongodb.MongoDBSchema;
 import edu.uci.ics.tippers.schema.postgresql.PgSQLSchema;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.log4j.Logger;
 import org.ini4j.Ini;
 import org.ini4j.IniPreferences;
 
 import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.prefs.Preferences;
@@ -42,6 +44,7 @@ import java.util.prefs.Preferences;
  */
 public class Benchmark {
 
+    private static final Logger LOGGER = Logger.getLogger(Benchmark.class);
     private static Map<Pair<Database, Integer>, Map<Integer, Duration>> runTimes = new HashMap<>();
     private static Configuration configuration;
 
@@ -64,6 +67,7 @@ public class Benchmark {
             System.out.println("---------------------------------------------------------------\n");
             System.out.println(String.format("Running Benchmark On %s With Mapping %s",
                     schemaCreator.getDatabase().getName(), schemaCreator.getMapping()));
+            LOGGER.info(schemaCreator.getDatabase().getName());
 
             // Creating schema on a particular database and particular mapping
             System.out.println("Creating Schema ...");
@@ -77,10 +81,12 @@ public class Benchmark {
             // Insert Tests
             System.out.println("Inserting Insert Test Data ...");
             runTimePerMapping.put(Query.INSERT_SINGLE.getQNum(), dataUploader.insertPerformance());
+            LOGGER.info(Arrays.toString(runTimePerMapping.entrySet().toArray()));
 
             // Running benchmark queries and gathering query runtimes
             System.out.println("Running Queries ...");
             runTimePerMapping.putAll(queryManager.runQueries());
+            LOGGER.info(Arrays.toString(runTimePerMapping.entrySet().toArray()));
 
             runTimes.put(new ImmutablePair<>(queryManager.getDatabase(), queryManager.getMapping()), runTimePerMapping);
 

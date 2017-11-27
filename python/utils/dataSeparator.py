@@ -19,6 +19,8 @@ def separateData(percentage, dataDir):
     tempFile = open(dataDir + 'observationTemp.json', 'w')
     insertTestFile = open(dataDir + 'insertTestData.json', 'w')
 
+    print ("Separating Insert Test Data")
+
     lineNum = 1
     for line in obsFile:
         if lineNum == numIngestionLines:
@@ -37,10 +39,14 @@ def separateData(percentage, dataDir):
             else:
                 insertTestFile.write(line)
         lineNum += 1
+        if lineNum % 200000 == 0:
+            print ("{} Lines Processed".format(lineNum))
 
     obsFile.close()
     tempFile.close()
     insertTestFile.close()
+
+    print ("Copying Data File")
 
     shutil.copy2(dataDir + 'observationTemp.json', dataDir + 'observation.json')
     os.remove(dataDir + 'observationTemp.json')
