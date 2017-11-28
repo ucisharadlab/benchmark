@@ -4,16 +4,18 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Indexes;
 import edu.uci.ics.tippers.common.DataFiles;
 import edu.uci.ics.tippers.common.Database;
+import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.common.util.BigJsonReader;
 import edu.uci.ics.tippers.common.util.Converter;
 import edu.uci.ics.tippers.connection.mongodb.DBManager;
 import edu.uci.ics.tippers.data.BaseDataUploader;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.model.observation.Observation;
-import edu.uci.ics.tippers.model.platform.Platform;
 import edu.uci.ics.tippers.model.semanticObservation.SemanticObservation;
+import org.apache.log4j.Logger;
 import org.bson.Document;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -33,6 +35,8 @@ public class MongoDBDataUploader extends BaseDataUploader{
     private MongoDatabase database;
     private static String datePattern = "yyyy-MM-dd'T'HH:mm:ss'Z'";
     private static SimpleDateFormat sdf = new SimpleDateFormat(datePattern);
+    private static final Logger LOGGER = Logger.getLogger(MongoDBDataUploader.class);
+
 
     public MongoDBDataUploader(int mapping, String dataDir) {
         super(mapping, dataDir);
@@ -88,6 +92,7 @@ public class MongoDBDataUploader extends BaseDataUploader{
                 .registerTypeAdapter(JSONObject.class, Converter.<JSONObject>getJSONSerializer())
                 .create();
         Observation obs;
+        int count = 0;
         while ((obs = reader.readNext()) != null) {
 
             Document docToInsert = Document.parse(gson.toJson(obs, Observation.class));
@@ -103,6 +108,9 @@ public class MongoDBDataUploader extends BaseDataUploader{
             }
 
             collection.insertOne(docToInsert);
+
+            if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s S Observations", count));
+            count ++;
         }
     }
 
@@ -116,6 +124,7 @@ public class MongoDBDataUploader extends BaseDataUploader{
                 .registerTypeAdapter(JSONObject.class, Converter.<JSONObject>getJSONSerializer())
                 .create();
         SemanticObservation obs;
+        int count = 0;
         while ((obs = reader.readNext()) != null) {
 
             Document docToInsert = Document.parse(gson.toJson(obs, SemanticObservation.class));
@@ -135,6 +144,9 @@ public class MongoDBDataUploader extends BaseDataUploader{
             }
 
             collection.insertOne(docToInsert);
+
+            if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s S Observations", count));
+            count ++;
         }
     }
 
@@ -243,6 +255,9 @@ public class MongoDBDataUploader extends BaseDataUploader{
 
     @Override
     public void addObservationData() throws BenchmarkException {
+        MongoCollection collection = database.getCollection("Observation");
+        collection.createIndex(Indexes.ascending("timeStamp"));
+
         addObservations("Observation", DataFiles.OBS);
     }
 
@@ -262,11 +277,17 @@ public class MongoDBDataUploader extends BaseDataUploader{
 
     @Override
     public void addSemanticObservationData() {
+        MongoCollection collection = database.getCollection("SemanticObservation");
+        collection.createIndex(Indexes.ascending("timeStamp"));
+
         addSemanticObservations("SemanticObservation", DataFiles.SO);
+
     }
 
     @Override
     public Duration insertPerformance() throws BenchmarkException {
+        LOGGER.info("Inserting Insert Test Data");
+
         Instant start = Instant.now();
         addObservations("Observation", DataFiles.INSERT_TEST);
         Instant end = Instant.now();

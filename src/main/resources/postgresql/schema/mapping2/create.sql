@@ -183,4 +183,10 @@ CREATE TABLE PRESENCE (
    FOREIGN KEY (semantic_entity_id) REFERENCES USERS (ID)
 ) ;
 
+CREATE INDEX wifi_timestamp_idx ON WiFiAPObservation(timeStamp);
+CREATE INDEX wemo_timestamp_idx ON WeMoObservation(timeStamp);
+CREATE INDEX temp_timestamp_idx ON ThermometerObservation(timeStamp);
+
+CREATE INDEX presence_timestamp_idx ON PRESENCE(timeStamp);
+CREATE INDEX occupancy_timestamp_idx ON OCCUPANCY(timeStamp);
 

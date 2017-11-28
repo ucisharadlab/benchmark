@@ -13,6 +13,7 @@ public class GridDBSchemaMapping2 extends GridDBBaseSchemaMapping {
 
     private JSONParser parser = new JSONParser();
     private EnumSet<IndexType> indexSet = EnumSet.of(IndexType.HASH);
+    private EnumSet<IndexType> treeIndex = EnumSet.of(IndexType.TREE);
 
     public GridDBSchemaMapping2(GridStore gridStore, String dataDir) {
         super(gridStore, dataDir);
@@ -138,7 +139,7 @@ public class GridDBSchemaMapping2 extends GridDBBaseSchemaMapping {
         containerInfo.setType(ContainerType.COLLECTION);
 
         columnInfoList.add(new ColumnInfo("id", GSType.STRING, indexSet));
-        columnInfoList.add(new ColumnInfo("timeStamp", GSType.TIMESTAMP));
+        columnInfoList.add(new ColumnInfo("timeStamp", GSType.TIMESTAMP, treeIndex));
         columnInfoList.add(new ColumnInfo("sensorId", GSType.STRING));
         columnInfoList.add(new ColumnInfo("clientId", GSType.STRING));
 
@@ -153,7 +154,7 @@ public class GridDBSchemaMapping2 extends GridDBBaseSchemaMapping {
         containerInfo.setType(ContainerType.COLLECTION);
 
         columnInfoList.add(new ColumnInfo("id", GSType.STRING, indexSet));
-        columnInfoList.add(new ColumnInfo("timeStamp", GSType.TIMESTAMP));
+        columnInfoList.add(new ColumnInfo("timeStamp", GSType.TIMESTAMP, treeIndex));
         columnInfoList.add(new ColumnInfo("sensorId", GSType.STRING));
         columnInfoList.add(new ColumnInfo("currentMilliWatts", GSType.INTEGER));
         columnInfoList.add(new ColumnInfo("onTodaySeconds", GSType.INTEGER));
@@ -170,7 +171,7 @@ public class GridDBSchemaMapping2 extends GridDBBaseSchemaMapping {
         containerInfo.setType(ContainerType.COLLECTION);
 
         columnInfoList.add(new ColumnInfo("id", GSType.STRING, indexSet));
-        columnInfoList.add(new ColumnInfo("timeStamp", GSType.TIMESTAMP));
+        columnInfoList.add(new ColumnInfo("timeStamp", GSType.TIMESTAMP, treeIndex));
         columnInfoList.add(new ColumnInfo("sensorId", GSType.STRING));
         columnInfoList.add(new ColumnInfo("temperature", GSType.INTEGER));
 
@@ -243,7 +244,7 @@ public class GridDBSchemaMapping2 extends GridDBBaseSchemaMapping {
         containerInfo.setType(ContainerType.COLLECTION);
 
         columnInfoList.add(new ColumnInfo("id", GSType.STRING, indexSet));
-        columnInfoList.add(new ColumnInfo("timeStamp", GSType.TIMESTAMP));
+        columnInfoList.add(new ColumnInfo("timeStamp", GSType.TIMESTAMP, treeIndex));
         columnInfoList.add(new ColumnInfo("virtualSensorId", GSType.STRING));
         columnInfoList.add(new ColumnInfo("location", GSType.STRING));
         columnInfoList.add(new ColumnInfo("semanticEntityId", GSType.STRING));
@@ -259,7 +260,7 @@ public class GridDBSchemaMapping2 extends GridDBBaseSchemaMapping {
         containerInfo.setType(ContainerType.COLLECTION);
 
         columnInfoList.add(new ColumnInfo("id", GSType.STRING, indexSet));
-        columnInfoList.add(new ColumnInfo("timeStamp", GSType.TIMESTAMP));
+        columnInfoList.add(new ColumnInfo("timeStamp", GSType.TIMESTAMP, treeIndex));
         columnInfoList.add(new ColumnInfo("virtualSensorId", GSType.STRING));
         columnInfoList.add(new ColumnInfo("occupancy", GSType.INTEGER));
         columnInfoList.add(new ColumnInfo("semanticEntityId", GSType.STRING));

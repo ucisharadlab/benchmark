@@ -171,6 +171,9 @@ PRIMARY KEY id;
 CREATE DATASET SemanticObservation(SemanticObservationType)
 PRIMARY KEY id;
 
+CREATE INDEX obs_timestamp_idx ON Observation(timeStamp);
+CREATE INDEX so_timestamp_idx ON SemanticObservation(timeStamp);
+
 CREATE FEED ObservationFeed using socket_adapter
     (
        ("sockets"="127.0.0.1:39011"),

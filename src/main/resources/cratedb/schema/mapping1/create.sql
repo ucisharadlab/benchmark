@@ -95,7 +95,7 @@ CREATE TABLE IF NOT EXISTS COVERAGE_INFRASTRUCTURE (
 CREATE TABLE IF NOT EXISTS OBSERVATION (
   id string NOT NULL,
   payload object ,
-  timeStamp timestamp NOT NULL,
+  timeStamp timestamp NOT NULL INDEX using plain,
   sensor_id string ,
   PRIMARY KEY (id)
 ) CLUSTERED INTO 1 shards WITH ( number_of_replicas = 0 );
@@ -130,7 +130,7 @@ CREATE TABLE IF NOT EXISTS SEMANTIC_OBSERVATION (
   id string NOT NULL,
   semantic_entity_id string NOT NULL,
   payload object,
-  timeStamp timestamp NOT NULL,
+  timeStamp timestamp NOT NULL INDEX using plain,
   virtual_sensor_id string,
   type_id string,
   PRIMARY KEY (id)

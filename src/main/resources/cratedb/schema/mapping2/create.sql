@@ -97,7 +97,7 @@ CREATE TABLE WeMoObservation (
   id string NOT NULL,
   currentMilliWatts integer ,
   onTodaySeconds integer,
-  timeStamp timestamp NOT NULL,
+  timeStamp timestamp NOT NULL INDEX using plain,
   sensor_id string,
   PRIMARY KEY (id)
 ) ;
@@ -105,7 +105,7 @@ CREATE TABLE WeMoObservation (
 CREATE TABLE WiFiAPObservation (
   id string NOT NULL,
   clientId string ,
-  timeStamp timestamp NOT NULL,
+  timeStamp timestamp NOT NULL INDEX using plain,
   sensor_id string ,
   PRIMARY KEY (id)
 ) ;
@@ -113,7 +113,7 @@ CREATE TABLE WiFiAPObservation (
 CREATE TABLE ThermometerObservation (
   id string NOT NULL,
   temperature integer ,
-  timeStamp timestamp NOT NULL,
+  timeStamp timestamp NOT NULL INDEX using plain,
   sensor_id string,
   PRIMARY KEY (id)
 ) ;
@@ -148,7 +148,7 @@ CREATE TABLE IF NOT EXISTS PRESENCE (
   id string NOT NULL,
   semantic_entity_id string NOT NULL,
   location string,
-  timeStamp timestamp NOT NULL,
+  timeStamp timestamp NOT NULL INDEX using plain,
   virtual_sensor_id string,
   PRIMARY KEY (id)
 ) ;
@@ -157,7 +157,7 @@ CREATE TABLE IF NOT EXISTS OCCUPANCY (
   id string NOT NULL,
   semantic_entity_id string NOT NULL,
   occupancy integer,
-  timeStamp timestamp NOT NULL,
+  timeStamp timestamp NOT NULL INDEX using plain,
   virtual_sensor_id string,
   PRIMARY KEY (id)
 ) ;
