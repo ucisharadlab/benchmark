@@ -4,6 +4,7 @@ import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.connection.asterixdb.AsterixDBConnectionManager;
 import org.apache.commons.text.StringEscapeUtils;
 
+import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
@@ -35,7 +36,7 @@ public class AsterixDataFeed {
 
         try {
             client = new Socket(Constants.ASTERIX_FEED_IP, Constants.ASTERIX_FEED_PORT);
-            outputStream = new DataOutputStream(client.getOutputStream());
+            outputStream = new DataOutputStream(new BufferedOutputStream(client.getOutputStream()));
         }
         catch (IOException e) {
             System.out.println(e);
