@@ -88,9 +88,16 @@ CREATE TYPE SensorType As {
     sensorConfig: string
 };
 
+CREATE TYPE SubSensorType As {
+    id: string,
+    name: string,
+    type_: SensorTypeType,
+};
+
+
 CREATE TYPE ObservationType AS {
 	id: string,
-	sensor: SensorType,
+	sensor: SubSensorType,
 	payload: PayloadType,
 	timeStamp: datetime
 };
@@ -111,7 +118,6 @@ CREATE TYPE VirtualSensorTypeType AS {
 	semanticObservationType: SemanticObservationTypeType
 };
 
-
 CREATE TYPE VirtualSensorType As {
     id: string,
     name: string,
@@ -123,7 +129,7 @@ CREATE TYPE VirtualSensorType As {
 
 CREATE TYPE SemanticObservationType AS {
 	id: string,
-	virtualSensor: VirtualSensorType,
+	virtualSensorId: string,
 	payload: PayloadType,
 	timeStamp: datetime,
 	semanticEntity: SemanticEntityType,

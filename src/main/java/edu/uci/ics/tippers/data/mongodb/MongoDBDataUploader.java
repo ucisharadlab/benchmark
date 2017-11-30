@@ -100,6 +100,10 @@ public class MongoDBDataUploader extends BaseDataUploader{
 
             switch (mapping) {
                 case 1:
+                    docToInsert.put("sensor", new Document()
+                            .append("id", ((Document)docToInsert.get("sensor")).getString("id"))
+                            .append("name",((Document)docToInsert.get("sensor")).getString("name"))
+                            .append("type_", ((Document)docToInsert.get("sensor")).get("type_")));
                     break;
                 case 2:
                     docToInsert.put("sensorId", ((Document)docToInsert.get("sensor")).getString("id"));
@@ -132,6 +136,9 @@ public class MongoDBDataUploader extends BaseDataUploader{
 
             switch (mapping) {
                 case 1:
+                    docToInsert.put("virtualSensorId", ((Document)docToInsert.get("virtualSensor")).getString("id"));
+                    docToInsert.remove("virtualSensor");
+                    ((Document)docToInsert.get("semanticEntity")).remove("geometry");
                     break;
                 case 2:
                     docToInsert.put("virtualSensorId", ((Document)docToInsert.get("virtualSensor")).getString("id"));
