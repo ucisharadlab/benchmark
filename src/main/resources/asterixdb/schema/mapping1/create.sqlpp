@@ -91,7 +91,7 @@ CREATE TYPE SensorType As {
 CREATE TYPE SubSensorType As {
     id: string,
     name: string,
-    type_: SensorTypeType,
+    type_: SensorTypeType
 };
 
 
