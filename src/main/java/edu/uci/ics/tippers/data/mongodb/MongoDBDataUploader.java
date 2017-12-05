@@ -93,11 +93,13 @@ public class MongoDBDataUploader extends BaseDataUploader{
                 .create();
         Observation obs;
         int count = 0;
+        List<Document> documents = new ArrayList<>();
         while ((obs = reader.readNext()) != null) {
 
             Document docToInsert = Document.parse(gson.toJson(obs, Observation.class));
-            docToInsert.put("timeStamp", obs.getTimeStamp());
-
+            docToInsert.put("_id", obs.getId());
+	        docToInsert.remove("id");
+	        docToInsert.put("timeStamp", obs.getTimeStamp());
             switch (mapping) {
                 case 1:
                     docToInsert.put("sensor", new Document()
@@ -111,11 +113,19 @@ public class MongoDBDataUploader extends BaseDataUploader{
                     break;
             }
 
-            collection.insertOne(docToInsert);
+            documents.add(docToInsert);
+
+            if (count % Constants.MONGO_BATCH_SIZE == 0) {
+                collection.insertMany(documents);
+                documents = new ArrayList<>();
+            }
 
             if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s S Observations", count));
             count ++;
         }
+
+        collection.insertMany(documents);
+
     }
 
     private void addSemanticObservations(String collectionName, DataFiles dataFile) {
@@ -129,9 +139,12 @@ public class MongoDBDataUploader extends BaseDataUploader{
                 .create();
         SemanticObservation obs;
         int count = 0;
+        List<Document> documents = new ArrayList<>();
         while ((obs = reader.readNext()) != null) {
 
             Document docToInsert = Document.parse(gson.toJson(obs, SemanticObservation.class));
+            docToInsert.put("_id", obs.getId());
+	        docToInsert.remove("id");
             docToInsert.put("timeStamp", obs.getTimeStamp());
 
             switch (mapping) {
@@ -150,11 +163,19 @@ public class MongoDBDataUploader extends BaseDataUploader{
                     break;
             }
 
-            collection.insertOne(docToInsert);
+            documents.add(docToInsert);
+
+            if (count % Constants.MONGO_BATCH_SIZE == 0) {
+                collection.insertMany(documents);
+                documents = new ArrayList<>();
+            }
 
             if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s S Observations", count));
             count ++;
         }
+
+        collection.insertMany(documents);
+
     }
 
     @Override
