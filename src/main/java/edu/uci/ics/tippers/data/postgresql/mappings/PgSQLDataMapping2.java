@@ -256,7 +256,6 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
             PreparedStatement wemoStmt = connection.prepareStatement(wemoInsert);
             PreparedStatement temStmt = connection.prepareStatement(temperatureInsert);
 
-            int batchSize = 100;
             int wifiCount = 0, wemoCount = 0, thermoCount = 0, count = 0;
             while ((obs = reader.readNext()) != null) {
 
@@ -284,11 +283,11 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
                     wemoCount ++;
                 }
 
-                if (wemoCount % batchSize == 0)
+                if (wemoCount % Constants.PGSQL_BATCH_SIZE == 0)
                     wemoStmt.executeBatch();
-                if (wifiCount % batchSize == 0)
+                if (wifiCount % Constants.PGSQL_BATCH_SIZE == 0)
                     wifiStmt.executeBatch();
-                if (thermoCount % batchSize == 0)
+                if (thermoCount % Constants.PGSQL_BATCH_SIZE == 0)
                     temStmt.executeBatch();
 
                 if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s Observations", count));
@@ -429,7 +428,6 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
             PreparedStatement presenceStmt = connection.prepareStatement(presenceInsert);
             PreparedStatement occupancyStmt = connection.prepareStatement(occupancyInsert);
 
-            int batchSize = 100;
             int presenceCount = 0, occupancyCount = 0, count = 0;
             while ((sobs = reader.readNext()) != null) {
 
@@ -452,9 +450,9 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
                     occupancyCount ++;
                 }
 
-                if (presenceCount % batchSize == 0)
+                if (presenceCount % Constants.PGSQL_BATCH_SIZE == 0)
                     presenceStmt.executeBatch();
-                if (occupancyCount % batchSize == 0)
+                if (occupancyCount % Constants.PGSQL_BATCH_SIZE == 0)
                     occupancyStmt.executeBatch();
 
                 if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s S Observations", count));
@@ -493,7 +491,6 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
             PreparedStatement wemoStmt = connection.prepareStatement(wemoInsert);
             PreparedStatement temStmt = connection.prepareStatement(temperatureInsert);
 
-            int batchSize = 100;
             int wifiCount = 0, wemoCount = 0, thermoCount = 0;
             while ((obs = reader.readNext()) != null) {
 
@@ -521,11 +518,11 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
                     wemoCount ++;
                 }
 
-                if (wemoCount % batchSize == 0)
+                if (wemoCount % Constants.PGSQL_BATCH_SIZE == 0)
                     wemoStmt.executeBatch();
-                if (wifiCount % batchSize == 0)
+                if (wifiCount % Constants.PGSQL_BATCH_SIZE == 0)
                     wifiStmt.executeBatch();
-                if (thermoCount % batchSize == 0)
+                if (thermoCount % Constants.PGSQL_BATCH_SIZE == 0)
                     temStmt.executeBatch();
             }
             wemoStmt.executeBatch();

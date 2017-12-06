@@ -248,7 +248,6 @@ public class PgSQLDataMapping1 extends PgSQLBaseDataMapping {
             Observation obs = null;
 
             stmt = connection.prepareStatement(insert);
-            int batchSize = 100;
             int count = 0;
             while ((obs = reader.readNext()) != null) {
 
@@ -259,7 +258,7 @@ public class PgSQLDataMapping1 extends PgSQLBaseDataMapping {
                 stmt.addBatch();
 
                 count ++;
-                if (count % batchSize == 0)
+                if (count % Constants.PGSQL_BATCH_SIZE == 0)
                     stmt.executeBatch();
 
                 if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s Observations", count));
@@ -388,7 +387,6 @@ public class PgSQLDataMapping1 extends PgSQLBaseDataMapping {
             insert = "INSERT INTO SEMANTIC_OBSERVATION " +
                     "(ID, SEMANTIC_ENTITY_ID, PAYLOAD, TIMESTAMP, VIRTUAL_SENSOR_ID, TYPE_ID) VALUES (?, ?, ?::JSON, ?, ?, ?)";
             stmt = connection.prepareStatement(insert);
-            int batchSize = 100;
             int count = 0;
             while ((sobs = reader.readNext()) != null) {
 
@@ -402,7 +400,7 @@ public class PgSQLDataMapping1 extends PgSQLBaseDataMapping {
                 stmt.addBatch();
 
                 count ++;
-                if (count % batchSize == 0)
+                if (count % Constants.PGSQL_BATCH_SIZE == 0)
                     stmt.executeBatch();
 
                 if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s S Observations", count));
@@ -432,7 +430,6 @@ public class PgSQLDataMapping1 extends PgSQLBaseDataMapping {
             Observation obs = null;
 
             stmt = connection.prepareStatement(insert);
-            int batchSize = 100;
             int count = 0;
             while ((obs = reader.readNext()) != null) {
 
@@ -443,7 +440,7 @@ public class PgSQLDataMapping1 extends PgSQLBaseDataMapping {
                 stmt.addBatch();
 
                 count ++;
-                if (count % batchSize == 0)
+                if (count % Constants.PGSQL_BATCH_SIZE == 0)
                     stmt.executeBatch();
             }
             stmt.executeBatch();
