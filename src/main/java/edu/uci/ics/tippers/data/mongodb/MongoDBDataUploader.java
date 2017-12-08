@@ -78,6 +78,8 @@ public class MongoDBDataUploader extends BaseDataUploader{
         JSONArray jsonArray = new JSONArray(values);
         jsonArray.forEach(e-> {
             Document docToInsert = Document.parse(e.toString());
+            docToInsert.put("_id", docToInsert.getString("id"));
+            docToInsert.remove("id");
             documents.add(docToInsert);
         });
         collection.insertMany(documents);
