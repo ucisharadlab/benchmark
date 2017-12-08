@@ -1,13 +1,9 @@
 package edu.uci.ics.tippers.query.mongodb;
 
-import com.mongodb.Mongo;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoIterable;
-import com.mongodb.client.model.Accumulators;
-import com.mongodb.client.model.Aggregates;
 import edu.uci.ics.tippers.common.Database;
-import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.connection.mongodb.DBManager;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.query.BaseQueryManager;
@@ -16,16 +12,19 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 import java.util.function.Consumer;
 
-import static com.mongodb.client.model.Accumulators.*;
-import static com.mongodb.client.model.Filters.*;
+import static com.mongodb.client.model.Accumulators.avg;
+import static com.mongodb.client.model.Accumulators.sum;
 import static com.mongodb.client.model.Aggregates.*;
+import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Projections.*;
 import static edu.uci.ics.tippers.common.util.Helper.getFileFromQuery;
 
@@ -77,7 +76,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
                 Instant start = Instant.now();
 
                 MongoCollection<Document> collection = database.getCollection("Sensor");
-                MongoIterable<Document> iterable = collection.find(eq("id", sensorId))
+                MongoIterable<Document> iterable = collection.find(eq("_id", sensorId))
                         .projection(new Document("name", 1).append("_id", 0));
 
                 getResults(iterable, 1);
@@ -98,8 +97,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
                         eq("type_.name", sensorTypeName),
                         in("coverage.id", locationIds)))
                         .projection(new Document("name", 1)
-                                .append("_id", 0)
-                                .append("id", 1));
+                                .append("_id", 1));
 
                 getResults(iterable, 2);
 
@@ -113,8 +111,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
                         eq("type_.name", sensorTypeName),
                         in("coverage", locationIds)))
                         .projection(new Document("name", 1)
-                                .append("_id", 0)
-                                .append("id", 1));
+                                .append("_id", 1));
 
                 getResults(iterable, 2);
 
@@ -408,7 +405,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
                 cal.add(Calendar.DATE, 1);
                 endTime = cal.getTime();
 
-                Bson lookUp1 = lookup("SemanticObservationType", "typeId", "id", "type_");
+                Bson lookUp1 = lookup("SemanticObservationType", "typeId", "_id", "type_");
 
                 match1 = match(and(
                         eq("type_.name", "presence"),
@@ -444,7 +441,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
                 ));
 
                 Bson lookUp3 = lookup("User", "semanticEntityId",
-                        "id", "semanticEntity");
+                        "_id", "semanticEntity");
 
                 Bson unwind2 = unwind("$semanticEntity");
 
@@ -535,7 +532,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
                 cal.add(Calendar.DATE, 1);
                 endTime = cal.getTime();
 
-                Bson lookUp1 = lookup("SemanticObservationType", "typeId", "id", "type_");
+                Bson lookUp1 = lookup("SemanticObservationType", "typeId", "_id", "type_");
 
                 match1 = match(and(
                         eq("type_.name", "presence"),
@@ -571,7 +568,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
                 ));
 
                 Bson lookUp3 = lookup("User", "semantics.semanticEntityId",
-                        "id", "semanticEntity");
+                        "_id", "semanticEntity");
 
                 Bson unwind2 = unwind("$semanticEntity");
 
@@ -602,7 +599,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
 
                 MongoCollection<Document> collection = database.getCollection("SemanticObservation");
 
-                Bson lookUp1 = lookup("Infrastructure", "payload.location", "id", "infra");
+                Bson lookUp1 = lookup("Infrastructure", "payload.location", "_id", "infra");
 
                 Bson unwind = unwind("$infra");
 
@@ -636,7 +633,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
 
                 collection = database.getCollection("SemanticObservation");
 
-                lookUp1 = lookup("Infrastructure", "payload.location", "id", "infra");
+                lookUp1 = lookup("Infrastructure", "payload.location", "_id", "infra");
 
                 unwind = unwind("$infra");
 
@@ -706,7 +703,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
 
                 collection = database.getCollection("SemanticObservation");
 
-                Bson lookUp1 = lookup("SemanticObservationType", "typeId", "id", "type_");
+                Bson lookUp1 = lookup("SemanticObservationType", "typeId", "_id", "type_");
 
                 match = match(and(
                         gt("timeStamp", startTime),
@@ -718,7 +715,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
 
                 sort = sort(new Document("semanticEntityId", 1).append("timeStamp", 1));
 
-                Bson lookUp2 = lookup("Infrastructure", "semanticEntityId", "id", "infra");
+                Bson lookUp2 = lookup("Infrastructure", "semanticEntityId", "_id", "infra");
 
                 Bson unwind = unwind("$infra");
 
