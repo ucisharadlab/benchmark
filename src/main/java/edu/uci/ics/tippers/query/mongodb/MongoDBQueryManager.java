@@ -239,14 +239,14 @@ public class MongoDBQueryManager extends BaseQueryManager{
 
                 collection = database.getCollection("Observation");
 
-                Bson lookUp = lookup("Sensor", "sensorId", "id", "sensors");
+                Bson lookUp = lookup("Sensor", "sensorId", "_id", "sensors");
 
                 Bson match = match(and(
                         eq("sensors.type_.name", sensorTypeName),
                         gt("timeStamp", startTime),
                         lt("timeStamp", endTime),
-                        gt(String.format("payload.%s", payloadAttribute), startPayloadValue),
-                        lt(String.format("payload.%s", payloadAttribute), endPayloadValue)
+                        gte(String.format("payload.%s", payloadAttribute), startPayloadValue),
+                        lte(String.format("payload.%s", payloadAttribute), endPayloadValue)
                 ));
 
                 Bson project = project(
