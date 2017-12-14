@@ -240,6 +240,9 @@ public class MongoDBDataUploader extends BaseDataUploader{
                     entities.forEach(entity->entityIds.put(entity.getString("id")));
                     docToInsert.put("coverage", entityIds);
 
+                    docToInsert.put("_id", docToInsert.getString("id"));
+                    docToInsert.remove("id");
+
                     documents.add(docToInsert);
                 });
                 collection.insertMany(documents);
@@ -274,6 +277,10 @@ public class MongoDBDataUploader extends BaseDataUploader{
                     Document docToInsert = Document.parse(e.toString());
                     docToInsert.put("ownerId", ((Document)docToInsert.get("owner")).getString("id"));
                     docToInsert.remove("owner");
+
+                    docToInsert.put("_id", docToInsert.getString("id"));
+                    docToInsert.remove("id");
+
                     documents.add(docToInsert);
                 });
                 collection.insertMany(documents);

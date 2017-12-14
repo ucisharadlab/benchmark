@@ -245,8 +245,8 @@ public class MongoDBQueryManager extends BaseQueryManager{
                         eq("sensors.type_.name", sensorTypeName),
                         gt("timeStamp", startTime),
                         lt("timeStamp", endTime),
-                        gt(String.format("payload.%s", payloadAttribute), startPayloadValue),
-                        lt(String.format("payload.%s", payloadAttribute), endPayloadValue)
+                        gte(String.format("payload.%s", payloadAttribute), startPayloadValue),
+                        lte(String.format("payload.%s", payloadAttribute), endPayloadValue)
                 ));
 
                 Bson project = project(

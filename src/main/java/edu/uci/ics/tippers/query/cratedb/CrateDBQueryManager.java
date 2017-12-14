@@ -1,7 +1,6 @@
 package edu.uci.ics.tippers.query.cratedb;
 
 import edu.uci.ics.tippers.common.Database;
-import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.connection.cratedb.CrateDBConnectionManager;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.query.BaseQueryManager;
@@ -137,7 +136,7 @@ public class CrateDBQueryManager extends BaseQueryManager {
                         stmt.setArray(3, sensorIdArray);
                         externalQueryManager.runTimedQuery(stmt, 4);
                     }
-                    else if ("WeMo".equals(typeId)) {
+                    else if (!wemoSensors.isEmpty()) {
                         query = "SELECT timeStamp, currentMilliWatts, onTodaySeconds FROM WeMoObservation  WHERE timestamp>? AND timestamp<? " +
                                 "AND SENSOR_ID=ANY(?)";
                         stmt = connection.prepareStatement(query);
@@ -148,7 +147,7 @@ public class CrateDBQueryManager extends BaseQueryManager {
                         stmt.setArray(3, sensorIdArray);
                         externalQueryManager.runTimedQuery(stmt, 4);
                     }
-                    else if ("WiFiAP".equals(typeId)) {
+                    else if (!wifiSensors.isEmpty()) {
                         query = "SELECT timeStamp, clientId FROM WiFiAPObservation  WHERE timestamp>? AND timestamp<? " +
                                 "AND SENSOR_ID=ANY(?)";
                         stmt = connection.prepareStatement(query);
@@ -176,6 +175,28 @@ public class CrateDBQueryManager extends BaseQueryManager {
                               Object startPayloadValue, Object endPayloadValue) throws BenchmarkException {
         switch (mapping) {
             case 1:
+                String query = String.format("SELECT timeStamp, payload FROM OBSERVATION o, SENSOR s, SENSOR_TYPE st  " +
+                                "WHERE s.id = o.sensor_id AND s.sensor_type_id=st.id AND st.name=? AND " +
+                                "timestamp>? AND timestamp<? AND payload['%s'] >= ? AND payload['%s'] <= ? ",
+                        payloadAttribute, payloadAttribute);
+                try {
+                    PreparedStatement stmt = connection.prepareStatement(query);
+
+                    stmt.setString(1, sensorTypeName);
+                    stmt.setTimestamp(2, new Timestamp(startTime.getTime()));
+                    stmt.setTimestamp(3, new Timestamp(endTime.getTime()));
+                    if (startPayloadValue instanceof  Integer) {
+                        stmt.setInt(4, (Integer) startPayloadValue);
+                        stmt.setInt(5, (Integer) endPayloadValue);
+                    } else if (startPayloadValue instanceof  Double) {
+                        stmt.setDouble(4, (Double) startPayloadValue);
+                        stmt.setDouble(5, (Double) endPayloadValue);
+                    }
+                    return externalQueryManager.runTimedQuery(stmt, 5);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
             case 2:
                 return externalQueryManager.runQuery5(sensorTypeName, startTime, endTime, payloadAttribute,
                         startPayloadValue, endPayloadValue);
@@ -247,7 +268,7 @@ public class CrateDBQueryManager extends BaseQueryManager {
                         stmt.setArray(3, sensorIdArray);
                         externalQueryManager.runTimedQuery(stmt, 6);
                     }
-                    else if ("WeMo".equals(typeId)) {
+                    else if (!wemoSensors.isEmpty()) {
                         query = "SELECT obs.sensor_id, avg(counts) FROM " +
                                 "(SELECT sensor_id, date_trunc('day', timestamp), " +
                                 "count(*) as counts " +
@@ -262,7 +283,7 @@ public class CrateDBQueryManager extends BaseQueryManager {
                         stmt.setArray(3, sensorIdArray);
                         externalQueryManager.runTimedQuery(stmt, 6);
                     }
-                    else if ("WiFiAP".equals(typeId)) {
+                    else if (!wifiSensors.isEmpty()) {
                         query = "SELECT obs.sensor_id, avg(counts) FROM " +
                                 "(SELECT sensor_id, date_trunc('day', timestamp), " +
                                 "count(*) as counts " +

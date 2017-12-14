@@ -1,12 +1,10 @@
 package edu.uci.ics.tippers.query.postgresql;
 
 import edu.uci.ics.tippers.common.Database;
-import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.connection.postgresql.PgSQLConnectionManager;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.query.BaseQueryManager;
 import edu.uci.ics.tippers.writer.RowWriter;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.sql.*;
@@ -270,67 +268,31 @@ public class PgSQLQueryManager extends BaseQueryManager{
                               Object startPayloadValue, Object endPayloadValue) throws BenchmarkException {
         switch (mapping) {
             case 1:
-                Instant start = Instant.now();
-                String query = "SELECT timeStamp, payload FROM OBSERVATION o, SENSOR s, SENSOR_TYPE st  " +
+                String query = String.format("SELECT timeStamp, payload FROM OBSERVATION o, SENSOR s, SENSOR_TYPE st  " +
                         "WHERE s.id = o.sensor_id AND s.sensor_type_id=st.id AND st.name=? AND " +
-                        "timestamp>? AND timestamp<? ";
+                        "timestamp>? AND timestamp<? AND payload ->> '%s' >= ? AND payload ->> '%s' <= ? ",
+                        payloadAttribute, payloadAttribute);
                 try {
                     PreparedStatement stmt = connection.prepareStatement(query);
 
                     stmt.setString(1, sensorTypeName);
                     stmt.setTimestamp(2, new Timestamp(startTime.getTime()));
                     stmt.setTimestamp(3, new Timestamp(endTime.getTime()));
-
-                    ResultSet rs = stmt.executeQuery();
-                    ResultSetMetaData rsmd = rs.getMetaData();
-                    int columnsNumber = rsmd.getColumnCount();
-                    int payloadColNum = 1;
-
-                    for(int i = 1; i <= columnsNumber; i++) {
-                        if ("payload".equals(rsmd.getColumnName(i))) {
-                            payloadColNum = i;
-                        }
+                    if (startPayloadValue instanceof  Integer) {
+                        stmt.setInt(4, (Integer) startPayloadValue);
+                        stmt.setInt(5, (Integer) endPayloadValue);
+                    } else if (startPayloadValue instanceof  Double) {
+                        stmt.setDouble(4, (Double) startPayloadValue);
+                        stmt.setDouble(5, (Double) endPayloadValue);
                     }
-                    RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(5));
-                    while(rs.next()) {
-                        JSONObject payload = new JSONObject(rs.getString(payloadColNum));
-
-                        if (startPayloadValue instanceof  Integer) {
-                            if (payload.getInt(payloadAttribute) >= (Integer)startPayloadValue
-                                    && payload.getInt(payloadAttribute) <= (Integer)endPayloadValue) {
-                                if (writeOutput) {
-                                    StringBuilder line = new StringBuilder("");
-                                    for(int i = 1; i <= columnsNumber; i++)
-                                        line.append(rs.getString(i)).append("\t");
-                                    writer.writeString(line.toString());
-                                }
-                            }
-
-                        } else if (startPayloadValue instanceof  Double) {
-                            if (payload.getDouble(payloadAttribute) >= (Double)startPayloadValue
-                                    && payload.getDouble(payloadAttribute) <= (Double)endPayloadValue) {
-                                if (writeOutput) {
-                                    StringBuilder line = new StringBuilder("");
-                                    for(int i = 1; i <= columnsNumber; i++)
-                                        line.append(rs.getString(i)).append("\t");
-                                    writer.writeString(line.toString());
-                                }
-                            }
-
-                        }
-                    }
-                    writer.close();
-                    rs.close();
-                    Instant end = Instant.now();
-                    return Duration.between(start, end);
-                } catch (SQLException | IOException e) {
+                    return runTimedQuery(stmt, 5);
+                } catch (SQLException e) {
                     e.printStackTrace();
                     throw new BenchmarkException("Error Running Query");
                 }
             case 2:
-
                 query = String.format("SELECT * FROM %sOBSERVATION o " +
-                        "WHERE timestamp>? AND timestamp<? AND %s>? AND %s<?", sensorTypeName,
+                        "WHERE timestamp>? AND timestamp<? AND %s>=? AND %s<=?", sensorTypeName,
                         payloadAttribute, payloadAttribute);
                 try {
                     PreparedStatement stmt = connection.prepareStatement(query);
