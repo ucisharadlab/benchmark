@@ -239,7 +239,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
 
                 collection = database.getCollection("Observation");
 
-                Bson lookUp = lookup("Sensor", "sensorId", "id", "sensors");
+                Bson lookUp = lookup("Sensor", "sensorId", "_id", "sensors");
 
                 Bson match = match(and(
                         eq("sensors.type_.name", sensorTypeName),
@@ -292,7 +292,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
                         )
                 );
 
-                Bson group1 = group(new Document("date", "$date").append("sensorId", "$sensor.id"),
+                Bson group1 = group(new Document("sensorId", "$sensor.id").append("date", "$date"),
                         sum("count", 1));
                 Bson group2 = group(new Document("sensorId", "$_id.sensorId"), avg("averagePerDay", "$count"));
 
@@ -324,7 +324,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
                         )
                 );
 
-                group1 = group(new Document("date", "$date").append("sensorId", "$sensorId"),
+                group1 = group(new Document("sensorId", "$sensorId").append("date", "$date"),
                         sum("count", 1));
                 group2 = group(new Document("sensorId", "$_id.sensorId"), avg("averagePerDay", "$count"));
 
