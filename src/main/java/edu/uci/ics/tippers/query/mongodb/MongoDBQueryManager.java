@@ -605,7 +605,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
 
                 Bson match = match(and(
                         eq("infra.type_.name", infraTypeName),
-                        eq("semanticEntityId", userId)));
+                        eq("semanticEntity.id", userId)));
 
                 Bson project = project(
                         fields(

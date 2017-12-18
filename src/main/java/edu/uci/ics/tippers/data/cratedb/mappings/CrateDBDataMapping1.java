@@ -106,6 +106,8 @@ public class CrateDBDataMapping1 extends CrateDBBaseDataMapping {
                 }
 
             }
+            stmt.executeBatch();
+            memStmt.executeBatch();
 
             // Adding Locations
             insert = "INSERT INTO LOCATION " +
@@ -256,7 +258,7 @@ public class CrateDBDataMapping1 extends CrateDBBaseDataMapping {
             Observation obs = null;
 
             stmt = connection.prepareStatement(insert);
-            int batchSize = 10000;
+            int batchSize = 100000;
             int count = 0;
             while ((obs = reader.readNext()) != null) {
 
@@ -310,9 +312,9 @@ public class CrateDBDataMapping1 extends CrateDBBaseDataMapping {
             JSONArray platform_list = (JSONArray)parser.parse(new InputStreamReader(
                     new FileInputStream(dataDir + DataFiles.PLT.getPath())));
 
+            stmt = connection.prepareStatement(insert);
             int count= 0, batchSize = 1000;
             for(int i =0;i<platform_list.size();i++){
-                stmt = connection.prepareStatement(insert);
                 JSONObject temp=(JSONObject)platform_list.get(i);
 
                 stmt.setString(1, (String)temp.get("id"));
@@ -327,6 +329,7 @@ public class CrateDBDataMapping1 extends CrateDBBaseDataMapping {
                     stmt.executeBatch();
 
             }
+            stmt.executeBatch();
 
         }
         catch(ParseException | SQLException | IOException e) {
@@ -402,7 +405,7 @@ public class CrateDBDataMapping1 extends CrateDBBaseDataMapping {
             insert = "INSERT INTO SEMANTIC_OBSERVATION " +
                     "(ID, SEMANTIC_ENTITY_ID, PAYLOAD, TIMESTAMP, VIRTUAL_SENSOR_ID, TYPE_ID) VALUES (?, ?, ?, ?, ?, ?)";
             stmt = connection.prepareStatement(insert);
-            int batchSize = 10000;
+            int batchSize = 100000;
             int count = 0;
             while ((sobs = reader.readNext()) != null) {
 
@@ -445,7 +448,7 @@ public class CrateDBDataMapping1 extends CrateDBBaseDataMapping {
             Observation obs = null;
 
             stmt = connection.prepareStatement(insert);
-            int batchSize = 10000;
+            int batchSize = 50000;
             int count = 0;
             while ((obs = reader.readNext()) != null) {
 

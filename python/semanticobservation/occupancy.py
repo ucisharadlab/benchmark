@@ -35,7 +35,7 @@ def createOccupancy(dt, end, step, dataDir):
 
     fpObj = open('data/occupancyData.json', 'w')
 
-    print ("Creating Random Occupancy Data")
+    print ("Creating Random Occupancy Data" + str(numRooms))
 
     count = 0
     while dt < end:

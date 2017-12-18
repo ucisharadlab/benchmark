@@ -104,6 +104,8 @@ public class CrateDBDataMapping2 extends CrateDBBaseDataMapping {
                 }
 
             }
+            stmt.executeBatch();
+            memStmt.executeBatch();
 
             // Adding Locations
             insert = "INSERT INTO LOCATION " +
@@ -342,10 +344,10 @@ public class CrateDBDataMapping2 extends CrateDBBaseDataMapping {
                     "USER_ID, PLATFORM_TYPE_ID) VALUES (?, ?, ?, ?)";
             JSONArray platform_list = (JSONArray)parser.parse(new InputStreamReader(
                     new FileInputStream(dataDir + DataFiles.PLT.getPath())));
+            stmt = connection.prepareStatement(insert);
 
             int count = 0, batchSize = 1000;
             for(int i =0;i<platform_list.size();i++){
-                stmt = connection.prepareStatement(insert);
                 JSONObject temp=(JSONObject)platform_list.get(i);
 
                 stmt.setString(1, (String)temp.get("id"));
@@ -360,7 +362,7 @@ public class CrateDBDataMapping2 extends CrateDBBaseDataMapping {
                     stmt.executeBatch();
 
             }
-
+            stmt.executeBatch();
         }
         catch(ParseException | SQLException | IOException e) {
             e.printStackTrace();

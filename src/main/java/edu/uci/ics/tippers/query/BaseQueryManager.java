@@ -46,7 +46,7 @@ public abstract class BaseQueryManager {
             return future.get(timeout, TimeUnit.MILLISECONDS);
         }catch (TimeoutException e) {
             e.printStackTrace();
-            return Constants.MAX_DURATION;
+            throw new BenchmarkException("Query Timed Out");
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
             throw new BenchmarkException("Error Running Query");

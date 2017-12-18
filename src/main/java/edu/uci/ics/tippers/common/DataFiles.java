@@ -2,22 +2,22 @@ package edu.uci.ics.tippers.common;
 
 public enum DataFiles {
 
-    INFRA_TYPE ("infrastructureType.json"),
-    LOCATION ("location.json"),
-    REGION ("region.json"),
-    INFRA ("infrastructure.json") ,
-    GROUP ("group.json"),
-    USER ("user.json"),
-    PLT_TYPE ("platformType.json"),
-    PLT ("platform.json"),
-    SENSOR_TYPE ("sensorType.json"),
-    SENSOR ("sensor.json") ,
-    OBS ("observation.json"),
-    VS_TYPE ("virtualSensorType.json"),
-    VS ("virtualSensor.json"),
-    SO_TYPE ("semanticObservationType.json"),
-    SO ("semanticObservation.json"),
-    INSERT_TEST ("insertTestData.json");
+    INFRA_TYPE ("infrastructureType"),
+    LOCATION ("location"),
+    REGION ("region"),
+    INFRA ("infrastructure") ,
+    GROUP ("group"),
+    USER ("user"),
+    PLT_TYPE ("platformType"),
+    PLT ("platform"),
+    SENSOR_TYPE ("sensorType"),
+    SENSOR ("sensor") ,
+    OBS ("observation"),
+    VS_TYPE ("virtualSensorType"),
+    VS ("virtualSensor"),
+    SO_TYPE ("semanticObservationType"),
+    SO ("semanticObservation"),
+    INSERT_TEST ("insertTestData");
 
     private final String path;
 
@@ -26,7 +26,13 @@ public enum DataFiles {
     }
 
     public String getPath() {
-        return path;
+        return getPathByTypeAndMapping("json", 0);
+    }
+    
+    public String getPathByTypeAndMapping(String type, int mapping) {
+        if (mapping != 0)
+            return String.format("%s.%s.%s", path, mapping, type);
+        return String.format("%s.%s", path, type);
     }
 
 }

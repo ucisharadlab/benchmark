@@ -270,7 +270,7 @@ public class PgSQLQueryManager extends BaseQueryManager{
             case 1:
                 String query = String.format("SELECT timeStamp, payload FROM OBSERVATION o, SENSOR s, SENSOR_TYPE st  " +
                         "WHERE s.id = o.sensor_id AND s.sensor_type_id=st.id AND st.name=? AND " +
-                        "timestamp>? AND timestamp<? AND payload ->> '%s' >= ? AND payload ->> '%s' <= ? ",
+                        "timestamp>? AND timestamp<? AND (payload::json ->> '%s')::int >= ? AND (payload::json ->> '%s')::int <= ? ",
                         payloadAttribute, payloadAttribute);
                 try {
                     PreparedStatement stmt = connection.prepareStatement(query);

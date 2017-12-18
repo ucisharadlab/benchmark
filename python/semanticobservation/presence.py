@@ -32,7 +32,7 @@ def createPresence(dt, end, step, dataDir):
 
     fpObj = open('data/presenceData.json', 'w')
 
-    print ("Creating Random Presence Data")
+    print ("Creating Random Presence Data " + str(numUsers))
 
     count = 0
     while dt < end:

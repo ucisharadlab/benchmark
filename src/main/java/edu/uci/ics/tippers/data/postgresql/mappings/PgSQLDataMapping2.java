@@ -491,7 +491,7 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
             PreparedStatement wemoStmt = connection.prepareStatement(wemoInsert);
             PreparedStatement temStmt = connection.prepareStatement(temperatureInsert);
 
-            int wifiCount = 0, wemoCount = 0, thermoCount = 0;
+            int wifiCount = 0, wemoCount = 0, thermoCount = 0, count=0;
             while ((obs = reader.readNext()) != null) {
 
                 if (obs.getSensor().getType_().getId().equals("Thermometer")) {
@@ -524,6 +524,10 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
                     wifiStmt.executeBatch();
                 if (thermoCount % Constants.PGSQL_BATCH_SIZE == 0)
                     temStmt.executeBatch();
+		
+		if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s S Observations", count));
+                count ++;
+		
             }
             wemoStmt.executeBatch();
             wifiStmt.executeBatch();

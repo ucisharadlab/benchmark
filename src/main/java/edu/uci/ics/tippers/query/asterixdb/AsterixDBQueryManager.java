@@ -9,6 +9,7 @@ import edu.uci.ics.tippers.query.BaseQueryManager;
 import edu.uci.ics.tippers.writer.RowWriter;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -19,6 +20,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class AsterixDBQueryManager extends BaseQueryManager{
+
+    private static final Logger LOGGER = Logger.getLogger(AsterixDBQueryManager.class);
 
     private AsterixDBConnectionManager connectionManager;
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
@@ -40,10 +43,15 @@ public class AsterixDBQueryManager extends BaseQueryManager{
     }
 
     private Duration runTimedQuery (String query, int queryNum) throws BenchmarkException {
-        Instant startTime = Instant.now();
+       
+	LOGGER.info(String.format("Running Query %s", queryNum));
+        LOGGER.info(query);
+	
+	Instant startTime = Instant.now();
         HttpResponse response = connectionManager.sendQuery(query);
         Instant endTime = Instant.now();
 
+	
         if (writeOutput) {
             // TODO: Write To File
             try {

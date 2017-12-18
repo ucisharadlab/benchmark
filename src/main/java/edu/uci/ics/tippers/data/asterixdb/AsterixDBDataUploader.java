@@ -62,8 +62,8 @@ public class AsterixDBDataUploader extends BaseDataUploader {
     }
 
     public String prepareQueryWithLoadFS(String dataset, DataFiles dataFile)  throws BenchmarkException {
-        return String.format("LOAD DATASET %s USING localfs((\"path\"=\"%s://%s\"),(\"format\"=\"adm\"))",
-                "Observation", "localhost", dataDir + dataFile.getPath());
+        return String.format("LOAD DATASET %s USING localfs(('path'='%s://%s'),('format'='adm'))",
+                dataset, "127.0.0.1", dataDir + dataFile.getPathByTypeAndMapping("adm", mapping));
     }
 
     public void simpleObservationInsert(String dataset, DataFiles dataFile) {
@@ -247,8 +247,8 @@ public class AsterixDBDataUploader extends BaseDataUploader {
             case 1:
             case 2:
                 connectionManager.sendQuery(prepareInsertQuery("UserGroup", DataFiles.GROUP));
-                genericInsertThroughFeed("User", DataFiles.USER, User.class);
-                // connectionManager.sendQuery(prepareInsertQuery("User", DataFiles.USER));
+                //genericInsertThroughFeed("User", DataFiles.USER, User.class);
+                connectionManager.sendQuery(prepareInsertQuery("User", DataFiles.USER));
                 break;
         }
     }
@@ -314,9 +314,9 @@ public class AsterixDBDataUploader extends BaseDataUploader {
                     JSONObject docToInsert = (JSONObject)e;
                     docToInsert.put("ownerId", docToInsert.getJSONObject("owner").getString("id"));
                     docToInsert.remove("owner");
-                    //String docString = e.toString();
-                    feed.sendDataToFeed(docToInsert.toString());
-                    //connectionManager.sendQuery(String.format(QUERY_FORMAT, "Platform", docString));
+                    String docString = e.toString();
+                    //feed.sendDataToFeed(docToInsert.toString());
+                    connectionManager.sendQuery(String.format(QUERY_FORMAT, "Platform", docString));
                 });
                 feed.stopFeed();
                 break;
@@ -325,7 +325,11 @@ public class AsterixDBDataUploader extends BaseDataUploader {
 
     @Override
     public void addObservationData() throws BenchmarkException {
-        observationInsertThroughFeed("Observation", DataFiles.OBS);
+
+        LOGGER.info("Observation Loading Started");
+        //observationInsertThroughFeed("Observation", DataFiles.OBS);
+        connectionManager.sendQuery(prepareQueryWithLoadFS("Observation", DataFiles.OBS));
+        LOGGER.info("Observation Loading Complete");
     }
 
     @Override
@@ -342,7 +346,11 @@ public class AsterixDBDataUploader extends BaseDataUploader {
 
     @Override
     public void addSemanticObservationData() {
-        semanticObservationInsertThroughFeed("SemanticObservation", DataFiles.SO);
+        LOGGER.info("Semantic Observation Loading Started");
+        //semanticObservationInsertThroughFeed("SemanticObservation", DataFiles.SO);
+        connectionManager.sendQuery(prepareQueryWithLoadFS("SemanticObservation", DataFiles.SO));
+        LOGGER.info("Semantic Observation Loading Complete");
+
     }
 
     @Override

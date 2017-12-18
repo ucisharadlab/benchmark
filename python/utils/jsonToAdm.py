@@ -23,6 +23,7 @@ def copyFiles(files, src, dest):
 
 def copyObservations(src, dest, mapping):
     admFile = open("{}observation.{}.adm".format(dest,mapping), "w")
+    count = 0
     with open(src + "observation.json", "r") as r:
         for line in r:
             line = line.strip()
@@ -45,17 +46,22 @@ def copyObservations(src, dest, mapping):
             observation["timeStamp"] = \
                     "datetime('" + datetime.strptime(observation["timeStamp"], "%Y-%m-%d %H:%M:%S") \
                         .strftime("%Y-%m-%dT%H:%M:%SZ") + "')"
-            observation = str(observation)\
+            observation = json.dumps(observation)\
                 .replace('"' + observation["timeStamp"] + '"', observation["timeStamp"])\
-                .replace('"', '\\"')\
                 .replace("'", '"')
             admFile.write(observation + "\n")
+
+            if count % 100000 == 0:
+                print ("Observation Modified ", count)
+            count += 1
 
     admFile.close()
 
 
 def copySemanticObservations(src, dest, mapping):
     admFile = open("{}semanticObservation.{}.adm".format(dest,mapping), "w")
+
+    count = 0
     with open(src + "semanticObservation.json", "r") as r:
         for line in r:
             line = line.strip()
@@ -84,11 +90,14 @@ def copySemanticObservations(src, dest, mapping):
             observation["timeStamp"] = \
                     "datetime('" + datetime.strptime(observation["timeStamp"], "%Y-%m-%d %H:%M:%S") \
                         .strftime("%Y-%m-%dT%H:%M:%SZ") + "')"
-            observation = str(observation)\
+            observation = json.dumps(observation)\
                 .replace('"' + observation["timeStamp"] + '"', observation["timeStamp"])\
-                .replace('"', '\\"')\
                 .replace("'", '"')
             admFile.write(observation + "\n")
+
+            if count % 100000 == 0:
+                print ("S Observation Modified ", count)
+            count += 1
 
     admFile.close()
 
