@@ -99,7 +99,7 @@ CREATE TYPE ObservationType AS {
 	id: string,
 	sensor: SubSensorType,
 	payload: PayloadType,
-	timeStamp: datetime
+	timeStamp: long
 };
 
 /** related to virtual sensors */

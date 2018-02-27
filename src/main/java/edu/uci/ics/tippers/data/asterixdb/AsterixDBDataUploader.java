@@ -114,13 +114,13 @@ public class AsterixDBDataUploader extends BaseDataUploader {
                 Observation obs;
                 while ((obs = reader.readNext()) != null) {
                     JSONObject docToInsert = new JSONObject(gson.toJson(obs, Observation.class).replace("\\", "\\\\\\"));
-                    docToInsert.put("timeStamp", String.format("datetime(\"%s\")", sdf.format(obs.getTimeStamp())));
+                    docToInsert.put("timeStamp", obs.getTimeStamp().getTime()*1000);
                     docToInsert.put("sensor", new JSONObject()
                             .put("id", docToInsert.getJSONObject("sensor").getString("id"))
                             .put("name", docToInsert.getJSONObject("sensor").getString("name"))
                             .put("type_", docToInsert.getJSONObject("sensor").getJSONObject("type_")));
 
-                    String docString = docToInsert.toString().replaceAll("\"(datetime\\(.*\\))\"", "$1");
+                    String docString = docToInsert.toString();//.replaceAll("\"(datetime\\(.*\\))\"", "$1");
                     feed.sendDataToFeed(docString);
                     if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s Observations", count));
                     count ++;

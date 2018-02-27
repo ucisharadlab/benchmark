@@ -10,6 +10,7 @@ import edu.uci.ics.tippers.data.cratedb.CrateDBDataUploader;
 import edu.uci.ics.tippers.data.griddb.GridDBDataUploader;
 import edu.uci.ics.tippers.data.mongodb.MongoDBDataUploader;
 import edu.uci.ics.tippers.data.postgresql.PgSQLDataUploader;
+import edu.uci.ics.tippers.data.sparksql.SparkSQLDataUploader;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.query.BaseQueryManager;
 import edu.uci.ics.tippers.query.asterixdb.AsterixDBQueryManager;
@@ -18,6 +19,7 @@ import edu.uci.ics.tippers.query.cratedb.CrateDBQueryManager;
 import edu.uci.ics.tippers.query.griddb.GridDBQueryManager;
 import edu.uci.ics.tippers.query.mongodb.MongoDBQueryManager;
 import edu.uci.ics.tippers.query.postgresql.PgSQLQueryManager;
+import edu.uci.ics.tippers.query.sparksql.SparkSQLQueryManager;
 import edu.uci.ics.tippers.scaler.Scale;
 import edu.uci.ics.tippers.schema.BaseSchema;
 import edu.uci.ics.tippers.schema.asterixdb.AsterixDBSchema;
@@ -26,6 +28,7 @@ import edu.uci.ics.tippers.schema.cratedb.CrateDBSchema;
 import edu.uci.ics.tippers.schema.griddb.GridDBSchema;
 import edu.uci.ics.tippers.schema.mongodb.MongoDBSchema;
 import edu.uci.ics.tippers.schema.postgresql.PgSQLSchema;
+import edu.uci.ics.tippers.schema.sparksql.SparkSQLSchema;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
@@ -129,7 +132,7 @@ public class Benchmark {
             //dbmsManager.startServers();
 
             for (Database database: configuration.getDatabases()) {
-                dbmsManager.startServer(database);
+                //dbmsManager.startServer(database);
                 switch (database) {
                     case GRIDDB:
                         configuration.getMappings().get(Database.GRIDDB).forEach(
@@ -185,10 +188,19 @@ public class Benchmark {
                                                 configuration.getOutputDir(),
                                                 configuration.isWriteOutput(), configuration.getTimeout())));
                         break;
+                    case SPARKSQL:
+                        configuration.getMappings().get(Database.SPARKSQL).forEach(
+                                e -> benchmark.runBenchmark(
+                                        new SparkSQLSchema(e, configuration.getDataDir()),
+                                        new SparkSQLDataUploader(e, configuration.getDataDir()),
+                                        new SparkSQLQueryManager(e, configuration.getQueriesDir(),
+                                                configuration.getOutputDir(),
+                                                configuration.isWriteOutput(), configuration.getTimeout())));
+                        break;
                     default:
                         throw new BenchmarkException("Database Not Supported");
                 }
-                dbmsManager.stopServer(database);
+                //dbmsManager.stopServer(database);
             }
 
             DataSize dataSize = new DataSize(configuration.getDataDir());

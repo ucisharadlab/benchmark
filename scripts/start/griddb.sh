@@ -4,6 +4,6 @@ export GS_HOME=/home/benchmark/opt/griddb
 export GS_LOG=/home/benchmark/opt/griddb/log
 export no_proxy=127.0.0.1
 gs_startnode
-sleep 5
+sleep 10
 gs_joincluster -c cluster1 -u admin/admin
 sleep 10

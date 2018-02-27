@@ -525,7 +525,7 @@ public class GridDBQueryManager extends BaseQueryManager {
                         JSONArray groups = groupBy.doGroupBy(jsonObservations, Arrays.asList("date"));
                         final int[] sum = {0};
 
-                        groups.iterator().forEachRemaining(e -> {
+                            groups.iterator().forEachRemaining(e -> {
                             sum[0] += ((JSONArray) e).length();
                         });
 

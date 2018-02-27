@@ -10,7 +10,8 @@ public enum Database {
     ASTERIXDB ("asterixdb"),
     CRATEDB ("cratedb"),
     CASSANDRA ("cassandra"),
-    POSTGRESQL ("postgresql");
+    POSTGRESQL ("postgresql"),
+    SPARKSQL ("sparksql");
 
     private final String name;
 

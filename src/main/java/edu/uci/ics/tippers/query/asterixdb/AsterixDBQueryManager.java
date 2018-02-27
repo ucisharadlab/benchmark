@@ -118,8 +118,8 @@ public class AsterixDBQueryManager extends BaseQueryManager{
             case 2:
                 return runTimedQuery(
                         String.format("SELECT timeStamp, sensorId, payload FROM Observation WHERE sensorId=\"%s\" "
-                                        + "AND timeStamp >= datetime(\"%s\") AND timeStamp <= datetime(\"%s\");",
-                                sensorId, sdf.format(startTime), sdf.format(endTime)), 3
+                                        + "AND timeStamp >= %s AND timeStamp <= %s;",
+                                sensorId, startTime.getTime()*1000, endTime.getTime()*1000), 3
                 );
             default:
                 throw new BenchmarkException("No Such Mapping");
@@ -133,15 +133,15 @@ public class AsterixDBQueryManager extends BaseQueryManager{
                 return runTimedQuery(
                         String.format("SELECT timeStamp, sensor.id, payload FROM Observation WHERE sensor.id IN {{ "
                                         + sensorIds.stream().map(e -> "\"" + e + "\"").collect(Collectors.joining(","))
-                                        + " }} AND timeStamp >= datetime(\"%s\") AND timeStamp <= datetime(\"%s\");",
-                                sdf.format(startTime), sdf.format(endTime)),  4
+                                        + " }} AND timeStamp >= %s AND timeStamp <= %s;",
+                                startTime.getTime()*1000, endTime.getTime()*1000),  4
                 );
             case 2:
                 return runTimedQuery(
                         String.format("SELECT timeStamp, sensorId, payload FROM Observation WHERE sensorId IN {{ "
                                         + sensorIds.stream().map(e -> "\"" + e + "\"").collect(Collectors.joining(","))
-                                        + " }} AND timeStamp >= datetime(\"%s\") AND timeStamp <= datetime(\"%s\");",
-                                sdf.format(startTime), sdf.format(endTime)),  4
+                                        + " }} AND timeStamp >= %s AND timeStamp <= %s;",
+                                startTime.getTime()*1000, endTime.getTime()*1000),  4
                 );
             default:
                 throw new BenchmarkException("No Such Mapping");
