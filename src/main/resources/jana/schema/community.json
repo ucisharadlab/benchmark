@@ -1,55 +1,22 @@
-{
-    "name": "community",
-    "primaryKey": ["community_id"],
+[
+    {
+    "name": "nation",
+    "primaryKey": ["nation_id"],
     "attributes": [
         {
-            "name": "community_id",
+            "name": "nation_id",
             "privacyLevel": {
-                "type": "private",
-                "operations": [
-                    {
-                        "type": "EqualityComparison"
-                    }
-                ]
+                "type": "public"
             },
             "type": "SQLUnsignedInt32"
         },
         {
-            "name": "community_name",
+            "name": "nation_name",
             "privacyLevel": {
                 "type": "public"
             },
             "type": "SQLString"
-        },
-        {
-            "name": "latitude",
-            "privacyLevel": {
-                "type": "public"
-            },
-            "type": "SQLLat"
-        },
-        {
-            "name": "longitude",
-            "privacyLevel": {
-                "type": "public"
-            },
-            "type": "SQLLon"
-        },
-        {
-            "name": "nation_id",
-            "privacyLevel": {
-                "type": "private",
-                "operations": [
-                    {
-                        "type": "EqualityComparison"
-                    }
-                ],
-                "foreignKey": {
-                    "relation": "nation",
-                    "attribute": "nation_id"
-                }
-            },
-            "type": "SQLUnsignedInt32"
         }
     ]
-}
+    }
+]
