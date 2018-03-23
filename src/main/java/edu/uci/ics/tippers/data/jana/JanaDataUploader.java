@@ -36,9 +36,9 @@ public class JanaDataUploader extends BaseDataUploader {
     public Duration addAllData() throws BenchmarkException {
         Instant start = Instant.now();
         addUserData();
-        //addInfrastructureData();
-        //addDeviceData();
-        //addSensorData();
+        addInfrastructureData();
+        addDeviceData();
+        addSensorData();
         //addObservationData();
         Instant end = Instant.now();
         return Duration.between(start, end);
@@ -74,9 +74,9 @@ public class JanaDataUploader extends BaseDataUploader {
                 JSONObject temp = (JSONObject) anInfraType_list;
                 JSONObject infraTypeRow = new JSONObject();
 
-                infraTypeRow.put(1, (String) temp.get("id"));
-                infraTypeRow.put(2, (String) temp.get("name"));
-                infraTypeRow.put(3, (String) temp.get("description"));
+                infraTypeRow.put("ID", (String) temp.get("id"));
+                infraTypeRow.put("NAME", (String) temp.get("name"));
+                infraTypeRow.put("DESCRIPTION", (String) temp.get("description"));
 
                 infraTypeArray.add(infraTypeRow);
             }
@@ -191,12 +191,12 @@ public class JanaDataUploader extends BaseDataUploader {
                 JSONObject temp = (JSONObject) aSensorType_list;
                 JSONObject sensorTypeRow = new JSONObject();
 
-                sensorTypeRow.put(1, (String) temp.get("id"));
-                sensorTypeRow.put(2, (String) temp.get("name"));
-                sensorTypeRow.put(3, (String) temp.get("description"));
-                sensorTypeRow.put(4, (String) temp.get("mobility"));
-                sensorTypeRow.put(5, (String) temp.get("captureFunctionality"));
-                sensorTypeRow.put(6, (String) temp.get("payloadSchema"));
+                sensorTypeRow.put("ID", (String) temp.get("id"));
+                sensorTypeRow.put("NAME", (String) temp.get("name"));
+                sensorTypeRow.put("DESCRIPTION", (String) temp.get("description"));
+                sensorTypeRow.put("MOBILITY", (String) temp.get("mobility"));
+                sensorTypeRow.put("CAPTURE_FUNCTIONALITY", (String) temp.get("captureFunctionality"));
+                sensorTypeRow.put("PAYLOAD_SCHEMA", (String) temp.get("payloadSchema"));
 
                 sensorTypeArray.add(sensorTypeRow);
             }
@@ -215,12 +215,12 @@ public class JanaDataUploader extends BaseDataUploader {
                 JSONObject temp = (JSONObject) aSensor_list;
                 JSONObject sensorRow = new JSONObject();
 
-                sensorRow.put(1, (String) temp.get("id"));
-                sensorRow.put(2, (String) temp.get("name"));
-                sensorRow.put(3, (String) ((JSONObject) temp.get("infrastructure")).get("id"));
-                sensorRow.put(4, (String) ((JSONObject) temp.get("owner")).get("id"));
-                sensorRow.put(5, (String) ((JSONObject) temp.get("type_")).get("id"));
-                sensorRow.put(6, (String) temp.get("sensorConfig"));
+                sensorRow.put("ID", (String) temp.get("id"));
+                sensorRow.put("NAME", (String) temp.get("name"));
+                sensorRow.put("INFRASTRUCTURE_ID", (String) ((JSONObject) temp.get("infrastructure")).get("id"));
+                sensorRow.put("USER_ID", (String) ((JSONObject) temp.get("owner")).get("id"));
+                sensorRow.put("SENSOR_TYPE_ID", (String) ((JSONObject) temp.get("type_")).get("id"));
+                sensorRow.put("SENSOR_CONFIG", (String) temp.get("sensorConfig"));
 
                 sensorArray.add(sensorRow);
 

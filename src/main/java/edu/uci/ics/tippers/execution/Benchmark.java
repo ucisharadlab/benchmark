@@ -1,6 +1,7 @@
 package edu.uci.ics.tippers.execution;
 
 import edu.uci.ics.tippers.common.Database;
+import edu.uci.ics.tippers.common.Query;
 import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.data.BaseDataUploader;
 import edu.uci.ics.tippers.data.asterixdb.AsterixDBDataUploader;
@@ -85,7 +86,7 @@ public class Benchmark {
 
             // Insert Tests
             System.out.println("Inserting Insert Test Data ...");
-            //runTimePerMapping.put(Query.INSERT_SINGLE.getQNum(), dataUploader.insertPerformance());
+            runTimePerMapping.put(Query.INSERT_SINGLE.getQNum(), dataUploader.insertPerformance());
             LOGGER.info(Arrays.toString(runTimePerMapping.entrySet().toArray()));
 
             // Running benchmark queries and gathering query runtimes

@@ -1,15 +1,14 @@
 package edu.uci.ics.tippers.connection.jana;
 
 import edu.uci.ics.tippers.connection.BaseConnectionManager;
+import edu.uci.ics.tippers.exception.BenchmarkException;
 import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -17,8 +16,6 @@ import org.json.simple.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 
 public class JanaConnectionManager extends BaseConnectionManager {
@@ -74,6 +71,17 @@ public class JanaConnectionManager extends BaseConnectionManager {
             //System.out.println(EntityUtils.toString(response.getEntity()));
         } catch (IOException e) {
             e.printStackTrace();
+            throw new BenchmarkException("Error While Inserting Data");
+        }
+
+        if (response.getStatusLine().getStatusCode() != 200) {
+            try {
+                System.out.println(EntityUtils.toString(response.getEntity()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                throw new BenchmarkException("Error Running Query");
+            }
         }
         return response;
     }
@@ -151,6 +159,15 @@ public class JanaConnectionManager extends BaseConnectionManager {
             response = client.execute(httpPost);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        if (response.getStatusLine().getStatusCode() != 200) {
+            try {
+                System.out.println(EntityUtils.toString(response.getEntity()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                throw new BenchmarkException("Error Running Query");
+            }
         }
         return response;
     }
