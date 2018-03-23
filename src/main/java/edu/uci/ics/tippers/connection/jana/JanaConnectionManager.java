@@ -37,7 +37,7 @@ public class JanaConnectionManager extends BaseConnectionManager {
             DDL_PORT = props.getProperty("ddl-port");
 
             // Warming Up
-            sendQuery(";");
+            //sendQuery(";");
 
         } catch (IOException ie) {
             LOGGER.error(ie);

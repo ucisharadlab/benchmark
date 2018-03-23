@@ -56,9 +56,9 @@ public class JanaDataUploader extends BaseDataUploader {
                 JSONObject temp = (JSONObject) aLocation_list;
                 JSONObject locationRow = new JSONObject();
                 locationRow.put("ID", temp.get("id"));
-                locationRow.put("X", temp.get("x"));
-                locationRow.put("Y", temp.get("y"));
-                locationRow.put("Z", temp.get("z"));
+                locationRow.put("X", temp.get("x").toString());
+                locationRow.put("Y", temp.get("y").toString());
+                locationRow.put("Z", temp.get("z").toString());
 
                 locationArray.add(locationRow);
             }
@@ -94,7 +94,7 @@ public class JanaDataUploader extends BaseDataUploader {
                 infraRow.put("ID", (String) temp.get("id"));
                 infraRow.put("NAME", (String) temp.get("name"));
                 infraRow.put("INFRASTRUCTURE_TYPE_ID", (String) ((JSONObject) temp.get("type_")).get("id"));
-                infraRow.put("FLOOR", ((Number) temp.get("floor")).intValue());
+                infraRow.put("FLOOR", temp.get("floor").toString());
 
                 infraArray.add(infraRow);
             }
@@ -115,8 +115,9 @@ public class JanaDataUploader extends BaseDataUploader {
 
                     infraLocationArray.add(infraLocationRow);
                 }
-                connectionManager.doInsert("INFRASTRUCTURE_LOCATION", infraLocationArray);
             }
+            connectionManager.doInsert("INFRASTRUCTURE_LOCATION", infraLocationArray);
+
         } catch(ParseException | IOException e) {
             e.printStackTrace();
         }
