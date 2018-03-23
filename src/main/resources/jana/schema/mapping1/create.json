@@ -1,0 +1,491 @@
+[
+    {
+        "name": "USERS",
+        "primaryKey": ["ID"],
+        "attributes": [
+            {
+                "name": "ID",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            },
+            {
+                "name": "NAME",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            },
+            {
+                "name": "EMAIL",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            },
+            {
+                "name": "GOOGLE_AUTH_TOKEN",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            }
+        ]
+    },
+    {
+        "name": "USER_GROUP",
+        "primaryKey": ["ID"],
+        "attributes": [
+            {
+                "name": "ID",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            },
+            {
+                "name": "NAME",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            },
+            {
+                "name": "DESCRIPTION",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            }
+        ]
+    },
+    {
+        "name": "USER_GROUP_MEMBERSHIP",
+        "primaryKey": ["USER_ID", "USER_GROUP_ID"],
+        "attributes": [
+            {
+                "name": "USER_ID",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            },
+            {
+                "name": "USER_GROUP_ID",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            }
+        ]
+    },
+    {
+        "name": "LOCATION",
+        "primaryKey": ["ID"],
+        "attributes": [
+            {
+                "name": "ID",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            },
+            {
+                "name": "X",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLFloat"
+            },
+            {
+                "name": "Y",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLFloat"
+            },
+            {
+                "name": "Z",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLFloat"
+            }
+        ]
+    },
+    {
+        "name": "INFRASTRUCTURE_TYPE",
+        "primaryKey": ["ID"],
+        "attributes": [
+            {
+                "name": "ID",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            },
+            {
+                "name": "NAME",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            },
+            {
+                "name": "DESCRIPTION",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            }
+        ]
+    },
+    {
+        "name": "INFRASTRUCTURE",
+        "primaryKey": ["ID"],
+        "attributes": [
+            {
+                "name": "ID",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            },
+            {
+                "name": "NAME",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            },
+            {
+                "name": "INFRASTRUCTURE_TYPE_ID",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            },
+            {
+                "name": "FLOOR",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLInt32"
+            }
+        ]
+    },
+    {
+        "name": "INFRASTRUCTURE_LOCATION",
+        "primaryKey": ["LOCATION_ID", "INFRASTRUCTURE_ID"],
+        "attributes": [
+            {
+                "name": "LOCATION_ID",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            },
+            {
+                "name": "INFRASTRUCTURE_ID",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            }
+        ]
+    },
+    {
+        "name": "PLATFORM",
+        "primaryKey": ["ID"],
+        "attributes": [
+            {
+                "name": "ID",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            },
+            {
+                "name": "NAME",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            },
+            {
+                "name": "USER_ID",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            },
+            {
+                "name": "PLATFORM_TYPE_ID",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            },
+            {
+                "name": "HASHED_MAC",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            }
+        ]
+    },
+    {
+        "name": "PLATFORM_TYPE",
+        "primaryKey": ["ID"],
+        "attributes": [
+            {
+                "name": "ID",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            },
+            {
+                "name": "NAME",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            },
+            {
+                "name": "DESCRIPTION",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            }
+        ]
+    },
+    {
+        "name": "SENSOR_TYPE",
+        "primaryKey": ["ID"],
+        "attributes": [
+            {
+                "name": "ID",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            },
+            {
+                "name": "NAME",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            },
+            {
+                "name": "DESCRIPTION",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            },
+            {
+                "name": "MOBILITY",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            },
+            {
+                "name": "CAPTURE_FUNCTIONALITY",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            },
+            {
+                "name": "PAYLOAD_SCHEMA",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            }
+        ]
+    },
+    {
+        "name": "SENSOR",
+        "primaryKey": ["ID"],
+        "attributes": [
+            {
+                "name": "ID",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            },
+            {
+                "name": "NAME",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            },
+            {
+                "name": "INFRASTRUCTURE_ID",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            },
+            {
+                "name": "USER_ID",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            },
+            {
+                "name": "SENSOR_TYPE_ID",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            },
+            {
+                "name": "SENSOR_CONFIG",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            }
+        ]
+    },
+    {
+        "name": "COVERAGE_INFRASTRUCTURE",
+        "primaryKey": ["SENSOR_ID", "INFRASTRUCTURE_ID"],
+        "attributes": [
+            {
+                "name": "SENSOR_ID",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            },
+            {
+                "name": "INFRASTRUCTURE_ID",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            }
+        ]
+    },
+    {
+        "name": "WiFiAPObservation",
+        "primaryKey": ["id"],
+        "attributes": [
+            {
+                "name": "id",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            },
+            {
+                "name": "clientId",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            },
+            {
+                "name": "sensor_id",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            },
+            {
+                "name": "timeStamp",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLDate"
+            }
+        ]
+    },
+    {
+        "name": "ThermometerObservation",
+        "primaryKey": ["id"],
+        "attributes": [
+            {
+                "name": "id",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            },
+            {
+                "name": "temperature",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLInt32"
+            },
+            {
+                "name": "sensor_id",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            },
+            {
+                "name": "timeStamp",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLDate"
+            }
+        ]
+    },
+    {
+        "name": "WeMoObservation",
+        "primaryKey": ["id"],
+        "attributes": [
+            {
+                "name": "id",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            },
+            {
+                "name": "currentMilliWatts",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLInt32"
+            },
+            {
+                "name": "onTodaySeconds",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLInt32"
+            },
+            {
+                "name": "sensor_id",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLString"
+            },
+            {
+                "name": "timeStamp",
+                "privacyLevel": {
+                    "type": "public"
+                },
+                "type": "SQLDate"
+            }
+        ]
+    }
+]
