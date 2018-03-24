@@ -341,8 +341,8 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
 
                 stmt.setString(1, (String)temp.get("id"));
                 stmt.setString(2, (String)temp.get("name"));
-                stmt.setString(3, (String)temp.get("ownerId"));
-                stmt.setString(4, (String)temp.get("typeId"));
+                stmt.setString(3, (String)((JSONObject)temp.get("owner")).get("id"));
+                stmt.setString(4, (String)((JSONObject)temp.get("type_")).get("id"));
                 stmt.executeUpdate();
 
             }

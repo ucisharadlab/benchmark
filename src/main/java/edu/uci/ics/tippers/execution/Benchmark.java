@@ -77,7 +77,7 @@ public class Benchmark {
 
             // Creating schema on a particular database and particular mapping
             System.out.println("Creating Schema ...");
-            schemaCreator.createSchema();
+            //schemaCreator.createSchema();
 
             // Inserting data into the database system after schema creation
             System.out.println("Inserting Data ...");
@@ -86,12 +86,12 @@ public class Benchmark {
 
             // Insert Tests
             System.out.println("Inserting Insert Test Data ...");
-            runTimePerMapping.put(Query.INSERT_SINGLE.getQNum(), dataUploader.insertPerformance());
+            //runTimePerMapping.put(Query.INSERT_SINGLE.getQNum(), dataUploader.insertPerformance());
             LOGGER.info(Arrays.toString(runTimePerMapping.entrySet().toArray()));
 
             // Running benchmark queries and gathering query runtimes
             System.out.println("Running Queries ...");
-            //runTimePerMapping.putAll(queryManager.runQueries());
+            runTimePerMapping.putAll(queryManager.runQueries());
             LOGGER.info(Arrays.toString(runTimePerMapping.entrySet().toArray()));
 
             runTimes.put(new ImmutablePair<>(queryManager.getDatabase(), queryManager.getMapping()), runTimePerMapping);
@@ -107,7 +107,7 @@ public class Benchmark {
             runTimes.put(new ImmutablePair<>(queryManager.getDatabase(), queryManager.getMapping()), null);
             try {
                 System.out.println("Cleaning Up Database, Removing Data And Schema ...\n");
-                schemaCreator.dropSchema();
+                //schemaCreator.dropSchema();
             } catch (Exception | Error e) {
                 e.printStackTrace();
             }

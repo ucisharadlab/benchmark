@@ -30,7 +30,7 @@ public class JanaQueryManager extends BaseQueryManager {
 
     @Override
     public Database getDatabase() {
-        return null;
+        return Database.JANA;
     }
 
     @Override
@@ -69,7 +69,7 @@ public class JanaQueryManager extends BaseQueryManager {
             case 1:
             case 2:
                 return runTimedQuery(
-                        String.format("SELECT name FROM SENSOR WHERE id = \"%s\";", sensorId), 1
+                        String.format("SELECT NAME FROM SENSOR WHERE ID = '%s';", sensorId), 1
                 );
             default:
                 throw new BenchmarkException("No Such Mapping");

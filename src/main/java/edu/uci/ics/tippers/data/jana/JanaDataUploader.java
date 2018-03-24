@@ -273,8 +273,8 @@ public class JanaDataUploader extends BaseDataUploader {
 
                 platformRow.put("ID", (String) temp.get("id"));
                 platformRow.put("NAME", (String) temp.get("name"));
-                platformRow.put("USER_ID", (String) temp.get("ownerId"));
-                platformRow.put("PLATFORM_TYPE_ID", (String) temp.get("typeId"));
+                platformRow.put("USER_ID", (String) ((JSONObject)temp.get("owner")).get("id"));
+                platformRow.put("PLATFORM_TYPE_ID", (String) ((JSONObject)temp.get("type_")).get("id"));
 
                 platformArray.add(platformRow);
             }
