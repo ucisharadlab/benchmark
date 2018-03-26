@@ -6,6 +6,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 // edu.uci.ics.tippers.scaler.data.Helper function
 public class Helper {
@@ -67,5 +68,13 @@ public class Helper {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		String string  = dateFormat.format(ts);
 		return string;
+	}
+
+	public static String listToInsertString(String relation, List<String> rows) {
+		StringBuilder insert = new StringBuilder();
+		insert.append("INSERT INTO %s VALUES ");
+		insert.append(rows.stream().collect(Collectors.joining(",")));
+
+		return insert.toString();
 	}
 }
