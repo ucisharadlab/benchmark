@@ -54,7 +54,7 @@ public class PulsarConnectionManager  extends BaseConnectionManager{
         return _instance;
     }
 
-    public HttpResponse doInsert(String createRelation, String relation, List<String> rows) {
+    public HttpResponse ingest(String createRelation, String relation, List<String> rows) {
         CloseableHttpClient client = HttpClients.createDefault();
         String url = String.format("http://%s:%s/ingest", SERVER, PORT);
         HttpPost httpPost = new HttpPost(url);
@@ -90,56 +90,6 @@ public class PulsarConnectionManager  extends BaseConnectionManager{
         return response;
     }
 
-    public HttpResponse createRelations(JSONArray relations) {
-        CloseableHttpClient client = HttpClients.createDefault();
-        String url = String.format("http://%s:%s/create", SERVER, PORT);
-        HttpPost httpPost = new HttpPost(url);
-
-        JSONObject payload = new JSONObject();
-        payload.put("relations", relations);
-
-        try {
-            httpPost.addHeader("content-type", "application/json");
-            httpPost.setEntity(new StringEntity(payload.toString()));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-
-
-        CloseableHttpResponse response = null;
-        try {
-            response = client.execute(httpPost);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return response;
-    }
-
-    public HttpResponse dropRelations(JSONArray relations) {
-        CloseableHttpClient client = HttpClients.createDefault();
-        String url = String.format("http://%s:%s/drop", SERVER, PORT);
-        HttpPost httpPost = new HttpPost(url);
-
-        JSONObject payload = new JSONObject();
-        payload.put("relations", relations);
-
-        try {
-            httpPost.addHeader("content-type", "application/json");
-            httpPost.setEntity(new StringEntity(payload.toString()));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-
-
-        CloseableHttpResponse response = null;
-        try {
-            response = client.execute(httpPost);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return response;
-
-    }
 
     public HttpResponse sendQuery(String query) {
         CloseableHttpClient client = HttpClients.createDefault();
