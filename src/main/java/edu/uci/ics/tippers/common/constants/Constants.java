@@ -21,8 +21,9 @@ public class Constants {
 
     public static int PGSQL_BATCH_SIZE = 50000;
 
-    public static int MONGO_BATCH_SIZE = 50000;
+    public static int JANA_BATCH_SIZE = 10000;
 
+    public static int MONGO_BATCH_SIZE = 50000;
 
     public static String ASTERIX_FEED_IP = "localhost";
 

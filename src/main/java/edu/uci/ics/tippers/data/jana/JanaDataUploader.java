@@ -2,9 +2,14 @@ package edu.uci.ics.tippers.data.jana;
 
 import edu.uci.ics.tippers.common.DataFiles;
 import edu.uci.ics.tippers.common.Database;
+import edu.uci.ics.tippers.common.constants.Constants;
+import edu.uci.ics.tippers.common.util.BigJsonReader;
 import edu.uci.ics.tippers.connection.jana.JanaConnectionManager;
 import edu.uci.ics.tippers.data.BaseDataUploader;
+import edu.uci.ics.tippers.data.postgresql.mappings.PgSQLDataMapping2;
 import edu.uci.ics.tippers.exception.BenchmarkException;
+import edu.uci.ics.tippers.model.observation.Observation;
+import org.apache.log4j.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -13,13 +18,20 @@ import org.json.simple.parser.ParseException;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.sql.PreparedStatement;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
 
 public class JanaDataUploader extends BaseDataUploader {
 
+    private static final Logger LOGGER = Logger.getLogger(JanaDataUploader.class);
+
     private JanaConnectionManager connectionManager;
     private JSONParser parser = new JSONParser();
+    private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+
 
     public JanaDataUploader(int mapping, String dataDir) {
         super(mapping, dataDir);
@@ -39,7 +51,7 @@ public class JanaDataUploader extends BaseDataUploader {
         addInfrastructureData();
         addDeviceData();
         addSensorData();
-        //addObservationData();
+        addObservationData();
         Instant end = Instant.now();
         return Duration.between(start, end);
     }
@@ -289,6 +301,61 @@ public class JanaDataUploader extends BaseDataUploader {
 
     @Override
     public void addObservationData() throws BenchmarkException {
+
+        BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
+                Observation.class);
+        Observation obs = null;
+
+        JSONArray wifiArray = new JSONArray();
+        JSONArray wemoArray = new JSONArray();
+        JSONArray temArray = new JSONArray();
+
+        int wifiCount = 1, wemoCount = 1, thermoCount = 1, count = 0;
+        while ((obs = reader.readNext()) != null) {
+
+            JSONObject observationRow = new JSONObject();
+            if (obs.getSensor().getType_().getId().equals("Thermometer")) {
+                observationRow.put("temperature", obs.getPayload().get("temperature").getAsString());
+                observationRow.put("sensor_id", obs.getSensor().getId());
+                observationRow.put("timeStamp", sdf.format(obs.getTimeStamp().getTime()));
+                observationRow.put("id", obs.getId());
+                temArray.add(observationRow);
+                thermoCount ++;
+            } else if (obs.getSensor().getType_().getId().equals("WiFiAP")) {
+                observationRow.put("clientId", obs.getPayload().get("clientId").getAsString());
+                observationRow.put("sensor_id", obs.getSensor().getId());
+                observationRow.put("timeStamp", sdf.format(obs.getTimeStamp().getTime()));
+                observationRow.put("id", obs.getId());
+                wifiArray.add(observationRow);
+                wifiCount ++;
+            } else if (obs.getSensor().getType_().getId().equals("WeMo")) {
+                observationRow.put("currentMilliWatts", obs.getPayload().get("currentMilliWatts").getAsString());
+                observationRow.put("onTodaySeconds", obs.getPayload().get("onTodaySeconds").getAsString());
+                observationRow.put("sensor_id", obs.getSensor().getId());
+                observationRow.put("timeStamp", sdf.format(obs.getTimeStamp().getTime()));
+                observationRow.put("id", obs.getId());
+                wemoArray.add(observationRow);
+                wemoCount ++;
+            }
+
+            if (wemoCount % Constants.JANA_BATCH_SIZE == 0) {
+                connectionManager.doInsert("WeMoObservation", wemoArray);
+                wemoArray = new JSONArray();
+            }
+            if (wifiCount % Constants.JANA_BATCH_SIZE == 0) {
+                connectionManager.doInsert("WiFiAPObservation", wifiArray);
+                wifiArray = new JSONArray();
+            }
+            if (thermoCount % Constants.JANA_BATCH_SIZE == 0) {
+                connectionManager.doInsert("ThermometerObservation", temArray);
+                temArray = new JSONArray();
+            }
+            if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s Observations", count));
+            count ++;
+        }
+        connectionManager.doInsert("WeMoObservation", wemoArray);
+        connectionManager.doInsert("WiFiAPObservation", wifiArray);
+        connectionManager.doInsert("ThermometerObservation", temArray);
 
     }
 

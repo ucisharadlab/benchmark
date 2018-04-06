@@ -409,7 +409,7 @@
                 "privacyLevel": {
                     "type": "public"
                 },
-                "type": "SQLDate"
+                "type": "SQLString"
             }
         ]
     },
@@ -443,7 +443,7 @@
                 "privacyLevel": {
                     "type": "public"
                 },
-                "type": "SQLDate"
+                "type": "SQLString"
             }
         ]
     },
@@ -484,7 +484,7 @@
                 "privacyLevel": {
                     "type": "public"
                 },
-                "type": "SQLDate"
+                "type": "SQLString"
             }
         ]
     }
