@@ -51,6 +51,16 @@ public class JanaDataUploader extends BaseDataUploader {
         addInfrastructureData();
         addDeviceData();
         addSensorData();
+        switch (mapping) {
+            case 1:
+                addObservationData();
+                break;
+            case 2:
+                addPartitionedObservationData();
+                break;
+            default:
+                throw new BenchmarkException("No Such Mapping");
+        }
         addObservationData();
         Instant end = Instant.now();
         return Duration.between(start, end);
@@ -359,6 +369,10 @@ public class JanaDataUploader extends BaseDataUploader {
 
     }
 
+    public void addPartitionedObservationData() throws BenchmarkException {
+
+    }
+
     @Override
     public void virtualSensorData() {
 
@@ -368,6 +382,11 @@ public class JanaDataUploader extends BaseDataUploader {
     public void addSemanticObservationData() {
 
     }
+
+    public void addPartitionedSemanticObservationData() {
+
+    }
+
 
     @Override
     public Duration insertPerformance() throws BenchmarkException {
