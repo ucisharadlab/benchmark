@@ -108,6 +108,16 @@ public class JanaConnectionManager extends BaseConnectionManager {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        if (response.getStatusLine().getStatusCode() != 200) {
+            try {
+                System.out.println(EntityUtils.toString(response.getEntity()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                throw new BenchmarkException("Error Creating Schema");
+            }
+        }
+
         return response;
     }
 
