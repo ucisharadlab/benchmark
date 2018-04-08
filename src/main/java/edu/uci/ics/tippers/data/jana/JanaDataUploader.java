@@ -297,7 +297,7 @@ public class JanaDataUploader extends BaseDataUploader {
                 platformRow.put("NAME", (String) temp.get("name"));
                 platformRow.put("USER_ID", (String) ((JSONObject)temp.get("owner")).get("id"));
                 platformRow.put("PLATFORM_TYPE_ID", (String) ((JSONObject)temp.get("type_")).get("id"));
-
+                platformRow.put("HASHED_MAC", (String) temp.get("hashedMac"));
                 platformArray.add(platformRow);
             }
             connectionManager.doInsert("PLATFORM", platformArray);
