@@ -404,7 +404,89 @@
         ]
     },
     {
-        "name": "WiFiAPObservation",
+        "name": "WiFiAPObservation_S",
+        "primaryKey": ["id"],
+        "attributes": [
+            {
+                "name": "id",
+                "privacyLevel": {
+                    "type": "private",
+                    "operations": [
+                        {
+                            "type": "EqualityComparison",
+                            "index": true
+                        }
+                    ]
+                },
+                "constraints": [
+                    {
+                        "type": "padTo",
+                        "value": 4
+                    }
+                ],
+                "type": "SQLString"
+            },
+            {
+                "name": "clientId",
+                "privacyLevel": {
+                    "type": "private",
+                    "operations": [
+                        {
+                            "type": "EqualityComparison",
+                            "index": true
+                        }
+                    ]
+                },
+                "constraints": [
+                    {
+                        "type": "padTo",
+                        "value": 4
+                    }
+                ],
+                "type": "SQLString"
+            },
+            {
+                "name": "sensor_id",
+                "privacyLevel": {
+                    "type": "private",
+                    "operations": [
+                        {
+                            "type": "EqualityComparison",
+                            "index": true
+                        }
+                    ]
+                },
+                "constraints": [
+                    {
+                        "type": "padTo",
+                        "value": 4
+                    }
+                ],
+                "type": "SQLString"
+            },
+            {
+                "name": "timeStamp",
+                "privacyLevel": {
+                    "type": "private",
+                    "operations": [
+                        {
+                            "type": "EqualityComparison",
+                            "index": true
+                        }
+                    ]
+                },
+                "constraints": [
+                    {
+                        "type": "padTo",
+                        "value": 4
+                    }
+                ],
+                "type": "SQLString"
+            }
+        ]
+    },
+    {
+        "name": "WiFiAPObservation_NS",
         "primaryKey": ["id"],
         "attributes": [
             {

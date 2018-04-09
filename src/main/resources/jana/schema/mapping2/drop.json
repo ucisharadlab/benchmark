@@ -1,5 +1,5 @@
 [
   "USERS", "USER_GROUP", "USER_GROUP_MEMBERSHIP", "LOCATION", "INFRASTRUCTURE_TYPE", "INFRASTRUCTURE",
   "INFRASTRUCTURE_LOCATION", "PLATFORM_TYPE", "PLATFORM", "SENSOR_TYPE", "SENSOR", "COVERAGE_INFRASTRUCTURE",
-  "WiFiAPObservation", "WeMoObservation", "ThermometerObservation"
+  "WiFiAPObservation_NS", "WiFiAPObservation_S", "WeMoObservation", "ThermometerObservation"
 ]

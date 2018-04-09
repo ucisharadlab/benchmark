@@ -23,6 +23,9 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class JanaDataUploader extends BaseDataUploader {
 
@@ -297,7 +300,7 @@ public class JanaDataUploader extends BaseDataUploader {
                 platformRow.put("NAME", (String) temp.get("name"));
                 platformRow.put("USER_ID", (String) ((JSONObject)temp.get("owner")).get("id"));
                 platformRow.put("PLATFORM_TYPE_ID", (String) ((JSONObject)temp.get("type_")).get("id"));
-
+                platformRow.put("HASHED_MAC", (String) temp.get("hashedMac"));
                 platformArray.add(platformRow);
             }
             connectionManager.doInsert("PLATFORM", platformArray);
@@ -370,7 +373,79 @@ public class JanaDataUploader extends BaseDataUploader {
     }
 
     public void addPartitionedObservationData() throws BenchmarkException {
+        BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
+                Observation.class);
+        Observation obs = null;
 
+        List<String> senUsersList = new ArrayList<String>();
+        senUsersList.add("a0515892-c37e-4c85-89fc-388d8e98eb9a"); //admin user
+        List<String> senSpaceList = new ArrayList<String>();
+        senSpaceList.add("3141_clwa_1600"); //location 1600
+
+        JSONArray wifiArray_S = new JSONArray();
+        JSONArray wifiArray_NS = new JSONArray();
+        JSONArray wemoArray = new JSONArray();
+        JSONArray temArray = new JSONArray();
+
+        int wifiCount = 1, wemoCount = 1, thermoCount = 1, count = 0;
+        while ((obs = reader.readNext()) != null) {
+            JSONObject observationRow = new JSONObject();
+            if (obs.getSensor().getType_().getId().equals("Thermometer")) {
+                observationRow.put("temperature", obs.getPayload().get("temperature").getAsString());
+                observationRow.put("sensor_id", obs.getSensor().getId());
+                observationRow.put("timeStamp", sdf.format(obs.getTimeStamp().getTime()));
+                observationRow.put("id", obs.getId());
+                temArray.add(observationRow);
+                thermoCount ++;
+            } else if (obs.getSensor().getType_().getId().equals("WiFiAP")) {
+
+                observationRow.put("clientId", obs.getPayload().get("clientId").getAsString());
+                observationRow.put("sensor_id", obs.getSensor().getId());
+                observationRow.put("timeStamp", sdf.format(obs.getTimeStamp().getTime()));
+                observationRow.put("id", obs.getId());
+
+                if(observationRow.values().contains("a0515892-c37e-4c85-89fc-388d8e98eb9a"))
+                    wifiArray_S.add(observationRow);
+                else
+                    wifiArray_NS.add(observationRow);
+
+                wifiCount ++;
+            } else if (obs.getSensor().getType_().getId().equals("WeMo")) {
+                observationRow.put("currentMilliWatts", obs.getPayload().get("currentMilliWatts").getAsString());
+                observationRow.put("onTodaySeconds", obs.getPayload().get("onTodaySeconds").getAsString());
+                observationRow.put("sensor_id", obs.getSensor().getId());
+                observationRow.put("timeStamp", sdf.format(obs.getTimeStamp().getTime()));
+                observationRow.put("id", obs.getId());
+                wemoArray.add(observationRow);
+                wemoCount ++;
+            }
+
+            if (wemoCount % Constants.JANA_BATCH_SIZE == 0) {
+                connectionManager.doInsert("WeMoObservation", wemoArray);
+                wemoArray = new JSONArray();
+            }
+            if (wifiCount % Constants.JANA_BATCH_SIZE == 0) {
+                /* partition observations into two tables:
+                    - if the clientId or the sensorId is sensitive store this in the Sensitive observation table
+                    - else, store this row in the Non-Sensitive observations
+                */
+                connectionManager.doInsert("WiFiAPObservation_S", wifiArray_S);
+                connectionManager.doInsert("WiFiAPObservation_NS", wifiArray_NS);
+                wifiArray_NS = new JSONArray();
+                wifiArray_S = new JSONArray();
+            }
+            if (thermoCount % Constants.JANA_BATCH_SIZE == 0) {
+                connectionManager.doInsert("ThermometerObservation", temArray);
+                temArray = new JSONArray();
+            }
+            if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s Observations", count));
+            count ++;
+        }
+
+        connectionManager.doInsert("WeMoObservation", wemoArray);
+        connectionManager.doInsert("WiFiAPObservation_S", wifiArray_S);
+        connectionManager.doInsert("WiFiAPObservation_NS", wifiArray_NS);
+        connectionManager.doInsert("ThermometerObservation", temArray);
     }
 
     @Override
