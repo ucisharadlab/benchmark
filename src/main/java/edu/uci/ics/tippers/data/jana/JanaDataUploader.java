@@ -387,6 +387,8 @@ public class JanaDataUploader extends BaseDataUploader {
         int wifiCount = 1, wemoCount = 1, thermoCount = 1, count = 0;
         while ((obs = reader.readNext()) != null) {
             JSONObject observationRow = new JSONObject();
+            boolean tupleIsSen=false;
+
             if (obs.getSensor().getType_().getId().equals("Thermometer")) {
                 observationRow.put("temperature", obs.getPayload().get("temperature").getAsString());
                 observationRow.put("sensor_id", obs.getSensor().getId());
@@ -406,20 +408,26 @@ public class JanaDataUploader extends BaseDataUploader {
                     - else, store this row in the Non-Sensitive observations
                 */
 
+                //user-based-sensitivity
                 for(int i=0;i<senUsersList.size();i++){
-                    if(observationRow.values().contains(senUsersList.get(i)))
+                    if(observationRow.values().contains(senUsersList.get(i))) {
                         wifiArray_S.add(observationRow);
-                    else
-                        wifiArray_NS.add(observationRow);
+                        tupleIsSen=true;
+                        break;
+                    }
                 }
 
+                //space-based sensitivity
                 for(int i=0;i<senSpaceList.size();i++){
-                    if(observationRow.values().contains(senSpaceList.get(i)))
+                    if(observationRow.values().contains(senSpaceList.get(i)) && (!tupleIsSen)) { //check that the tuple is not added already
                         wifiArray_S.add(observationRow);
-                    else
-                        wifiArray_NS.add(observationRow);
+                        tupleIsSen=true;
+                        break;
+                    }
                 }
 
+                if(!tupleIsSen)
+                    wifiArray_NS.add(observationRow);
 
                 wifiCount ++;
             } else if (obs.getSensor().getType_().getId().equals("WeMo")) {
