@@ -15,9 +15,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -35,6 +33,7 @@ public class JanaDataUploader extends BaseDataUploader {
     private JSONParser parser = new JSONParser();
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
+    private String senLevelDataDir="/home/sumaya/Desktop/benchmark/src/main/java/edu/uci/ics/tippers/data/jana/sensitivity_levels_data";
 
     public JanaDataUploader(int mapping, String dataDir) {
         super(mapping, dataDir);
@@ -56,10 +55,10 @@ public class JanaDataUploader extends BaseDataUploader {
         addSensorData();
         switch (mapping) {
             case 1:
-                addObservationData();
+                addObservationData(); //no sensitivity
                 break;
             case 2:
-                addPartitionedObservationData();
+                addPartitionedObservationData(); //either: low,medium,high or full sensitivity
                 break;
             default:
                 throw new BenchmarkException("No Such Mapping");
@@ -377,10 +376,8 @@ public class JanaDataUploader extends BaseDataUploader {
                 Observation.class);
         Observation obs = null;
 
-        List<String> senUsersList = new ArrayList<String>();
-        senUsersList.add("a0515892-c37e-4c85-89fc-388d8e98eb9a"); //admin user
-        List<String> senSpaceList = new ArrayList<String>();
-        senSpaceList.add("3141_clwa_1600"); //location 1600
+        List<String> senUsersList = getSensitiveUsers();
+        List<String> senSpaceList = getSensitiveSensors();
 
         JSONArray wifiArray_S = new JSONArray();
         JSONArray wifiArray_NS = new JSONArray();
@@ -404,10 +401,25 @@ public class JanaDataUploader extends BaseDataUploader {
                 observationRow.put("timeStamp", sdf.format(obs.getTimeStamp().getTime()));
                 observationRow.put("id", obs.getId());
 
-                if(observationRow.values().contains("a0515892-c37e-4c85-89fc-388d8e98eb9a"))
-                    wifiArray_S.add(observationRow);
-                else
-                    wifiArray_NS.add(observationRow);
+                /* partition observations into two tables:
+                    - if the clientId or the sensorId is sensitive store this in the Sensitive observation table
+                    - else, store this row in the Non-Sensitive observations
+                */
+
+                for(int i=0;i<senUsersList.size();i++){
+                    if(observationRow.values().contains(senUsersList.get(i)))
+                        wifiArray_S.add(observationRow);
+                    else
+                        wifiArray_NS.add(observationRow);
+                }
+
+                for(int i=0;i<senSpaceList.size();i++){
+                    if(observationRow.values().contains(senSpaceList.get(i)))
+                        wifiArray_S.add(observationRow);
+                    else
+                        wifiArray_NS.add(observationRow);
+                }
+
 
                 wifiCount ++;
             } else if (obs.getSensor().getType_().getId().equals("WeMo")) {
@@ -425,10 +437,6 @@ public class JanaDataUploader extends BaseDataUploader {
                 wemoArray = new JSONArray();
             }
             if (wifiCount % Constants.JANA_BATCH_SIZE == 0) {
-                /* partition observations into two tables:
-                    - if the clientId or the sensorId is sensitive store this in the Sensitive observation table
-                    - else, store this row in the Non-Sensitive observations
-                */
                 connectionManager.doInsert("WiFiAPObservation_S", wifiArray_S);
                 connectionManager.doInsert("WiFiAPObservation_NS", wifiArray_NS);
                 wifiArray_NS = new JSONArray();
@@ -446,6 +454,60 @@ public class JanaDataUploader extends BaseDataUploader {
         connectionManager.doInsert("WiFiAPObservation_S", wifiArray_S);
         connectionManager.doInsert("WiFiAPObservation_NS", wifiArray_NS);
         connectionManager.doInsert("ThermometerObservation", temArray);
+    }
+
+    private List<String> getSensitiveUsers(){
+        List<String> senUsersList = new ArrayList<String>();
+        //String fileName = senLevelDataDir+"/users_low";
+        String fileName = senLevelDataDir+"/users_medium";
+        //String fileName = senLevelDataDir+"/users_high";
+        //String fileName = senLevelDataDir+"/users_full";
+        String line;
+
+        try {
+            FileReader fileReader = new FileReader(fileName);
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+            while ((line=bufferedReader.readLine())!= null)
+                senUsersList.add(line);
+
+            bufferedReader.close();
+        }
+        catch(FileNotFoundException ex){
+            System.out.println(ex.getMessage());
+        }
+        catch(IOException ex) {
+            System.out.println(ex.getMessage());
+        }
+
+        return senUsersList;
+    }
+
+    private List<String> getSensitiveSensors(){
+        List<String> senSpaceList = new ArrayList<String>();
+        //String fileName = senLevelDataDir+"/sensors_low";
+        String fileName = senLevelDataDir+"/sensors_medium";
+        //String fileName = senLevelDataDir+"/sensors_high";
+        //String fileName = senLevelDataDir+"/sensors_full";
+        String line;
+
+        try {
+            FileReader fileReader = new FileReader(fileName);
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+            while ((line=bufferedReader.readLine())!= null)
+                senSpaceList.add(line);
+
+            bufferedReader.close();
+        }
+        catch(FileNotFoundException ex){
+            System.out.println(ex.getMessage());
+        }
+        catch(IOException ex) {
+            System.out.println(ex.getMessage());
+        }
+
+        return senSpaceList;
     }
 
     @Override

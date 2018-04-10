@@ -77,12 +77,12 @@ public class Benchmark {
 
             // Creating schema on a particular database and particular mapping
             System.out.println("Creating Schema ...");
-            schemaCreator.createSchema();
+            //schemaCreator.createSchema();
 
             // Inserting data into the database system after schema creation
             System.out.println("Inserting Data ...");
             Map<Integer, Duration> runTimePerMapping = new HashMap<Integer, Duration>();
-            runTimePerMapping.put(Query.INSERT_COMPLETE.getQNum(), dataUploader.addAllData());
+            //runTimePerMapping.put(Query.INSERT_COMPLETE.getQNum(), dataUploader.addAllData());
 
             // Insert Tests
             System.out.println("Inserting Insert Test Data ...");
@@ -98,7 +98,7 @@ public class Benchmark {
 
             // Cleaning up inserted data and dropping created schema
             System.out.println("Cleaning Up Database, Removing Data And Schema ...\n");
-            //schemaCreator.dropSchema();
+            schemaCreator.dropSchema();
 
             System.out.println("---------------------------------------------------------------\n");
 
