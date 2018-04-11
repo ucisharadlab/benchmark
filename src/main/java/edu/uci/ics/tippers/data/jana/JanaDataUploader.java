@@ -63,7 +63,6 @@ public class JanaDataUploader extends BaseDataUploader {
             default:
                 throw new BenchmarkException("No Such Mapping");
         }
-        addObservationData();
         Instant end = Instant.now();
         return Duration.between(start, end);
     }
@@ -329,14 +328,14 @@ public class JanaDataUploader extends BaseDataUploader {
             if (obs.getSensor().getType_().getId().equals("Thermometer")) {
                 observationRow.put("temperature", obs.getPayload().get("temperature").getAsString());
                 observationRow.put("sensor_id", obs.getSensor().getId());
-                observationRow.put("timeStamp", sdf.format(obs.getTimeStamp().getTime()));
+                observationRow.put("timeStamp", String.valueOf(obs.getTimeStamp().getTime()));
                 observationRow.put("id", obs.getId());
                 temArray.add(observationRow);
                 thermoCount ++;
             } else if (obs.getSensor().getType_().getId().equals("WiFiAP")) {
                 observationRow.put("clientId", obs.getPayload().get("clientId").getAsString());
                 observationRow.put("sensor_id", obs.getSensor().getId());
-                observationRow.put("timeStamp", sdf.format(obs.getTimeStamp().getTime()));
+                observationRow.put("timeStamp", String.valueOf(obs.getTimeStamp().getTime()));
                 observationRow.put("id", obs.getId());
                 wifiArray.add(observationRow);
                 wifiCount ++;
@@ -344,7 +343,7 @@ public class JanaDataUploader extends BaseDataUploader {
                 observationRow.put("currentMilliWatts", obs.getPayload().get("currentMilliWatts").getAsString());
                 observationRow.put("onTodaySeconds", obs.getPayload().get("onTodaySeconds").getAsString());
                 observationRow.put("sensor_id", obs.getSensor().getId());
-                observationRow.put("timeStamp", sdf.format(obs.getTimeStamp().getTime()));
+                observationRow.put("timeStamp", String.valueOf(obs.getTimeStamp().getTime()));
                 observationRow.put("id", obs.getId());
                 wemoArray.add(observationRow);
                 wemoCount ++;
