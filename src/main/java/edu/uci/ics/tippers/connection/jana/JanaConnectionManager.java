@@ -76,11 +76,17 @@ public class JanaConnectionManager extends BaseConnectionManager {
 
         if (response.getStatusLine().getStatusCode() != 200) {
             try {
-                System.out.println(EntityUtils.toString(response.getEntity()));
+                System.out.println(relation + ": "+ EntityUtils.toString(response.getEntity()));
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
                 throw new BenchmarkException("Error Running Query");
+            }
+        } else {
+            try {
+                System.out.println(relation + ": "+ EntityUtils.toString(response.getEntity()));
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
         return response;
@@ -115,6 +121,12 @@ public class JanaConnectionManager extends BaseConnectionManager {
                 e.printStackTrace();
             } finally {
                 throw new BenchmarkException("Error Creating Schema");
+            }
+        } else {
+            try {
+                System.out.println(EntityUtils.toString(response.getEntity()));
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
 
