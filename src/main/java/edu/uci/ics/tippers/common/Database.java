@@ -13,7 +13,8 @@ public enum Database {
     POSTGRESQL ("postgresql"),
     SPARKSQL ("sparksql"),
     JANA ("jana"),
-    PULSAR ("pulsar");
+    PULSAR ("pulsar"),
+    SQLSERVER ("sqlserver");
 
     private final String name;
 

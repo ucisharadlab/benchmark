@@ -12,6 +12,7 @@ import edu.uci.ics.tippers.data.jana.JanaDataUploader;
 import edu.uci.ics.tippers.data.mongodb.MongoDBDataUploader;
 import edu.uci.ics.tippers.data.postgresql.PgSQLDataUploader;
 import edu.uci.ics.tippers.data.sparksql.SparkSQLDataUploader;
+import edu.uci.ics.tippers.data.sqlserver.SQLServerDataUploader;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.query.BaseQueryManager;
 import edu.uci.ics.tippers.query.asterixdb.AsterixDBQueryManager;
@@ -22,6 +23,7 @@ import edu.uci.ics.tippers.query.jana.JanaQueryManager;
 import edu.uci.ics.tippers.query.mongodb.MongoDBQueryManager;
 import edu.uci.ics.tippers.query.postgresql.PgSQLQueryManager;
 import edu.uci.ics.tippers.query.sparksql.SparkSQLQueryManager;
+import edu.uci.ics.tippers.query.sqlserver.SQLServerQueryManager;
 import edu.uci.ics.tippers.scaler.Scale;
 import edu.uci.ics.tippers.schema.BaseSchema;
 import edu.uci.ics.tippers.schema.asterixdb.AsterixDBSchema;
@@ -32,6 +34,7 @@ import edu.uci.ics.tippers.schema.jana.JanaSchema;
 import edu.uci.ics.tippers.schema.mongodb.MongoDBSchema;
 import edu.uci.ics.tippers.schema.postgresql.PgSQLSchema;
 import edu.uci.ics.tippers.schema.sparksql.SparkSQLSchema;
+import edu.uci.ics.tippers.schema.sqlserver.SQLServerSchema;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
@@ -77,12 +80,12 @@ public class Benchmark {
 
             // Creating schema on a particular database and particular mapping
             System.out.println("Creating Schema ...");
-            schemaCreator.createSchema();
+            //schemaCreator.createSchema();
 
             // Inserting data into the database system after schema creation
             System.out.println("Inserting Data ...");
             Map<Integer, Duration> runTimePerMapping = new HashMap<Integer, Duration>();
-            runTimePerMapping.put(Query.INSERT_COMPLETE.getQNum(), dataUploader.addAllData());
+            //runTimePerMapping.put(Query.INSERT_COMPLETE.getQNum(), dataUploader.addAllData());
 
             // Insert Tests
             System.out.println("Inserting Insert Test Data ...");
@@ -91,7 +94,7 @@ public class Benchmark {
 
             // Running benchmark queries and gathering query runtimes
             System.out.println("Running Queries ...");
-            //runTimePerMapping.putAll(queryManager.runQueries());
+            runTimePerMapping.putAll(queryManager.runQueries());
             LOGGER.info(Arrays.toString(runTimePerMapping.entrySet().toArray()));
 
             runTimes.put(new ImmutablePair<>(queryManager.getDatabase(), queryManager.getMapping()), runTimePerMapping);
@@ -206,6 +209,15 @@ public class Benchmark {
                                         new JanaSchema(e, configuration.getDataDir()),
                                         new JanaDataUploader(e, configuration.getDataDir()),
                                         new JanaQueryManager(e, configuration.getQueriesDir(),
+                                                configuration.getOutputDir(),
+                                                configuration.isWriteOutput(), configuration.getTimeout())));
+                        break;
+                    case SQLSERVER:
+                        configuration.getMappings().get(Database.SQLSERVER).forEach(
+                                e -> benchmark.runBenchmark(
+                                        new SQLServerSchema(e, configuration.getDataDir()),
+                                        new SQLServerDataUploader(e, configuration.getDataDir()),
+                                        new SQLServerQueryManager(e, configuration.getQueriesDir(),
                                                 configuration.getOutputDir(),
                                                 configuration.isWriteOutput(), configuration.getTimeout())));
                         break;

@@ -331,7 +331,7 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
 
             // Adding Platforms
             insert = "INSERT INTO PLATFORM " + "(ID, NAME, " +
-                    "USER_ID, PLATFORM_TYPE_ID) VALUES (?, ?, ?, ?)";
+                    "USER_ID, PLATFORM_TYPE_ID, HASHED_MAC) VALUES (?, ?, ?, ?, ?)";
             JSONArray platform_list = (JSONArray)parser.parse(new InputStreamReader(
                     new FileInputStream(dataDir + DataFiles.PLT.getPath())));
 
@@ -343,6 +343,7 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
                 stmt.setString(2, (String)temp.get("name"));
                 stmt.setString(3, (String)((JSONObject)temp.get("owner")).get("id"));
                 stmt.setString(4, (String)((JSONObject)temp.get("type_")).get("id"));
+                stmt.setString(5, (String)(temp.get("hashedMac")));
                 stmt.executeUpdate();
 
             }
