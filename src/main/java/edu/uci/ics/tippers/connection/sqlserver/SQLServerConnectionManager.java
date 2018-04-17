@@ -75,5 +75,33 @@ public class SQLServerConnectionManager extends BaseConnectionManager {
         }
     }
 
+    public Connection getEncryptedConnection() throws BenchmarkException {
+        try {
+
+            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+
+        } catch (ClassNotFoundException e) {
+
+            System.out.println("Where is your SQL Server JDBC Driver? "
+                    + "Include in your library path!");
+            e.printStackTrace();
+
+        }
+
+        Connection connection;
+        try {
+            connection = DriverManager.getConnection(
+                    String.format("jdbc:sqlserver://%s:%s;databaseName=%s;columnEncryptionSetting=Enabled;" +
+                                    "keyStoreAuthentication=JavaKeyStorePassword;" +
+                                    "keyStoreLocation=/opt/mssql-tools/bin/keystore.jks;keyStoreSecret=mypassword;",
+                            SERVER, PORT, DATABASE), USER, PASSWORD);
+
+            return connection;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new BenchmarkException("Error Connecting to SQL Server");
+        }
+    }
+
 
 }

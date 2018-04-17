@@ -18,7 +18,10 @@ public class SQLServerSchema extends BaseSchema {
 
     public SQLServerSchema(int mapping, String dataDir) {
         super(mapping, dataDir);
-        connection = SQLServerConnectionManager.getInstance().getConnection();
+        if (mapping == 3)
+            connection = SQLServerConnectionManager.getInstance().getEncryptedConnection();
+        else
+            connection = SQLServerConnectionManager.getInstance().getConnection();
     }
 
     @Override
@@ -46,6 +49,7 @@ public class SQLServerSchema extends BaseSchema {
         switch (mapping) {
             case 1:
             case 2:
+            case 3:
                 runScript(String.format(CREATE_FORMAT, mapping));
                 break;
             default:
@@ -58,6 +62,7 @@ public class SQLServerSchema extends BaseSchema {
         switch (mapping) {
             case 1:
             case 2:
+            case 3:
                 runScript(String.format(DROP_FORMAT, mapping));
                 break;
             default:

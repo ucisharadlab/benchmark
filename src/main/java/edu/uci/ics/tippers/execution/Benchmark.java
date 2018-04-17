@@ -80,12 +80,12 @@ public class Benchmark {
 
             // Creating schema on a particular database and particular mapping
             System.out.println("Creating Schema ...");
-            //schemaCreator.createSchema();
+            schemaCreator.createSchema();
 
             // Inserting data into the database system after schema creation
             System.out.println("Inserting Data ...");
             Map<Integer, Duration> runTimePerMapping = new HashMap<Integer, Duration>();
-            //runTimePerMapping.put(Query.INSERT_COMPLETE.getQNum(), dataUploader.addAllData());
+            runTimePerMapping.put(Query.INSERT_COMPLETE.getQNum(), dataUploader.addAllData());
 
             // Insert Tests
             System.out.println("Inserting Insert Test Data ...");
@@ -94,7 +94,7 @@ public class Benchmark {
 
             // Running benchmark queries and gathering query runtimes
             System.out.println("Running Queries ...");
-            runTimePerMapping.putAll(queryManager.runQueries());
+            //runTimePerMapping.putAll(queryManager.runQueries());
             LOGGER.info(Arrays.toString(runTimePerMapping.entrySet().toArray()));
 
             runTimes.put(new ImmutablePair<>(queryManager.getDatabase(), queryManager.getMapping()), runTimePerMapping);
