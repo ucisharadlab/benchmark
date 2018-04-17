@@ -475,13 +475,7 @@
                         }
                     ]
                 },
-                "constraints": [
-                    {
-                        "type": "padTo",
-                        "value": 20
-                    }
-                ],
-                "type": "SQLString"
+                "type": "SQLInt32"
             }
         ]
     },
@@ -515,7 +509,7 @@
                 "privacyLevel": {
                     "type": "public"
                 },
-                "type": "SQLString"
+                "type": "SQLInt32"
             }
         ]
     },
@@ -549,7 +543,7 @@
                 "privacyLevel": {
                     "type": "public"
                 },
-                "type": "SQLString"
+                "type": "SQLInt32"
             }
         ]
     },
@@ -590,7 +584,7 @@
                 "privacyLevel": {
                     "type": "public"
                 },
-                "type": "SQLString"
+                "type": "SQLInt32"
             }
         ]
     }

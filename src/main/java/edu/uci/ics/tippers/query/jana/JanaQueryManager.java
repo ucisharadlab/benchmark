@@ -67,6 +67,9 @@ public class JanaQueryManager extends BaseQueryManager {
     public Duration runQuery1(String sensorId) throws BenchmarkException {
         switch (mapping) {
             case 1:
+                return runTimedQuery(
+                        String.format("SELECT NAME FROM SENSOR WHERE ID = '%s';", sensorId), 1
+                );
             case 2:
                 return runTimedQuery(
                         String.format("SELECT NAME FROM SENSOR WHERE ID = '%s';", sensorId), 1

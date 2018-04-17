@@ -91,7 +91,7 @@ public class Benchmark {
 
             // Running benchmark queries and gathering query runtimes
             System.out.println("Running Queries ...");
-            //runTimePerMapping.putAll(queryManager.runQueries());
+            runTimePerMapping.putAll(queryManager.runQueries());
             LOGGER.info(Arrays.toString(runTimePerMapping.entrySet().toArray()));
 
             runTimes.put(new ImmutablePair<>(queryManager.getDatabase(), queryManager.getMapping()), runTimePerMapping);

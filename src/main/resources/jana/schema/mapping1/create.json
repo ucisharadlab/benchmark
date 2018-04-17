@@ -409,7 +409,7 @@
                 "privacyLevel": {
                     "type": "public"
                 },
-                "type": "SQLUnsignedInt64"
+                "type": "SQLInt32"
             }
         ]
     },
@@ -443,7 +443,7 @@
                 "privacyLevel": {
                     "type": "public"
                 },
-                "type": "SQLUnsignedInt64"
+                "type": "SQLInt32"
             }
         ]
     },
@@ -484,7 +484,7 @@
                 "privacyLevel": {
                     "type": "public"
                 },
-                "type": "SQLUnsignedInt64"
+                "type": "SQLInt32"
             }
         ]
     }

@@ -328,14 +328,14 @@ public class JanaDataUploader extends BaseDataUploader {
             if (obs.getSensor().getType_().getId().equals("Thermometer")) {
                 observationRow.put("temperature", obs.getPayload().get("temperature").getAsString());
                 observationRow.put("sensor_id", obs.getSensor().getId());
-                observationRow.put("timeStamp", String.valueOf(obs.getTimeStamp().getTime()));
+                observationRow.put("timeStamp", String.valueOf(obs.getTimeStamp().getTime()/1000));
                 observationRow.put("id", obs.getId());
                 temArray.add(observationRow);
                 thermoCount ++;
             } else if (obs.getSensor().getType_().getId().equals("WiFiAP")) {
                 observationRow.put("clientId", obs.getPayload().get("clientId").getAsString());
                 observationRow.put("sensor_id", obs.getSensor().getId());
-                observationRow.put("timeStamp", String.valueOf(obs.getTimeStamp().getTime()));
+                observationRow.put("timeStamp", String.valueOf(obs.getTimeStamp().getTime()/1000));
                 observationRow.put("id", obs.getId());
                 wifiArray.add(observationRow);
                 wifiCount ++;
@@ -343,7 +343,7 @@ public class JanaDataUploader extends BaseDataUploader {
                 observationRow.put("currentMilliWatts", obs.getPayload().get("currentMilliWatts").getAsString());
                 observationRow.put("onTodaySeconds", obs.getPayload().get("onTodaySeconds").getAsString());
                 observationRow.put("sensor_id", obs.getSensor().getId());
-                observationRow.put("timeStamp", String.valueOf(obs.getTimeStamp().getTime()));
+                observationRow.put("timeStamp", String.valueOf(obs.getTimeStamp().getTime()/1000));
                 observationRow.put("id", obs.getId());
                 wemoArray.add(observationRow);
                 wemoCount ++;
@@ -391,7 +391,7 @@ public class JanaDataUploader extends BaseDataUploader {
             if (obs.getSensor().getType_().getId().equals("Thermometer")) {
                 observationRow.put("temperature", obs.getPayload().get("temperature").getAsString());
                 observationRow.put("sensor_id", obs.getSensor().getId());
-                observationRow.put("timeStamp", sdf.format(obs.getTimeStamp().getTime()));
+                observationRow.put("timeStamp", String.valueOf(obs.getTimeStamp().getTime()/1000));
                 observationRow.put("id", obs.getId());
                 temArray.add(observationRow);
                 thermoCount ++;
@@ -399,7 +399,7 @@ public class JanaDataUploader extends BaseDataUploader {
 
                 observationRow.put("clientId", obs.getPayload().get("clientId").getAsString());
                 observationRow.put("sensor_id", obs.getSensor().getId());
-                observationRow.put("timeStamp", sdf.format(obs.getTimeStamp().getTime()));
+                observationRow.put("timeStamp", String.valueOf(obs.getTimeStamp().getTime()/1000));
                 observationRow.put("id", obs.getId());
 
                 /* partition observations into two tables:
@@ -433,7 +433,7 @@ public class JanaDataUploader extends BaseDataUploader {
                 observationRow.put("currentMilliWatts", obs.getPayload().get("currentMilliWatts").getAsString());
                 observationRow.put("onTodaySeconds", obs.getPayload().get("onTodaySeconds").getAsString());
                 observationRow.put("sensor_id", obs.getSensor().getId());
-                observationRow.put("timeStamp", sdf.format(obs.getTimeStamp().getTime()));
+                observationRow.put("timeStamp", String.valueOf(obs.getTimeStamp().getTime()/1000));
                 observationRow.put("id", obs.getId());
                 wemoArray.add(observationRow);
                 wemoCount ++;
@@ -465,10 +465,10 @@ public class JanaDataUploader extends BaseDataUploader {
 
     private List<String> getSensitiveUsers(){
         List<String> senUsersList = new ArrayList<String>();
-        //String fileName = senLevelDataDir+"/users_low";
-        String fileName = senLevelDataDir+"/users_medium";
-        //String fileName = senLevelDataDir+"/users_high";
-        //String fileName = senLevelDataDir+"/users_full";
+        //String fileName = senLevelDataDir+"/small_dataset/users_low";
+        //String fileName = senLevelDataDir+"/small_dataset//users_medium";
+        String fileName = senLevelDataDir+"/small_dataset//users_high";
+        //String fileName = senLevelDataDir+"/small_dataset//users_full";
         String line;
 
         try {
@@ -492,10 +492,10 @@ public class JanaDataUploader extends BaseDataUploader {
 
     private List<String> getSensitiveSensors(){
         List<String> senSpaceList = new ArrayList<String>();
-        //String fileName = senLevelDataDir+"/sensors_low";
-        String fileName = senLevelDataDir+"/sensors_medium";
-        //String fileName = senLevelDataDir+"/sensors_high";
-        //String fileName = senLevelDataDir+"/sensors_full";
+        //String fileName = senLevelDataDir+"/small_dataset/sensors_low";
+        //String fileName = senLevelDataDir+"/small_dataset/sensors_medium";
+        String fileName = senLevelDataDir+"/small_dataset//sensors_high";
+        //String fileName = senLevelDataDir+"/small_dataset//sensors_full";
         String line;
 
         try {
