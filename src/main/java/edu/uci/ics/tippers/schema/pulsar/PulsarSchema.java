@@ -12,7 +12,7 @@ public class PulsarSchema extends BaseSchema {
 
     @Override
     public Database getDatabase() {
-        return null;
+        return Database.PULSAR;
     }
 
     @Override

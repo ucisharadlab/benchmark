@@ -54,7 +54,7 @@ public class PulsarConnectionManager  extends BaseConnectionManager{
         return _instance;
     }
 
-    public HttpResponse ingest(String createRelation, String relation, List<String> rows) {
+    public HttpResponse ingest(String createRelation, String relation, List<List<String>> rows) {
         CloseableHttpClient client = HttpClients.createDefault();
         String url = String.format("http://%s:%s/ingest", SERVER, PORT);
         HttpPost httpPost = new HttpPost(url);

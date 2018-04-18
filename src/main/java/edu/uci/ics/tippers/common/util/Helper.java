@@ -70,10 +70,11 @@ public class Helper {
 		return string;
 	}
 
-	public static String listToInsertString(String relation, List<String> rows) {
+	public static String listToInsertString(String relation, List<List<String>> rows) {
 		StringBuilder insert = new StringBuilder();
 		insert.append("INSERT INTO %s VALUES ");
-		insert.append(rows.stream().collect(Collectors.joining(",")));
+		insert.append(rows.stream().map(row->'('+row.stream().collect(Collectors.joining(","))+')')
+				.collect(Collectors.joining(",")));
 
 		return insert.toString();
 	}
