@@ -4,6 +4,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoIterable;
 import edu.uci.ics.tippers.common.Database;
+import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.connection.mongodb.DBManager;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.query.BaseQueryManager;
@@ -737,5 +738,10 @@ public class MongoDBQueryManager extends BaseQueryManager{
             default:
                 throw new BenchmarkException("No Such Mapping");
         }
+    }
+
+    @Override
+    public Duration runQuery11() throws BenchmarkException {
+        return Constants.MAX_DURATION;
     }
 }

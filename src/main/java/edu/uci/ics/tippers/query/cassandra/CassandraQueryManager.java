@@ -76,4 +76,9 @@ public class CassandraQueryManager extends BaseQueryManager {
     public Duration runQuery10(Date startTime, Date endTime) throws BenchmarkException {
         return null;
     }
+
+    @Override
+    public Duration runQuery11() throws BenchmarkException {
+        return null;
+    }
 }

@@ -1,6 +1,7 @@
 package edu.uci.ics.tippers.query.sqlserver;
 
 import edu.uci.ics.tippers.common.Database;
+import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.connection.sqlserver.SQLServerConnectionManager;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.query.BaseQueryManager;
@@ -603,5 +604,10 @@ public class SQLServerQueryManager extends BaseQueryManager{
 
 
         }
+    }
+
+    @Override
+    public Duration runQuery11() throws BenchmarkException {
+        return Constants.MAX_DURATION;
     }
 }

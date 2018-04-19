@@ -1,6 +1,7 @@
 package edu.uci.ics.tippers.query.pulsar;
 
 import edu.uci.ics.tippers.common.Database;
+import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.query.BaseQueryManager;
 
@@ -71,6 +72,11 @@ public class PulsarQueryManager extends BaseQueryManager {
 
     @Override
     public Duration runQuery10(Date startTime, Date endTime) throws BenchmarkException {
+        return null;
+    }
+
+    @Override
+    public Duration runQuery11() throws BenchmarkException {
         return null;
     }
 }

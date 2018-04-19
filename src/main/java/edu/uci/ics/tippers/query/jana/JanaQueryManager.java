@@ -12,9 +12,14 @@ import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -23,6 +28,9 @@ public class JanaQueryManager extends BaseQueryManager {
     private static final Logger LOGGER = Logger.getLogger(AsterixDBQueryManager.class);
     private JanaConnectionManager connectionManager;
 
+    private String senLevelDataDir="/home/sumaya/Desktop/benchmark/src/main/java/edu/uci/ics/tippers/data/jana/sensitivity_levels_data";
+    private List<String> senSensorsList = getSensitiveSensors();
+    private List<String> senUsersList = getSensitiveUsers();
     public JanaQueryManager(int mapping, String queriesDir, String outputDir, boolean writeOutput, long timeout) {
         super(mapping, queriesDir, outputDir, writeOutput, timeout);
         connectionManager = JanaConnectionManager.getInstance();
@@ -86,7 +94,24 @@ public class JanaQueryManager extends BaseQueryManager {
 
     @Override
     public Duration runQuery3(String sensorId, Date startTime, Date endTime) throws BenchmarkException {
-        return Constants.MAX_DURATION;
+        switch (mapping) {
+            case 1:
+                return runTimedQuery(
+                        String.format("SELECT timeStamp, clientId FROM WiFiAPObservation WHERE sensor_id='%s' "
+                                        + "AND timeStamp >=%s AND timeStamp <=%s;",
+                                sensorId, startTime.getTime()/1000, endTime.getTime()/1000), 3
+                );
+            case 2://partition the query based on whether the data reside on the S or NS table
+                if(senSensorsList.contains(sensorId))
+                    return runTimedQuery(String.format("SELECT timeStamp, clientId FROM WiFiAPObservation_S WHERE sensor_id='%s' AND timeStamp >=%s AND timeStamp <=%s;",
+                        sensorId, startTime.getTime()/1000,endTime.getTime()/1000), 3);
+                else
+                    return runTimedQuery(String.format("SELECT timeStamp, clientId FROM WiFiAPObservation_NS WHERE sensor_id='%s' "
+                                + "AND timeStamp >=%s AND timeStamp <=%s;",
+                        sensorId, startTime.getTime()/1000, endTime.getTime()/1000),3);
+            default:
+                throw new BenchmarkException("No Such Mapping");
+        }
     }
 
     @Override
@@ -122,5 +147,76 @@ public class JanaQueryManager extends BaseQueryManager {
     @Override
     public Duration runQuery10(Date startTime, Date endTime) throws BenchmarkException {
         return Constants.MAX_DURATION;
+    }
+
+    @Override
+    public Duration runQuery11() throws BenchmarkException {
+        switch (mapping) {
+            case 1:
+                return runTimedQuery(String.format("Select p.USER_ID,count(*) from PLATFORM p join WiFiAPObservation w ON w.clientId=p.ID GROUP BY p.USER_ID"), 11);
+            case 2://partition the query based on whether the data reside on the S or NS table
+                    Instant startTime = Instant.now();
+                    runTimedQuery(String.format("Select p.USER_ID,count(*) from PLATFORM p join WiFiAPObservation_S w ON w.clientId=p.HASHED_MAC GROUP BY p.USER_ID"), 11);
+                    runTimedQuery(String.format("Select p.USER_ID,count(*) from PLATFORM p join WiFiAPObservation_NS w ON w.clientId=p.ID GROUP BY p.USER_ID"), 11);
+                    Instant endTime = Instant.now();
+                return Duration.between(startTime, endTime);
+            default:
+                throw new BenchmarkException("No Such Mapping");
+        }
+    }
+
+    //
+    private List<String> getSensitiveSensors(){
+        List<String> senSpaceList = new ArrayList<String>();
+        //String fileName = senLevelDataDir+"/small_dataset/sensors_low";
+        //String fileName = senLevelDataDir+"/small_dataset/sensors_medium";
+        //String fileName = senLevelDataDir+"/small_dataset//sensors_high";
+        String fileName = senLevelDataDir+"/small_dataset//sensors_full";
+        String line;
+
+        try {
+            FileReader fileReader = new FileReader(fileName);
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+            while ((line=bufferedReader.readLine())!= null)
+                senSpaceList.add(line);
+
+            bufferedReader.close();
+        }
+        catch(FileNotFoundException ex){
+            System.out.println(ex.getMessage());
+        }
+        catch(IOException ex) {
+            System.out.println(ex.getMessage());
+        }
+
+        return senSpaceList;
+    }
+
+    private List<String> getSensitiveUsers(){
+        List<String> senUsersList = new ArrayList<String>();
+        //String fileName = senLevelDataDir+"/small_dataset/users_low";
+        //String fileName = senLevelDataDir+"/small_dataset//users_medium";
+        //String fileName = senLevelDataDir+"/small_dataset//users_high";
+        String fileName = senLevelDataDir+"/small_dataset//users_full";
+        String line;
+
+        try {
+            FileReader fileReader = new FileReader(fileName);
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+            while ((line=bufferedReader.readLine())!= null)
+                senUsersList.add(line);
+
+            bufferedReader.close();
+        }
+        catch(FileNotFoundException ex){
+            System.out.println(ex.getMessage());
+        }
+        catch(IOException ex) {
+            System.out.println(ex.getMessage());
+        }
+
+        return senUsersList;
     }
 }
