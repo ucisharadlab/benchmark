@@ -45,16 +45,17 @@ public class PulsarDataUploader extends BaseDataUploader {
 
         try {
             writer = new BufferedWriter(new FileWriter(PulsarConnectionManager.getInsertFilePath()));
-            writer.write(String.format("INSERT INTO %s VALUES \n", PULSAR_TABLE_NAME));
+            //writer.write(String.format("INSERT INTO %s VALUES \n", PULSAR_TABLE_NAME));
         } catch (IOException e) {
             e.printStackTrace();
         }
-        connectionManager.ingestFromCommandLine(schema);
+        //connectionManager.ingestFromCommandLine(schema);
     }
 
     private void writeRow(List<String> row) throws BenchmarkException {
         try {
-            writer.write("(" + row.stream().collect(Collectors.joining(",")) +"),\n");
+            writer.write(String.format("INSERT INTO %s VALUES \n", PULSAR_TABLE_NAME) +
+                    " (" + row.stream().collect(Collectors.joining(",")) +");\n");
         } catch (IOException e) {
             e.printStackTrace();
             throw new BenchmarkException("Error Writing Pulsar inserts file");

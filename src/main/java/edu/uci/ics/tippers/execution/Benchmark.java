@@ -11,6 +11,7 @@ import edu.uci.ics.tippers.data.griddb.GridDBDataUploader;
 import edu.uci.ics.tippers.data.jana.JanaDataUploader;
 import edu.uci.ics.tippers.data.mongodb.MongoDBDataUploader;
 import edu.uci.ics.tippers.data.postgresql.PgSQLDataUploader;
+import edu.uci.ics.tippers.data.pulsar.PulsarDataUploader;
 import edu.uci.ics.tippers.data.sparksql.SparkSQLDataUploader;
 import edu.uci.ics.tippers.data.sqlserver.SQLServerDataUploader;
 import edu.uci.ics.tippers.exception.BenchmarkException;
@@ -22,6 +23,7 @@ import edu.uci.ics.tippers.query.griddb.GridDBQueryManager;
 import edu.uci.ics.tippers.query.jana.JanaQueryManager;
 import edu.uci.ics.tippers.query.mongodb.MongoDBQueryManager;
 import edu.uci.ics.tippers.query.postgresql.PgSQLQueryManager;
+import edu.uci.ics.tippers.query.pulsar.PulsarQueryManager;
 import edu.uci.ics.tippers.query.sparksql.SparkSQLQueryManager;
 import edu.uci.ics.tippers.query.sqlserver.SQLServerQueryManager;
 import edu.uci.ics.tippers.scaler.Scale;
@@ -33,6 +35,7 @@ import edu.uci.ics.tippers.schema.griddb.GridDBSchema;
 import edu.uci.ics.tippers.schema.jana.JanaSchema;
 import edu.uci.ics.tippers.schema.mongodb.MongoDBSchema;
 import edu.uci.ics.tippers.schema.postgresql.PgSQLSchema;
+import edu.uci.ics.tippers.schema.pulsar.PulsarSchema;
 import edu.uci.ics.tippers.schema.sparksql.SparkSQLSchema;
 import edu.uci.ics.tippers.schema.sqlserver.SQLServerSchema;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -94,7 +97,7 @@ public class Benchmark {
 
             // Running benchmark queries and gathering query runtimes
             System.out.println("Running Queries ...");
-            runTimePerMapping.putAll(queryManager.runQueries());
+            //runTimePerMapping.putAll(queryManager.runQueries());
             LOGGER.info(Arrays.toString(runTimePerMapping.entrySet().toArray()));
 
             runTimes.put(new ImmutablePair<>(queryManager.getDatabase(), queryManager.getMapping()), runTimePerMapping);
@@ -218,6 +221,15 @@ public class Benchmark {
                                         new SQLServerSchema(e, configuration.getDataDir()),
                                         new SQLServerDataUploader(e, configuration.getDataDir()),
                                         new SQLServerQueryManager(e, configuration.getQueriesDir(),
+                                                configuration.getOutputDir(),
+                                                configuration.isWriteOutput(), configuration.getTimeout())));
+                        break;
+                    case PULSAR:
+                        configuration.getMappings().get(Database.PULSAR).forEach(
+                                e -> benchmark.runBenchmark(
+                                        new PulsarSchema(e, configuration.getDataDir()),
+                                        new PulsarDataUploader(e, configuration.getDataDir()),
+                                        new PulsarQueryManager(e, configuration.getQueriesDir(),
                                                 configuration.getOutputDir(),
                                                 configuration.isWriteOutput(), configuration.getTimeout())));
                         break;
