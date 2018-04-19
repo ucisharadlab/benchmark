@@ -30,7 +30,7 @@ public class PulsarDataUploader extends BaseDataUploader {
     private String schema;
     private List<List<String>> inserts;
     private String CREATE_SCHEMA_FORMAT = "pulsar/schema/mapping%s/create.sql";
-    private String DROP_FORMAT = "postgresql/schema/mapping%s/drop.sql";
+    private String DROP_FORMAT = "pulsar/schema/mapping%s/drop.sql";
     private String PULSAR_TABLE_NAME = "TippersBigTable";
     private int counter = 1;
     private int NUM_COLUMNS = 67;
@@ -44,13 +44,15 @@ public class PulsarDataUploader extends BaseDataUploader {
         schema = readSchema(mapping);
         addAllData();
         PulsarConnectionManager connectionManager = PulsarConnectionManager.getInstance();
-        connectionManager.ingest(schema, PULSAR_TABLE_NAME, inserts);
+        connectionManager.ingestFromCommandLine(schema, PULSAR_TABLE_NAME, inserts);
     }
 
     private String readSchema(int mapping) throws BenchmarkException {
         byte[] encoded = new byte[0];
         try {
-            encoded = Files.readAllBytes(Paths.get(String.format(CREATE_SCHEMA_FORMAT, mapping)));
+            encoded = Files.readAllBytes(Paths.get(
+                    PulsarDataUploader.class.getClassLoader().getResource(
+                            String.format(CREATE_SCHEMA_FORMAT, mapping)).getPath()));
         } catch (IOException e) {
             e.printStackTrace();
             throw new BenchmarkException("Error Reading Pulsar Schema File");
@@ -85,7 +87,7 @@ public class PulsarDataUploader extends BaseDataUploader {
         addInfrastructureData();
         addDeviceData();
         addSensorData();
-        addObservationData(); //no sensitivity
+//        addObservationData(); //no sensitivity
         Instant end = Instant.now();
         return Duration.between(start, end);
     }

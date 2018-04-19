@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -32,6 +33,11 @@ public class PulsarConnectionManager  extends BaseConnectionManager{
     private Properties props;
     private static String SERVER;
     private static String PORT;
+    private static String DATADIR;
+    private static String CONTAINER;
+    private static String INSERT_FILE_NAME = "inserts.txt";
+    private static String SCHEMA_FILE_NAME = "schema.txt";
+    private static String INGEST_COMMAND = "docker exec %s /bin/bash ./usr/share/sdb/dbingest.sh";
 
     private PulsarConnectionManager() {
         try {
@@ -41,7 +47,8 @@ public class PulsarConnectionManager  extends BaseConnectionManager{
 
             SERVER = props.getProperty("server");
             PORT = props.getProperty("port");
-
+            DATADIR = props.getProperty("data-dir");
+            CONTAINER = props.getProperty("container");
             // Warming Up
             //sendQuery(";");
 
@@ -86,10 +93,35 @@ public class PulsarConnectionManager  extends BaseConnectionManager{
             } finally {
                 throw new BenchmarkException("Error Running Query");
             }
+        } else{
+            try {
+                System.out.println(EntityUtils.toString(response.getEntity()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         return response;
     }
 
+    public void createSchemaFile(String schema) {
+        Helper.writeStringToFile(schema, DATADIR + SCHEMA_FILE_NAME);
+    }
+
+    private void createInsertFile(String inserts) {
+        Helper.writeStringToFile(inserts, DATADIR + INSERT_FILE_NAME);
+    }
+
+    public void ingestFromCommandLine(String createRelation, String relation, List<List<String>> rows) {
+        createSchemaFile(createRelation);
+        createInsertFile(Helper.listToInsertString(relation, rows));
+        try {
+            Helper.runBlockingProcess(Arrays.asList(String.format(INGEST_COMMAND, CONTAINER).split(" ")));
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new BenchmarkException("Error While Inserting Data");
+        }
+
+    }
 
     public HttpResponse sendQuery(String query) {
         CloseableHttpClient client = HttpClients.createDefault();
