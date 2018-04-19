@@ -314,6 +314,22 @@ public abstract class BaseQueryManager {
             e.printStackTrace();
             queryRunTimes.put(10, Constants.MAX_DURATION);
         }
+
+        // Query 11
+        numQueries = 0;
+        runTime = Duration.ZERO;
+        try {
+            while (numQueries<5) {
+                runTime = runTime.plus(runWithThread(() -> runQuery11()));
+                numQueries++;
+            }
+
+            queryRunTimes.put(11, runTime.dividedBy(numQueries));
+        } catch (Exception | Error e) {
+            e.printStackTrace();
+            queryRunTimes.put(11, Constants.MAX_DURATION);
+        }
+
         return queryRunTimes;
     }
 
@@ -339,4 +355,6 @@ public abstract class BaseQueryManager {
     public abstract Duration runQuery9(String userId, String infraTypeName) throws BenchmarkException;
 
     public abstract Duration runQuery10(Date startTime, Date endTime) throws BenchmarkException;
+
+    public abstract Duration runQuery11() throws BenchmarkException;
 }

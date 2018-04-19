@@ -27,13 +27,7 @@
             {
                 "name": "GOOGLE_AUTH_TOKEN",
                 "privacyLevel": {
-                    "type": "private",
-                    "operations": [
-                      {
-                        "type": "EqualityComparison",
-                        "index": true
-                      }
-                  ]
+                    "type": "private"
                 },
                 "constraints": [
                   {
@@ -242,13 +236,7 @@
             {
                 "name": "HASHED_MAC",
                 "privacyLevel": {
-                    "type": "private",
-                    "operations": [
-                      {
-                        "type": "EqualityComparison",
-                        "index": true
-                      }
-                    ]
+                    "type": "private"
                   },
                 "constraints": [
                   {
@@ -429,13 +417,7 @@
             {
                 "name": "clientId",
                 "privacyLevel": {
-                    "type": "private",
-                    "operations": [
-                        {
-                            "type": "EqualityComparison",
-                            "index": true
-                        }
-                    ]
+                    "type": "private"
                 },
                 "constraints": [
                     {
@@ -448,13 +430,7 @@
             {
                 "name": "sensor_id",
                 "privacyLevel": {
-                    "type": "private",
-                    "operations": [
-                        {
-                            "type": "EqualityComparison",
-                            "index": true
-                        }
-                    ]
+                    "type": "private"
                 },
                 "constraints": [
                     {
@@ -467,13 +443,7 @@
             {
                 "name": "timeStamp",
                 "privacyLevel": {
-                    "type": "private",
-                    "operations": [
-                        {
-                            "type": "EqualityComparison",
-                            "index": true
-                        }
-                    ]
+                    "type": "private"
                 },
                 "type": "SQLInt32"
             }

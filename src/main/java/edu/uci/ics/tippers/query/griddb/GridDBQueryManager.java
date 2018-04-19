@@ -1012,4 +1012,9 @@ public class GridDBQueryManager extends BaseQueryManager {
                 throw new BenchmarkException("No Such Mapping");
         }
     }
+
+    @Override
+    public Duration runQuery11() throws BenchmarkException {
+        return Constants.MAX_DURATION;
+    }
 }

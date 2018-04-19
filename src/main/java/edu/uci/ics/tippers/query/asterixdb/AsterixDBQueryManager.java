@@ -330,4 +330,9 @@ public class AsterixDBQueryManager extends BaseQueryManager{
         }
 
     }
+
+    @Override
+    public Duration runQuery11() throws BenchmarkException {
+        return Constants.MAX_DURATION;
+    }
 }

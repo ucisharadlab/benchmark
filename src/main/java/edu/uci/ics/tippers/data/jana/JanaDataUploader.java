@@ -465,9 +465,9 @@ public class JanaDataUploader extends BaseDataUploader {
 
     private List<String> getSensitiveUsers(){
         List<String> senUsersList = new ArrayList<String>();
-        //String fileName = senLevelDataDir+"/small_dataset/users_low";
-        //String fileName = senLevelDataDir+"/small_dataset//users_medium";
-        String fileName = senLevelDataDir+"/small_dataset//users_high";
+        //String fileName = senLevelDataDir+"/medium_dataset/users_low";
+        String fileName = senLevelDataDir+"/medium_dataset//users_medium";
+        //String fileName = senLevelDataDir+"/small_dataset//users_high";
         //String fileName = senLevelDataDir+"/small_dataset//users_full";
         String line;
 
@@ -492,9 +492,9 @@ public class JanaDataUploader extends BaseDataUploader {
 
     private List<String> getSensitiveSensors(){
         List<String> senSpaceList = new ArrayList<String>();
-        //String fileName = senLevelDataDir+"/small_dataset/sensors_low";
-        //String fileName = senLevelDataDir+"/small_dataset/sensors_medium";
-        String fileName = senLevelDataDir+"/small_dataset//sensors_high";
+        //String fileName = senLevelDataDir+"/medium_dataset/sensors_low";
+        String fileName = senLevelDataDir+"/medium_dataset/sensors_medium";
+        //String fileName = senLevelDataDir+"/small_dataset//sensors_high";
         //String fileName = senLevelDataDir+"/small_dataset//sensors_full";
         String line;
 
