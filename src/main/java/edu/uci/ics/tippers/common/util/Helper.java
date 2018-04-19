@@ -2,6 +2,7 @@ package edu.uci.ics.tippers.common.util;
 
 import edu.uci.ics.tippers.common.constants.Constants;
 
+import java.io.*;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -70,11 +71,40 @@ public class Helper {
 		return string;
 	}
 
-	public static String listToInsertString(String relation, List<String> rows) {
+	public static String listToInsertString(String relation, List<List<String>> rows) {
 		StringBuilder insert = new StringBuilder();
-		insert.append("INSERT INTO %s VALUES ");
-		insert.append(rows.stream().collect(Collectors.joining(",")));
+		insert.append(String.format("INSERT INTO %s VALUES ", relation));
+		insert.append(rows.stream().map(row->'('+row.stream().collect(Collectors.joining(","))+')')
+				.collect(Collectors.joining(",")));
 
 		return insert.toString();
+	}
+
+	public static void writeStringToFile(String str, String filePath) {
+        BufferedWriter writer;
+        try {
+            writer = new BufferedWriter(new FileWriter(filePath));
+            writer.write(str);
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+	private static void printLines(InputStream ins) throws Exception {
+		String line = null;
+		BufferedReader in = new BufferedReader(
+				new InputStreamReader(ins));
+		while ((line = in.readLine()) != null) {
+			System.out.println(line);
+		}
+	}
+
+	public static void runBlockingProcess(List<String> command) throws Exception {
+		ProcessBuilder pb = new ProcessBuilder(command);
+		Process pro = pb.start();
+		printLines(pro.getInputStream());
+		printLines(pro.getErrorStream());
+		pro.waitFor();
 	}
 }

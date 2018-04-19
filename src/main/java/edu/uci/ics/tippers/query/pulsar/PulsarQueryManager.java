@@ -17,7 +17,7 @@ public class PulsarQueryManager extends BaseQueryManager {
 
     @Override
     public Database getDatabase() {
-        return null;
+        return Database.PULSAR;
     }
 
     @Override
