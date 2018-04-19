@@ -61,6 +61,10 @@ public class PulsarConnectionManager  extends BaseConnectionManager{
         return _instance;
     }
 
+    public static String getInsertFilePath(){
+        return DATADIR + INSERT_FILE_NAME;
+    }
+
     public HttpResponse ingest(String createRelation, String relation, List<List<String>> rows) {
         CloseableHttpClient client = HttpClients.createDefault();
         String url = String.format("http://%s:%s/ingest", SERVER, PORT);
@@ -103,7 +107,7 @@ public class PulsarConnectionManager  extends BaseConnectionManager{
         return response;
     }
 
-    public void createSchemaFile(String schema) {
+    private void createSchemaFile(String schema) {
         Helper.writeStringToFile(schema, DATADIR + SCHEMA_FILE_NAME);
     }
 
@@ -111,9 +115,8 @@ public class PulsarConnectionManager  extends BaseConnectionManager{
         Helper.writeStringToFile(inserts, DATADIR + INSERT_FILE_NAME);
     }
 
-    public void ingestFromCommandLine(String createRelation, String relation, List<List<String>> rows) {
+    public void ingestFromCommandLine(String createRelation) {
         createSchemaFile(createRelation);
-        createInsertFile(Helper.listToInsertString(relation, rows));
         try {
             Helper.runBlockingProcess(Arrays.asList(String.format(INGEST_COMMAND, CONTAINER).split(" ")));
         } catch (Exception e) {

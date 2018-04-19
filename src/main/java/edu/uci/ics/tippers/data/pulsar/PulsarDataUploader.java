@@ -14,9 +14,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -25,11 +23,11 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class PulsarDataUploader extends BaseDataUploader {
 
     private String schema;
-    private List<List<String>> inserts;
     private String CREATE_SCHEMA_FORMAT = "pulsar/schema/mapping%s/create.sql";
     private String DROP_FORMAT = "pulsar/schema/mapping%s/drop.sql";
     private String PULSAR_TABLE_NAME = "TippersBigTable";
@@ -38,17 +36,31 @@ public class PulsarDataUploader extends BaseDataUploader {
 
     private JSONParser parser = new JSONParser();
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
+    BufferedWriter writer = null;
 
     public PulsarDataUploader(int mapping, String dataDir) {
         super(mapping, dataDir);
-        inserts = new ArrayList<>();
         schema = readSchema(mapping);
-        addAllData();
         PulsarConnectionManager connectionManager = PulsarConnectionManager.getInstance();
-        connectionManager.ingestFromCommandLine(schema, PULSAR_TABLE_NAME, inserts);
+
+        try {
+            writer = new BufferedWriter(new FileWriter(PulsarConnectionManager.getInsertFilePath()));
+            writer.write(String.format("INSERT INTO %s VALUES \n", PULSAR_TABLE_NAME));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        connectionManager.ingestFromCommandLine(schema);
     }
 
+    private void writeRow(List<String> row) throws BenchmarkException {
+        try {
+            writer.write("(" + row.stream().collect(Collectors.joining(",")) +"),\n");
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new BenchmarkException("Error Writing Pulsar inserts file");
+        }
+    }
+    
     private String readSchema(int mapping) throws BenchmarkException {
         byte[] encoded = new byte[0];
         try {
@@ -90,6 +102,12 @@ public class PulsarDataUploader extends BaseDataUploader {
         addDeviceData();
         addSensorData();
         addObservationData(); //no sensitivity
+        try {
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         Instant end = Instant.now();
         return Duration.between(start, end);
     }
@@ -111,7 +129,7 @@ public class PulsarDataUploader extends BaseDataUploader {
                 pulsarRow.set(3, temp.get("y").toString());
                 pulsarRow.set(4, temp.get("z").toString());
 
-                inserts.add(pulsarRow);
+                writeRow(pulsarRow);
             }
 
             // Adding Infrastructure Type
@@ -125,7 +143,7 @@ public class PulsarDataUploader extends BaseDataUploader {
                 pulsarRow.set(6, getQuotedString(temp.get("name")));
                 pulsarRow.set(7, getQuotedString(temp.get("description")));
 
-                inserts.add(pulsarRow);
+                writeRow(pulsarRow);
             }
 
             // Adding Infrastructure
@@ -140,7 +158,7 @@ public class PulsarDataUploader extends BaseDataUploader {
                 pulsarRow.set(10, getQuotedString(((JSONObject) temp.get("type_")).get("id")));
                 pulsarRow.set(11, temp.get("floor").toString());
 
-                inserts.add(pulsarRow);
+                writeRow(pulsarRow);
             }
 
             for (Object anInfra_list : infra_list) {
@@ -154,7 +172,7 @@ public class PulsarDataUploader extends BaseDataUploader {
                     pulsarRow.set(12, getQuotedString(temp.get("id")));
                     pulsarRow.set(13, getQuotedString(((JSONObject) location).get("id")));
 
-                    inserts.add(pulsarRow);
+                    writeRow(pulsarRow);
                 }
             }
 
@@ -179,7 +197,7 @@ public class PulsarDataUploader extends BaseDataUploader {
                 pulsarRow.set(15, getQuotedString(temp.get("name")));
                 pulsarRow.set(16, getQuotedString(temp.get("description")));
 
-                inserts.add(pulsarRow);
+                writeRow(pulsarRow);
             }
 
             // Adding Users
@@ -196,7 +214,7 @@ public class PulsarDataUploader extends BaseDataUploader {
                 pulsarRow.set(19, getQuotedString( temp.get("name")));
                 pulsarRow.set(20, getQuotedString( temp.get("googleAuthToken")));
 
-                inserts.add(pulsarRow);
+                writeRow(pulsarRow);
 
                 groups = (JSONArray) temp.get("groups");
                 for (Object group : groups) {
@@ -205,7 +223,7 @@ public class PulsarDataUploader extends BaseDataUploader {
                     pulsarRow.set(21, getQuotedString( temp.get("id")));
                     pulsarRow.set(22, getQuotedString(((JSONObject) group).get("id")));
 
-                    inserts.add(pulsarRow);
+                    writeRow(pulsarRow);
                 }
             }
 
@@ -232,7 +250,7 @@ public class PulsarDataUploader extends BaseDataUploader {
                 pulsarRow.set(27, getQuotedString( temp.get("captureFunctionality")));
                 pulsarRow.set(28, getQuotedString( temp.get("payloadSchema")));
 
-                inserts.add(pulsarRow);
+                writeRow(pulsarRow);
             }
 
 
@@ -251,7 +269,7 @@ public class PulsarDataUploader extends BaseDataUploader {
                 pulsarRow.set(33, getQuotedString( ((JSONObject) temp.get("type_")).get("id")));
                 pulsarRow.set(34, getQuotedString( temp.get("sensorConfig")));
 
-                inserts.add(pulsarRow);
+                writeRow(pulsarRow);
 
                 JSONArray entitiesCovered = (JSONArray) temp.get("coverage");
                 for (Object anEntitiesCovered : entitiesCovered) {
@@ -260,7 +278,7 @@ public class PulsarDataUploader extends BaseDataUploader {
                     pulsarRow.set(35, getQuotedString( temp.get("id")));
                     pulsarRow.set(36, getQuotedString(((JSONObject) anEntitiesCovered).get("name")));
 
-                    inserts.add(pulsarRow);
+                    writeRow(pulsarRow);
                 }
             }
 
@@ -284,7 +302,7 @@ public class PulsarDataUploader extends BaseDataUploader {
                 pulsarRow.set(38, getQuotedString( temp.get("name")));
                 pulsarRow.set(39, getQuotedString( temp.get("description")));
 
-                inserts.add(pulsarRow);
+                writeRow(pulsarRow);
             }
 
             // Adding Platforms
@@ -300,7 +318,7 @@ public class PulsarDataUploader extends BaseDataUploader {
                 pulsarRow.set(43, getQuotedString( ((JSONObject)temp.get("type_")).get("id")));
                 pulsarRow.set(44, getQuotedString( temp.get("hashedMac")));
 
-                inserts.add(pulsarRow);
+                writeRow(pulsarRow);
             }
 
         } catch(ParseException | IOException e) {
@@ -339,7 +357,7 @@ public class PulsarDataUploader extends BaseDataUploader {
                 pulsarRow.set(46, getQuotedString(sdf.format(obs.getTimeStamp())));
                 pulsarRow.set(45, getQuotedString(obs.getId()));
             }
-            inserts.add(pulsarRow);
+            writeRow(pulsarRow);
         }
     }
 
