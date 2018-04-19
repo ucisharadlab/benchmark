@@ -20,6 +20,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -36,6 +37,7 @@ public class PulsarDataUploader extends BaseDataUploader {
     private int NUM_COLUMNS = 67;
 
     private JSONParser parser = new JSONParser();
+    private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 
     public PulsarDataUploader(int mapping, String dataDir) {
@@ -87,7 +89,7 @@ public class PulsarDataUploader extends BaseDataUploader {
         addInfrastructureData();
         addDeviceData();
         addSensorData();
-//        addObservationData(); //no sensitivity
+        addObservationData(); //no sensitivity
         Instant end = Instant.now();
         return Duration.between(start, end);
     }
@@ -309,62 +311,36 @@ public class PulsarDataUploader extends BaseDataUploader {
 
     @Override
     public void addObservationData() throws BenchmarkException {
-//        List<String> pulsarRow;
-//        BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
-//                Observation.class);
-//        Observation obs = null;
-//
-//        JSONArray wifiArray = new JSONArray();
-//        JSONArray wemoArray = new JSONArray();
-//        JSONArray temArray = new JSONArray();
-//
-//        int wifiCount = 1, wemoCount = 1, thermoCount = 1, count = 0;
-//        while ((obs = reader.readNext()) != null) {
-//
-//            JSONObject observationRow = new JSONObject();
-//            if (obs.getSensor().getType_().getId().equals("Thermometer")) {
-//                observationRow.put("temperature", obs.getPayload().get("temperature").getAsString());
-//                observationRow.put("sensor_id", obs.getSensor().getId());
-//                observationRow.put("timeStamp", String.valueOf(obs.getTimeStamp().getTime()/1000));
-//                observationRow.put("id", obs.getId());
-//                temArray.add(observationRow);
-//                thermoCount ++;
-//            } else if (obs.getSensor().getType_().getId().equals("WiFiAP")) {
-//                observationRow.put("clientId", obs.getPayload().get("clientId").getAsString());
-//                observationRow.put("sensor_id", obs.getSensor().getId());
-//                observationRow.put("timeStamp", String.valueOf(obs.getTimeStamp().getTime()/1000));
-//                observationRow.put("id", obs.getId());
-//                wifiArray.add(observationRow);
-//                wifiCount ++;
-//            } else if (obs.getSensor().getType_().getId().equals("WeMo")) {
-//                observationRow.put("currentMilliWatts", obs.getPayload().get("currentMilliWatts").getAsString());
-//                observationRow.put("onTodaySeconds", obs.getPayload().get("onTodaySeconds").getAsString());
-//                observationRow.put("sensor_id", obs.getSensor().getId());
-//                observationRow.put("timeStamp", String.valueOf(obs.getTimeStamp().getTime()/1000));
-//                observationRow.put("id", obs.getId());
-//                wemoArray.add(observationRow);
-//                wemoCount ++;
-//            }
-//
-//            if (wemoCount % Constants.JANA_BATCH_SIZE == 0) {
-//                connectionManager.doInsert("WeMoObservation", wemoArray);
-//                wemoArray = new JSONArray();
-//            }
-//            if (wifiCount % Constants.JANA_BATCH_SIZE == 0) {
-//                connectionManager.doInsert("WiFiAPObservation", wifiArray);
-//                wifiArray = new JSONArray();
-//            }
-//            if (thermoCount % Constants.JANA_BATCH_SIZE == 0) {
-//                connectionManager.doInsert("ThermometerObservation", temArray);
-//                temArray = new JSONArray();
-//            }
-//            if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s Observations", count));
-//            count ++;
-//        }
-//        connectionManager.doInsert("WeMoObservation", wemoArray);
-//        connectionManager.doInsert("WiFiAPObservation", wifiArray);
-//        connectionManager.doInsert("ThermometerObservation", temArray);
+        List<String> pulsarRow;
+        BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
+                Observation.class);
+        Observation obs = null;
+        while ((obs = reader.readNext()) != null) {
+            pulsarRow = null;
+            if (obs.getSensor().getType_().getId().equals("Thermometer")) {
+                pulsarRow = getNullRow("ThermometerObservation");
+                pulsarRow.set(48, obs.getPayload().get("temperature").getAsString());
+                pulsarRow.set(47, getQuotedString(obs.getSensor().getId()));
+                pulsarRow.set(46, getQuotedString(sdf.format(obs.getTimeStamp())));
+                pulsarRow.set(45, getQuotedString(obs.getId()));
 
+            } else if (obs.getSensor().getType_().getId().equals("WiFiAP")) {
+                pulsarRow = getNullRow("WiFiAPObservation");
+                pulsarRow.set(49, getQuotedString(obs.getPayload().get("clientId").getAsString()));
+                pulsarRow.set(47, getQuotedString(obs.getSensor().getId()));
+                pulsarRow.set(46, getQuotedString(sdf.format(obs.getTimeStamp())));
+                pulsarRow.set(45, getQuotedString(obs.getId()));
+
+            } else if (obs.getSensor().getType_().getId().equals("WeMo")) {
+                pulsarRow = getNullRow("WeMoObservation");
+                pulsarRow.set(50, obs.getPayload().get("currentMilliWatts").getAsString());
+                pulsarRow.set(51, obs.getPayload().get("onTodaySeconds").getAsString());
+                pulsarRow.set(47, getQuotedString(obs.getSensor().getId()));
+                pulsarRow.set(46, getQuotedString(sdf.format(obs.getTimeStamp())));
+                pulsarRow.set(45, getQuotedString(obs.getId()));
+            }
+            inserts.add(pulsarRow);
+        }
     }
 
     @Override
