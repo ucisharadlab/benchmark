@@ -222,4 +222,13 @@ public class PulsarConnectionManager  extends BaseConnectionManager{
         return response;
     }
 
+    @Override
+    public org.json.JSONArray runQueryWithJSONResults(String query) {
+        try {
+            return new org.json.JSONArray(EntityUtils.toString(sendQuery(query).getEntity()));
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new BenchmarkException("Error Executing Query");
+        }
+    }
 }

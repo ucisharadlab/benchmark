@@ -193,4 +193,9 @@ public class JanaConnectionManager extends BaseConnectionManager {
         }
         return response;
     }
+
+    @Override
+    public org.json.JSONArray runQueryWithJSONResults(String query) {
+        return null;
+    }
 }

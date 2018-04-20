@@ -11,6 +11,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
+import org.json.JSONArray;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -86,4 +87,8 @@ public class AsterixDBConnectionManager extends BaseConnectionManager {
         return response;
     }
 
+    @Override
+    public JSONArray runQueryWithJSONResults(String query) {
+        return null;
+    }
 }

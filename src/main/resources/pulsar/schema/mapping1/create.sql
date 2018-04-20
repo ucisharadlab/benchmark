@@ -63,7 +63,7 @@ CREATE TABLE TippersBigTable (
   OBSERVATION_TIMESTAMP datetime RANGE,
   OBSERVATION_SENSOR_ID char(255) RANGE,
   OBSERVATION_temperature BIGINT ,
-  OBSERVATION_clientId char(255) ,
+  OBSERVATION_clientId char(255) RANGE,
   OBSERVATION_currentMilliWatts BIGINT ,
   OBSERVATION_onTodaySeconds BIGINT ,
 

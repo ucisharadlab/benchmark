@@ -1,5 +1,6 @@
-package edu.uci.ics.tippers.wrapper.griddb.translator;
+package edu.uci.ics.tippers.operators;
 
+import edu.uci.ics.tippers.wrapper.griddb.translator.Operator;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,9 +23,23 @@ public class AggregateOperator {
         return sum;
     }
 
-    public static Object count(JSONArray list) {
+    public  static Object count(JSONArray list) {
 
         return list.length();
+    }
+
+    public static JSONArray count(JSONArray list, List<Integer> fields) {
+
+        JSONArray results = new JSONArray();
+        for(int i=0; i<list.length(); i++) {
+            JSONArray row = new JSONArray();
+            for(int j=0; j<fields.size(); j++) {
+                row.put(list.getJSONArray(i).getJSONArray(0).getString(fields.get(j)));
+            }
+            row.put(list.getJSONArray(i).length());
+            results.put(row);
+        }
+        return results;
     }
 
     public static Object avg(String field, JSONArray list) throws JSONException {

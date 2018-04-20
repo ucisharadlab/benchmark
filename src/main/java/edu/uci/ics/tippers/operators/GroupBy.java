@@ -26,6 +26,14 @@ public class GroupBy {
         return result;
     }
 
+    private static List<Object>  prepareKeyObjectByIndex(JSONArray jsonArray, List<Integer> fields) throws JSONException {
+        List<Object>  result = new ArrayList<>();
+        for (Integer field: fields) {
+            result.add(jsonArray.get(field));
+        }
+        return result;
+    }
+
     public JSONArray doGroupBy(JSONArray currentCollection, List<String> fields) throws JSONException {
         JSONArray jsonArray = new JSONArray();
         Map<List<Object>, JSONArray> groups = new HashMap<>();
@@ -33,6 +41,26 @@ public class GroupBy {
         for (int j=0; j<currentCollection.length(); j++){
             JSONObject outerJsonObject = currentCollection.getJSONObject(j);
             List<Object>  keyObject = prepareKeyObject(outerJsonObject, fields);
+
+            if (!groups.containsKey(keyObject)){
+                groups.put(keyObject, new JSONArray());
+            }
+            groups.get(keyObject).put(outerJsonObject);
+
+        }
+        for(List<Object>  object:groups.keySet())
+            jsonArray.put(groups.get(object));
+
+        return jsonArray;
+    }
+
+    public static JSONArray doGroupByIndex(JSONArray currentCollection, List<Integer> fields) throws JSONException {
+        JSONArray jsonArray = new JSONArray();
+        Map<List<Object>, JSONArray> groups = new HashMap<>();
+
+        for (int j=0; j<currentCollection.length(); j++){
+            JSONArray outerJsonObject = currentCollection.getJSONArray(j);
+            List<Object>  keyObject = prepareKeyObjectByIndex(outerJsonObject, fields);
 
             if (!groups.containsKey(keyObject)){
                 groups.put(keyObject, new JSONArray());

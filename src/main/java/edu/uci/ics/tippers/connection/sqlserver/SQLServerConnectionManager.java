@@ -6,6 +6,7 @@ import edu.uci.ics.tippers.connection.postgresql.PgSQLConnectionManager;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.query.BaseQueryManager;
 import org.apache.log4j.Logger;
+import org.json.JSONArray;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -104,4 +105,8 @@ public class SQLServerConnectionManager extends BaseConnectionManager {
     }
 
 
+    @Override
+    public JSONArray runQueryWithJSONResults(String query) {
+        return null;
+    }
 }

@@ -11,6 +11,7 @@ import edu.uci.ics.tippers.writer.RowWriter;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
+import org.json.JSONArray;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
