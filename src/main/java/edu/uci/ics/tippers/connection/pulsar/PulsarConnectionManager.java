@@ -21,6 +21,7 @@ import org.json.simple.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -65,6 +66,11 @@ public class PulsarConnectionManager  extends BaseConnectionManager{
         return DATADIR + INSERT_FILE_NAME;
     }
 
+    public static String getSchemaFilePath(){
+        return DATADIR + SCHEMA_FILE_NAME;
+    }
+
+
     public HttpResponse ingest(String createRelation, String relation, List<List<String>> rows) {
         CloseableHttpClient client = HttpClients.createDefault();
         String url = String.format("http://%s:%s/ingest", SERVER, PORT);
@@ -107,16 +113,15 @@ public class PulsarConnectionManager  extends BaseConnectionManager{
         return response;
     }
 
-    private void createSchemaFile(String schema) {
+    public void createSchemaFile(String schema) {
         Helper.writeStringToFile(schema, DATADIR + SCHEMA_FILE_NAME);
     }
 
-    private void createInsertFile(String inserts) {
+    public void createInsertFile(String inserts) {
         Helper.writeStringToFile(inserts, DATADIR + INSERT_FILE_NAME);
     }
 
     public void ingestFromCommandLine(String createRelation) {
-        createSchemaFile(createRelation);
         try {
             Helper.runBlockingProcess(Arrays.asList(String.format(INGEST_COMMAND, CONTAINER).split(" ")));
         } catch (Exception e) {
@@ -126,21 +131,79 @@ public class PulsarConnectionManager  extends BaseConnectionManager{
 
     }
 
-    public HttpResponse sendQuery(String query) {
+    public HttpResponse startSDB() {
         CloseableHttpClient client = HttpClients.createDefault();
-        String url = String.format("http://%s:%s/query", SERVER, PORT);
+        String url = String.format("http://%s:%s/start", SERVER, PORT);
         HttpPost httpPost = new HttpPost(url);
 
-
-        List<NameValuePair> params = new ArrayList<NameValuePair>(2);
-        params.add(new BasicNameValuePair(query, ""));
-
+        CloseableHttpResponse response = null;
         try {
-            httpPost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
+            response = client.execute(httpPost);
+        } catch (IOException e) {
             e.printStackTrace();
         }
+        if (response.getStatusLine().getStatusCode() != 200) {
+            try {
+                System.out.println(EntityUtils.toString(response.getEntity()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                throw new BenchmarkException("Error Running Query");
+            }
+        } else {
+            try {
+                System.out.println(EntityUtils.toString(response.getEntity()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return response;
+    }
 
+    public HttpResponse stopSDB() {
+        CloseableHttpClient client = HttpClients.createDefault();
+        String url = String.format("http://%s:%s/stop", SERVER, PORT);
+        HttpPost httpPost = new HttpPost(url);
+
+        CloseableHttpResponse response = null;
+        try {
+            response = client.execute(httpPost);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (response.getStatusLine().getStatusCode() != 200) {
+            try {
+                System.out.println(EntityUtils.toString(response.getEntity()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                throw new BenchmarkException("Error Running Query");
+            }
+        } else {
+            try {
+                System.out.println(EntityUtils.toString(response.getEntity()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return response;
+    }
+
+    public HttpResponse sendQuery(String query) {
+        CloseableHttpClient client = HttpClients.createDefault();
+        String url = null;
+        try {
+            url = String.format("http://%s:%s/query?%s", SERVER, PORT, URLEncoder.encode(query).
+                    replaceAll("\\+", "%20"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        HttpPost httpPost = new HttpPost(url);
+        try {
+            httpPost.addHeader("content-type", "application/x-www-form-urlencoded");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         CloseableHttpResponse response = null;
         try {
             response = client.execute(httpPost);

@@ -37,11 +37,11 @@ public class PulsarDataUploader extends BaseDataUploader {
     private JSONParser parser = new JSONParser();
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     BufferedWriter writer = null;
+    PulsarConnectionManager connectionManager = PulsarConnectionManager.getInstance();
 
     public PulsarDataUploader(int mapping, String dataDir) {
         super(mapping, dataDir);
         schema = readSchema(mapping);
-        PulsarConnectionManager connectionManager = PulsarConnectionManager.getInstance();
 
         try {
             writer = new BufferedWriter(new FileWriter(PulsarConnectionManager.getInsertFilePath()));
@@ -49,7 +49,6 @@ public class PulsarDataUploader extends BaseDataUploader {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //connectionManager.ingestFromCommandLine(schema);
     }
 
     private void writeRow(List<String> row) throws BenchmarkException {
@@ -108,7 +107,19 @@ public class PulsarDataUploader extends BaseDataUploader {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        connectionManager.stopSDB();
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        //connectionManager.ingestFromCommandLine(schema);
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        connectionManager.startSDB();
         Instant end = Instant.now();
         return Duration.between(start, end);
     }
