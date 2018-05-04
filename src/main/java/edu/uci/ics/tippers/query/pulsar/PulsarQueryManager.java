@@ -87,11 +87,10 @@ public class PulsarQueryManager extends BaseQueryManager {
     public Duration runQuery1(String sensorId) throws BenchmarkException {
         switch (mapping) {
             case 1:
-//                return runTimedQuery(
-//                        String.format("SELECT SENSOR_NAME FROM TippersBigTable WHERE ROW_TYPE='SENSOR' " +
-//                                "AND SENSOR_ID='%s';", sensorId), 1
-//                );
-                return Constants.MAX_DURATION;
+                return runTimedQuery(
+                        String.format("SELECT SENSOR_NAME FROM TippersBigTable WHERE ROW_TYPE='SENSOR' " +
+                                "AND SENSOR_ID='%s';", sensorId), 1
+                );
 
             default:
                 throw new BenchmarkException("No Such Mapping");
@@ -107,13 +106,12 @@ public class PulsarQueryManager extends BaseQueryManager {
     public Duration runQuery3(String sensorId, Date startTime, Date endTime) throws BenchmarkException {
         switch (mapping) {
             case 1:
-//                return runTimedQuery(
-//                        String.format("SELECT OBSERVATION_TIMESTAMP, OBSERVATION_clientId FROM TippersBigTable " +
-//                                "WHERE OBSERVATION_TIMESTAMP>'%s' AND OBSERVATION_TIMESTAMP<'%s' AND ROW_TYPE='%s' " +
-//                                "AND OBSERVATION_SENSOR_ID='%s'", sdf.format(startTime), sdf.format(endTime),
-//                                "WiFiAPObservation", sensorId), 3
-//                );
-                return Constants.MAX_DURATION;
+                return runTimedQuery(
+                        String.format("SELECT OBSERVATION_TIMESTAMP, OBSERVATION_clientId FROM TippersBigTable " +
+                                "WHERE OBSERVATION_TIMESTAMP>'%s' AND OBSERVATION_TIMESTAMP<'%s' AND ROW_TYPE='%s' " +
+                                "AND OBSERVATION_SENSOR_ID='%s'", sdf.format(startTime), sdf.format(endTime),
+                                "WiFiAPObservation", sensorId), 3
+                );
 
             default:
                 throw new BenchmarkException("No Such Mapping");
@@ -157,14 +155,19 @@ public class PulsarQueryManager extends BaseQueryManager {
 
     @Override
     public Duration runQuery11() throws BenchmarkException {
+
         Instant startTime = Instant.now();
         JSONArray platforms = runQueryWithResults("SELECT PLATFORM_USER_ID, PLATFORM_HASHED_MAC FROM TippersBigTable " +
                 "WHERE ROW_TYPE='PLATFORM'");
+
         String rightTableQuery = "SELECT OBSERVATION_ID FROM TippersBigTable WHERE ROW_TYPE='WiFiAPObservation' " +
                 "AND OBSERVATION_clientId='%s'";
-        JSONArray joinResults = AggregateOperator.count(GroupBy.doGroupByIndex(
-                Join.indexLoopJoin(platforms, rightTableQuery, 1, DataType.STRING, connectionManager),
-                Arrays.asList(1)), Arrays.asList(1));
+
+        JSONArray joinResults = AggregateOperator.count(
+                                    GroupBy.doGroupByIndex(
+                                        Join.indexLoopJoin(platforms, rightTableQuery, 1, DataType.STRING, connectionManager),
+                                    Arrays.asList(1)),
+                                Arrays.asList(1));
 
         if (writeOutput) {
             try {

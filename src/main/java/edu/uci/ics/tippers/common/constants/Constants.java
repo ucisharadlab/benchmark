@@ -31,5 +31,6 @@ public class Constants {
 
     public static int LOG_LIM = 100000;
 
+    public static String SENSITIVE_DIR = "sensitivity_levels_data/";
 
 }

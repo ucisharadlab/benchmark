@@ -7,6 +7,8 @@ import edu.uci.ics.tippers.common.util.BigJsonReader;
 import edu.uci.ics.tippers.connection.jana.JanaConnectionManager;
 import edu.uci.ics.tippers.data.BaseDataUploader;
 import edu.uci.ics.tippers.data.postgresql.mappings.PgSQLDataMapping2;
+import edu.uci.ics.tippers.encryption.BaseSensitivityManager;
+import edu.uci.ics.tippers.encryption.DefaultSensitivityManager;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.model.observation.Observation;
 import org.apache.log4j.Logger;
@@ -32,8 +34,6 @@ public class JanaDataUploader extends BaseDataUploader {
     private JanaConnectionManager connectionManager;
     private JSONParser parser = new JSONParser();
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-
-    private String senLevelDataDir="/home/sumaya/Desktop/benchmark/src/main/java/edu/uci/ics/tippers/data/jana/sensitivity_levels_data";
 
     public JanaDataUploader(int mapping, String dataDir) {
         super(mapping, dataDir);
@@ -371,22 +371,21 @@ public class JanaDataUploader extends BaseDataUploader {
     }
 
     public void addPartitionedObservationData() throws BenchmarkException {
+
         BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
                 Observation.class);
         Observation obs = null;
-
-        List<String> senUsersList = getSensitiveUsers();
-        List<String> senSpaceList = getSensitiveSensors();
 
         JSONArray wifiArray_S = new JSONArray();
         JSONArray wifiArray_NS = new JSONArray();
         JSONArray wemoArray = new JSONArray();
         JSONArray temArray = new JSONArray();
 
+        BaseSensitivityManager sensitivityManager = new DefaultSensitivityManager(getDatabase(), mapping, dataDir);
+
         int wifiCount = 1, wemoCount = 1, thermoCount = 1, count = 0;
         while ((obs = reader.readNext()) != null) {
             JSONObject observationRow = new JSONObject();
-            boolean tupleIsSen=false;
 
             if (obs.getSensor().getType_().getId().equals("Thermometer")) {
                 observationRow.put("temperature", obs.getPayload().get("temperature").getAsString());
@@ -407,26 +406,11 @@ public class JanaDataUploader extends BaseDataUploader {
                     - else, store this row in the Non-Sensitive observations
                 */
 
-                //user-based-sensitivity
-                for(int i=0;i<senUsersList.size();i++){
-                    if(observationRow.values().contains(senUsersList.get(i))) {
-                        wifiArray_S.add(observationRow);
-                        tupleIsSen=true;
-                        break;
-                    }
-                }
-
-                //space-based sensitivity
-                for(int i=0;i<senSpaceList.size();i++){
-                    if(observationRow.values().contains(senSpaceList.get(i)) && (!tupleIsSen)) { //check that the tuple is not added already
-                        wifiArray_S.add(observationRow);
-                        tupleIsSen=true;
-                        break;
-                    }
-                }
-
-                if(!tupleIsSen)
+                if (sensitivityManager.checkObservationSensitive(observationRow)){
+                    wifiArray_S.add(observationRow);
+                } else {
                     wifiArray_NS.add(observationRow);
+                }
 
                 wifiCount ++;
             } else if (obs.getSensor().getType_().getId().equals("WeMo")) {
@@ -463,59 +447,6 @@ public class JanaDataUploader extends BaseDataUploader {
         connectionManager.doInsert("ThermometerObservation", temArray);
     }
 
-    private List<String> getSensitiveUsers(){
-        List<String> senUsersList = new ArrayList<String>();
-        //String fileName = senLevelDataDir+"/medium_dataset/users_low";
-        String fileName = senLevelDataDir+"/medium_dataset//users_medium";
-        //String fileName = senLevelDataDir+"/small_dataset//users_high";
-        //String fileName = senLevelDataDir+"/small_dataset//users_full";
-        String line;
-
-        try {
-            FileReader fileReader = new FileReader(fileName);
-            BufferedReader bufferedReader = new BufferedReader(fileReader);
-
-            while ((line=bufferedReader.readLine())!= null)
-                senUsersList.add(line);
-
-            bufferedReader.close();
-        }
-        catch(FileNotFoundException ex){
-            System.out.println(ex.getMessage());
-        }
-        catch(IOException ex) {
-            System.out.println(ex.getMessage());
-        }
-
-        return senUsersList;
-    }
-
-    private List<String> getSensitiveSensors(){
-        List<String> senSpaceList = new ArrayList<String>();
-        //String fileName = senLevelDataDir+"/medium_dataset/sensors_low";
-        String fileName = senLevelDataDir+"/medium_dataset/sensors_medium";
-        //String fileName = senLevelDataDir+"/small_dataset//sensors_high";
-        //String fileName = senLevelDataDir+"/small_dataset//sensors_full";
-        String line;
-
-        try {
-            FileReader fileReader = new FileReader(fileName);
-            BufferedReader bufferedReader = new BufferedReader(fileReader);
-
-            while ((line=bufferedReader.readLine())!= null)
-                senSpaceList.add(line);
-
-            bufferedReader.close();
-        }
-        catch(FileNotFoundException ex){
-            System.out.println(ex.getMessage());
-        }
-        catch(IOException ex) {
-            System.out.println(ex.getMessage());
-        }
-
-        return senSpaceList;
-    }
 
     @Override
     public void virtualSensorData() {
