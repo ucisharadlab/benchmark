@@ -69,7 +69,7 @@ public class AsterixDBDataUploader extends BaseDataUploader {
     public void simpleObservationInsert(String dataset, DataFiles dataFile) {
         switch (mapping) {
             case 1:
-                BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
+                BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + dataFile.getPath(),
                         Observation.class);
                 Gson gson = new GsonBuilder()
                         .registerTypeAdapter(JSONObject.class, Converter.<JSONObject>getJSONSerializer())
@@ -84,7 +84,7 @@ public class AsterixDBDataUploader extends BaseDataUploader {
                 break;
             case 2:
                 // TODO: Fast Insertion Code
-                reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
+                reader = new BigJsonReader<>(dataDir + dataFile.getPath(),
                         Observation.class);
                 gson = new GsonBuilder()
                         .registerTypeAdapter(JSONObject.class, Converter.<JSONObject>getJSONSerializer())
