@@ -11,7 +11,9 @@ public enum Database {
     CRATEDB ("cratedb"),
     CASSANDRA ("cassandra"),
     POSTGRESQL ("postgresql"),
-    SPARKSQL ("sparksql");
+    SPARKSQL ("sparksql"),
+    INFLUXDB ("influxdb"),
+    COUCHBASE ("couchbase");
 
     private final String name;
 

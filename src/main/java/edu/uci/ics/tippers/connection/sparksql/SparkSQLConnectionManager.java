@@ -23,6 +23,7 @@ public class SparkSQLConnectionManager {
 
     private SparkSQLConnectionManager() {
         try {
+
             InputStream inputStream = getClass().getClassLoader().getResourceAsStream("sparksql/sparksql.properties");
             props = new Properties();
             props.load(inputStream);
@@ -45,16 +46,16 @@ public class SparkSQLConnectionManager {
 
     public Connection getConnection() throws BenchmarkException {
 
-        Connection connection;
+        Connection connection = null;
         try {
             Properties properties = new Properties();
             properties.put("user", USER);
-            connection = DriverManager.getConnection(
-                    String.format("jdbc:hive2://%s:%s/", SERVER, PORT), properties);
-            connection.setSchema(DATABASE);
+//            connection = DriverManager.getConnection(
+//                    String.format("jdbc:hive2://%s:%s/", SERVER, PORT), properties);
+//            connection.setSchema(DATABASE);
 
             return connection;
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             throw new BenchmarkException("Error Connecting to SparkSQL Thrift Server");
         }

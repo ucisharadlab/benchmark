@@ -1,13 +1,17 @@
-package edu.uci.ics.tippers.data.postgresql.mappings;
+package edu.uci.ics.tippers.data.sparksql.mappings;
 
 import edu.uci.ics.tippers.common.DataFiles;
 import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.common.util.BigJsonReader;
-import edu.uci.ics.tippers.data.postgresql.PgSQLBaseDataMapping;
+import edu.uci.ics.tippers.data.sparksql.SparkSQLBaseDataMapping;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.model.observation.Observation;
 import edu.uci.ics.tippers.model.semanticObservation.SemanticObservation;
 import org.apache.log4j.Logger;
+import org.apache.spark.SparkConf;
+import org.apache.spark.SparkContext;
+import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.sql.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -15,21 +19,23 @@ import org.json.simple.parser.ParseException;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.Properties;
 
-public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
+public class SparkSQLDataMapping2 extends SparkSQLBaseDataMapping {
 
-    private static final Logger LOGGER = Logger.getLogger(PgSQLDataMapping2.class);
+    private static final Logger LOGGER = Logger.getLogger(SparkSQLDataMapping2.class);
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     private JSONParser parser = new JSONParser();
 
-    public PgSQLDataMapping2(Connection connection, String dataDir) {
+    public SparkSQLDataMapping2(Connection connection, String dataDir) {
         super(connection, dataDir);
     }
 
@@ -55,7 +61,7 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
         try {
 
             // Adding Groups
-            insert ="INSERT INTO USER_GROUP " + "(ID, NAME, DESCRIPTION) VALUES (?, ?, ?)";
+            insert ="INSERT INTO USER_GROUP " + " VALUES (?, ?, ?)";
             JSONArray group_list = (JSONArray) parser.parse(new InputStreamReader(
                     new FileInputStream(dataDir + DataFiles.GROUP.getPath())));
             stmt = connection.prepareStatement(insert);
@@ -63,32 +69,42 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
             for(int i =0;i<group_list.size();i++){
                 JSONObject temp=(JSONObject)group_list.get(i);
                 stmt.setString(1, (String)temp.get("id"));
-                stmt.setString(2, (String)temp.get("name"));
-                stmt.setString(3, (String)temp.get("description"));
+                stmt.setString(3, (String)temp.get("name"));
+                stmt.setString(2, (String)temp.get("description"));
                 stmt.executeUpdate();
             }
 
             // Adding Users
-            insert = "INSERT INTO USERS " + "(ID, EMAIL, GOOGLE_AUTH_TOKEN, NAME) VALUES (?, ?, ?, ?)";
+            StringBuilder insertBuilder = new StringBuilder("INSERT INTO USERS " + " VALUES ");
             JSONArray user_list = (JSONArray) parser.parse(new InputStreamReader(
                     new FileInputStream(dataDir + DataFiles.USER.getPath())));
             stmt = connection.prepareStatement(insert);
 
-            String membership = "INSERT INTO USER_GROUP_MEMBERSHIP " + "(USER_ID, USER_GROUP_ID) VALUES (?, ?)";
+            String membership = "INSERT INTO USER_GROUP_MEMBERSHIP " + " VALUES (?, ?)";
             PreparedStatement memStmt = connection.prepareStatement(membership);
 
+            int count =0, batchSize = 1000;
             for(int i =0;i<user_list.size();i++){
-
                 JSONObject temp=(JSONObject)user_list.get(i);
                 JSONArray groups;
 
-                stmt.setString(1, (String)temp.get("id"));
-                stmt.setString(2, (String)temp.get("emailId"));
-                stmt.setString(4, (String)temp.get("name"));
-                stmt.setString(3, (String)temp.get("googleAuthToken"));
+                StringBuilder parmasBuilder = new StringBuilder();
+                parmasBuilder
+                        .append("(")
+                        .append((String)temp.get("id"))
+                        .append(",")
+                        .append((String)temp.get("emailId"))
+                        .append(",")
+                        .append((String)temp.get("name"))
+                        .append(",")
+                        .append((String)temp.get("googleAuthToken"))
+                        .append(")");
+                stmt.setString(4, (String)temp.get("id"));
+                stmt.setString(1, (String)temp.get("emailId"));
+                stmt.setString(3, (String)temp.get("name"));
+                stmt.setString(2, (String)temp.get("googleAuthToken"));
 
                 stmt.executeUpdate();
-
 
                 groups=(JSONArray)temp.get("groups");
                 memStmt.setString(1, (String)temp.get("id"));
@@ -96,11 +112,20 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
                     memStmt.setString(2, ((JSONObject)groups.get(x)).get("id").toString());
                     memStmt.executeUpdate();
                 }
+
+                count ++;
+                if (count % batchSize == 0) {
+                    stmt.executeBatch();
+                    memStmt.executeBatch();
+                }
+
             }
+//            stmt.executeBatch();
+//            memStmt.executeBatch();
 
             // Adding Locations
             insert = "INSERT INTO LOCATION " +
-                    "(ID, X, Y, Z) VALUES (?, ?, ?, ?)";
+                    " VALUES (?, ?, ?, ?)";
             JSONArray location_list = (JSONArray) parser.parse(new InputStreamReader(
                     new FileInputStream(dataDir + DataFiles.LOCATION.getPath())));
 
@@ -117,7 +142,7 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
 
             // Adding Infrastructure Type
             insert = "INSERT INTO INFRASTRUCTURE_TYPE " +
-                    "(ID, NAME, DESCRIPTION) VALUES (?, ?, ?)";
+                    " VALUES (?, ?, ?)";
             JSONArray infraType_list = (JSONArray) parser.parse(new InputStreamReader(
                     new FileInputStream(dataDir + DataFiles.INFRA_TYPE.getPath())));
 
@@ -126,15 +151,15 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
                 JSONObject temp=(JSONObject)infraType_list.get(i);
 
                 stmt.setString(1, (String)temp.get("id"));
-                stmt.setString(2, (String)temp.get("name"));
-                stmt.setString(3, (String)temp.get("description"));
+                stmt.setString(3, (String)temp.get("name"));
+                stmt.setString(2, (String)temp.get("description"));
 
                 stmt.executeUpdate();
             }
 
             // Adding Infrastructure
             insert = "INSERT INTO INFRASTRUCTURE " +
-                    "(ID, INFRASTRUCTURE_TYPE_ID, NAME, FLOOR) VALUES (?, ?, ?, ?)";
+                    " VALUES (?, ?, ?, ?)";
 
             JSONArray infra_list = (JSONArray) parser.parse(new InputStreamReader(
                     new FileInputStream(dataDir + DataFiles.INFRA.getPath())));
@@ -143,14 +168,14 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
             for(int i =0;i<infra_list.size();i++){
                 JSONObject temp=(JSONObject)infra_list.get(i);
 
-                stmt.setString(1, (String)temp.get("id"));
-                stmt.setString(3, (String)temp.get("name"));
+                stmt.setString(3, (String)temp.get("id"));
+                stmt.setString(1, (String)temp.get("name"));
                 stmt.setString(2, (String)((JSONObject)temp.get("type_")).get("id"));
                 stmt.setInt(4, ((Number)temp.get("floor")).intValue());
                 stmt.executeUpdate();
             }
 
-            String regionInfra = "INSERT INTO INFRASTRUCTURE_LOCATION " + "(LOCATION_ID, INFRASTRUCTURE_ID) VALUES (?, ?)";
+            String regionInfra = "INSERT INTO INFRASTRUCTURE_LOCATION " + " VALUES (?, ?)";
             PreparedStatement regionInfraStmt = connection.prepareStatement(regionInfra);
 
 
@@ -181,72 +206,69 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
 
         try {
             // Adding Sensor Types
-            insert = "INSERT INTO SENSOR_TYPE " +
-                    "(ID, NAME, DESCRIPTION, MOBILITY, CAPTURE_FUNCTIONALITY, PAYLOAD_SCHEMA) " +
-                    "VALUES (?, ?, ?, ?, ?, ?)";
-            JSONArray sensorType_list = (JSONArray) parser.parse(new InputStreamReader(
-                    new FileInputStream(dataDir + DataFiles.SENSOR_TYPE.getPath())));
-            stmt = connection.prepareStatement(insert);
-            for(int i =0;i<sensorType_list.size();i++){
-                JSONObject temp=(JSONObject)sensorType_list.get(i);
-
-                stmt.setString(1, (String)temp.get("id"));
-                stmt.setString(2, (String)temp.get("name"));
-                stmt.setString(3, (String)temp.get("description"));
-                stmt.setString(4, (String)temp.get("mobility"));
-                stmt.setString(5, (String)temp.get("captureFunctionality"));
-                stmt.setString(6, (String)temp.get("payloadSchema"));
-                stmt.executeUpdate();
-
-            }
-
-
-
-            // Adding Sensors
-            insert = "INSERT INTO SENSOR" +
-                    "(ID, NAME, INFRASTRUCTURE_ID, USER_ID, SENSOR_TYPE_ID, SENSOR_CONFIG) " +
-                    "VALUES (?, ?, ?, ?, ?, ?)";
-
-
-            String covInfrastructure = "INSERT INTO Coverage_Infrastructure" +
-                    "(SENSOR_ID, INFRASTRUCTURE_ID) " +
-                    "VALUES (?, ?)" ;
-
-            PreparedStatement covInfraStmt = connection.prepareStatement(covInfrastructure);
-
-            JSONArray sensor_list = (JSONArray) parser.parse(new InputStreamReader(
-                    new FileInputStream(dataDir + DataFiles.SENSOR.getPath())));
-
-            stmt = connection.prepareStatement(insert);
-            for(int i =0;i<sensor_list.size();i++){
-                JSONObject temp=(JSONObject)sensor_list.get(i);
-
-                stmt.setString(1, (String)temp.get("id"));
-                stmt.setString(2, (String)temp.get("name"));
-                stmt.setString(3, (String)((JSONObject)temp.get("infrastructure")).get("id"));
-                stmt.setString(4, (String)((JSONObject)temp.get("owner")).get("id"));
-                stmt.setString(5, (String)((JSONObject)temp.get("type_")).get("id"));
-                stmt.setString(6, (String)temp.get("sensorConfig"));
-                stmt.executeUpdate();
-
-                JSONArray entitiesCovered = (JSONArray) temp.get("coverage");
-                covInfraStmt.setString(1, (String)temp.get("id"));
-                for(int x=0; x<entitiesCovered.size(); x++) {
-                    covInfraStmt.setString(2,((JSONObject)entitiesCovered.get(x)).get("name").toString());
-                    covInfraStmt.executeUpdate();
-                }
-
-            }
+//            insert = "INSERT INTO SENSOR_TYPE " +
+//                    " VALUES (?, ?, ?, ?, ?, ?)";
+//            JSONArray sensorType_list = (JSONArray) parser.parse(new InputStreamReader(
+//                    new FileInputStream(dataDir + DataFiles.SENSOR_TYPE.getPath())));
+//            stmt = connection.prepareStatement(insert);
+//            for(int i =0;i<sensorType_list.size();i++){
+//                JSONObject temp=(JSONObject)sensorType_list.get(i);
+//
+//                stmt.setString(1, (String)temp.get("id"));
+//                stmt.setString(4, (String)temp.get("name"));
+//                stmt.setString(2, (String)temp.get("description"));
+//                stmt.setString(3, (String)temp.get("mobility"));
+//                stmt.setString(5, (String)temp.get("captureFunctionality"));
+//                stmt.setString(6, (String)temp.get("payloadSchema"));
+//                stmt.executeUpdate();
+//
+//            }
+//
+//
+//
+//            // Adding Sensors
+//            insert = "INSERT INTO SENSOR " +
+//                    " VALUES (?, ?, ?, ?, ?, ?)";
+//
+//
+//            String covInfrastructure = "INSERT INTO Coverage_Infrastructure " +
+//                    " VALUES (?, ?)" ;
+//
+//            PreparedStatement covInfraStmt = connection.prepareStatement(covInfrastructure);
+//
+//            JSONArray sensor_list = (JSONArray) parser.parse(new InputStreamReader(
+//                    new FileInputStream(dataDir + DataFiles.SENSOR.getPath())));
+//
+//            stmt = connection.prepareStatement(insert);
+//            for(int i =0;i<sensor_list.size();i++){
+//                JSONObject temp=(JSONObject)sensor_list.get(i);
+//
+//                stmt.setString(1, (String)temp.get("id"));
+//                stmt.setString(2, (String)temp.get("name"));
+//                stmt.setString(3, (String)((JSONObject)temp.get("infrastructure")).get("id"));
+//                stmt.setString(4, (String)((JSONObject)temp.get("owner")).get("id"));
+//                stmt.setString(5, (String)((JSONObject)temp.get("type_")).get("id"));
+//                stmt.setString(6, (String)temp.get("sensorConfig"));
+//                stmt.executeUpdate();
+//
+//                JSONArray entitiesCovered = (JSONArray) temp.get("coverage");
+//                covInfraStmt.setString(1, (String)temp.get("id"));
+//                for(int x=0; x<entitiesCovered.size(); x++) {
+//                    covInfraStmt.setString(2,((JSONObject)entitiesCovered.get(x)).get("name").toString());
+//                    covInfraStmt.executeUpdate();
+//                }
+//
+//            }
 
             // Adding Observations
             String wifiInsert = "INSERT INTO WiFiAPObservation " +
-                    "(ID, TIMESTAMP, SENSOR_ID, clientId) VALUES (?, ?, ?, ?)";
+                    " VALUES (?, ?, ?, ?)";
 
             String wemoInsert = "INSERT INTO WeMoObservation " +
-                    "(ID, TIMESTAMP, SENSOR_ID, currentMilliWatts, onTodaySeconds) VALUES (?, ?, ?, ?, ?)";
+                    " VALUES (?, ?, ?, ?, ?)";
 
             String temperatureInsert = "INSERT INTO ThermometerObservation " +
-                    "(ID, TIMESTAMP, SENSOR_ID, temperature) VALUES (?, ?, ?, ?)";
+                    " VALUES (?, ?, ?, ?)";
 
             BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
                     Observation.class);
@@ -256,6 +278,7 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
             PreparedStatement wemoStmt = connection.prepareStatement(wemoInsert);
             PreparedStatement temStmt = connection.prepareStatement(temperatureInsert);
 
+            int batchSize = 10000;
             int wifiCount = 0, wemoCount = 0, thermoCount = 0, count = 0;
             while ((obs = reader.readNext()) != null) {
 
@@ -283,11 +306,11 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
                     wemoCount ++;
                 }
 
-                if (wemoCount % Constants.PGSQL_BATCH_SIZE == 0)
+                if (wemoCount % batchSize == 0)
                     wemoStmt.executeBatch();
-                if (wifiCount % Constants.PGSQL_BATCH_SIZE == 0)
+                if (wifiCount % batchSize == 0)
                     wifiStmt.executeBatch();
-                if (thermoCount % Constants.PGSQL_BATCH_SIZE == 0)
+                if (thermoCount % batchSize == 0)
                     temStmt.executeBatch();
 
                 if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s Observations", count));
@@ -300,20 +323,21 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
 
 
         }
-        catch(ParseException | SQLException | IOException e) {
-            e.printStackTrace();
-        }
+        catch(Exception e) {}
+//        catch(ParseException | SQLException | IOException e) {
+//            e.printStackTrace();
+//        }
 
     }
 
-    public void addDevices() {
+    public void     addDevices() {
 
         PreparedStatement stmt;
         String insert;
 
         try {
             // Adding PlatformTypes
-            insert = "INSERT INTO PLATFORM_TYPE" + "(ID, NAME, DESCRIPTION) VALUES (?, ?, ?)";
+            insert = "INSERT INTO PLATFORM_TYPE" + " VALUES (?, ?, ?)";
             JSONArray platformType_list = (JSONArray) parser.parse(new InputStreamReader(
                     new FileInputStream(dataDir + DataFiles.PLT_TYPE.getPath())));
 
@@ -323,20 +347,20 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
                 JSONObject temp=(JSONObject)platformType_list.get(i);
 
                 stmt.setString(1, (String)temp.get("id"));
-                stmt.setString(2, (String)temp.get("name"));
-                stmt.setString(3, (String)temp.get("description"));
+                stmt.setString(3, (String)temp.get("name"));
+                stmt.setString(2, (String)temp.get("description"));
                 stmt.executeUpdate();
 
             }
 
             // Adding Platforms
-            insert = "INSERT INTO PLATFORM " + "(ID, NAME, " +
-                    "USER_ID, PLATFORM_TYPE_ID, HASHED_MAC) VALUES (?, ?, ?, ?, ?)";
+            insert = "INSERT INTO PLATFORM " + " VALUES (?, ?, ?, ?, ?)";
             JSONArray platform_list = (JSONArray)parser.parse(new InputStreamReader(
                     new FileInputStream(dataDir + DataFiles.PLT.getPath())));
+            stmt = connection.prepareStatement(insert);
 
+            int count = 0, batchSize = 1000;
             for(int i =0;i<platform_list.size();i++){
-                stmt = connection.prepareStatement(insert);
                 JSONObject temp=(JSONObject)platform_list.get(i);
 
                 stmt.setString(1, (String)temp.get("id"));
@@ -347,7 +371,6 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
                 stmt.executeUpdate();
 
             }
-
         }
         catch(ParseException | SQLException | IOException e) {
             e.printStackTrace();
@@ -361,7 +384,7 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
         try {
 
             // Adding Semantic Observation Types
-            insert = "INSERT INTO SEMANTIC_OBSERVATION_TYPE" + "(ID, NAME, DESCRIPTION) VALUES (?, ?, ?)";
+            insert = "INSERT INTO SEMANTIC_OBSERVATION_TYPE" + " VALUES (?, ?, ?)";
             JSONArray soType_list = (JSONArray) parser.parse(new InputStreamReader(
                     new FileInputStream(dataDir + DataFiles.SO_TYPE.getPath())));
 
@@ -376,8 +399,7 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
             }
 
             // Adding Virtual Sensor Types
-            insert = "INSERT INTO VIRTUAL_SENSOR_TYPE" + "(ID, NAME, DESCRIPTION, INPUT_TYPE_ID, " +
-                    "SEMANTIC_OBSERVATION_TYPE_ID) VALUES (?, ?, ?, ?, ?)";
+            insert = "INSERT INTO VIRTUAL_SENSOR_TYPE" +" VALUES (?, ?, ?, ?, ?)";
             JSONArray vsensorType_list = (JSONArray) parser.parse(new InputStreamReader(
                     new FileInputStream(dataDir + DataFiles.VS_TYPE.getPath())));
 
@@ -395,8 +417,8 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
             }
 
             // Adding Virtual Sensors
-            insert = "INSERT INTO VIRTUAL_SENSOR" + "(ID, NAME, DESCRIPTION, LANGUAGE, PROJECT_NAME, TYPE_ID) " +
-                    "VALUES (?, ?, ?, ?, ?, ?)";
+            insert = "INSERT INTO VIRTUAL_SENSOR " +
+                    " VALUES (?, ?, ?, ?, ?, ?)";
             JSONArray sensor_list = (JSONArray) parser.parse(new InputStreamReader(
                     new FileInputStream(dataDir + DataFiles.VS.getPath())));
 
@@ -420,15 +442,16 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
             SemanticObservation sobs = null;
 
             String presenceInsert = "INSERT INTO PRESENCE " +
-                    "(ID, SEMANTIC_ENTITY_ID, LOCATION, TIMESTAMP, VIRTUAL_SENSOR_ID) VALUES (?, ?, ?, ?, ?)";
+                    " VALUES (?, ?, ?, ?, ?)";
 
             String occupancyInsert = "INSERT INTO OCCUPANCY " +
-                    "(ID, SEMANTIC_ENTITY_ID, OCCUPANCY, TIMESTAMP, VIRTUAL_SENSOR_ID) VALUES (?, ?, ?, ?, ?)";
+                    " VALUES (?, ?, ?, ?, ?)";
 
 
             PreparedStatement presenceStmt = connection.prepareStatement(presenceInsert);
             PreparedStatement occupancyStmt = connection.prepareStatement(occupancyInsert);
 
+            int batchSize = 10000;
             int presenceCount = 0, occupancyCount = 0, count = 0;
             while ((sobs = reader.readNext()) != null) {
 
@@ -451,9 +474,9 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
                     occupancyCount ++;
                 }
 
-                if (presenceCount % Constants.PGSQL_BATCH_SIZE == 0)
+                if (presenceCount % batchSize == 0)
                     presenceStmt.executeBatch();
-                if (occupancyCount % Constants.PGSQL_BATCH_SIZE == 0)
+                if (occupancyCount % batchSize == 0)
                     occupancyStmt.executeBatch();
 
                 if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s S Observations", count));
@@ -476,13 +499,13 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
 
         try {
             String wifiInsert = "INSERT INTO WiFiAPObservation " +
-                    "(ID, TIMESTAMP, SENSOR_ID, clientId) VALUES (?, ?, ?, ?)";
+                    " VALUES (?, ?, ?, ?)";
 
             String wemoInsert = "INSERT INTO WeMoObservation " +
-                    "(ID, TIMESTAMP, SENSOR_ID, currentMilliWatts, onTodaySeconds) VALUES (?, ?, ?, ?, ?)";
+                    " VALUES (?, ?, ?, ?, ?)";
 
             String temperatureInsert = "INSERT INTO ThermometerObservation " +
-                    "(ID, TIMESTAMP, SENSOR_ID, temperature) VALUES (?, ?, ?, ?)";
+                    " VALUES (?, ?, ?, ?)";
 
             BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + DataFiles.INSERT_TEST.getPath(),
                     Observation.class);
@@ -492,7 +515,8 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
             PreparedStatement wemoStmt = connection.prepareStatement(wemoInsert);
             PreparedStatement temStmt = connection.prepareStatement(temperatureInsert);
 
-            int wifiCount = 0, wemoCount = 0, thermoCount = 0, count=0;
+            int batchSize = 10000;
+            int wifiCount = 0, wemoCount = 0, thermoCount = 0;
             while ((obs = reader.readNext()) != null) {
 
                 if (obs.getSensor().getType_().getId().equals("Thermometer")) {
@@ -519,16 +543,12 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
                     wemoCount ++;
                 }
 
-                if (wemoCount % Constants.PGSQL_BATCH_SIZE == 0)
+                if (wemoCount % batchSize == 0)
                     wemoStmt.executeBatch();
-                if (wifiCount % Constants.PGSQL_BATCH_SIZE == 0)
+                if (wifiCount % batchSize == 0)
                     wifiStmt.executeBatch();
-                if (thermoCount % Constants.PGSQL_BATCH_SIZE == 0)
+                if (thermoCount % batchSize == 0)
                     temStmt.executeBatch();
-		
-		if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s S Observations", count));
-                count ++;
-		
             }
             wemoStmt.executeBatch();
             wifiStmt.executeBatch();

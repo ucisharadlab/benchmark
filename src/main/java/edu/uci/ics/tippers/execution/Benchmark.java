@@ -6,8 +6,10 @@ import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.data.BaseDataUploader;
 import edu.uci.ics.tippers.data.asterixdb.AsterixDBDataUploader;
 import edu.uci.ics.tippers.data.cassandra.CassandraDataUploader;
+import edu.uci.ics.tippers.data.couchbase.CouchbaseDataUploader;
 import edu.uci.ics.tippers.data.cratedb.CrateDBDataUploader;
 import edu.uci.ics.tippers.data.griddb.GridDBDataUploader;
+import edu.uci.ics.tippers.data.influxdb.InfluxDBDataUploader;
 import edu.uci.ics.tippers.data.mongodb.MongoDBDataUploader;
 import edu.uci.ics.tippers.data.postgresql.PgSQLDataUploader;
 import edu.uci.ics.tippers.data.sparksql.SparkSQLDataUploader;
@@ -15,8 +17,10 @@ import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.query.BaseQueryManager;
 import edu.uci.ics.tippers.query.asterixdb.AsterixDBQueryManager;
 import edu.uci.ics.tippers.query.cassandra.CassandraQueryManager;
+import edu.uci.ics.tippers.query.couchbase.CouchbaseQueryManager;
 import edu.uci.ics.tippers.query.cratedb.CrateDBQueryManager;
 import edu.uci.ics.tippers.query.griddb.GridDBQueryManager;
+import edu.uci.ics.tippers.query.influxdb.InfluxDBQueryManager;
 import edu.uci.ics.tippers.query.mongodb.MongoDBQueryManager;
 import edu.uci.ics.tippers.query.postgresql.PgSQLQueryManager;
 import edu.uci.ics.tippers.query.sparksql.SparkSQLQueryManager;
@@ -24,8 +28,10 @@ import edu.uci.ics.tippers.scaler.Scale;
 import edu.uci.ics.tippers.schema.BaseSchema;
 import edu.uci.ics.tippers.schema.asterixdb.AsterixDBSchema;
 import edu.uci.ics.tippers.schema.cassandra.CassandraSchema;
+import edu.uci.ics.tippers.schema.couchbase.CouchbaseSchema;
 import edu.uci.ics.tippers.schema.cratedb.CrateDBSchema;
 import edu.uci.ics.tippers.schema.griddb.GridDBSchema;
+import edu.uci.ics.tippers.schema.influxdb.InfluxDBSchema;
 import edu.uci.ics.tippers.schema.mongodb.MongoDBSchema;
 import edu.uci.ics.tippers.schema.postgresql.PgSQLSchema;
 import edu.uci.ics.tippers.schema.sparksql.SparkSQLSchema;
@@ -74,7 +80,7 @@ public class Benchmark {
 
             // Creating schema on a particular database and particular mapping
             System.out.println("Creating Schema ...");
-            schemaCreator.createSchema();
+            //schemaCreator.createSchema();
 
             // Inserting data into the database system after schema creation
             System.out.println("Inserting Data ...");
@@ -95,7 +101,7 @@ public class Benchmark {
 
             // Cleaning up inserted data and dropping created schema
             System.out.println("Cleaning Up Database, Removing Data And Schema ...\n");
-            schemaCreator.dropSchema();
+            //schemaCreator.dropSchema();
 
             System.out.println("---------------------------------------------------------------\n");
 
@@ -104,7 +110,7 @@ public class Benchmark {
             runTimes.put(new ImmutablePair<>(queryManager.getDatabase(), queryManager.getMapping()), null);
             try {
                 System.out.println("Cleaning Up Database, Removing Data And Schema ...\n");
-                schemaCreator.dropSchema();
+                //schemaCreator.dropSchema();
             } catch (Exception | Error e) {
                 e.printStackTrace();
             }
@@ -194,6 +200,24 @@ public class Benchmark {
                                         new SparkSQLSchema(e, configuration.getDataDir()),
                                         new SparkSQLDataUploader(e, configuration.getDataDir()),
                                         new SparkSQLQueryManager(e, configuration.getQueriesDir(),
+                                                configuration.getOutputDir(),
+                                                configuration.isWriteOutput(), configuration.getTimeout())));
+                        break;
+                    case INFLUXDB:
+                        configuration.getMappings().get(Database.INFLUXDB).forEach(
+                                e -> benchmark.runBenchmark(
+                                        new InfluxDBSchema(e, configuration.getDataDir()),
+                                        new InfluxDBDataUploader(e, configuration.getDataDir()),
+                                        new InfluxDBQueryManager(e, configuration.getQueriesDir(),
+                                                configuration.getOutputDir(),
+                                                configuration.isWriteOutput(), configuration.getTimeout())));
+                        break;
+                    case COUCHBASE:
+                        configuration.getMappings().get(Database.COUCHBASE).forEach(
+                                e -> benchmark.runBenchmark(
+                                        new CouchbaseSchema(e, configuration.getDataDir()),
+                                        new CouchbaseDataUploader(e, configuration.getDataDir()),
+                                        new CouchbaseQueryManager(e, configuration.getQueriesDir(),
                                                 configuration.getOutputDir(),
                                                 configuration.isWriteOutput(), configuration.getTimeout())));
                         break;

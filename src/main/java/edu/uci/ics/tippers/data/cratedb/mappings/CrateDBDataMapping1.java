@@ -308,7 +308,7 @@ public class CrateDBDataMapping1 extends CrateDBBaseDataMapping {
 
             // Adding Platforms
             insert = "INSERT INTO PLATFORM " + "(ID, NAME, " +
-                    "USER_ID, PLATFORM_TYPE_ID) VALUES (?, ?, ?, ?)";
+                    "USER_ID, PLATFORM_TYPE_ID, HASHED_MAC) VALUES (?, ?, ?, ?, ?)";
             JSONArray platform_list = (JSONArray)parser.parse(new InputStreamReader(
                     new FileInputStream(dataDir + DataFiles.PLT.getPath())));
 
@@ -319,8 +319,9 @@ public class CrateDBDataMapping1 extends CrateDBBaseDataMapping {
 
                 stmt.setString(1, (String)temp.get("id"));
                 stmt.setString(2, (String)temp.get("name"));
-                stmt.setString(3, (String)temp.get("ownerId"));
-                stmt.setString(4, (String)temp.get("typeId"));
+                stmt.setString(3, (String) ((JSONObject)temp.get("owner")).get("id"));
+                stmt.setString(4, (String) ((JSONObject)temp.get("type_")).get("id"));
+                stmt.setString(5, (String)temp.get("hashedMac"));
 
                 stmt.addBatch();
 
