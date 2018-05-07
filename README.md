@@ -5,11 +5,16 @@ Benchmark overview can be seen at https://docs.google.com/presentation/d/1h9OSWi
 
 At present the Benchmark compares the following databases:
 
+```
 MongoDB CE (3.4.9)
 GridDB SE (3.0.1)
 AsterixDB (0.9.2)
 PostgreSQL (9.6.5)
 Crate DB (2.1.6)
+InfluxDB (1.5.0)
+SparkSQL (2.3.0)
+Couchbase (5.1.0)
+```
 
 For each database we use different mappings to store TIPPERS data. For each such mapping we add code for schema creation,
 data upload and query translation.
@@ -85,4 +90,14 @@ data-dir = /home/benchmark/benchmark/benchmark/src/main/resources/data/
 output-dir = /home/benchmark/benchmark/benchmark/data/
 
 ```
+<h3>Secure Databases</h3>
 
+Benchmark also has support for the following cloud secure database systems
+
+```
+Jana
+Pulsar
+SQL Server Always Encrypted
+```
+
+In order to run bencmark on these systems checkout the `encryption` branch.
