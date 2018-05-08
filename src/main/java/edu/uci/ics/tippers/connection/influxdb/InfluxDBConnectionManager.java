@@ -2,6 +2,7 @@ package edu.uci.ics.tippers.connection.influxdb;
 
 import edu.uci.ics.tippers.connection.BaseConnectionManager;
 import edu.uci.ics.tippers.connection.asterixdb.AsterixDBConnectionManager;
+import edu.uci.ics.tippers.exception.BenchmarkException;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -17,6 +18,9 @@ import org.apache.log4j.Logger;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -29,6 +33,12 @@ public class InfluxDBConnectionManager extends BaseConnectionManager {
     private static String PORT;
     private static String DB;
 
+    private static String PG_SERVER;
+    private static String PG_PORT;
+    private static String PG_DATABASE;
+    private static String PG_USER;
+    private static String PG_PASSWORD;
+
     private InfluxDBConnectionManager() {
         try {
             InputStream inputStream = getClass().getClassLoader().getResourceAsStream("influxdb/influxdb.properties");
@@ -39,11 +49,42 @@ public class InfluxDBConnectionManager extends BaseConnectionManager {
             PORT = props.getProperty("port");
             DB = props.getProperty("db");
 
+            PG_SERVER = props.getProperty("pg-server");
+            PG_PORT = props.getProperty("pg-port");
+            PG_DATABASE = props.getProperty("pg-database");
+            PG_USER = props.getProperty("pg-user");
+            PG_PASSWORD = props.getProperty("pg-password");
+
             // Warming Up
-            sendQuery(";");
+            //sendQuery(";");
 
         } catch (IOException ie) {
             LOGGER.error(ie);
+        }
+    }
+
+    public Connection getMetadataConnection() throws BenchmarkException {
+        try {
+
+            Class.forName("org.postgresql.Driver");
+
+        } catch (ClassNotFoundException e) {
+
+            System.out.println("Where is your PostgreSQL JDBC Driver? "
+                    + "Include in your library path!");
+            e.printStackTrace();
+
+        }
+
+        Connection connection;
+        try {
+            connection = DriverManager.getConnection(
+                    String.format("jdbc:postgresql://%s:%s/%s", PG_SERVER, PG_PORT, PG_DATABASE), PG_USER, PG_PASSWORD);
+
+            return connection;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new BenchmarkException("Error Connecting to Postgres");
         }
     }
 

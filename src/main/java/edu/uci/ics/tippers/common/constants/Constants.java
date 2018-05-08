@@ -23,6 +23,7 @@ public class Constants {
 
     public static int MONGO_BATCH_SIZE = 50000;
 
+    public static int INFLUXDB_BATCH_SIZE = 50000;
 
     public static String ASTERIX_FEED_IP = "localhost";
 
