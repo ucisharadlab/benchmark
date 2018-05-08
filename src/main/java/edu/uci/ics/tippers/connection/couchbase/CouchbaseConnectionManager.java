@@ -1,5 +1,6 @@
 package edu.uci.ics.tippers.connection.couchbase;
 
+import edu.uci.ics.tippers.common.util.Helper;
 import edu.uci.ics.tippers.connection.BaseConnectionManager;
 import edu.uci.ics.tippers.connection.asterixdb.AsterixDBConnectionManager;
 import org.apache.http.HttpResponse;
@@ -11,6 +12,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
@@ -57,8 +59,10 @@ public class CouchbaseConnectionManager extends BaseConnectionManager {
 
     public HttpResponse sendQuery(String query) {
         CloseableHttpClient client = HttpClients.createDefault();
-        String url = String.format("http://%s:%s/query/service", SERVER, PORT);
+        String url = String.format("http://%s:%s/query/service", SERVER, QUERY_PORT);
         HttpPost httpPost = new HttpPost(url);
+        httpPost.setHeader("Authorization", "Basic " + Helper.createAuthentication(USER, PASSWORD));
+
 
         List<NameValuePair> params = new ArrayList<NameValuePair>(2);
         params.add(new BasicNameValuePair("statement", query));
@@ -73,7 +77,7 @@ public class CouchbaseConnectionManager extends BaseConnectionManager {
         CloseableHttpResponse response = null;
         try {
             response = client.execute(httpPost);
-            //System.out.println(EntityUtils.toString(response.getEntity()));
+            System.out.println(EntityUtils.toString(response.getEntity()));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -84,9 +88,15 @@ public class CouchbaseConnectionManager extends BaseConnectionManager {
         CloseableHttpClient client = HttpClients.createDefault();
         String url = String.format("http://%s:%s/pools/default/buckets", SERVER, PORT);
         HttpPost httpPost = new HttpPost(url);
+        httpPost.setHeader("Authorization", "Basic " + Helper.createAuthentication(USER, PASSWORD));
 
         List<NameValuePair> params = new ArrayList<NameValuePair>(2);
         params.add(new BasicNameValuePair("name", bucket));
+        params.add(new BasicNameValuePair("authType", "sasl"));
+        params.add(new BasicNameValuePair("saslPassword", "pass"));
+        params.add(new BasicNameValuePair("bucketType", "couchbase"));
+        params.add(new BasicNameValuePair("ramQuotaMB", "100"));
+
 
         try {
             httpPost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
@@ -97,7 +107,7 @@ public class CouchbaseConnectionManager extends BaseConnectionManager {
         CloseableHttpResponse response = null;
         try {
             response = client.execute(httpPost);
-            //System.out.println(EntityUtils.toString(response.getEntity()));
+            System.out.println(EntityUtils.toString(response.getEntity()));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -108,11 +118,13 @@ public class CouchbaseConnectionManager extends BaseConnectionManager {
         CloseableHttpClient client = HttpClients.createDefault();
         String url = String.format("http://%s:%s/pools/default/buckets/%s", SERVER, PORT, bucket);
         HttpDelete httpDelete = new HttpDelete(url);
+        httpDelete.setHeader("Authorization", "Basic " + Helper.createAuthentication(USER, PASSWORD));
+
 
         CloseableHttpResponse response = null;
         try {
             response = client.execute(httpDelete);
-            //System.out.println(EntityUtils.toString(response.getEntity()));
+            System.out.println(EntityUtils.toString(response.getEntity()));
         } catch (IOException e) {
             e.printStackTrace();
         }

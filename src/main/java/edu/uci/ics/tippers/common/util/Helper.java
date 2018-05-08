@@ -1,10 +1,12 @@
 package edu.uci.ics.tippers.common.util;
 
 import edu.uci.ics.tippers.common.constants.Constants;
+import org.apache.http.client.methods.HttpPost;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 // edu.uci.ics.tippers.scaler.data.Helper function
@@ -67,5 +69,10 @@ public class Helper {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		String string  = dateFormat.format(ts);
 		return string;
+	}
+
+	public static String createAuthentication(String user, String password) {
+		String encoding = Base64.getEncoder().encodeToString(String.format("%s:%s", user, password).getBytes());
+		return encoding;
 	}
 }

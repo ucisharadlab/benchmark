@@ -15,6 +15,7 @@ import java.io.InputStream;
 public class CouchbaseSchema extends BaseSchema{
 
     private String SCHEMA_FILE = "couchbase/schema.txt";
+    private String CREATE_INDEX = "CREATE PRIMARY INDEX %s_index ON %s";
 
     public CouchbaseSchema(int mapping, String dataDir) {
         super(mapping, dataDir);
@@ -36,6 +37,7 @@ public class CouchbaseSchema extends BaseSchema{
         }
         for (String bucket : buckets) {
             HttpResponse response = CouchbaseConnectionManager.getInstance().createBucket(bucket);
+            response = CouchbaseConnectionManager.getInstance().sendQuery(String.format(CREATE_INDEX, bucket, bucket));
         }
     }
 

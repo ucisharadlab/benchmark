@@ -1,0 +1,14 @@
+Location
+Infrastructure
+InfrastructureType
+UserGroup
+User
+PlatformType
+Platform
+SensorType
+Sensor
+Observation
+SemanticObservationType
+VirtualSensorType
+VirtualSensor
+SemanticObservation

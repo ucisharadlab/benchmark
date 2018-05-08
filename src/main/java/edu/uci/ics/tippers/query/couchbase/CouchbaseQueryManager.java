@@ -86,17 +86,17 @@ public class CouchbaseQueryManager extends BaseQueryManager {
             case 1:
                 return runTimedQuery(
                         String.format("SELECT s.id, s.name FROM Sensor s WHERE s.type_.name=\"%s\" AND "
-                                        + "(SOME e IN s.coverage SATISFIES e.id IN {{"
+                                        + "(SOME e IN s.coverage SATISFIES e.id IN ("
                                         + locationIds.stream().map(e -> "\"" + e + "\"" ).collect(Collectors.joining(","))
-                                        + "}});",
+                                        + "));",
                                 sensorTypeName), 2
                 );
             case 2:
                 return runTimedQuery(
                         String.format("SELECT s.id, s.name FROM Sensor s WHERE s.type_.name=\"%s\" AND "
-                                        + "(SOME e IN s.coverage SATISFIES e IN {{"
+                                        + "(SOME e IN s.coverage SATISFIES e IN ["
                                         + locationIds.stream().map(e -> "\"" + e + "\"" ).collect(Collectors.joining(","))
-                                        + "}});",
+                                        + "]);",
                                 sensorTypeName), 2
                 );
             default:
@@ -111,14 +111,14 @@ public class CouchbaseQueryManager extends BaseQueryManager {
             case 1:
                 return runTimedQuery(
                         String.format("SELECT timeStamp, sensor.id, payload FROM Observation WHERE sensor.id=\"%s\" "
-                                        + "AND timeStamp >= datetime(\"%s\") AND timeStamp <= datetime(\"%s\");",
+                                        + "AND timeStamp >= \"%s\" AND timeStamp <= \"%s\";",
                                 sensorId, sdf.format(startTime), sdf.format(endTime)), 3
                 );
             case 2:
                 return runTimedQuery(
                         String.format("SELECT timeStamp, sensorId, payload FROM Observation WHERE sensorId=\"%s\" "
-                                        + "AND timeStamp >= %s AND timeStamp <= %s;",
-                                sensorId, startTime.getTime()*1000, endTime.getTime()*1000), 3
+                                        + "AND timeStamp >= \"%s\" AND timeStamp <= \"%s\";",
+                                sensorId, sdf.format(startTime), sdf.format(endTime)), 3
                 );
             default:
                 throw new BenchmarkException("No Such Mapping");
@@ -130,17 +130,17 @@ public class CouchbaseQueryManager extends BaseQueryManager {
         switch (mapping) {
             case 1:
                 return runTimedQuery(
-                        String.format("SELECT timeStamp, sensor.id, payload FROM Observation WHERE sensor.id IN {{ "
+                        String.format("SELECT timeStamp, sensor.id, payload FROM Observation WHERE sensor.id IN [ "
                                         + sensorIds.stream().map(e -> "\"" + e + "\"").collect(Collectors.joining(","))
-                                        + " }} AND timeStamp >= %s AND timeStamp <= %s;",
-                                startTime.getTime()*1000, endTime.getTime()*1000),  4
+                                        + " ] AND timeStamp >= \"%s\" AND timeStamp <= \"%s\";",
+                                sdf.format(startTime), sdf.format(endTime)),  4
                 );
             case 2:
                 return runTimedQuery(
                         String.format("SELECT timeStamp, sensorId, payload FROM Observation WHERE sensorId IN {{ "
                                         + sensorIds.stream().map(e -> "\"" + e + "\"").collect(Collectors.joining(","))
-                                        + " }} AND timeStamp >= %s AND timeStamp <= %s;",
-                                startTime.getTime()*1000, endTime.getTime()*1000),  4
+                                        + " }} AND timeStamp >= \"%s\" AND timeStamp <= \"%s\";",
+                                sdf.format(startTime), sdf.format(endTime)),  4
                 );
             default:
                 throw new BenchmarkException("No Such Mapping");
@@ -155,8 +155,8 @@ public class CouchbaseQueryManager extends BaseQueryManager {
                 return runTimedQuery(
                         String.format("SELECT timeStamp, sensor.id, payload " +
                                         "FROM Observation " +
-                                        "WHERE sensor.type_.name = \"%s\" AND timeStamp >= datetime(\"%s\") AND " +
-                                        "timeStamp <= datetime(\"%s\") " +
+                                        "WHERE sensor.type_.name = \"%s\" AND timeStamp >= \"%s\" AND " +
+                                        "timeStamp <= \"%s\" " +
                                         "AND payload.%s >= %s AND payload.%s <= %s",
                                 sensorTypeName, sdf.format(startTime), sdf.format(endTime), payloadAttribute,
                                 startPayloadValue, payloadAttribute, endPayloadValue), 5
@@ -166,8 +166,8 @@ public class CouchbaseQueryManager extends BaseQueryManager {
                         String.format("SELECT obs.timeStamp, obs.sensorId, obs.payload " +
                                         "FROM Observation obs, Sensor sen " +
                                         "WHERE obs.sensorId = sen.id AND sen.type_.name = \"%s\" AND " +
-                                        "obs.timeStamp >= datetime(\"%s\") AND " +
-                                        "obs.timeStamp <= datetime(\"%s\") " +
+                                        "obs.timeStamp >= \"%s\" AND " +
+                                        "obs.timeStamp <= \"%s\" " +
                                         "AND obs.payload.%s >= %s AND obs.payload.%s <= %s",
                                 sensorTypeName, sdf.format(startTime), sdf.format(endTime), payloadAttribute,
                                 startPayloadValue, payloadAttribute, endPayloadValue), 5
@@ -184,23 +184,23 @@ public class CouchbaseQueryManager extends BaseQueryManager {
             case 1:
                 return runTimedQuery(
                         String.format("SELECT obs.id , AVG(obs.count) FROM " +
-                                        "(SELECT sensor.id , get_date_from_datetime(timeStamp), count(*)  AS count " +
+                                        "(SELECT sensor.id , DATE_FORMAT_STR(timeStamp, '1111-11-11'), count(*)  AS count " +
                                         "FROM Observation " +
-                                        "WHERE sensor.id IN {{ " +
+                                        "WHERE sensor.id IN [ " +
                                         sensorIds.stream().map(e -> "\"" + e + "\"").collect(Collectors.joining(",")) +
-                                        " }} AND timeStamp >= datetime(\"%s\") AND timeStamp <= datetime(\"%s\") " +
-                                        "GROUP BY sensor.id, get_date_from_datetime(timeStamp)) AS obs GROUP BY obs.id",
+                                        " ] AND timeStamp >= \"%s\" AND timeStamp <= \"%s\" " +
+                                        "GROUP BY sensor.id, DATE_FORMAT_STR(timeStamp, '1111-11-11')) AS obs GROUP BY obs.id",
                                 sdf.format(startTime), sdf.format(endTime)), 6
                 );
             case 2:
                 return runTimedQuery(
                         String.format("SELECT obs.sensorId , AVG(obs.count) FROM " +
-                                        "(SELECT sensorId , get_date_from_datetime(timeStamp), count(*)  AS count " +
+                                        "(SELECT sensorId , DATE_FORMAT_STR(timeStamp, '1111-11-11'), count(*)  AS count " +
                                         "FROM Observation " +
-                                        "WHERE sensorId IN {{ " +
+                                        "WHERE sensorId IN [ " +
                                         sensorIds.stream().map(e -> "\"" + e + "\"").collect(Collectors.joining(",")) +
-                                        " }} AND timeStamp >= datetime(\"%s\") AND timeStamp <= datetime(\"%s\") " +
-                                        "GROUP BY sensorId, get_date_from_datetime(timeStamp)) AS obs GROUP BY obs.sensorId",
+                                        " ] AND timeStamp >= \"%s\" AND timeStamp <= \"%s\" " +
+                                        "GROUP BY sensorId, DATE_FORMAT_STR(timeStamp, '1111-11-11')) AS obs GROUP BY obs.sensorId",
                                 sdf.format(startTime), sdf.format(endTime)), 6
                 );
             default:
@@ -215,20 +215,21 @@ public class CouchbaseQueryManager extends BaseQueryManager {
             case 1:
                 return runTimedQuery(
                         String.format("SELECT s1.semanticEntity.name " +
-                                        " FROM SemanticObservation s1, SemanticObservation s2 " +
-                                        " WHERE get_date_from_datetime(s1.timeStamp) = date(\"%s\") AND " +
-                                        " get_date_from_datetime(s2.timeStamp) = date(\"%s\") AND " +
-                                        " s1.type_.name = s2.type_.name AND s2.type_.name = \"presence\" AND " +
-                                        " s1.payload.location = \"%s\" AND s2.payload.location = \"%s\" " +
-                                        " AND s1.timeStamp < s2.timeStamp AND s1.semanticEntity.id = s2.semanticEntity.id",
+                                        " FROM SemanticObservation s1 JOIN SemanticObservation s2 " +
+                                        " ON  s1.type_.name = s2.type_.name AND s1.timeStamp < s2.timeStamp " +
+                                        " AND s1.semanticEntity.id = s2.semanticEntity.id " +
+                                        " WHERE DATE_FORMAT_STR(s1.timeStamp, '1111-11-11') = \"%s\" AND " +
+                                        " DATE_FORMAT_STR(s2.timeStamp, '1111-11-11') = \"%s\" AND " +
+                                        "  s2.type_.name = \"presence\" AND " +
+                                        " s1.payload.location = \"%s\" AND s2.payload.location = \"%s\" ",
                                 dateOnlyFormat.format(date), dateOnlyFormat.format(date), startLocation, endLocation), 7
                 );
             case 2:
                 return runTimedQuery(
                         String.format("SELECT se.name " +
                                         " FROM SemanticObservation s1, SemanticObservation s2, User se, SemanticObservationType st" +
-                                        " WHERE get_date_from_datetime(s1.timeStamp) = date(\"%s\") AND " +
-                                        " get_date_from_datetime(s2.timeStamp) = date(\"%s\") AND " +
+                                        " WHERE DATE_FORMAT_STR(s1.timeStamp, '1111-11-11') = \"%s\" AND " +
+                                        " DATE_FORMAT_STR(s2.timeStamp, '1111-11-11') = \"%s\" AND " +
                                         " s1.typeId = s2.typeId AND s2.typeId = st.id AND st.name = \"presence\" AND " +
                                         " s1.payload.location = \"%s\" AND s2.payload.location = \"%s\" " +
                                         " AND s1.timeStamp < s2.timeStamp AND s1.semanticEntityId = s2.semanticEntityId " +
@@ -248,8 +249,8 @@ public class CouchbaseQueryManager extends BaseQueryManager {
                 return runTimedQuery(
                         String.format("SELECT s2.semanticEntity.name, s1.payload.location " +
                                         " FROM SemanticObservation s1, SemanticObservation s2 " +
-                                        " WHERE get_date_from_datetime(s1.timeStamp) = date(\"%s\") AND " +
-                                        " get_date_from_datetime(s2.timeStamp) = date(\"%s\") AND " +
+                                        " WHERE DATE_FORMAT_STR(s1.timeStamp, '1111-11-11') = \"%s\" AND " +
+                                        " DATE_FORMAT_STR(s2.timeStamp, '1111-11-11') = \"%s\" AND " +
                                         " s1.type_.name = s2.type_.name AND s2.type_.name = \"presence\" AND " +
                                         " s1.payload.location = s2.payload.location " +
                                         " AND s1.timeStamp = s2.timeStamp AND s1.semanticEntity.id = \"%s\" " +
@@ -260,8 +261,8 @@ public class CouchbaseQueryManager extends BaseQueryManager {
                 return runTimedQuery(
                         String.format("SELECT se.name, s1.payload.location " +
                                         " FROM SemanticObservation s1, SemanticObservation s2, User se, SemanticObservationType st" +
-                                        " WHERE get_date_from_datetime(s1.timeStamp) = date(\"%s\") AND " +
-                                        " get_date_from_datetime(s2.timeStamp) = date(\"%s\") AND " +
+                                        " WHERE DATE_FORMAT_STR(s1.timeStamp, '1111-11-11') = \"%s\" AND " +
+                                        " DATE_FORMAT_STR(s2.timeStamp, '1111-11-11') = \"%s\" AND " +
                                         " s1.typeId = s2.typeId AND s2.typeId = st.id AND st.name = \"presence\" AND " +
                                         " s1.payload.location = s2.payload.location " +
                                         " AND s1.timeStamp = s2.timeStamp AND s1.semanticEntityId = \"%s\" " +
@@ -278,21 +279,21 @@ public class CouchbaseQueryManager extends BaseQueryManager {
             case 1:
                 return runTimedQuery(
                         String.format("SELECT AVG(groups.timeSpent) AS avgTimePerDay FROM " +
-                                        " (SELECT get_date_from_datetime(so.timeStamp), count(*)*10  AS timeSpent " +
+                                        " (SELECT DATE_FORMAT_STR(so.timeStamp, '1111-11-11'), count(*)*10  AS timeSpent " +
                                         " FROM SemanticObservation so, Infrastructure infra " +
                                         " WHERE so.type_.name=\"presence\" AND so.semanticEntity.id=\"%s\" " +
                                         " AND so.payload.location = infra.id AND infra.type_.name = \"%s\"" +
-                                        " GROUP BY get_date_from_datetime(so.timeStamp))  AS groups ",
+                                        " GROUP BY DATE_FORMAT_STR(so.timeStamp, '1111-11-11'))  AS groups ",
                                 userId, infraTypeName), 9
                 );
             case 2:
                 return runTimedQuery(
                         String.format("SELECT AVG(groups.timeSpent) AS avgTimePerDay FROM " +
-                                        " (SELECT get_date_from_datetime(so.timeStamp), count(*)*10  AS timeSpent " +
+                                        " (SELECT DATE_FORMAT_STR(so.timeStamp, '1111-11-11'), count(*)*10  AS timeSpent " +
                                         " FROM SemanticObservation so, Infrastructure infra, SemanticObservationType st " +
                                         " WHERE so.typeId = st.id AND st.name = \"presence\" AND so.semanticEntityId=\"%s\" " +
                                         " AND so.payload.location = infra.id AND infra.type_.name = \"%s\"" +
-                                        " GROUP BY get_date_from_datetime(so.timeStamp)) AS groups ",
+                                        " GROUP BY DATE_FORMAT_STR(so.timeStamp, '1111-11-11')) AS groups ",
                                 userId, infraTypeName), 9
                 );
             default:
@@ -309,7 +310,7 @@ public class CouchbaseQueryManager extends BaseQueryManager {
                         String.format("SELECT infra.name, (" +
                                 "SELECT so.timeStamp, so.payload.occupancy " +
                                 "FROM SemanticObservation so " +
-                                "WHERE so.timeStamp > datetime(\"%s\") AND so.timeStamp < datetime(\"%s\") " +
+                                "WHERE so.timeStamp > \"%s\" AND so.timeStamp < \"%s\" " +
                                 "AND so.type_.name = \"occupancy\" AND so.semanticEntity.id = infra.id " +
                                 "ORDER BY so.semanticEntity.id, so.timeStamp) AS histogram " +
                                 "FROM Infrastructure infra", sdf.format(startTime), sdf.format(endTime)), 10
@@ -319,7 +320,7 @@ public class CouchbaseQueryManager extends BaseQueryManager {
                         String.format("SELECT infra.name, (" +
                                 "SELECT so.timeStamp, so.payload.occupancy " +
                                 "FROM SemanticObservation so, SemanticObservationType st " +
-                                "WHERE so.timeStamp > datetime(\"%s\") AND so.timeStamp < datetime(\"%s\") " +
+                                "WHERE so.timeStamp > \"%s\" AND so.timeStamp < \"%s\" " +
                                 "AND so.typeId = st.id AND st.name = \"occupancy\" AND so.semanticEntityId = infra.id " +
                                 "ORDER BY so.semanticEntityId, so.timeStamp) AS histogram " +
                                 "FROM Infrastructure infra", sdf.format(startTime), sdf.format(endTime)), 10

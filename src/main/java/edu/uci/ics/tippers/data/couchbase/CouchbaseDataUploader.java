@@ -99,7 +99,7 @@ public class CouchbaseDataUploader extends BaseDataUploader {
         switch (mapping) {
             case 1:
                 BigJsonReader<SemanticObservation> reader = new BigJsonReader<>(dataDir +dataFile.getPath(),
-                        Observation.class);
+                        SemanticObservation.class);
                 Gson gson = new GsonBuilder()
                         .registerTypeAdapter(JSONObject.class, Converter.<JSONObject>getJSONSerializer())
                         .create();
@@ -114,7 +114,7 @@ public class CouchbaseDataUploader extends BaseDataUploader {
             case 2:
                 // TODO: Fast Insertion Code
                 reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
-                        Observation.class);
+                        SemanticObservation.class);
                 gson = new GsonBuilder()
                         .registerTypeAdapter(JSONObject.class, Converter.<JSONObject>getJSONSerializer())
                         .create();
