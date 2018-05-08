@@ -43,12 +43,12 @@ public class InfluxDBSchema extends BaseSchema{
     @Override
     public void createSchema() throws BenchmarkException {
         HttpResponse response = InfluxDBConnectionManager.getInstance().addSchema();
-        runScript(CREATE_FORMAT);
+        //runScript(CREATE_FORMAT);
     }
 
     @Override
     public void dropSchema() throws BenchmarkException {
         HttpResponse response = InfluxDBConnectionManager.getInstance().deleteSchema();
-        runScript(DROP_FORMAT);
+        //runScript(DROP_FORMAT);
     }
 }

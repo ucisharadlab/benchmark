@@ -13,6 +13,7 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
@@ -118,7 +119,8 @@ public class InfluxDBConnectionManager extends BaseConnectionManager {
         CloseableHttpResponse response = null;
         try {
             response = client.execute(httpPost);
-            //System.out.println(EntityUtils.toString(response.getEntity()));
+//            if (response.getStatusLine().getStatusCode()!=204)
+//                System.out.println(EntityUtils.toString(response.getEntity()));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -130,12 +132,21 @@ public class InfluxDBConnectionManager extends BaseConnectionManager {
         String url = String.format("http://%s:%s/write?db=%s", SERVER, PORT, DB);
         HttpPost httpPost = new HttpPost(url);
 
+        List<NameValuePair> params = new ArrayList<NameValuePair>(2);
+        params.add(new BasicNameValuePair("precision", "ms"));
+        try {
+            httpPost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
         httpPost.setEntity(new StringEntity(inserts, "UTF-8"));
 
         CloseableHttpResponse response = null;
         try {
             response = client.execute(httpPost);
-            //System.out.println(EntityUtils.toString(response.getEntity()));
+            if (response.getStatusLine().getStatusCode()!=204)
+                System.out.println(EntityUtils.toString(response.getEntity()));
         } catch (IOException e) {
             e.printStackTrace();
         }
