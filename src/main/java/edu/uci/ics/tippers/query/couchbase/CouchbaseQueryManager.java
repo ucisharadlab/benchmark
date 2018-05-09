@@ -227,7 +227,7 @@ public class CouchbaseQueryManager extends BaseQueryManager {
             case 2:
                 return runTimedQuery(
                         String.format("SELECT se.name " +
-                                        " FROM SemanticObservation s1, SemanticObservation s2, User se, SemanticObservationType st" +
+                                        " FROM SemanticObservation s1, SemanticObservation s2, Users se, SemanticObservationType st" +
                                         " WHERE DATE_FORMAT_STR(s1.timeStamp, '1111-11-11') = \"%s\" AND " +
                                         " DATE_FORMAT_STR(s2.timeStamp, '1111-11-11') = \"%s\" AND " +
                                         " s1.typeId = s2.typeId AND s2.typeId = st.id AND st.name = \"presence\" AND " +
@@ -260,7 +260,7 @@ public class CouchbaseQueryManager extends BaseQueryManager {
             case 2:
                 return runTimedQuery(
                         String.format("SELECT se.name, s1.payload.location " +
-                                        " FROM SemanticObservation s1, SemanticObservation s2, User se, SemanticObservationType st" +
+                                        " FROM SemanticObservation s1, SemanticObservation s2, Users se, SemanticObservationType st" +
                                         " WHERE DATE_FORMAT_STR(s1.timeStamp, '1111-11-11') = \"%s\" AND " +
                                         " DATE_FORMAT_STR(s2.timeStamp, '1111-11-11') = \"%s\" AND " +
                                         " s1.typeId = s2.typeId AND s2.typeId = st.id AND st.name = \"presence\" AND " +

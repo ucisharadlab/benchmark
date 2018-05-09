@@ -8,6 +8,7 @@ import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.common.util.BigJsonReader;
 import edu.uci.ics.tippers.common.util.Converter;
 import edu.uci.ics.tippers.connection.couchbase.CouchbaseConnectionManager;
+import edu.uci.ics.tippers.connection.influxdb.InfluxDBConnectionManager;
 import edu.uci.ics.tippers.data.BaseDataUploader;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.model.observation.Observation;
@@ -16,23 +17,31 @@ import edu.uci.ics.tippers.model.semanticObservation.SemanticObservation;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class CouchbaseDataUploader extends BaseDataUploader {
 
     private static final Logger LOGGER = Logger.getLogger(CouchbaseDataUploader.class);
 
     private CouchbaseConnectionManager connectionManager;
-    private static final String QUERY_FORMAT = "INSERT INTO %s(%s)";
+    private static final String QUERY_FORMAT = "INSERT INTO %s VALUES(%s, %s)";
     private static String datePattern = "yyyy-MM-dd'T'HH:mm:ss'Z'";
     private static SimpleDateFormat sdf = new SimpleDateFormat(datePattern);
+    private JSONParser parser = new JSONParser();
 
     public CouchbaseDataUploader(int mapping, String dataDir) {
         super(mapping, dataDir);
@@ -48,12 +57,12 @@ public class CouchbaseDataUploader extends BaseDataUploader {
     public Duration addAllData() throws BenchmarkException {
         Instant start = Instant.now();
 
-        addInfrastructureData();
-        addUserData();
-        addDeviceData();
-        addSensorData();
-        addObservationData();
-        virtualSensorData();
+//        addInfrastructureData();
+//        addUserData();
+//        addDeviceData();
+//        addSensorData();
+//        addObservationData();
+//        virtualSensorData();
         addSemanticObservationData();
 
         Instant end = Instant.now();
@@ -69,12 +78,26 @@ public class CouchbaseDataUploader extends BaseDataUploader {
                         .registerTypeAdapter(JSONObject.class, Converter.<JSONObject>getJSONSerializer())
                         .create();
                 Observation obs;
+
+                List<String> batch = new ArrayList<>();
+                int count = 1;
                 while ((obs = reader.readNext()) != null) {
                     JSONObject docToInsert = new JSONObject(gson.toJson(obs, Observation.class));
-                    docToInsert.put("timeStamp", String.format("datetime('%s')", sdf.format(obs.getTimeStamp())));
-                    String docString = docToInsert.toString().replaceAll("\"(datetime\\(.*\\))\"", "$1");
-                    connectionManager.sendQuery(String.format(QUERY_FORMAT, "Observation", docString));
+                    docToInsert.put("timeStamp",  sdf.format(obs.getTimeStamp()));
+                    batch.add(String.format("VALUES (%s, %s)",
+                            "\"" + docToInsert.getString("id") +"\"",docToInsert.toString()));
+
+                    if (count % Constants.COUCHBASE_BATCH_SIZE == 0) {
+                        connectionManager.sendQuery( String.format("INSERT INTO %s %s", dataset,
+                                batch.stream().collect(Collectors.joining(",\n"))));
+                        batch = new ArrayList<>();
+                    }
+
+                    if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s Observations", count));
+                    count ++;
                 }
+                connectionManager.sendQuery( String.format("INSERT INTO %s %s", dataset,
+                        batch.stream().collect(Collectors.joining(",\n"))));
                 break;
             case 2:
                 // TODO: Fast Insertion Code
@@ -83,14 +106,28 @@ public class CouchbaseDataUploader extends BaseDataUploader {
                 gson = new GsonBuilder()
                         .registerTypeAdapter(JSONObject.class, Converter.<JSONObject>getJSONSerializer())
                         .create();
+
+                batch = new ArrayList<>();
+                count = 1;
                 while ((obs = reader.readNext()) != null) {
                     JSONObject docToInsert = new JSONObject(gson.toJson(obs, Observation.class));
                     docToInsert.put("sensorId", obs.getSensor().getId());
                     docToInsert.remove("sensor");
-                    docToInsert.put("timeStamp", String.format("datetime('%s')", sdf.format(obs.getTimeStamp())));
-                    String docString = docToInsert.toString().replaceAll("\"(datetime\\(.*\\))\"", "$1");
-                    connectionManager.sendQuery(String.format(QUERY_FORMAT, "Observation", docString));
+                    docToInsert.put("timeStamp",  sdf.format(obs.getTimeStamp()));
+                    batch.add(String.format("VALUES (%s, %s)",
+                            "\"" + docToInsert.getString("id") +"\"",docToInsert.toString()));
+
+                    if (count % Constants.COUCHBASE_BATCH_SIZE == 0) {
+                        connectionManager.sendQuery( String.format("INSERT INTO %s %s", dataset,
+                                batch.stream().collect(Collectors.joining(",\n"))));
+                        batch = new ArrayList<>();
+                    }
+
+                    if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s Observations", count));
+                    count ++;
                 }
+                connectionManager.sendQuery( String.format("INSERT INTO %s %s", dataset,
+                        batch.stream().collect(Collectors.joining(",\n"))));
                 break;
         }
     }
@@ -104,12 +141,25 @@ public class CouchbaseDataUploader extends BaseDataUploader {
                         .registerTypeAdapter(JSONObject.class, Converter.<JSONObject>getJSONSerializer())
                         .create();
                 SemanticObservation obs;
+                List<String> batch = new ArrayList<>();
+                int count = 1;
                 while ((obs = reader.readNext()) != null) {
-                    JSONObject docToInsert = new JSONObject(gson.toJson(obs, Observation.class));
-                    docToInsert.put("timeStamp", String.format("datetime('%s')", sdf.format(obs.getTimeStamp())));
-                    String docString = docToInsert.toString().replaceAll("\"(datetime\\(.*\\))\"", "$1");
-                    connectionManager.sendQuery(String.format(QUERY_FORMAT, "SemanticObservation", docString));
+                    JSONObject docToInsert = new JSONObject(gson.toJson(obs, SemanticObservation.class));
+                    docToInsert.put("timeStamp",  sdf.format(obs.getTimeStamp()));
+                    batch.add(String.format("VALUES (%s, %s)",
+                            "\"" + docToInsert.getString("id") +"\"",docToInsert.toString()));
+
+                    if (count % Constants.COUCHBASE_BATCH_SIZE == 0) {
+                        connectionManager.sendQuery( String.format("INSERT INTO %s %s", dataset,
+                                batch.stream().collect(Collectors.joining(",\n"))));
+                        batch = new ArrayList<>();
+                    }
+
+                    if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s Observations", count));
+                    count ++;
                 }
+                connectionManager.sendQuery( String.format("INSERT INTO %s %s", dataset,
+                        batch.stream().collect(Collectors.joining(",\n"))));
                 break;
             case 2:
                 // TODO: Fast Insertion Code
@@ -118,29 +168,51 @@ public class CouchbaseDataUploader extends BaseDataUploader {
                 gson = new GsonBuilder()
                         .registerTypeAdapter(JSONObject.class, Converter.<JSONObject>getJSONSerializer())
                         .create();
+
+                batch = new ArrayList<>();
+                count = 1;
                 while ((obs = reader.readNext()) != null) {
-                    JSONObject docToInsert = new JSONObject(gson.toJson(obs, Observation.class));
-//                    docToInsert.put("sensorId", obs.getSensor().getId());
-//                    docToInsert.remove("sensor");
-                    docToInsert.put("timeStamp", String.format("datetime('%s')", sdf.format(obs.getTimeStamp())));
-                    String docString = docToInsert.toString().replaceAll("\"(datetime\\(.*\\))\"", "$1");
-                    connectionManager.sendQuery(String.format(QUERY_FORMAT, "SemanticObservation", docString));
+                    JSONObject docToInsert = new JSONObject(gson.toJson(obs, SemanticObservation.class));
+                    docToInsert.put("virtualSensorId", obs.getVirtualSensor().getId());
+                    docToInsert.remove("virtualSensor");
+                    docToInsert.getJSONObject("semanticEntity").remove("geometry");
+                    docToInsert.put("timeStamp",  sdf.format(obs.getTimeStamp()));
+                    batch.add(String.format("VALUES (%s, %s)",
+                            "\"" + docToInsert.getString("id") +"\"",docToInsert.toString()));
+
+                    if (count % Constants.COUCHBASE_BATCH_SIZE == 0) {
+                        connectionManager.sendQuery( String.format("INSERT INTO %s %s", dataset,
+                                batch.stream().collect(Collectors.joining(",\n"))));
+                        batch = new ArrayList<>();
+                    }
+
+                    if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s Observations", count));
+                    count ++;
                 }
+                connectionManager.sendQuery( String.format("INSERT INTO %s %s", dataset,
+                        batch.stream().collect(Collectors.joining(",\n"))));
                 break;
         }
     }
 
-    private String prepareInsertQuery(String dataset, DataFiles dataFile) throws BenchmarkException {
+    private void prepareInsertQuery(String dataset, DataFiles dataFile) throws BenchmarkException {
 
         String values = null;
+
         try {
-            values = new String(Files.readAllBytes(Paths.get(dataDir + dataFile.getPath())), StandardCharsets.UTF_8);
+            org.json.simple.JSONArray jsonArray = (org.json.simple.JSONArray) parser.parse(new InputStreamReader(
+                    new FileInputStream(dataDir + dataFile.getPath())));
+            for (Object item : jsonArray) {
+                connectionManager.sendQuery(String.format(QUERY_FORMAT, dataset,
+                        "\"" + ((org.json.simple.JSONObject) item).get("id") + "\"", item.toString()));
+            }
         } catch (IOException e) {
             e.printStackTrace();
             throw new BenchmarkException("Error Reading Data Files");
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
 
-        return String.format(QUERY_FORMAT, dataset, values);
     }
 
     @Override
@@ -148,9 +220,9 @@ public class CouchbaseDataUploader extends BaseDataUploader {
         switch (mapping) {
             case 1:
             case 2:
-                connectionManager.sendQuery(prepareInsertQuery("InfrastructureType", DataFiles.INFRA_TYPE));
-                connectionManager.sendQuery(prepareInsertQuery("Location", DataFiles.LOCATION));
-                connectionManager.sendQuery(prepareInsertQuery("Infrastructure", DataFiles.INFRA));
+                prepareInsertQuery("InfrastructureType", DataFiles.INFRA_TYPE);
+                prepareInsertQuery("Location", DataFiles.LOCATION);
+                prepareInsertQuery("Infrastructure", DataFiles.INFRA);
                 break;
         }
     }
@@ -160,8 +232,8 @@ public class CouchbaseDataUploader extends BaseDataUploader {
         switch (mapping) {
             case 1:
             case 2:
-                connectionManager.sendQuery(prepareInsertQuery("UserGroup", DataFiles.GROUP));
-                connectionManager.sendQuery(prepareInsertQuery("User", DataFiles.USER));
+                prepareInsertQuery("UserGroup", DataFiles.GROUP);
+                prepareInsertQuery("Users", DataFiles.USER);
                 break;
         }
     }
@@ -170,11 +242,11 @@ public class CouchbaseDataUploader extends BaseDataUploader {
     public void addSensorData() throws BenchmarkException {
         switch (mapping) {
             case 1:
-                connectionManager.sendQuery(prepareInsertQuery("SensorType", DataFiles.SENSOR_TYPE));
-                connectionManager.sendQuery(prepareInsertQuery("Sensor", DataFiles.SENSOR));
+                prepareInsertQuery("SensorType", DataFiles.SENSOR_TYPE);
+                prepareInsertQuery("Sensor", DataFiles.SENSOR);
                 break;
             case 2:
-                connectionManager.sendQuery(prepareInsertQuery("SensorType", DataFiles.SENSOR_TYPE));
+                prepareInsertQuery("SensorType", DataFiles.SENSOR_TYPE);
                 String values = null;
                 try {
                     values = new String(Files.readAllBytes(Paths.get(dataDir + DataFiles.SENSOR.getPath())),
@@ -197,7 +269,7 @@ public class CouchbaseDataUploader extends BaseDataUploader {
                     docToInsert.put("coverage", entityIds);
 
                     String docString = e.toString();
-                    connectionManager.sendQuery(String.format(QUERY_FORMAT, "Sensor", docString));
+                    String.format(QUERY_FORMAT, "Sensor", docString);
                 });
                 break;
         }
@@ -207,11 +279,11 @@ public class CouchbaseDataUploader extends BaseDataUploader {
     public void addDeviceData() throws BenchmarkException {
         switch (mapping) {
             case 1:
-                connectionManager.sendQuery(prepareInsertQuery("PlatformType", DataFiles.PLT_TYPE));
-                connectionManager.sendQuery(prepareInsertQuery("Platform", DataFiles.PLT));
+                prepareInsertQuery("PlatformType", DataFiles.PLT_TYPE);
+                prepareInsertQuery("Platform", DataFiles.PLT);
                 break;
             case 2:
-                connectionManager.sendQuery(prepareInsertQuery("PlatformType", DataFiles.PLT_TYPE));
+                prepareInsertQuery("PlatformType", DataFiles.PLT_TYPE);
                 String values = null;
                 try {
                     values = new String(Files.readAllBytes(Paths.get(dataDir + DataFiles.PLT.getPath())),
@@ -226,7 +298,7 @@ public class CouchbaseDataUploader extends BaseDataUploader {
                     docToInsert.put("ownerId", docToInsert.getJSONObject("owner").getString("id"));
                     docToInsert.remove("owner");
                     String docString = e.toString();
-                    connectionManager.sendQuery(String.format(QUERY_FORMAT, "Platform", docString));
+                    String.format(QUERY_FORMAT, "Platform", docString);
                 });
                 break;
         }
@@ -245,9 +317,9 @@ public class CouchbaseDataUploader extends BaseDataUploader {
         switch (mapping) {
             case 1:
             case 2:
-                connectionManager.sendQuery(prepareInsertQuery("SemanticObservationType", DataFiles.SO_TYPE));
-                connectionManager.sendQuery(prepareInsertQuery("VirtualSensorType", DataFiles.VS_TYPE));
-                connectionManager.sendQuery(prepareInsertQuery("VirtualSensor", DataFiles.VS));
+                prepareInsertQuery("SemanticObservationType", DataFiles.SO_TYPE);
+                prepareInsertQuery("VirtualSensorType", DataFiles.VS_TYPE);
+                prepareInsertQuery("VirtualSensor", DataFiles.VS);
                 break;
         }
     }

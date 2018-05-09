@@ -80,7 +80,7 @@ public class Benchmark {
 
             // Creating schema on a particular database and particular mapping
             System.out.println("Creating Schema ...");
-            schemaCreator.createSchema();
+            // schemaCreator.createSchema();
 
             // Inserting data into the database system after schema creation
             System.out.println("Inserting Data ...");

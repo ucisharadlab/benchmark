@@ -25,6 +25,8 @@ public class Constants {
 
     public static int INFLUXDB_BATCH_SIZE = 50000;
 
+    public static int COUCHBASE_BATCH_SIZE = 50000;
+
     public static String ASTERIX_FEED_IP = "localhost";
 
     public static int ASTERIX_FEED_PORT = 39011;

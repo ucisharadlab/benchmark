@@ -408,6 +408,8 @@ public class InfluxDBDataUploader extends BaseDataUploader {
             if (count % Constants.INFLUXDB_BATCH_SIZE == 0) {
                 InfluxDBConnectionManager.getInstance().write(
                         measurements.stream().collect(Collectors.joining("\n")));
+                measurements = new ArrayList<>();
+
             }
 
             if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s Observations", count));
@@ -444,6 +446,8 @@ public class InfluxDBDataUploader extends BaseDataUploader {
             if (count % Constants.INFLUXDB_BATCH_SIZE == 0) {
                 InfluxDBConnectionManager.getInstance().write(
                         measurements.stream().collect(Collectors.joining("\n")));
+                measurements = new ArrayList<>();
+
             }
 
             if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s S Observations", count));
@@ -488,6 +492,7 @@ public class InfluxDBDataUploader extends BaseDataUploader {
                 if (count % Constants.INFLUXDB_BATCH_SIZE == 0) {
                     InfluxDBConnectionManager.getInstance().write(
                             measurements.stream().collect(Collectors.joining("\n")));
+                    measurements = new ArrayList<>();
                 }
 
                 if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s Observations", count));

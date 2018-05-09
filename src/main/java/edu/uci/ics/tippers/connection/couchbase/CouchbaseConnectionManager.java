@@ -77,7 +77,8 @@ public class CouchbaseConnectionManager extends BaseConnectionManager {
         CloseableHttpResponse response = null;
         try {
             response = client.execute(httpPost);
-            System.out.println(EntityUtils.toString(response.getEntity()));
+            if (response.getStatusLine().getStatusCode() != 200)
+                System.out.println(EntityUtils.toString(response.getEntity()));
         } catch (IOException e) {
             e.printStackTrace();
         }
