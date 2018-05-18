@@ -85,15 +85,15 @@ public class CouchbaseQueryManager extends BaseQueryManager {
         switch (mapping) {
             case 1:
                 return runTimedQuery(
-                        String.format("SELECT s.id, s.name FROM Sensor s WHERE s.type_.name=\"%s\" AND "
-                                        + "(SOME e IN s.coverage SATISFIES e.id IN ("
+                        String.format("SELECT s.id, s.name FROM Sensor s UNNEST s.coverage e WHERE s.type_.name=\"%s\" AND "
+                                        + "( e.id IN ["
                                         + locationIds.stream().map(e -> "\"" + e + "\"" ).collect(Collectors.joining(","))
-                                        + "));",
+                                        + "]);",
                                 sensorTypeName), 2
                 );
             case 2:
                 return runTimedQuery(
-                        String.format("SELECT s.id, s.name FROM Sensor s WHERE s.type_.name=\"%s\" AND "
+                        String.format("SELECT s.id, s.name FROM Sensor s UNNEST s.coverage WHERE s.type_.name=\"%s\" AND "
                                         + "(SOME e IN s.coverage SATISFIES e IN ["
                                         + locationIds.stream().map(e -> "\"" + e + "\"" ).collect(Collectors.joining(","))
                                         + "]);",
@@ -280,7 +280,7 @@ public class CouchbaseQueryManager extends BaseQueryManager {
                 return runTimedQuery(
                         String.format("SELECT AVG(groups.timeSpent) AS avgTimePerDay FROM " +
                                         " (SELECT DATE_FORMAT_STR(so.timeStamp, '1111-11-11'), count(*)*10  AS timeSpent " +
-                                        " FROM SemanticObservation so, Infrastructure infra " +
+                                        " FROM SemanticObservation so JOIN Infrastructure infra ON KEYS so.payload.location " +
                                         " WHERE so.type_.name=\"presence\" AND so.semanticEntity.id=\"%s\" " +
                                         " AND so.payload.location = infra.id AND infra.type_.name = \"%s\"" +
                                         " GROUP BY DATE_FORMAT_STR(so.timeStamp, '1111-11-11'))  AS groups ",
