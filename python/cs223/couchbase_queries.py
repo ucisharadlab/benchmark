@@ -164,7 +164,7 @@ def generateTimeQueries(dir):
         next(csvfile)
         spamreader = csv.reader(csvfile, delimiter=',', quotechar='"')
         for row in spamreader:
-            params = [row[1], row[2], row[4], row[5], row[3]]
+            params = [row[4], row[5], row[3]]
             queries.append((row[5], Q3.format(*params)))
 
     print(queries[-1])
@@ -176,7 +176,7 @@ def generateTimeQueries(dir):
         spamreader = csv.reader(csvfile, delimiter=',', quotechar='"')
         for row in spamreader:
             params = [row[4], row[5], row[3]]
-            params[4] = ','.join(map(lambda x: '"{}"'.format(x), params[4].split(";")))
+            params[2] = ','.join(map(lambda x: '"{}"'.format(x), params[2].split(";")))
             queries.append((row[5], Q4.format(*(params))))
         print(queries[-1])
         print()
@@ -187,14 +187,14 @@ def generateTimeQueries(dir):
         spamreader = csv.reader(csvfile, delimiter=',', quotechar='"')
         for row in spamreader:
             params = [ row[4], row[5], row[3]]
-            params[3] = ','.join(map(lambda x: '"{}"'.format(x), params[3].split(";")))
+            params[2] = ','.join(map(lambda x: '"{}"'.format(x), params[2].split(";")))
             queries.append((row[5], Q6.format(*(params))))
         print(queries[-1])
         print()
 
     queries.sort()
 
-    with open(dir + 'queries.txt', 'w') as csvfile:
+    with open(dir + 'couchbase_queries.txt', 'w') as csvfile:
         writer = csv.writer(csvfile, delimiter=',', quotechar="`")
         writer.writerows(queries)
 
