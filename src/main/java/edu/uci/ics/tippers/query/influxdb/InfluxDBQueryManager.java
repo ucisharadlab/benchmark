@@ -4,7 +4,6 @@ import edu.uci.ics.tippers.common.Database;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.query.BaseQueryManager;
 import edu.uci.ics.tippers.writer.RowWriter;
-import org.codehaus.jackson.map.Serializers;
 
 import java.io.IOException;
 import java.sql.*;
