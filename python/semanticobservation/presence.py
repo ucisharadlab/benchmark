@@ -4,6 +4,7 @@ import json
 import uuid
 import numpy as np
 
+from utils import helper
 
 def createPresence(dt, end, step, dataDir):
 
@@ -34,15 +35,19 @@ def createPresence(dt, end, step, dataDir):
 
     print ("Creating Random Presence Data " + str(numUsers))
 
+    type_ = pickedSensor["type_"]["semanticObservationType"]
+    helper.deleteSOTypeAttributes(type_)
+    helper.deleteVirtualSensorAttributes(pickedSensor)
     count = 0
     while dt < end:
-        for j in np.random.choice(numUsers, numUsers, replace=False):
+        for j in np.random.choice(numUsers, numUsers/10, replace=False):
             id = str(uuid.uuid4())
+            helper.deleteUserAttributes(users[j])
             sobs = {
                 "id": id,
                 "timeStamp": dt.strftime('%Y-%m-%d %H:%M:%S'),
                 "virtualSensor": pickedSensor,
-                "type_": pickedSensor["type_"]["semanticObservationType"],
+                "type_": type_,
                 "semanticEntity": users[j],
                 "payload": {
                     "location": rooms[random.randint(0, numRooms-1)]['id']

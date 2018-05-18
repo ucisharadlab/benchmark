@@ -102,13 +102,13 @@ if __name__ == "__main__":
     configFile = sys.argv[1]
     configDict = readConfiguration(configFile)
     pattern = configDict['others']["pattern"]
-    copyFiles(common, configDict['others']["data-dir"], configDict['others']["output-dir"])
-
-    createUsers(configDict)
-
-    createSensors(configDict, pattern)
-
-    createObservations(configDict, pattern)
-    createSemanticObservations(configDict, pattern)
+    # copyFiles(common, configDict['others']["data-dir"], configDict['others']["output-dir"])
+    #
+    # createUsers(configDict)
+    #
+    # createSensors(configDict, pattern)
+    #
+    # createObservations(configDict, pattern)
+    # createSemanticObservations(configDict, pattern)
     createQueries(configDict)
-    dataSeparator.separateData(int(configDict['others']["insert-test-data"]), configDict['others']['output-dir'])
+    # dataSeparator.separateData(int(configDict['others']["insert-test-data"]), configDict['others']['output-dir'])

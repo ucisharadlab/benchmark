@@ -84,20 +84,37 @@ class Queries(object):
     def query3(self, timeDelta):
         queries = []
         for i in range(self.runs):
-            sensorId = self.sensors[random.randint(0, len(self.sensors) - 1)]['id']
+            sensor = self.sensors[random.randint(0, len(self.sensors) - 1)]
             t1, t2 = self.randomTimeRange(self.startTime, self.maxDays, timeDelta)
-            queries.append("{},{},{},{}\n".format(i, sensorId, t1, t2))
-
-        self.writeQueries(3, "# time(s), sensorId, startTime, endTime", queries)
+            if sensor['type_']['name'] == "WeMo":
+                queries.append("{},currentmilliwatts,{},{},{},{}\n".format(i,sensor['type_']['name'], sensor['id'], t1, t2))
+            if sensor['type_']['name'] == "WiFiAP":
+                queries.append("{},clientid,{},{},{},{}\n".format(i,sensor['type_']['name'], sensor['id'], t1, t2))
+            if sensor['type_']['name'] == "Thermometer":
+                queries.append("{},temperature,{},{},{},{}\n".format(i,sensor['type_']['name'], sensor['id'], t1, t2))
+        self.writeQueries(3, "# time(s), type_, sensorId, startTime, endTime", queries)
 
     def query4(self, numSensors, timeDelta):
         queries = []
-        for i in range(self.runs):
-            sensors = [self.sensors[x]['id'] for x in np.random.choice(len(self.sensors), numSensors, replace=False)]
+        for i in range(int(self.runs/3)):
+            sensors = list(filter(lambda x: x['type_']['name']=='WeMo', self.sensors))
+            sensors = [self.sensors[x] for x in np.random.choice(len(sensors), numSensors, replace=False)]
             t1, t2 = self.randomTimeRange(self.startTime, self.maxDays, timeDelta)
-            queries.append("{},{},{},{}\n".format(i, ';'.join(sensors), t1, t2))
+            queries.append("{},currentmilliwatts,WeMo,{},{},{}\n".format(i, ';'.join(map(lambda x: x['id'], sensors)), t1, t2))
 
-        self.writeQueries(4, "# time(s), sensorIds(List), startTime, endTime", queries)
+        for i in range(int(self.runs/3)):
+            sensors = list(filter(lambda x: x['type_']['name']=='Thermometer', self.sensors))
+            sensors = [self.sensors[x] for x in np.random.choice(len(sensors), numSensors, replace=False)]
+            t1, t2 = self.randomTimeRange(self.startTime, self.maxDays, timeDelta)
+            queries.append("{},temperature,Thermometer,{},{},{}\n".format(i, ';'.join(map(lambda x: x['id'], sensors)), t1, t2))
+
+        for i in range(int(self.runs/3)):
+            sensors = list(filter(lambda x: x['type_']['name']=='WiFiAP', self.sensors))
+            sensors = [self.sensors[x] for x in np.random.choice(len(sensors), numSensors, replace=False)]
+            t1, t2 = self.randomTimeRange(self.startTime, self.maxDays, timeDelta)
+            queries.append("{},clientid,WiFiAP,{},{},{}\n".format(i, ';'.join(map(lambda x: x['id'], sensors)), t1, t2))
+
+        self.writeQueries(4, "# time(s), sensorIds(List), startTime, endTime, type", queries)
 
     def query5(self, timeDelta):
         # TODO: Currently only for temperature sensors, change to multiple types
@@ -113,10 +130,23 @@ class Queries(object):
 
     def query6(self, numSensors, timeDelta):
         queries = []
-        for i in range(self.runs):
-            sensors = [self.sensors[x]['id'] for x in np.random.choice(len(self.sensors), numSensors, replace=False)]
+        for i in range(int(self.runs/3)):
+            sensors = list(filter(lambda x: x['type_']['name']=='WeMo', self.sensors))
+            sensors = [self.sensors[x] for x in np.random.choice(len(sensors), numSensors, replace=False)]
             t1, t2 = self.randomTimeRange(self.startTime, self.maxDays, timeDelta)
-            queries.append("{},{},{},{}\n".format(i, ';'.join(sensors), t1, t2))
+            queries.append("{},currentmilliwatts,WeMo,{},{},{}\n".format(i, ';'.join(map(lambda x: x['id'], sensors)), t1, t2))
+
+        for i in range(int(self.runs/3)):
+            sensors = list(filter(lambda x: x['type_']['name']=='Thermometer', self.sensors))
+            sensors = [self.sensors[x] for x in np.random.choice(len(sensors), numSensors, replace=False)]
+            t1, t2 = self.randomTimeRange(self.startTime, self.maxDays, timeDelta)
+            queries.append("{},temperature,Thermometer,{},{},{}\n".format(i, ';'.join(map(lambda x: x['id'], sensors)), t1, t2))
+
+        for i in range(int(self.runs/3)):
+            sensors = list(filter(lambda x: x['type_']['name']=='WiFiAP', self.sensors))
+            sensors = [self.sensors[x] for x in np.random.choice(len(sensors), numSensors, replace=False)]
+            t1, t2 = self.randomTimeRange(self.startTime, self.maxDays, timeDelta)
+            queries.append("{},clientid,WiFiAP,{},{},{}\n".format(i, ';'.join(map(lambda x: x['id'], sensors)), t1, t2))
 
         self.writeQueries(6, "# time(s), sensorIds(List), startTime, endTime", queries)
 
