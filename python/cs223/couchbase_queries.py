@@ -8,9 +8,9 @@ SELECT name FROM Sensor WHERE id = "{}"
 """
 
 Q2 = """
-SELECT sen.name 
-FROM SENSOR sen, SENSOR_TYPE st, COVERAGE_INFRASTRUCTURE ci 
-WHERE sen.SENSOR_TYPE_ID=st.id AND st.name='{}' AND sen.id=ci.SENSOR_ID AND ci.INFRASTRUCTURE_ID=ANY(array[{}])
+SELECT s.id, s.name
+FROM Sensor s UNNEST s.coverage e
+WHERE s.type_.name="{}" AND ( e.id IN [{}]);
 """
 
 Q3 = """
@@ -28,7 +28,7 @@ WHERE timeStamp >= "{}" AND timeStamp <= "{}" AND sensor.id IN [ {} ]
 Q5 = """
 SELECT timeStamp, sensor.id, payload 
 FROM Observation 
-WHERE timeStamp >= "{}" AND timeStamp <= "{}" AND sensor.type_.name = "{}" AND payload.{} >= {} AND payload.{} <= {}
+WHERE sensor.type_.name = "{}" AND timeStamp >= "{}" AND timeStamp <= "{}" AND  payload.{} >= {} AND payload.{} <= {}
 """
 
 Q6 = """
@@ -54,22 +54,19 @@ GROUP BY obs.id
 # """
 
 Q9 = """
-SELECT Avg(timeSpent) as avgTimeSpent FROM 
-	(SELECT date_trunc('day', so.timeStamp), count(*)*10 as timeSpent 
-         FROM PRESENCE so, Infrastructure infra, Infrastructure_Type infraType 
-         WHERE so.location = infra.id AND infra.INFRASTRUCTURE_TYPE_ID = infraType.id AND infraType.name = '{}' AND so.semantic_entity_id = '{}' 
-         GROUP BY  date_trunc('day', so.timeStamp)) AS timeSpentPerDay
+SELECT AVG(groups.timeSpent) AS avgTimePerDay
+FROM  (SELECT DATE_FORMAT_STR(so.timeStamp, '1111-11-11'), count(*)*10  AS timeSpent
+       FROM SemanticObservation so JOIN Infrastructure infra ON KEYS so.payload.location
+       WHERE so.type_.name="presence" AND infra.type_.name = "{}"
+       AND so.payload.location = infra.id AND so.semanticEntity.id="{}"
+       GROUP BY DATE_FORMAT_STR(so.timeStamp, '1111-11-11')) AS groups
 """
 
 Q10 = """
-SELECT infra.name, so.timeStamp, so.occupancy 
-FROM OCCUPANCY so, INFRASTRUCTURE infra 
-WHERE so.timeStamp > '{}' AND so.timeStamp < '{}' AND so.semantic_entity_id = infra.id 
-ORDER BY so.semantic_entity_id, so.timeStamp
-
 SELECT infra.name, (SELECT so.timeStamp, so.payload.occupancy 
                     FROM SemanticObservation so 
-                    WHERE so.timeStamp > "{}" AND so.timeStamp < "{}" AND so.type_.name = "occupancy" AND so.semanticEntity.id = infra.id ORDER BY so.semanticEntity.id, so.timeStamp) AS histogram 
+                    WHERE so.timeStamp > "{}" AND so.timeStamp < "{}" AND so.type_.name = "occupancy"
+                    AND so.semanticEntity.id = infra.id ORDER BY so.semanticEntity.id, so.timeStamp) AS histogram
 FROM Infrastructure infra
 """
 
@@ -108,7 +105,7 @@ def generateTimeQueries(dir):
         spamreader = csv.reader(csvfile, delimiter=',', quotechar='"')
         for row in spamreader:
             params = row[1:]
-            params[1] = ','.join(map(lambda x: "'{}'".format(x), params[1].split(";")))
+            params[1] = ','.join(map(lambda x: '"{}"'.format(x), params[1].split(";")))
             queries.append((getRandomTimeStamp(), Q2.format(*(params))))
         print(queries[-1])
         print()
@@ -157,7 +154,7 @@ def generateTimeQueries(dir):
         next(csvfile)
         spamreader = csv.reader(csvfile, delimiter=',', quotechar='"')
         for row in spamreader:
-            params = [row[4], row[1], row[2], row[3], row[4], row[6], row[4], row[7]]
+            params = [row[1], row[2], row[3], row[4], row[6], row[4], row[7]]
             queries.append((row[3], Q5.format(*(params))))
     print(queries[-1])
     print()
@@ -178,8 +175,8 @@ def generateTimeQueries(dir):
         next(csvfile)
         spamreader = csv.reader(csvfile, delimiter=',', quotechar='"')
         for row in spamreader:
-            params = [row[1], row[2], row[4], row[5], row[3]]
-            params[4] = ','.join(map(lambda x: "'{}'".format(x), params[4].split(";")))
+            params = [row[4], row[5], row[3]]
+            params[4] = ','.join(map(lambda x: '"{}"'.format(x), params[4].split(";")))
             queries.append((row[5], Q4.format(*(params))))
         print(queries[-1])
         print()
@@ -189,8 +186,8 @@ def generateTimeQueries(dir):
         next(csvfile)
         spamreader = csv.reader(csvfile, delimiter=',', quotechar='"')
         for row in spamreader:
-            params = [row[2], row[4], row[5], row[3]]
-            params[3] = ','.join(map(lambda x: "'{}'".format(x), params[3].split(";")))
+            params = [ row[4], row[5], row[3]]
+            params[3] = ','.join(map(lambda x: '"{}"'.format(x), params[3].split(";")))
             queries.append((row[5], Q6.format(*(params))))
         print(queries[-1])
         print()
