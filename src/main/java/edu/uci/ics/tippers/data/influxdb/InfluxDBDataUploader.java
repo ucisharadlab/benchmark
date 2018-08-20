@@ -27,6 +27,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 public class InfluxDBDataUploader extends BaseDataUploader {
@@ -34,6 +35,7 @@ public class InfluxDBDataUploader extends BaseDataUploader {
     private Connection metadataConnection;
     private static final Logger LOGGER = Logger.getLogger(InfluxDBDataUploader.class);
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static final Long MS_TO_NS = 1000000L;
 
     private JSONParser parser = new JSONParser();
     
@@ -59,6 +61,10 @@ public class InfluxDBDataUploader extends BaseDataUploader {
         addSemanticObservationData();
         Instant end = Instant.now();
         return Duration.between(start, end);
+    }
+
+    private Long getRandomNanoSecond(){
+        return ThreadLocalRandom.current().nextLong(0, 1000000);
     }
 
     public void addMetadata() throws BenchmarkException {
@@ -390,19 +396,19 @@ public class InfluxDBDataUploader extends BaseDataUploader {
             if (obs.getSensor().getType_().getId().equals("Thermometer")) {
                 measurements.add(String.format("Thermometer,sensorId=%s id=\"%s\",temperature=%s %s",
                         obs.getSensor().getId(), obs.getId(), obs.getPayload().get("temperature").getAsInt(),
-                        obs.getTimeStamp().getTime()));
+                        obs.getTimeStamp().getTime()*MS_TO_NS + getRandomNanoSecond()));
 
             } else if (obs.getSensor().getType_().getId().equals("WiFiAP")) {
                 measurements.add(String.format("WiFiAP,sensorId=%s id=\"%s\",clientId=\"%s\" %s",
                         obs.getSensor().getId(), obs.getId(), obs.getPayload().get("clientId").getAsString(),
-                        obs.getTimeStamp().getTime()));
+                        obs.getTimeStamp().getTime()*MS_TO_NS + getRandomNanoSecond()));
 
             } else if (obs.getSensor().getType_().getId().equals("WeMo")) {
                 measurements.add(String.format("WeMo,sensorId=%s id=\"%s\",currentMilliWatts=%s,onTodaySeconds=%s  %s",
                         obs.getSensor().getId(), obs.getId(),
                         obs.getPayload().get("currentMilliWatts").getAsInt(),
                         obs.getPayload().get("onTodaySeconds").getAsInt(),
-                        obs.getTimeStamp().getTime()));
+                        obs.getTimeStamp().getTime()*MS_TO_NS + getRandomNanoSecond()));
             }
 
             if (count % Constants.INFLUXDB_BATCH_SIZE == 0) {
@@ -434,13 +440,13 @@ public class InfluxDBDataUploader extends BaseDataUploader {
                 measurements.add(String.format("presence,virtualSensorId=%s,semanticEntityId=%s id=\"%s\",location=\"%s\" %s",
                         sobs.getVirtualSensor().getId(), sobs.getSemanticEntity().get("id").getAsString(),
                         sobs.getId(), sobs.getPayload().get("location").getAsString(),
-                        sobs.getTimeStamp().getTime()));
+                        sobs.getTimeStamp().getTime()*MS_TO_NS + getRandomNanoSecond()));
 
             } else if (sobs.getType_().getId().equals("occupancy")) {
                 measurements.add(String.format("occupancy,virtualSensorId=%s,semanticEntityId=%s id=\"%s\",occupancy=%s %s",
                         sobs.getVirtualSensor().getId(), sobs.getSemanticEntity().get("id").getAsString(),
                         sobs.getId(), sobs.getPayload().get("occupancy").getAsInt(),
-                        sobs.getTimeStamp().getTime()));
+                        sobs.getTimeStamp().getTime()*MS_TO_NS + getRandomNanoSecond()));
             }
 
             if (count % Constants.INFLUXDB_BATCH_SIZE == 0) {
@@ -474,19 +480,19 @@ public class InfluxDBDataUploader extends BaseDataUploader {
                 if (obs.getSensor().getType_().getId().equals("Thermometer")) {
                     measurements.add(String.format("Thermometer,sensorId=%s id=\"%s\",temperature=%s %s",
                             obs.getSensor().getId(), obs.getId(), obs.getPayload().get("temperature").getAsInt(),
-                            obs.getTimeStamp().getTime()));
+                            obs.getTimeStamp().getTime()*MS_TO_NS + getRandomNanoSecond()));
 
                 } else if (obs.getSensor().getType_().getId().equals("WiFiAP")) {
                     measurements.add(String.format("WiFiAP,sensorId=%s id=\"%s\",clientId=\"%s\" %s",
                             obs.getSensor().getId(), obs.getId(), obs.getPayload().get("clientId").getAsString(),
-                            obs.getTimeStamp().getTime()));
+                            obs.getTimeStamp().getTime()*MS_TO_NS + getRandomNanoSecond()));
 
                 } else if (obs.getSensor().getType_().getId().equals("WeMo")) {
                     measurements.add(String.format("WeMo,sensorId=%s id=\"%s\",currentMilliWatts=%s,onTodaySeconds=%s  %s",
                             obs.getSensor().getId(), obs.getId(),
                             obs.getPayload().get("currentMilliWatts").getAsInt(),
                             obs.getPayload().get("onTodaySeconds").getAsInt(),
-                            obs.getTimeStamp().getTime()));
+                            obs.getTimeStamp().getTime()*MS_TO_NS + getRandomNanoSecond()));
                 }
 
                 if (count % Constants.INFLUXDB_BATCH_SIZE == 0) {
