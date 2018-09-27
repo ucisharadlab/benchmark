@@ -129,4 +129,76 @@ public class InfluxDBQueryManager extends BaseQueryManager {
     public Duration runQuery10(Date startTime, Date endTime) throws BenchmarkException {
         return null;
     }
+
+
+    @Override
+    public Duration explainQuery1(String sensorId) throws BenchmarkException {
+        String query = "SELECT name FROM SENSOR WHERE id=?";
+        try {
+            PreparedStatement stmt = metadataConnection.prepareStatement(query);
+            stmt.setString(1, sensorId);
+            return runTimedMetadataQuery(stmt, 1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new BenchmarkException("Error Running Query");
+        }
+    }
+
+    @Override
+    public Duration explainQuery2(String sensorTypeName, List<String> locationIds) throws BenchmarkException {
+        String query = "SELECT sen.name FROM SENSOR sen, SENSOR_TYPE st, " +
+                "COVERAGE_INFRASTRUCTURE ci WHERE sen.SENSOR_TYPE_ID=st.id AND st.name=? " +
+                "AND sen.id=ci.SENSOR_ID AND ci.INFRASTRUCTURE_ID=ANY(?)";
+        try {
+            PreparedStatement stmt = metadataConnection.prepareStatement(query);
+            stmt.setString(1, sensorTypeName);
+
+            Array locationsArray = metadataConnection.createArrayOf("VARCHAR", locationIds.toArray());
+            stmt.setArray(2, locationsArray);
+            return runTimedMetadataQuery(stmt, 2);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new BenchmarkException("Error Running Query");
+        }
+    }
+
+    @Override
+    public Duration explainQuery3(String sensorId, Date startTime, Date endTime) throws BenchmarkException {
+        return null;
+    }
+
+    @Override
+    public Duration explainQuery4(List<String> sensorIds, Date startTime, Date endTime) throws BenchmarkException {
+        return null;
+    }
+
+    @Override
+    public Duration explainQuery5(String sensorTypeName, Date startTime, Date endTime, String payloadAttribute, Object startPayloadValue, Object endPayloadValue) throws BenchmarkException {
+        return null;
+    }
+
+    @Override
+    public Duration explainQuery6(List<String> sensorIds, Date startTime, Date endTime) throws BenchmarkException {
+        return null;
+    }
+
+    @Override
+    public Duration explainQuery7(String startLocation, String endLocation, Date date) throws BenchmarkException {
+        return null;
+    }
+
+    @Override
+    public Duration explainQuery8(String userId, Date date) throws BenchmarkException {
+        return null;
+    }
+
+    @Override
+    public Duration explainQuery9(String userId, String infraTypeName) throws BenchmarkException {
+        return null;
+    }
+
+    @Override
+    public Duration explainQuery10(Date startTime, Date endTime) throws BenchmarkException {
+        return null;
+    }
 }

@@ -133,7 +133,7 @@ public class InfluxDBConnectionManager extends BaseConnectionManager {
         HttpPost httpPost = new HttpPost(url);
 
         List<NameValuePair> params = new ArrayList<NameValuePair>(2);
-        params.add(new BasicNameValuePair("precision", "ms"));
+        params.add(new BasicNameValuePair("precision", "ns"));
         try {
             httpPost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
         } catch (UnsupportedEncodingException e) {
