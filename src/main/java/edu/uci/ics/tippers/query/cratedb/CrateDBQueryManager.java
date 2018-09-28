@@ -22,7 +22,8 @@ public class CrateDBQueryManager extends BaseQueryManager {
     public CrateDBQueryManager(int mapping, String queriesDir, String outputDir, boolean writeOutput, long timeout) {
         super(mapping, queriesDir, outputDir, writeOutput, timeout);
         connection = CrateDBConnectionManager.getInstance().getConnection();
-        externalQueryManager = new PgSQLQueryManager(mapping, queriesDir, outputDir, writeOutput, timeout, connection);
+        externalQueryManager = new PgSQLQueryManager(mapping, queriesDir, outputDir, writeOutput, timeout, connection,
+                Database.CRATEDB);
     }
 
     @Override
@@ -536,7 +537,7 @@ public class CrateDBQueryManager extends BaseQueryManager {
                     throw new BenchmarkException("Error Running Query");
                 }
             case 2:
-                query = "EXPLAIN SELECT ID, SENSOR_TYPE_ID FROM SENSOR WHERE ID=ANY(?)";
+                query = "SELECT ID, SENSOR_TYPE_ID FROM SENSOR WHERE ID=ANY(?)";
                 try {
                     Instant start = Instant.now();
                     PreparedStatement stmt = connection.prepareStatement(query);
@@ -664,7 +665,7 @@ public class CrateDBQueryManager extends BaseQueryManager {
                     throw new BenchmarkException("Error Running Query");
                 }
             case 2:
-                query = "EXPLAIN SELECT ID, SENSOR_TYPE_ID FROM SENSOR WHERE ID=ANY(?)";
+                query = " SELECT ID, SENSOR_TYPE_ID FROM SENSOR WHERE ID=ANY(?)";
                 try {
                     Instant start = Instant.now();
                     PreparedStatement stmt = connection.prepareStatement(query);

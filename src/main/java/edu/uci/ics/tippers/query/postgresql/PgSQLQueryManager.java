@@ -30,10 +30,10 @@ public class PgSQLQueryManager extends BaseQueryManager{
 
     // For External Database (CrateDB) Usage
     public PgSQLQueryManager( int mapping, String queriesDir, String outputDir, boolean writeOutput, long timeout,
-                             Connection connection) {
+                             Connection connection, Database database) {
         super(mapping, queriesDir, outputDir, writeOutput, timeout);
         this.connection = connection;
-        this.database = Database.CRATEDB;
+        this.database = database;
     }
 
     public Duration runTimedQuery(PreparedStatement stmt, int queryNum) throws BenchmarkException {
@@ -691,7 +691,7 @@ public class PgSQLQueryManager extends BaseQueryManager{
                     throw new BenchmarkException("Error Running Query");
                 }
             case 2:
-                query = "EXPLAIN SELECT SENSOR_TYPE_ID FROM SENSOR WHERE ID=?";
+                query = "SELECT SENSOR_TYPE_ID FROM SENSOR WHERE ID=?";
                 try {
                     Instant start = Instant.now();
                     PreparedStatement stmt = connection.prepareStatement(query);
@@ -751,7 +751,7 @@ public class PgSQLQueryManager extends BaseQueryManager{
                     throw new BenchmarkException("Error Running Query");
                 }
             case 2:
-                query = "EXPLAIN SELECT ID, SENSOR_TYPE_ID FROM SENSOR WHERE ID=ANY(?)";
+                query = "SELECT ID, SENSOR_TYPE_ID FROM SENSOR WHERE ID=ANY(?)";
                 try {
                     Instant start = Instant.now();
                     PreparedStatement stmt = connection.prepareStatement(query);
@@ -897,7 +897,7 @@ public class PgSQLQueryManager extends BaseQueryManager{
                     throw new BenchmarkException("Error Running Query");
                 }
             case 2:
-                query = "EXPLAIN SELECT ID, SENSOR_TYPE_ID FROM SENSOR WHERE ID=ANY(?)";
+                query = "SELECT ID, SENSOR_TYPE_ID FROM SENSOR WHERE ID=ANY(?)";
                 try {
                     Instant start = Instant.now();
                     PreparedStatement stmt = connection.prepareStatement(query);
