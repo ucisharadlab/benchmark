@@ -712,7 +712,7 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                         stmt = connection.prepareStatement(query);
                         stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
                         stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
-                        
+
                         externalQueryManager.explainQuery(stmt, 6);
                     }
 

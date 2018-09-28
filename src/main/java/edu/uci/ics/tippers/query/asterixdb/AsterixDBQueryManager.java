@@ -77,7 +77,7 @@ public class AsterixDBQueryManager extends BaseQueryManager{
         Instant endTime = Instant.now();
 
         try {
-            RowWriter<String> writer = new RowWriter<>(outputDir+"/explain/", getDatabase(), mapping,
+            RowWriter<String> writer = new RowWriter<>(outputDir+"/explains/", getDatabase(), mapping,
                     Helper.getFileFromQuery(queryNum));
             writer.writeString(EntityUtils.toString(response.getEntity()));
             writer.close();
