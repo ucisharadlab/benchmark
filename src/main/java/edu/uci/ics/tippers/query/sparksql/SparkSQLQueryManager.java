@@ -476,7 +476,7 @@ public class SparkSQLQueryManager extends BaseQueryManager {
         switch (mapping) {
             case 1:
             case 2:
-                return externalQueryManager.runQuery1(sensorId);
+                return externalQueryManager.explainQuery1(sensorId);
             default:
                 throw new BenchmarkException("Error Running Query 1 on CrateDB");
         }
@@ -487,7 +487,7 @@ public class SparkSQLQueryManager extends BaseQueryManager {
         switch (mapping) {
             case 1:
             case 2:
-                String query = "SELECT sen.name FROM SENSOR sen, SENSOR_TYPE st, " +
+                String query = "EXPLAIN EXTENDED SELECT sen.name FROM SENSOR sen, SENSOR_TYPE st, " +
                         "COVERAGE_INFRASTRUCTURE ci WHERE sen.SENSOR_TYPE_ID=st.id AND st.name=? " +
                         "AND sen.id=ci.SENSOR_ID AND ci.INFRASTRUCTURE_ID=ANY(?)";
                 try {
@@ -496,7 +496,7 @@ public class SparkSQLQueryManager extends BaseQueryManager {
 
                     Array locationsArray = connection.createArrayOf("string", locationIds.toArray());
                     stmt.setArray(2, locationsArray);
-                    return externalQueryManager.runTimedQuery(stmt, 2);
+                    return externalQueryManager.explainQuery(stmt, 2);
                 } catch (SQLException e) {
                     e.printStackTrace();
                     throw new BenchmarkException("Error Running Query");
@@ -511,7 +511,7 @@ public class SparkSQLQueryManager extends BaseQueryManager {
         switch (mapping) {
             case 1:
             case 2:
-                return externalQueryManager.runQuery3(sensorId, startTime, endTime);
+                return externalQueryManager.explainQuery3(sensorId, startTime, endTime);
             default:
                 throw new BenchmarkException("Error Running Query 3 on CrateDB");
         }
@@ -521,7 +521,7 @@ public class SparkSQLQueryManager extends BaseQueryManager {
     public Duration explainQuery4(List<String> sensorIds, Date startTime, Date endTime) throws BenchmarkException {
         switch (mapping) {
             case 1:
-                String query = "SELECT timeStamp, payload FROM OBSERVATION WHERE timestamp>? AND timestamp<? " +
+                String query = "EXPLAIN EXTENDED SELECT timeStamp, payload FROM OBSERVATION WHERE timestamp>? AND timestamp<? " +
                         "AND SENSOR_ID = ANY(?)";
                 try {
                     PreparedStatement stmt = connection.prepareStatement(query);
@@ -531,13 +531,13 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                     Array sensorIdArray = connection.createArrayOf("string", sensorIds.toArray());
                     stmt.setArray(3, sensorIdArray);
 
-                    return externalQueryManager.runTimedQuery(stmt, 4);
+                    return externalQueryManager.explainQuery(stmt, 4);
                 } catch (SQLException e) {
                     e.printStackTrace();
                     throw new BenchmarkException("Error Running Query");
                 }
             case 2:
-                query = "SELECT ID, SENSOR_TYPE_ID FROM SENSOR WHERE ID=ANY(?)";
+                query = "EXPLAIN EXTENDED SELECT ID, SENSOR_TYPE_ID FROM SENSOR WHERE ID=ANY(?)";
                 try {
                     Instant start = Instant.now();
                     PreparedStatement stmt = connection.prepareStatement(query);
@@ -562,7 +562,7 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                     rs.close();
 
                     if (!thermoSensors.isEmpty()) {
-                        query = "SELECT timeStamp, temperature FROM ThermometerObservation  WHERE timestamp>? AND timestamp<? " +
+                        query = "EXPLAIN EXTENDED SELECT timeStamp, temperature FROM ThermometerObservation  WHERE timestamp>? AND timestamp<? " +
                                 "AND SENSOR_ID=ANY(?)";
                         stmt = connection.prepareStatement(query);
                         stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
@@ -570,10 +570,10 @@ public class SparkSQLQueryManager extends BaseQueryManager {
 
                         sensorIdArray = connection.createArrayOf("string", thermoSensors.toArray());
                         stmt.setArray(3, sensorIdArray);
-                        externalQueryManager.runTimedQuery(stmt, 4);
+                        externalQueryManager.explainQuery(stmt, 4);
                     }
                     else if (!wemoSensors.isEmpty()) {
-                        query = "SELECT timeStamp, currentMilliWatts, onTodaySeconds FROM WeMoObservation  WHERE timestamp>? AND timestamp<? " +
+                        query = "EXPLAIN EXTENDED SELECT timeStamp, currentMilliWatts, onTodaySeconds FROM WeMoObservation  WHERE timestamp>? AND timestamp<? " +
                                 "AND SENSOR_ID=ANY(?)";
                         stmt = connection.prepareStatement(query);
                         stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
@@ -581,10 +581,10 @@ public class SparkSQLQueryManager extends BaseQueryManager {
 
                         sensorIdArray = connection.createArrayOf("string", wemoSensors.toArray());
                         stmt.setArray(3, sensorIdArray);
-                        externalQueryManager.runTimedQuery(stmt, 4);
+                        externalQueryManager.explainQuery(stmt, 4);
                     }
                     else if (!wifiSensors.isEmpty()) {
-                        query = "SELECT timeStamp, clientId FROM WiFiAPObservation  WHERE timestamp>? AND timestamp<? " +
+                        query = "EXPLAIN EXTENDED SELECT timeStamp, clientId FROM WiFiAPObservation  WHERE timestamp>? AND timestamp<? " +
                                 "AND SENSOR_ID=ANY(?)";
                         stmt = connection.prepareStatement(query);
                         stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
@@ -592,7 +592,7 @@ public class SparkSQLQueryManager extends BaseQueryManager {
 
                         sensorIdArray = connection.createArrayOf("string", wifiSensors.toArray());
                         stmt.setArray(3, sensorIdArray);
-                        externalQueryManager.runTimedQuery(stmt, 4);
+                        externalQueryManager.explainQuery(stmt, 4);
                     }
 
                     Instant end = Instant.now();
@@ -611,7 +611,7 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                               Object startPayloadValue, Object endPayloadValue) throws BenchmarkException {
         switch (mapping) {
             case 1:
-                String query = String.format("SELECT timeStamp, payload FROM OBSERVATION o, SENSOR s, SENSOR_TYPE st  " +
+                String query = String.format("EXPLAIN EXTENDED SELECT timeStamp, payload FROM OBSERVATION o, SENSOR s, SENSOR_TYPE st  " +
                                 "WHERE s.id = o.sensor_id AND s.sensor_type_id=st.id AND st.name=? AND " +
                                 "timestamp>? AND timestamp<? AND payload['%s'] >= ? AND payload['%s'] <= ? ",
                         payloadAttribute, payloadAttribute);
@@ -628,13 +628,13 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                         stmt.setDouble(4, (Double) startPayloadValue);
                         stmt.setDouble(5, (Double) endPayloadValue);
                     }
-                    return externalQueryManager.runTimedQuery(stmt, 5);
+                    return externalQueryManager.explainQuery(stmt, 5);
                 } catch (SQLException e) {
                     e.printStackTrace();
                     throw new BenchmarkException("Error Running Query");
                 }
             case 2:
-                return externalQueryManager.runQuery5(sensorTypeName, startTime, endTime, payloadAttribute,
+                return externalQueryManager.explainQuery5(sensorTypeName, startTime, endTime, payloadAttribute,
                         startPayloadValue, endPayloadValue);
             default:
                 throw new BenchmarkException("No Such Mapping");
@@ -645,8 +645,8 @@ public class SparkSQLQueryManager extends BaseQueryManager {
     public Duration explainQuery6(List<String> sensorIds, Date startTime, Date endTime) throws BenchmarkException {
         switch (mapping) {
             case 1:
-                String query = "SELECT obs.sensor_id, avg(counts) FROM " +
-                        "(SELECT sensor_id, date_trunc('day', timestamp), " +
+                String query = "EXPLAIN EXTENDED SELECT obs.sensor_id, avg(counts) FROM " +
+                        "( SELECT sensor_id, date_trunc('day', timestamp), " +
                         "count(*) as counts " +
                         "FROM OBSERVATION WHERE timestamp>? AND timestamp<? " +
                         "AND SENSOR_ID = ANY(?) GROUP BY sensor_id, date_trunc('day', timestamp)) " +
@@ -659,13 +659,13 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                     Array sensorIdArray = connection.createArrayOf("string", sensorIds.toArray());
                     stmt.setArray(3, sensorIdArray);
 
-                    return externalQueryManager.runTimedQuery(stmt, 6);
+                    return externalQueryManager.explainQuery(stmt, 6);
                 } catch (SQLException e) {
                     e.printStackTrace();
                     throw new BenchmarkException("Error Running Query");
                 }
             case 2:
-                query = "SELECT ID, SENSOR_TYPE_ID FROM SENSOR WHERE ID=ANY(?)";
+                query = "EXPLAIN EXTENDED SELECT ID, SENSOR_TYPE_ID FROM SENSOR WHERE ID=ANY(?)";
                 try {
                     Instant start = Instant.now();
                     PreparedStatement stmt = connection.prepareStatement(query);
@@ -690,8 +690,8 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                     rs.close();
 
                     if (!thermoSensors.isEmpty()) {
-                        query = "SELECT obs.sensor_id, avg(counts) FROM " +
-                                "(SELECT sensor_id, date_trunc('day', timestamp), " +
+                        query = "EXPLAIN EXTENDED SELECT obs.sensor_id, avg(counts) FROM " +
+                                "( SELECT sensor_id, date_trunc('day', timestamp), " +
                                 "count(*) as counts " +
                                 "FROM ThermometerObservation WHERE timestamp>? AND timestamp<? " +
                                 "AND SENSOR_ID = ANY(?) GROUP BY sensor_id, date_trunc('day', timestamp)) " +
@@ -702,11 +702,11 @@ public class SparkSQLQueryManager extends BaseQueryManager {
 
                         sensorIdArray = connection.createArrayOf("string", thermoSensors.toArray());
                         stmt.setArray(3, sensorIdArray);
-                        externalQueryManager.runTimedQuery(stmt, 6);
+                        externalQueryManager.explainQuery(stmt, 6);
                     }
                     else if (!wemoSensors.isEmpty()) {
-                        query = "SELECT obs.sensor_id, avg(counts) FROM " +
-                                "(SELECT sensor_id, date_trunc('day', timestamp), " +
+                        query = "EXPLAIN EXTENDED SELECT obs.sensor_id, avg(counts) FROM " +
+                                "( SELECT sensor_id, date_trunc('day', timestamp), " +
                                 "count(*) as counts " +
                                 "FROM WeMoObservation WHERE timestamp>? AND timestamp<? " +
                                 "AND SENSOR_ID = ANY(?) GROUP BY sensor_id, date_trunc('day', timestamp)) " +
@@ -717,10 +717,10 @@ public class SparkSQLQueryManager extends BaseQueryManager {
 
                         sensorIdArray = connection.createArrayOf("string", wemoSensors.toArray());
                         stmt.setArray(3, sensorIdArray);
-                        externalQueryManager.runTimedQuery(stmt, 6);
+                        externalQueryManager.explainQuery(stmt, 6);
                     }
                     else if (!wifiSensors.isEmpty()) {
-                        query = "SELECT obs.sensor_id, avg(counts) FROM " +
+                        query = "EXPLAIN EXTENDED SELECT obs.sensor_id, avg(counts) FROM " +
                                 "(SELECT sensor_id, date_trunc('day', timestamp), " +
                                 "count(*) as counts " +
                                 "FROM WiFiAPObservation WHERE timestamp>? AND timestamp<? " +
@@ -732,7 +732,7 @@ public class SparkSQLQueryManager extends BaseQueryManager {
 
                         sensorIdArray = connection.createArrayOf("string", wifiSensors.toArray());
                         stmt.setArray(3, sensorIdArray);
-                        externalQueryManager.runTimedQuery(stmt, 6);
+                        externalQueryManager.explainQuery(stmt, 6);
                     }
 
                     Instant end = Instant.now();
@@ -756,7 +756,7 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                 cal.add(Calendar.DATE, 1);
                 Date endTime = cal.getTime();
 
-                String query = "SELECT u.name " +
+                String query = "EXPLAIN EXTENDED SELECT u.name " +
                         "FROM SEMANTIC_OBSERVATION s1, SEMANTIC_OBSERVATION s2, SEMANTIC_OBSERVATION_TYPE st, USERS u " +
                         "WHERE s1.timeStamp >= ? AND s1.timeStamp <= ?  AND s2.timeStamp <= ? " +
                         "AND st.name = 'presence' AND st.id = s1.type_id AND st.id = s2.type_id " +
@@ -772,7 +772,7 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                     stmt.setString(4, startLocation);
                     stmt.setString(5, endLocation);
 
-                    return externalQueryManager.runTimedQuery(stmt, 7);
+                    return externalQueryManager.explainQuery(stmt, 7);
                 } catch (SQLException e) {
                     e.printStackTrace();
                     throw new BenchmarkException("Error Running Query");
@@ -783,7 +783,7 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                 cal.setTime(date);
                 cal.add(Calendar.DATE, 1);
                 endTime = cal.getTime();
-                query = "SELECT u.name " +
+                query = "EXPLAIN EXTENDED SELECT u.name " +
                         "FROM PRESENCE s1, PRESENCE s2, USERS u " +
                         "WHERE s1.timeStamp >= ? AND s1.timeStamp <= ?  AND s2.timeStamp <= ? " +
                         "AND s1.semantic_entity_id = s2.semantic_entity_id " +
@@ -798,7 +798,7 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                     stmt.setString(4, startLocation);
                     stmt.setString(5, endLocation);
 
-                    return externalQueryManager.runTimedQuery(stmt, 7);
+                    return externalQueryManager.explainQuery(stmt, 7);
                 } catch (SQLException e) {
                     e.printStackTrace();
                     throw new BenchmarkException("Error Running Query");
@@ -818,7 +818,7 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                 cal.add(Calendar.DATE, 1);
                 Date endTime = cal.getTime();
 
-                String query = "SELECT u.name, s1.payload " +
+                String query = "EXPLAIN EXTENDED SELECT u.name, s1.payload " +
                         "FROM SEMANTIC_OBSERVATION s1, SEMANTIC_OBSERVATION s2, SEMANTIC_OBSERVATION_TYPE st, USERS u " +
                         "WHERE s1.timeStamp >= ? AND s1.timeStamp <= ? " +
                         "AND s2.timeStamp = s1.timeStamp " +
@@ -831,7 +831,7 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                     stmt.setTimestamp (2, new Timestamp(endTime.getTime()));
                     stmt.setString(3, userId);
 
-                    return externalQueryManager.runTimedQuery(stmt, 8);
+                    return externalQueryManager.explainQuery(stmt, 8);
                 } catch (SQLException e) {
                     e.printStackTrace();
                     throw new BenchmarkException("Error Running Query");
@@ -843,7 +843,7 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                 cal.setTime(date);
                 cal.add(Calendar.DATE, 1);
                 endTime = cal.getTime();
-                query = "SELECT u.name, s1.location " +
+                query = "EXPLAIN EXTENDED SELECT u.name, s1.location " +
                         "FROM PRESENCE s1, PRESENCE s2, USERS u " +
                         "WHERE s1.timeStamp >= ? AND s1.timeStamp <= ? " +
                         "AND s2.timeStamp = s1.timeStamp " +
@@ -855,7 +855,7 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                     stmt.setTimestamp (2, new Timestamp(endTime.getTime()));
                     stmt.setString(3, userId);
 
-                    return externalQueryManager.runTimedQuery(stmt, 8);
+                    return externalQueryManager.explainQuery(stmt, 8);
                 } catch (SQLException e) {
                     e.printStackTrace();
                     throw new BenchmarkException("Error Running Query");
@@ -869,7 +869,7 @@ public class SparkSQLQueryManager extends BaseQueryManager {
     public Duration explainQuery9(String userId, String infraTypeName) throws BenchmarkException {
         switch (mapping) {
             case 1:
-                String query = "SELECT Avg(timeSpent) as avgTimeSpent FROM " +
+                String query = "EXPLAIN EXTENDED SELECT Avg(timeSpent) as avgTimeSpent FROM " +
                         " (SELECT date_trunc('day', so.timeStamp), count(*)*10 as timeSpent " +
                         "  FROM SEMANTIC_OBSERVATION so, Infrastructure infra, Infrastructure_Type infraType, SEMANTIC_OBSERVATION_TYPE st " +
                         "  WHERE st.name = 'presence' AND so.type_id = st.id " +
@@ -883,13 +883,13 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                     stmt.setString (1, infraTypeName);
                     stmt.setString(2, userId);
 
-                    return externalQueryManager.runTimedQuery(stmt, 9);
+                    return externalQueryManager.explainQuery(stmt, 9);
                 } catch (SQLException e) {
                     e.printStackTrace();
                     throw new BenchmarkException("Error Running Query");
                 }
             case 2:
-                return externalQueryManager.runQuery9(userId, infraTypeName);
+                return externalQueryManager.explainQuery9(userId, infraTypeName);
             default:
                 throw new BenchmarkException("No Such Mapping");
         }
@@ -900,7 +900,7 @@ public class SparkSQLQueryManager extends BaseQueryManager {
         switch (mapping) {
             case 1:
             case 2:
-                return externalQueryManager.runQuery10(startTime, endTime);
+                return externalQueryManager.explainQuery10(startTime, endTime);
             default:
                 throw new BenchmarkException("No Such Mapping");
         }

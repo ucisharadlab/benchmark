@@ -748,7 +748,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
 
                 MongoCollection<Document> collection = database.getCollection("Sensor");
                 MongoIterable<Document> iterable = collection.find(eq("_id", sensorId))
-                        .projection(new Document("name", 1).append("_id", 0));
+                        .projection(new Document("name", 1).append("_id", 0)).modifiers(new Document("$explain", true));
 
                 getResults(iterable, 1);
                 Instant end = Instant.now();
@@ -769,7 +769,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
                         eq("type_.name", sensorTypeName),
                         in("coverage.id", locationIds)))
                         .projection(new Document("name", 1)
-                                .append("_id", 1));
+                                .append("_id", 1)).modifiers(new Document("$explain", true));
 
                 getResults(iterable, 2);
 
@@ -783,7 +783,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
                         eq("type_.name", sensorTypeName),
                         in("coverage", locationIds)))
                         .projection(new Document("name", 1)
-                                .append("_id", 1));
+                                .append("_id", 1)).modifiers(new Document("$explain", true));
 
                 getResults(iterable, 2);
 
@@ -809,7 +809,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
                         .projection(new Document("timeStamp", 1)
                                 .append("_id", 0)
                                 .append("payload", 1)
-                                .append("sensor.id", 1));
+                                .append("sensor.id", 1)).modifiers(new Document("$explain", true));
 
                 getResults(iterable, 3);
 
@@ -827,7 +827,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
                         .projection(new Document("timeStamp", 1)
                                 .append("_id", 0)
                                 .append("payload", 1)
-                                .append("sensorId", 1));
+                                .append("sensorId", 1)).modifiers(new Document("$explain", true));
 
                 getResults(iterable, 3);
 
@@ -853,7 +853,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
                         .projection(new Document("timeStamp", 1)
                                 .append("_id", 0)
                                 .append("sensor.id", 1)
-                                .append("payload.temperature", 1));
+                                .append("payload.temperature", 1)).modifiers(new Document("$explain", true));
 
                 getResults(iterable, 4);
 
@@ -871,7 +871,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
                         .projection(new Document("timeStamp", 1)
                                 .append("_id", 0)
                                 .append("sensorId", 1)
-                                .append("payload", 1));
+                                .append("payload", 1)).modifiers(new Document("$explain", true));
 
                 getResults(iterable, 4);
 
@@ -900,7 +900,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
                         .projection(new Document("timeStamp", 1)
                                 .append("_id", 0)
                                 .append("sensor.id", 1)
-                                .append("payload", 1));
+                                .append("payload", 1)).modifiers(new Document("$explain", true));
 
                 getResults(iterable, 5);
 
