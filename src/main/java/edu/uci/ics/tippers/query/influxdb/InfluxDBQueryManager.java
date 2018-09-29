@@ -40,7 +40,7 @@ public class InfluxDBQueryManager extends BaseQueryManager {
     public InfluxDBQueryManager(int mapping, String queriesDir, String outputDir, boolean writeOutput, long timeout) {
         super(mapping, queriesDir, outputDir, writeOutput, timeout);
         connectionManager = InfluxDBConnectionManager.getInstance();
-
+        metadataConnection = InfluxDBConnectionManager.getInstance().getMetadataConnection();
     }
 
     @Override
@@ -77,6 +77,29 @@ public class InfluxDBQueryManager extends BaseQueryManager {
         }
         return Duration.between(startTime, endTime);
     }
+
+    private Duration explainQuery(String query, int queryNum) throws BenchmarkException {
+
+        LOGGER.info(String.format("Running Query %s", queryNum));
+        LOGGER.info(query);
+
+        Instant startTime = Instant.now();
+        HttpResponse response = connectionManager.sendQuery("EXPLAIN " + query);
+        Instant endTime = Instant.now();
+
+        try {
+            RowWriter<String> writer = new RowWriter<>(outputDir+"/explains/", getDatabase(), mapping,
+                    Helper.getFileFromQuery(queryNum));
+            writer.writeString(EntityUtils.toString(response.getEntity()));
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new BenchmarkException("Error writing output to file");
+        }
+
+        return Duration.between(startTime, endTime);
+    }
+
 
     private Duration runTimedMetadataQuery(PreparedStatement stmt, int queryNum) throws BenchmarkException {
         try {
@@ -179,7 +202,7 @@ public class InfluxDBQueryManager extends BaseQueryManager {
                 try {
                     List<List<Object>> sensorTypes = runMetadataQueryWithRows(
                             String.format("SELECT * FROM Sensor WHERE id='%s'", sensorId));
-                    String collectionName = sensorTypes.get(0).get(2) + "Observation";
+                    String collectionName = sensorTypes.get(0).get(4) + "Observation";
 
                     String query = String.format("SELECT * FROM %s WHERE timeStamp > TIMESTAMP('%s') " +
                                     "AND timeStamp < TIMESTAMP('%s') AND sensorId='%s'",
@@ -206,7 +229,6 @@ public class InfluxDBQueryManager extends BaseQueryManager {
                     List<String> wemoSensors = new ArrayList<>();
                     List<String> thermoSensors = new ArrayList<>();
 
-                    RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(4));
                     for (String sensorId : sensorIds) {
                         typeId = (String) runMetadataQueryWithRows(
                                 String.format("SELECT * FROM Sensor WHERE id='%s'", sensorId)).get(0).get(2);
@@ -242,10 +264,9 @@ public class InfluxDBQueryManager extends BaseQueryManager {
                         runTimedQuery(query, 4);
 
                     }
-                    writer.close();
                     Instant end = Instant.now();
                     return Duration.between(start, end);
-                } catch (IOException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                     throw new BenchmarkException("Error Running Query");
                 }
@@ -368,7 +389,7 @@ public class InfluxDBQueryManager extends BaseQueryManager {
                 Date endTime = cal.getTime();
 
                 try {
-                    Map<String, String> userMap = runMetadataQueryWithRows("SELECT * FROM User")
+                    Map<String, String> userMap = runMetadataQueryWithRows("SELECT * FROM Users")
                             .stream().collect(Collectors.toMap(e -> {
                                 try {
                                     return (String)e.get(0);
@@ -438,7 +459,7 @@ public class InfluxDBQueryManager extends BaseQueryManager {
 
                 try {
                     Map<String, String> userMap = runMetadataQueryWithRows(
-                            "SELECT * FROM User")
+                            "SELECT * FROM Users")
                             .stream().collect(Collectors.toMap(e -> {
                                 try {
                                     return (String)e.get(0);
@@ -503,7 +524,7 @@ public class InfluxDBQueryManager extends BaseQueryManager {
 
                 try {
                     String infraTypeId = (String) runMetadataQueryWithRows(
-                            String.format("SELECT * FROM InfrastructureType WHERE name='%s'", infraTypeName)).get(0).get(0);
+                            String.format("SELECT * FROM Infrastructure_Type WHERE name='%s'", infraTypeName)).get(0).get(0);
 
                     List<String> infras = runMetadataQueryWithRows(
                             String.format("SELECT * FROM Infrastructure WHERE typeId='%s'", infraTypeId))
@@ -653,41 +674,428 @@ public class InfluxDBQueryManager extends BaseQueryManager {
 
     @Override
     public Duration explainQuery3(String sensorId, Date startTime, Date endTime) throws BenchmarkException {
-        return null;
+        switch (mapping) {
+            case 2:
+                try {
+                    List<List<Object>> sensorTypes = runMetadataQueryWithRows(
+                            String.format("SELECT * FROM Sensor WHERE id='%s'", sensorId));
+                    String collectionName = sensorTypes.get(0).get(4) + "Observation";
+
+                    String query = String.format("SELECT * FROM %s WHERE timeStamp > TIMESTAMP('%s') " +
+                                    "AND timeStamp < TIMESTAMP('%s') AND sensorId='%s'",
+                            collectionName, sdf.format(startTime), sdf.format(endTime), sensorId);
+                    return explainQuery(query, 3);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            default:
+                throw  new BenchmarkException("No Such Mapping");
+        }
+
     }
 
     @Override
     public Duration explainQuery4(List<String> sensorIds, Date startTime, Date endTime) throws BenchmarkException {
-        return null;
+        switch (mapping) {
+
+            case 2:
+                try {
+                    Instant start = Instant.now();
+                    String typeId = null;
+                    List<String> wifiSensors = new ArrayList<>();
+                    List<String> wemoSensors = new ArrayList<>();
+                    List<String> thermoSensors = new ArrayList<>();
+
+                    for (String sensorId : sensorIds) {
+                        typeId = (String) runMetadataQueryWithRows(
+                                String.format("SELECT * FROM Sensor WHERE id='%s'", sensorId)).get(0).get(2);
+                        if ("Thermometer".equals(typeId))
+                            thermoSensors.add(sensorId);
+                        else if ("WeMo".equals(typeId))
+                            wemoSensors.add(sensorId);
+                        else if ("WiFiAP".equals(typeId))
+                            wifiSensors.add(sensorId);
+                    }
+
+                    if (!thermoSensors.isEmpty()) {
+                        String query = String.format("SELECT * FROM ThermometerObservation WHERE timeStamp > TIMESTAMP('%s') " +
+                                "AND timeStamp < TIMESTAMP('%s') AND ( "
+                                + thermoSensors.stream().map(e -> "sensorId = '" + e + "'" ).collect(Collectors.joining(" OR "))
+                                + ");", sdf.format(startTime), sdf.format(endTime));
+                        explainQuery(query, 4);
+
+                    }
+                    if (!wemoSensors.isEmpty()) {
+                        String query = String.format("SELECT * FROM WeMoObservation WHERE timeStamp > TIMESTAMP('%s') " +
+                                "AND timeStamp < TIMESTAMP('%s') AND ( "
+                                + wemoSensors.stream().map(e -> "sensorId = '" + e + "'" ).collect(Collectors.joining(" OR "))
+                                + ");", sdf.format(startTime), sdf.format(endTime));
+                        explainQuery(query, 4);
+
+                    }
+                    if (!wifiSensors.isEmpty()) {
+                        String query = String.format("SELECT * FROM WiFiAPObservation WHERE timeStamp > TIMESTAMP('%s') " +
+                                "AND timeStamp < TIMESTAMP('%s') AND ( "
+                                + wifiSensors.stream().map(e -> "sensorId = '" + e + "'" ).collect(Collectors.joining(" OR "))
+                                + ");", sdf.format(startTime), sdf.format(endTime));
+                        explainQuery(query, 4);
+
+                    }
+                    Instant end = Instant.now();
+                    return Duration.between(start, end);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
+            default:
+                throw new BenchmarkException("No Such Mapping");
+        }
+
     }
 
     @Override
-    public Duration explainQuery5(String sensorTypeName, Date startTime, Date endTime, String payloadAttribute, Object startPayloadValue, Object endPayloadValue) throws BenchmarkException {
-        return null;
+    public Duration explainQuery5(String sensorTypeName, Date startTime, Date endTime, String payloadAttribute,
+                              Object startPayloadValue, Object endPayloadValue) throws BenchmarkException {
+        switch (mapping) {
+
+            case 2:
+                Instant start = Instant.now();
+                try {
+
+                    String collectionName = sensorTypeName + "Observation";
+
+                    String query = String.format("SELECT * FROM %s WHERE timeStamp > TIMESTAMP('%s') " +
+                                    "AND timeStamp < TIMESTAMP('%s') AND %s >= %s AND %s <= %s ",
+                            collectionName, sdf.format(startTime), sdf.format(endTime), payloadAttribute, startPayloadValue,
+                            payloadAttribute, endPayloadValue);
+                    explainQuery(query, 5);
+
+                    Instant end = Instant.now();
+                    return Duration.between(start, end);
+                } catch (Exception ge) {
+                    ge.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
+            default:
+                throw new BenchmarkException("No such mapping");
+        }
     }
 
     @Override
     public Duration explainQuery6(List<String> sensorIds, Date startTime, Date endTime) throws BenchmarkException {
-        return null;
+        // TODO: Fix Error Due to TimeZone
+        switch (mapping) {
+
+            case 2:
+                Instant start = Instant.now();
+                try {
+                    RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(6));
+                    JSONArray observations = null;
+
+                    for (String sensorId : sensorIds) {
+                        String typeId = (String) runMetadataQueryWithRows(
+                                String.format("SELECT * FROM Sensor WHERE id='%s'", sensorId)).get(0).get(2);
+
+                        if ("Thermometer".equals(typeId)) {
+                            String query = String.format("SELECT * FROM ThermometerObservation WHERE timeStamp > TIMESTAMP('%s') " +
+                                            "AND timeStamp < TIMESTAMP('%s') AND sensorId = '%s'",
+                                    sdf.format(startTime), sdf.format(endTime), sensorId);
+                            observations = runQueryWithRows(query);
+                        }
+                        else if ("WeMo".equals(typeId)){
+                            String query = String.format("SELECT * FROM WeMoObservation WHERE timeStamp > TIMESTAMP('%s') " +
+                                            "AND timeStamp < TIMESTAMP('%s') AND sensorId = '%s'",
+                                    sdf.format(startTime), sdf.format(endTime), sensorId);
+                            observations = runQueryWithRows(query);
+                        }
+                        else if ("WiFiAP".equals(typeId)){
+                            String query = String.format("SELECT * FROM WiFiAPObservation WHERE timeStamp > TIMESTAMP('%s') " +
+                                            "AND timeStamp < TIMESTAMP('%s') AND sensorId = '%s'",
+                                    sdf.format(startTime), sdf.format(endTime), sensorId);
+                            observations = runQueryWithRows(query);
+                        }
+
+                        JSONArray jsonObservations = new JSONArray();
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+                        observations.forEach(e -> {
+                            JSONObject object = new JSONObject();
+                            try {
+                                object.put("date", dateFormat.format(((JSONArray)e).getString(1)));
+                                jsonObservations.put(object);
+                            } catch (Exception e1) {
+                                e1.printStackTrace();
+                            }
+                        });
+
+                        GroupBy groupBy = new GroupBy();
+                        JSONArray groups = groupBy.doGroupBy(jsonObservations, Arrays.asList("date"));
+                        final int[] sum = {0};
+
+                        groups.iterator().forEachRemaining(e -> {
+                            sum[0] += ((JSONArray) e).length();
+                        });
+
+                        if (writeOutput) {
+                            if (groups.length() != 0)
+                                writer.writeString(sensorId + ", " + sum[0] / groups.length());
+                        }
+                    }
+                    writer.close();
+                    Instant end = Instant.now();
+                    return Duration.between(start, end);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
+            default:
+                throw new BenchmarkException("No such mapping");
+        }
     }
 
     @Override
     public Duration explainQuery7(String startLocation, String endLocation, Date date) throws BenchmarkException {
-        return null;
+        // TODO: Fix Error Due to TimeZone
+        switch (mapping) {
+            case 2:
+                Instant start = Instant.now();
+                Date startTime = date;
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(date);
+                cal.add(Calendar.DATE, 1);
+                Date endTime = cal.getTime();
+
+                try {
+                    Map<String, String> userMap = runMetadataQueryWithRows("SELECT * FROM Users")
+                            .stream().collect(Collectors.toMap(e -> {
+                                try {
+                                    return (String)e.get(0);
+                                } catch (Exception e1) {
+                                    e1.printStackTrace();
+                                    return null;
+                                }
+                            }, e -> {
+                                try {
+                                    return (String)e.get(2);
+                                } catch (Exception e1) {
+                                    e1.printStackTrace();
+                                    return null;
+                                }
+                            }));
+
+                    RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(7));
+
+
+                    JSONArray rows = runQueryWithRows(
+                            String.format("SELECT * FROM Presence WHERE timeStamp >= TIMESTAMP('%s') " +
+                                            "AND timeStamp <= TIMESTAMP('%s') AND location = '%s'",
+                                    sdf.format(startTime), sdf.format(endTime), startLocation));
+
+                    for (Object row : rows) {
+
+                        String query = String.format("SELECT * FROM Presence WHERE timeStamp >= TIMESTAMP('%s') " +
+                                        "AND timeStamp <= TIMESTAMP('%s') AND location = '%s' AND semanticEntityId = '%s'",
+                                sdf.format(((JSONArray)row).getString(1)), sdf.format(endTime), endLocation, ((JSONArray)row).getString(4));
+                        JSONArray observations = runQueryWithRows(query);
+
+                        observations.forEach(e->{
+                            if (writeOutput) {
+                                try {
+                                    writer.writeString(userMap.get(((JSONArray)e).getString(4)));
+                                } catch (IOException e1) {
+                                    e1.printStackTrace();
+                                }
+
+                            }
+                        });
+                    }
+
+                    writer.close();
+                    Instant end = Instant.now();
+                    return Duration.between(start, end);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
+            default:
+                throw new BenchmarkException("No Such Mapping");
+        }
     }
 
     @Override
     public Duration explainQuery8(String userId, Date date) throws BenchmarkException {
-        return null;
+        // TODO: Fix Error Due to TimeZone
+        switch (mapping) {
+            case 2:
+                Instant start = Instant.now();
+                Date startTime = date;
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(date);
+                cal.add(Calendar.DATE, 1);
+                Date  endTime = cal.getTime();
+
+                try {
+                    Map<String, String> userMap = runMetadataQueryWithRows(
+                            "SELECT * FROM Users")
+                            .stream().collect(Collectors.toMap(e -> {
+                                try {
+                                    return (String)e.get(0);
+                                } catch (Exception e1) {
+                                    e1.printStackTrace();
+                                    return null;
+                                }
+                            }, e -> {
+                                try {
+                                    return (String)e.get(2);
+                                } catch (Exception e1) {
+                                    e1.printStackTrace();
+                                    return null;
+                                }
+                            }));
+
+                    RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(8));
+
+                    JSONArray results = runQueryWithRows(String.format("SELECT * FROM Presence WHERE semanticEntityId = '%s' " +
+                                    "AND timeStamp >= TIMESTAMP('%s') AND timeStamp <= TIMESTAMP('%s')",
+                            userId, sdf.format(startTime), sdf.format(endTime)));
+                    Iterator<Object> rows = results.iterator();
+
+                    while (rows.hasNext()) {
+
+                        JSONArray row = (JSONArray) rows.next();
+
+                        String query = String.format("SELECT * FROM Presence WHERE timeStamp = TIMESTAMP('%s') " +
+                                        "AND location='%s' AND semanticEntityId != '%s'", sdf.format(row.getString(1)),
+                                row.getString(3), userId);
+                        JSONArray observations = runQueryWithRows(query);
+
+                        observations.forEach(e->{
+                            if (writeOutput) {
+                                try {
+                                    writer.writeString(userMap.get(((JSONArray)e).getString(4)) + ", " +((JSONArray)e).getString(3));
+                                } catch (IOException e1) {
+                                    e1.printStackTrace();
+                                }
+
+                            }
+                        });
+                    }
+                    writer.close();
+                    Instant end = Instant.now();
+                    return Duration.between(start, end);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
+            default:
+                throw new BenchmarkException("No such mapping");
+        }
     }
 
     @Override
     public Duration explainQuery9(String userId, String infraTypeName) throws BenchmarkException {
-        return null;
+        // TODO: Fix Error Due to TimeZone
+        switch (mapping) {
+            case 2:
+                Instant start = Instant.now();
+
+                try {
+                    String infraTypeId = (String) runMetadataQueryWithRows(
+                            String.format("SELECT * FROM Infrastructure_Type WHERE name='%s'", infraTypeName)).get(0).get(0);
+
+                    List<String> infras = runMetadataQueryWithRows(
+                            String.format("SELECT * FROM Infrastructure WHERE typeId='%s'", infraTypeId))
+                            .stream().map(e -> {
+                                try {
+                                    return (String)e.get(0);
+                                } catch (Exception e1) {
+                                    e1.printStackTrace();
+                                    return null;
+                                }
+                            }).collect(Collectors.toList());
+
+                    RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(9));
+                    String query = String.format("SELECT * FROM Presence WHERE semanticEntityId='%s'", userId);
+                    JSONArray observations = runQueryWithRows(query);
+
+                    JSONArray jsonObservations = new JSONArray();
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+                    observations.forEach(e -> {
+                        JSONObject object = new JSONObject();
+                        try {
+                            if (infras.contains(((JSONArray)e).getString(3))) {
+                                object.put("date", dateFormat.format(((JSONArray)e).getString(1)));
+                                jsonObservations.put(object);
+                            }
+                        } catch (Exception e1) {
+                            e1.printStackTrace();
+                        }
+                    });
+
+                    GroupBy groupBy = new GroupBy();
+                    JSONArray groups = groupBy.doGroupBy(jsonObservations, Arrays.asList("date"));
+                    final int[] sum = {0};
+
+                    groups.iterator().forEachRemaining(e -> {
+                        sum[0] += ((JSONArray) e).length();
+                    });
+
+                    if (writeOutput) {
+                        if (groups.length() != 0)
+                            writer.writeString(userId + ", " + sum[0] * 10 / groups.length());
+                    }
+
+                    writer.close();
+                    Instant end = Instant.now();
+                    return Duration.between(start, end);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
+            default:
+                throw new BenchmarkException("No Such Mapping");
+        }
     }
 
     @Override
     public Duration explainQuery10(Date startTime, Date endTime) throws BenchmarkException {
-        return null;
+        // TODO: Fix Error Due to TimeZone
+        switch (mapping) {
+            case 2:
+                Instant start = Instant.now();
+                try {
+                    Map<String, String> infraMap = runMetadataQueryWithRows("SELECT * FROM Infrastructure")
+                            .stream().collect(Collectors.toMap(e -> {
+                                try {
+                                    return (String)e.get(0);
+                                } catch (Exception e1) {
+                                    e1.printStackTrace();
+                                    return null;
+                                }
+                            }, e -> {
+                                try {
+                                    return (String)e.get(1);
+                                } catch (Exception e1) {
+                                    e1.printStackTrace();
+                                    return null;
+                                }
+                            }));
+
+                    String query = String.format("SELECT * FROM Occupancy WHERE time >= '%s' " +
+                                    "AND time <= '%s' ORDER BY time ",
+                            sdf.format(startTime), sdf.format(endTime));
+                    explainQuery(query, 10);
+
+                    Instant end = Instant.now();
+                    return Duration.between(start, end);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
+            default:
+                throw new BenchmarkException("No Such Mapping");
+        }
     }
+
 }
