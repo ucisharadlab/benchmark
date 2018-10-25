@@ -86,8 +86,7 @@ public class JoinPerformance {
 
         String createCoverageTable = "CREATE TABLE COVERAGE_INFRASTRUCTURE_EXP (\n" +
                 "  SENSOR_ID varchar(255) NOT NULL,\n" +
-                "  INFRASTRUCTURE_ID varchar(255) NOT NULL,\n" +
-                "  PRIMARY KEY (INFRASTRUCTURE_ID, SENSOR_ID)\n" +
+                "  INFRASTRUCTURE_ID varchar(255) NOT NULL\n" +
                 ") ";
 
         String createObservationTable = "CREATE TABLE OBSERVATION_EXP (\n" +
@@ -114,9 +113,9 @@ public class JoinPerformance {
 
     private void dropPgSchema() {
 
-        String dropSensorTable = " DROP TABLE SENSOR_EXP IF EXISTS";
-        String dropCoverageTable = " DROP TABLE COVERAGE_INFRASTRUCTURE_EXP IF EXISTS";
-        String dropObservationTable = " DROP TABLE OBSERVATION_EXP IF EXISTS";
+        String dropSensorTable = " DROP TABLE IF EXISTS SENSOR_EXP;";
+        String dropCoverageTable = " DROP TABLE IF EXISTS COVERAGE_INFRASTRUCTURE_EXP;";
+        String dropObservationTable = " DROP TABLE IF EXISTS OBSERVATION_EXP;";
 
         try {
             PreparedStatement stmt = pgConnection.prepareStatement(dropCoverageTable);
@@ -154,7 +153,7 @@ public class JoinPerformance {
             PreparedStatement covInfraStmt = pgConnection.prepareStatement(covInfrastructure);
 
             JSONArray sensor_list = (JSONArray) parser.parse(new InputStreamReader(
-                    new FileInputStream(dataDir + "sensor_exp.json")));
+                    new FileInputStream(dataDir + "sensor.json")));
 
             stmt = pgConnection.prepareStatement(insert);
             for(int i =0;i<sensor_list.size();i++){
@@ -181,7 +180,7 @@ public class JoinPerformance {
             insert = "INSERT INTO OBSERVATION_EXP " +
                     "(ID, PAYLOAD, TIMESTAMP, SENSOR_ID) VALUES (?, ?::JSON, ?, ?)";
 
-            BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + "observation_exp.json",
+            BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + "observation.json",
                     Observation.class);
             Observation obs = null;
 
@@ -310,12 +309,12 @@ public class JoinPerformance {
 
             // Adding Sensors
             JSONArray sensor_list = (JSONArray) parser.parse(new InputStreamReader(
-                    new FileInputStream(dataDir + "sensor_exp.json")));
+                    new FileInputStream(dataDir + "sensor.json")));
 
             for(int i =0;i<sensor_list.size();i++){
                 JSONObject temp=(JSONObject)sensor_list.get(i);
                 JSONArray locations;
-                collection = gridStore.getCollection("Sensor");
+                collection = gridStore.getCollection("Sensor_Exp");
 
                 row = collection.createRow();
                 row.setValue(0, temp.get("id"));
@@ -336,7 +335,7 @@ public class JoinPerformance {
             }
 
             // Adding Observations
-            BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + "observation_exp.json",
+            BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + "observation.json",
                     Observation.class);
             Observation obs = null;
             int count = 0;
@@ -344,11 +343,11 @@ public class JoinPerformance {
             while ((obs = reader.readNext()) != null) {
                 String collectionName = null;
                 if (obs.getSensor().getType_().getId().equals("WiFiAP")) {
-                    collectionName = "WiFiAPObservation";
+                    collectionName = "WiFiAPObservation_Exp";
                 } else if (obs.getSensor().getType_().getId().equals("WeMo")) {
-                    collectionName = "WeMoObservation";
+                    collectionName = "WeMoObservation_Exp";
                 } else if (obs.getSensor().getType_().getId().equals("Thermometer")) {
-                    collectionName = "ThermometerObservation";
+                    collectionName = "ThermometerObservation_Exp";
                 }
 
                 collection = gridStore.getCollection(collectionName);
@@ -486,7 +485,7 @@ public class JoinPerformance {
 
     private Duration runPGQuery(List<String> sensorNames, Date startTime, Date endTime) throws BenchmarkException {
 
-        String query = "SELECT obs.timeStamp, obs.payload FROM OBSERVATION_EXP obs INNER JOIN SENSOR_EXP sen ON sen.id=obs.sensorId " +
+        String query = "SELECT obs.timeStamp, obs.payload FROM OBSERVATION_EXP obs INNER JOIN SENSOR_EXP sen ON sen.id=obs.sensor_Id " +
                 "WHERE obs.timestamp>? AND obs.timestamp<? AND sen.name=ANY(?)";
         try {
             PreparedStatement stmt = pgConnection.prepareStatement(query);
@@ -511,10 +510,11 @@ public class JoinPerformance {
             List<String> wemoSensors = new ArrayList<>();
             List<String> thermoSensors = new ArrayList<>();
 
-            RowWriter<String> writer = new RowWriter<>(outputDir, Database.GRIDDB, 3, getFileFromQuery(4));
+            RowWriter<String> writer = new RowWriter<>(outputDir, Database.GRIDDB, 3, getFileFromQuery(11));
             for (String sensorName : sensorNames) {
                 List<Row> rows = runQueryWithRows("Sensor_Exp",
                         String.format("SELECT * FROM Sensor_Exp WHERE name='%s'", sensorName));
+                if (rows.size() == 0) continue;
 
                 String typeId = rows.get(0).getString(2);
                 String id = rows.get(0).getString(0);
@@ -614,11 +614,18 @@ public class JoinPerformance {
 
     private List<Duration> runExperiment() {
 
-        createPgSchema();
-        createGridDBSchema();
+        System.out.println("Creating Schema And Adding Data");
 
-        addPgData();
-        addGridDBData();
+//        dropGridDBSchema();gt
+//        dropPgSchema();
+//
+//        createPgSchema();
+//        createGridDBSchema();
+//
+//        addPgData();
+//        addGridDBData();
+
+        System.out.println("Done Adding Data, Running Queries Now");
 
         int numQueries = 0;
         Duration runTime = Duration.ZERO;
