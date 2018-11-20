@@ -1,0 +1,2 @@
+Index Scan using sensor_pkey on sensor  (cost=0.28..8.29 rows=1 width=12)	
+  Index Cond: ((id)::text = 'thermometer2'::text)	

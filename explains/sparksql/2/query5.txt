@@ -1,0 +1,3 @@
+== Physical Plan ==
+*Filter (((((isnotnull(temperature#4026) && isnotnull(timestamp#4027)) && (cast(timestamp#4027 as string) > 2017-11-01 00:00:00.0)) && (cast(timestamp#4027 as string) < 2017-11-07 11:10:10.0)) && (temperature#4026 >= 0)) && (temperature#4026 <= 42))
++- HiveTableScan [id#4025, temperature#4026, timeStamp#4027, sensor_id#4028], HiveTableRelation `tippersdb`.`thermometerobservation`, org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe, [id#4025, temperature#4026, timeStamp#4027, sensor_id#4028]	

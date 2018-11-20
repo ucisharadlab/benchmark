@@ -1,0 +1,2 @@
+== Physical Plan ==
+org.apache.spark.sql.AnalysisException: Undefined function: 'date_trunc'. This function is neither a registered temporary function nor a permanent function registered in the database 'default'.; line 1 pos 350	

@@ -1,0 +1,48 @@
+{
+  "planType": "QueryThenFetch",
+  "subPlan": {
+    "planType": "Collect",
+    "collectPhase": {
+      "phaseType": "COLLECT",
+      "id": 0,
+      "executionNodes": [
+        "NdL8k7eoQ0eUgH5sRw_QnQ"
+      ],
+      "distribution": {
+        "distributedByColumn": 0,
+        "type": "BROADCAST"
+      },
+      "toCollect": [
+        "tippersdb.thermometerobservation._fetchid"
+      ],
+      "projections": [
+        {
+          "type": "Fetch",
+          "outputs": "Fetch{IC{0, long}, Ref{tippersdb.thermometerobservation._doc['timestamp'], timestamp}}, Fetch{IC{0, long}, Ref{tippersdb.thermometerobservation._doc['temperature'], integer}}",
+          "fetchSize": 65840
+        }
+      ],
+      "routing": {
+        "NdL8k7eoQ0eUgH5sRw_QnQ": {
+          "tippersdb.thermometerobservation": [
+            0,
+            1,
+            2,
+            3
+          ]
+        }
+      }
+    }
+  },
+  "fetchPhase": {
+    "phaseType": "FETCH",
+    "id": 1,
+    "executionNodes": [
+      "NdL8k7eoQ0eUgH5sRw_QnQ"
+    ],
+    "fetchRefs": [
+      "tippersdb.thermometerobservation._doc['timestamp']",
+      "tippersdb.thermometerobservation._doc['temperature']"
+    ]
+  }
+}

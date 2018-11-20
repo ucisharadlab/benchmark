@@ -1,0 +1,62 @@
+== Parsed Logical Plan ==
+'Project ['u.name]
++- 'Filter (((('s1.timeStamp >= 2017-11-08 00:00:00.0) && ('s1.timeStamp <= 2017-11-09 00:00:00.0)) && (('s2.timeStamp <= 2017-11-09 00:00:00.0) && ('s1.semantic_entity_id = 's2.semantic_entity_id))) && ((('s1.location = 2059) && ('s2.location = 2061)) && (('s1.timeStamp < 's2.timeStamp) && ('s1.semantic_entity_id = 'u.id))))
+   +- 'Join Inner
+      :- 'Join Inner
+      :  :- 'SubqueryAlias s1
+      :  :  +- 'UnresolvedRelation `PRESENCE`
+      :  +- 'SubqueryAlias s2
+      :     +- 'UnresolvedRelation `PRESENCE`
+      +- 'SubqueryAlias u
+         +- 'UnresolvedRelation `USERS`
+
+== Analyzed Logical Plan ==
+name: string
+Project [name#3589]
++- Filter ((((cast(timeStamp#3580 as string) >= 2017-11-08 00:00:00.0) && (cast(timeStamp#3580 as string) <= 2017-11-09 00:00:00.0)) && ((cast(timeStamp#3585 as string) <= 2017-11-09 00:00:00.0) && (semantic_entity_id#3578 = semantic_entity_id#3583))) && (((location#3579 = 2059) && (location#3584 = 2061)) && ((timeStamp#3580 < timeStamp#3585) && (semantic_entity_id#3578 = id#3590))))
+   +- Join Inner
+      :- Join Inner
+      :  :- SubqueryAlias s1
+      :  :  +- SubqueryAlias presence
+      :  :     +- HiveTableRelation `tippersdb`.`presence`, org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe, [id#3577, semantic_entity_id#3578, location#3579, timeStamp#3580, virtual_sensor_id#3581]
+      :  +- SubqueryAlias s2
+      :     +- SubqueryAlias presence
+      :        +- HiveTableRelation `tippersdb`.`presence`, org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe, [id#3582, semantic_entity_id#3583, location#3584, timeStamp#3585, virtual_sensor_id#3586]
+      +- SubqueryAlias u
+         +- SubqueryAlias users
+            +- HiveTableRelation `tippersdb`.`users`, org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe, [EMAIL#3587, GOOGLE_AUTH_TOKEN#3588, NAME#3589, ID#3590]
+
+== Optimized Logical Plan ==
+Project [name#3589]
++- Join Inner, (semantic_entity_id#3578 = id#3590)
+   :- Project [semantic_entity_id#3578]
+   :  +- Join Inner, ((semantic_entity_id#3578 = semantic_entity_id#3583) && (timeStamp#3580 < timeStamp#3585))
+   :     :- Project [semantic_entity_id#3578, timeStamp#3580]
+   :     :  +- Filter (((((isnotnull(location#3579) && isnotnull(timeStamp#3580)) && (cast(timeStamp#3580 as string) >= 2017-11-08 00:00:00.0)) && (cast(timeStamp#3580 as string) <= 2017-11-09 00:00:00.0)) && (location#3579 = 2059)) && isnotnull(semantic_entity_id#3578))
+   :     :     +- HiveTableRelation `tippersdb`.`presence`, org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe, [id#3577, semantic_entity_id#3578, location#3579, timeStamp#3580, virtual_sensor_id#3581]
+   :     +- Project [semantic_entity_id#3583, timeStamp#3585]
+   :        +- Filter ((((isnotnull(timeStamp#3585) && isnotnull(location#3584)) && (cast(timeStamp#3585 as string) <= 2017-11-09 00:00:00.0)) && (location#3584 = 2061)) && isnotnull(semantic_entity_id#3583))
+   :           +- HiveTableRelation `tippersdb`.`presence`, org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe, [id#3582, semantic_entity_id#3583, location#3584, timeStamp#3585, virtual_sensor_id#3586]
+   +- Project [NAME#3589, ID#3590]
+      +- Filter isnotnull(id#3590)
+         +- HiveTableRelation `tippersdb`.`users`, org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe, [EMAIL#3587, GOOGLE_AUTH_TOKEN#3588, NAME#3589, ID#3590]
+
+== Physical Plan ==
+*Project [name#3589]
++- *SortMergeJoin [semantic_entity_id#3578], [id#3590], Inner
+   :- *Project [semantic_entity_id#3578]
+   :  +- *SortMergeJoin [semantic_entity_id#3578], [semantic_entity_id#3583], Inner, (timeStamp#3580 < timeStamp#3585)
+   :     :- *Sort [semantic_entity_id#3578 ASC NULLS FIRST], false, 0
+   :     :  +- Exchange hashpartitioning(semantic_entity_id#3578, 200)
+   :     :     +- *Project [semantic_entity_id#3578, timeStamp#3580]
+   :     :        +- *Filter (((((isnotnull(location#3579) && isnotnull(timeStamp#3580)) && (cast(timeStamp#3580 as string) >= 2017-11-08 00:00:00.0)) && (cast(timeStamp#3580 as string) <= 2017-11-09 00:00:00.0)) && (location#3579 = 2059)) && isnotnull(semantic_entity_id#3578))
+   :     :           +- HiveTableScan [semantic_entity_id#3578, timeStamp#3580, location#3579], HiveTableRelation `tippersdb`.`presence`, org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe, [id#3577, semantic_entity_id#3578, location#3579, timeStamp#3580, virtual_sensor_id#3581]
+   :     +- *Sort [semantic_entity_id#3583 ASC NULLS FIRST], false, 0
+   :        +- Exchange hashpartitioning(semantic_entity_id#3583, 200)
+   :           +- *Project [semantic_entity_id#3583, timeStamp#3585]
+   :              +- *Filter ((((isnotnull(timeStamp#3585) && isnotnull(location#3584)) && (cast(timeStamp#3585 as string) <= 2017-11-09 00:00:00.0)) && (location#3584 = 2061)) && isnotnull(semantic_entity_id#3583))
+   :                 +- HiveTableScan [semantic_entity_id#3583, timeStamp#3585, location#3584], HiveTableRelation `tippersdb`.`presence`, org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe, [id#3582, semantic_entity_id#3583, location#3584, timeStamp#3585, virtual_sensor_id#3586]
+   +- *Sort [id#3590 ASC NULLS FIRST], false, 0
+      +- Exchange hashpartitioning(id#3590, 200)
+         +- *Filter isnotnull(id#3590)
+            +- HiveTableScan [NAME#3589, ID#3590], HiveTableRelation `tippersdb`.`users`, org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe, [EMAIL#3587, GOOGLE_AUTH_TOKEN#3588, NAME#3589, ID#3590]	

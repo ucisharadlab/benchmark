@@ -1,0 +1,88 @@
+{
+  "stages": [
+    {
+      "$cursor": {
+        "query": {
+          "semanticEntityId": {
+            "$eq": "user1"
+          }
+        },
+        "fields": {
+          "payload.location": 1,
+          "timeStamp": 1,
+          "_id": 0
+        },
+        "queryPlanner": {
+          "plannerVersion": 1,
+          "namespace": "TippersDB.SemanticObservation",
+          "indexFilterSet": false,
+          "parsedQuery": {
+            "semanticEntityId": {
+              "$eq": "user1"
+            }
+          },
+          "winningPlan": {
+            "stage": "COLLSCAN",
+            "filter": {
+              "semanticEntityId": {
+                "$eq": "user1"
+              }
+            },
+            "direction": "forward"
+          },
+          "rejectedPlans": []
+        }
+      }
+    },
+    {
+      "$lookup": {
+        "from": "Infrastructure",
+        "as": "infra",
+        "localField": "payload.location",
+        "foreignField": "_id",
+        "unwinding": {
+          "preserveNullAndEmptyArrays": false
+        },
+        "matching": {
+          "type_.name": {
+            "$eq": "Labs"
+          }
+        }
+      }
+    },
+    {
+      "$project": {
+        "_id": false,
+        "date": {
+          "$dateToString": {
+            "format": "%Y-%m-%d",
+            "date": "$timeStamp"
+          }
+        }
+      }
+    },
+    {
+      "$group": {
+        "_id": {
+          "date": "$date"
+        },
+        "count": {
+          "$sum": {
+            "$const": 10
+          }
+        }
+      }
+    },
+    {
+      "$group": {
+        "_id": {
+          "$const": null
+        },
+        "averageMinsPerDay": {
+          "$avg": "$count"
+        }
+      }
+    }
+  ],
+  "ok": 1.0
+}
