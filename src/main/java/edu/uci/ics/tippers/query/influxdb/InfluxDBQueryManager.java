@@ -800,46 +800,22 @@ public class InfluxDBQueryManager extends BaseQueryManager {
                             String query = String.format("SELECT * FROM ThermometerObservation WHERE timeStamp > TIMESTAMP('%s') " +
                                             "AND timeStamp < TIMESTAMP('%s') AND sensorId = '%s'",
                                     sdf.format(startTime), sdf.format(endTime), sensorId);
-                            observations = runQueryWithRows(query);
+                            explainQuery(query, 6);
                         }
                         else if ("WeMo".equals(typeId)){
                             String query = String.format("SELECT * FROM WeMoObservation WHERE timeStamp > TIMESTAMP('%s') " +
                                             "AND timeStamp < TIMESTAMP('%s') AND sensorId = '%s'",
                                     sdf.format(startTime), sdf.format(endTime), sensorId);
-                            observations = runQueryWithRows(query);
+                            explainQuery(query, 6);
                         }
                         else if ("WiFiAP".equals(typeId)){
                             String query = String.format("SELECT * FROM WiFiAPObservation WHERE timeStamp > TIMESTAMP('%s') " +
                                             "AND timeStamp < TIMESTAMP('%s') AND sensorId = '%s'",
                                     sdf.format(startTime), sdf.format(endTime), sensorId);
-                            observations = runQueryWithRows(query);
+                            explainQuery(query, 6);
                         }
 
-                        JSONArray jsonObservations = new JSONArray();
-                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
-                        observations.forEach(e -> {
-                            JSONObject object = new JSONObject();
-                            try {
-                                object.put("date", dateFormat.format(((JSONArray)e).getString(1)));
-                                jsonObservations.put(object);
-                            } catch (Exception e1) {
-                                e1.printStackTrace();
-                            }
-                        });
-
-                        GroupBy groupBy = new GroupBy();
-                        JSONArray groups = groupBy.doGroupBy(jsonObservations, Arrays.asList("date"));
-                        final int[] sum = {0};
-
-                        groups.iterator().forEachRemaining(e -> {
-                            sum[0] += ((JSONArray) e).length();
-                        });
-
-                        if (writeOutput) {
-                            if (groups.length() != 0)
-                                writer.writeString(sensorId + ", " + sum[0] / groups.length());
-                        }
+                        break;
                     }
                     writer.close();
                     Instant end = Instant.now();
@@ -886,29 +862,10 @@ public class InfluxDBQueryManager extends BaseQueryManager {
                     RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(7));
 
 
-                    JSONArray rows = runQueryWithRows(
+                    explainQuery(
                             String.format("SELECT * FROM Presence WHERE timeStamp >= TIMESTAMP('%s') " +
                                             "AND timeStamp <= TIMESTAMP('%s') AND location = '%s'",
-                                    sdf.format(startTime), sdf.format(endTime), startLocation));
-
-                    for (Object row : rows) {
-
-                        String query = String.format("SELECT * FROM Presence WHERE timeStamp >= TIMESTAMP('%s') " +
-                                        "AND timeStamp <= TIMESTAMP('%s') AND location = '%s' AND semanticEntityId = '%s'",
-                                sdf.format(((JSONArray)row).getString(1)), sdf.format(endTime), endLocation, ((JSONArray)row).getString(4));
-                        JSONArray observations = runQueryWithRows(query);
-
-                        observations.forEach(e->{
-                            if (writeOutput) {
-                                try {
-                                    writer.writeString(userMap.get(((JSONArray)e).getString(4)));
-                                } catch (IOException e1) {
-                                    e1.printStackTrace();
-                                }
-
-                            }
-                        });
-                    }
+                                    sdf.format(startTime), sdf.format(endTime), startLocation), 7);
 
                     writer.close();
                     Instant end = Instant.now();
@@ -955,31 +912,10 @@ public class InfluxDBQueryManager extends BaseQueryManager {
 
                     RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(8));
 
-                    JSONArray results = runQueryWithRows(String.format("SELECT * FROM Presence WHERE semanticEntityId = '%s' " +
+                    explainQuery(String.format("SELECT * FROM Presence WHERE semanticEntityId = '%s' " +
                                     "AND timeStamp >= TIMESTAMP('%s') AND timeStamp <= TIMESTAMP('%s')",
-                            userId, sdf.format(startTime), sdf.format(endTime)));
-                    Iterator<Object> rows = results.iterator();
+                            userId, sdf.format(startTime), sdf.format(endTime)), 8);
 
-                    while (rows.hasNext()) {
-
-                        JSONArray row = (JSONArray) rows.next();
-
-                        String query = String.format("SELECT * FROM Presence WHERE timeStamp = TIMESTAMP('%s') " +
-                                        "AND location='%s' AND semanticEntityId != '%s'", sdf.format(row.getString(1)),
-                                row.getString(3), userId);
-                        JSONArray observations = runQueryWithRows(query);
-
-                        observations.forEach(e->{
-                            if (writeOutput) {
-                                try {
-                                    writer.writeString(userMap.get(((JSONArray)e).getString(4)) + ", " +((JSONArray)e).getString(3));
-                                } catch (IOException e1) {
-                                    e1.printStackTrace();
-                                }
-
-                            }
-                        });
-                    }
                     writer.close();
                     Instant end = Instant.now();
                     return Duration.between(start, end);
@@ -1004,7 +940,7 @@ public class InfluxDBQueryManager extends BaseQueryManager {
                             String.format("SELECT * FROM Infrastructure_Type WHERE name='%s'", infraTypeName)).get(0).get(0);
 
                     List<String> infras = runMetadataQueryWithRows(
-                            String.format("SELECT * FROM Infrastructure WHERE typeId='%s'", infraTypeId))
+                            String.format("SELECT * FROM Infrastructure WHERE INFRASTRUCTURE_TYPE_ID='%s'", infraTypeId))
                             .stream().map(e -> {
                                 try {
                                     return (String)e.get(0);
@@ -1016,35 +952,7 @@ public class InfluxDBQueryManager extends BaseQueryManager {
 
                     RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(9));
                     String query = String.format("SELECT * FROM Presence WHERE semanticEntityId='%s'", userId);
-                    JSONArray observations = runQueryWithRows(query);
-
-                    JSONArray jsonObservations = new JSONArray();
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
-                    observations.forEach(e -> {
-                        JSONObject object = new JSONObject();
-                        try {
-                            if (infras.contains(((JSONArray)e).getString(3))) {
-                                object.put("date", dateFormat.format(((JSONArray)e).getString(1)));
-                                jsonObservations.put(object);
-                            }
-                        } catch (Exception e1) {
-                            e1.printStackTrace();
-                        }
-                    });
-
-                    GroupBy groupBy = new GroupBy();
-                    JSONArray groups = groupBy.doGroupBy(jsonObservations, Arrays.asList("date"));
-                    final int[] sum = {0};
-
-                    groups.iterator().forEachRemaining(e -> {
-                        sum[0] += ((JSONArray) e).length();
-                    });
-
-                    if (writeOutput) {
-                        if (groups.length() != 0)
-                            writer.writeString(userId + ", " + sum[0] * 10 / groups.length());
-                    }
+                    explainQuery(query, 9);
 
                     writer.close();
                     Instant end = Instant.now();
