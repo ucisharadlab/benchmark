@@ -53,9 +53,9 @@ public class AsterixDBDataUploader extends BaseDataUploader {
         addUserData();
         addDeviceData();
         addSensorData();
-        addObservationData();
+//        addObservationData();
         virtualSensorData();
-        addSemanticObservationData();
+//        addSemanticObservationData();
 
         Instant end = Instant.now();
         return Duration.between(start, end);
@@ -295,8 +295,8 @@ public class AsterixDBDataUploader extends BaseDataUploader {
         switch (mapping) {
             case 1:
                 connectionManager.sendQuery(prepareInsertQuery("PlatformType", DataFiles.PLT_TYPE));
-                genericInsertThroughFeed("Platform", DataFiles.PLT, Platform.class);
-                // connectionManager.sendQuery(prepareInsertQuery("Platform", DataFiles.PLT));
+                //genericInsertThroughFeed("Platform", DataFiles.PLT, Platform.class);
+                connectionManager.sendQuery(prepareInsertQuery("Platform", DataFiles.PLT));
                 break;
             case 2:
                 connectionManager.sendQuery(prepareInsertQuery("PlatformType", DataFiles.PLT_TYPE));

@@ -4,6 +4,7 @@ import json
 import uuid
 import numpy as np
 
+from utils import helper
 from trajectory import TrajectoryScale
 
 
@@ -31,9 +32,9 @@ def createWiFiObservations(dt, end, step, dataDir):
     count = 0
     while dt < end:
 
-        for i in np.random.choice(numSenors, numSenors/8, replace=False):
-            for j in range(8):
-                pickedSensor = sensors[i]
+        for i in np.random.choice(numSenors, numSenors/4, replace=False):
+            for j in range(4):
+                pickedSensor = helper.deleteSensorAttributes(sensors[i])
                 id = str(uuid.uuid4())
                 obs = {
                     "id": id,

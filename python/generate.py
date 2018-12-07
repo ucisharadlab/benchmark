@@ -112,7 +112,8 @@ if __name__ == "__main__":
     createRooms(configDict)
     createSensors(configDict, pattern)
 
-    createObservations(configDict, pattern)
-    createSemanticObservations(configDict, pattern)
-    createQueries(configDict)
-    dataSeparator.separateData(int(configDict['others']["insert-test-data"]), configDict['others']['output-dir'])
+    # createObservations(configDict, pattern)
+    # createSemanticObservations(configDict, pattern)
+    #
+    # createQueries(configDict)
+    # dataSeparator.separateData(int(configDict['others']["insert-test-data"]), configDict['others']['output-dir'])

@@ -80,22 +80,22 @@ public class Benchmark {
 
             // Creating schema on a particular database and particular mapping
             System.out.println("Creating Schema ...");
-            // schemaCreator.createSchema();
+            schemaCreator.createSchema();
 
             // Inserting data into the database system after schema creation
             System.out.println("Inserting Data ...");
             Map<Integer, Duration> runTimePerMapping = new HashMap<Integer, Duration>();
-            // runTimePerMapping.put(Query.INSERT_COMPLETE.getQNum(), dataUploader.addAllData());
+            runTimePerMapping.put(Query.INSERT_COMPLETE.getQNum(), dataUploader.addAllData());
 
             // Insert Tests
-            System.out.println("Inserting Insert Test Data ...");
-            // runTimePerMapping.put(Query.INSERT_SINGLE.getQNum(), dataUploader.insertPerformance());
-            LOGGER.info(Arrays.toString(runTimePerMapping.entrySet().toArray()));
+//            System.out.println("Inserting Insert Test Data ...");
+//            runTimePerMapping.put(Query.INSERT_SINGLE.getQNum(), dataUploader.insertPerformance());
+//            LOGGER.info(Arrays.toString(runTimePerMapping.entrySet().toArray()));
 
             // Running benchmark queries and gathering query runtimes
-            System.out.println("Running Queries ...");
-            runTimePerMapping.putAll(queryManager.explainQueries());
-            LOGGER.info(Arrays.toString(runTimePerMapping.entrySet().toArray()));
+//            System.out.println("Running Queries ...");
+//            runTimePerMapping.putAll(queryManager.explainQueries());
+//            LOGGER.info(Arrays.toString(runTimePerMapping.entrySet().toArray()));
 
             runTimes.put(new ImmutablePair<>(queryManager.getDatabase(), queryManager.getMapping()), runTimePerMapping);
 
@@ -109,8 +109,8 @@ public class Benchmark {
             be.printStackTrace();
             runTimes.put(new ImmutablePair<>(queryManager.getDatabase(), queryManager.getMapping()), null);
             try {
-                System.out.println("Cleaning Up Database, Removing Data And Schema ...\n");
-                //schemaCreator.dropSchema();
+//                System.out.println("Cleaning Up Database, Removing Data And Schema ...\n");
+//                schemaCreator.dropSchema();
             } catch (Exception | Error e) {
                 e.printStackTrace();
             }

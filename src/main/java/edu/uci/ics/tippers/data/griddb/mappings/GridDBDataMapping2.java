@@ -200,40 +200,40 @@ public class GridDBDataMapping2 extends GridDBBaseDataMapping {
             }
 
             // Adding Observations
-            BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
-                    Observation.class);
-            Observation obs = null;
-            int count = 0;
-
-            while ((obs = reader.readNext()) != null) {
-                String collectionName = null;
-                if (obs.getSensor().getType_().getId().equals("WiFiAP")) {
-                    collectionName = "WiFiAPObservation";
-                } else if (obs.getSensor().getType_().getId().equals("WeMo")) {
-                    collectionName = "WeMoObservation";
-                } else if (obs.getSensor().getType_().getId().equals("Thermometer")) {
-                    collectionName = "ThermometerObservation";
-                }
-
-                collection = gridStore.getCollection(collectionName);
-
-                row = collection.createRow();
-                row.setValue(1, obs.getTimeStamp());
-                row.setValue(0, obs.getId());
-                row.setValue(2, obs.getSensor().getId());
-
-                if (obs.getSensor().getType_().getId().equals("Thermometer")) {
-                    row.setValue(3, obs.getPayload().get("temperature").getAsInt());
-                } else if (obs.getSensor().getType_().getId().equals("WiFiAP")) {
-                    row.setValue(3, obs.getPayload().get("clientId").getAsString());
-                } else if (obs.getSensor().getType_().getId().equals("WeMo")) {
-                    row.setValue(3, obs.getPayload().get("currentMilliWatts").getAsInt());
-                    row.setValue(4, obs.getPayload().get("onTodaySeconds").getAsInt());
-                }
-                collection.put(row);
-                if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s Observations", count));
-                count ++;
-            }
+//            BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
+//                    Observation.class);
+//            Observation obs = null;
+//            int count = 0;
+//
+//            while ((obs = reader.readNext()) != null) {
+//                String collectionName = null;
+//                if (obs.getSensor().getType_().getId().equals("WiFiAP")) {
+//                    collectionName = "WiFiAPObservation";
+//                } else if (obs.getSensor().getType_().getId().equals("WeMo")) {
+//                    collectionName = "WeMoObservation";
+//                } else if (obs.getSensor().getType_().getId().equals("Thermometer")) {
+//                    collectionName = "ThermometerObservation";
+//                }
+//
+//                collection = gridStore.getCollection(collectionName);
+//
+//                row = collection.createRow();
+//                row.setValue(1, obs.getTimeStamp());
+//                row.setValue(0, obs.getId());
+//                row.setValue(2, obs.getSensor().getId());
+//
+//                if (obs.getSensor().getType_().getId().equals("Thermometer")) {
+//                    row.setValue(3, obs.getPayload().get("temperature").getAsInt());
+//                } else if (obs.getSensor().getType_().getId().equals("WiFiAP")) {
+//                    row.setValue(3, obs.getPayload().get("clientId").getAsString());
+//                } else if (obs.getSensor().getType_().getId().equals("WeMo")) {
+//                    row.setValue(3, obs.getPayload().get("currentMilliWatts").getAsInt());
+//                    row.setValue(4, obs.getPayload().get("onTodaySeconds").getAsInt());
+//                }
+//                collection.put(row);
+//                if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s Observations", count));
+//                count ++;
+//            }
 
         }
         catch(ParseException | IOException e) {
@@ -351,37 +351,38 @@ public class GridDBDataMapping2 extends GridDBBaseDataMapping {
             }
 
             // Adding Semantic Observations
-            BigJsonReader<SemanticObservation> reader = new BigJsonReader<>(dataDir + DataFiles.SO.getPath(),
-                    SemanticObservation.class);
-            SemanticObservation sobs = null;
-            int count = 0;
-            while ((sobs = reader.readNext()) != null) {
-                String collectionName = null;
-                if (sobs.getType_().getId().equals("occupancy")) {
-                    collectionName = "Occupancy";
-                } else if (sobs.getType_().getId().equals("presence")) {
-                    collectionName = "Presence";
-                }
-
-                collection = gridStore.getCollection(collectionName);
-
-                row = collection.createRow();
-                row.setValue(0, sobs.getId());
-                row.setValue(1, sobs.getTimeStamp());
-                row.setValue(2, sobs.getVirtualSensor().getId());
-                row.setValue(4, sobs.getSemanticEntity().get("id").getAsString());
-
-                if (sobs.getType_().getId().equals("occupancy")) {
-                    row.setValue(3, sobs.getPayload().get("occupancy").getAsInt());
-                } else if (sobs.getType_().getId().equals("presence")) {
-                    row.setValue(3, sobs.getPayload().get("location").getAsString());
-                }
-                collection.put(row);
-
-                if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s S Observations", count));
-                count ++;
-            }
-            gridStore.getCollection("Occupancy").flush();
+//            BigJsonReader<SemanticObservation> reader = new BigJsonReader<>(dataDir + DataFiles.SO.getPath(),
+//                    SemanticObservation.class);
+//            SemanticObservation sobs = null;
+//            int count = 0;
+//            while ((sobs = reader.readNext()) != null) {
+//                String collectionName = null;
+//                if (sobs.getType_().getId().equals("occupancy")) {
+//                    collectionName = "Occupancy";
+//                } else if (sobs.getType_().getId().equals("presence")) {
+//                    collectionName = "Presence";
+//                }
+//
+//                collection = gridStore.getCollection(collectionName);
+//
+//                row = collection.createRow();
+//                row.setValue(0, sobs.getId());
+//                row.setValue(1, sobs.getTimeStamp());
+//                row.setValue(2, sobs.getVirtualSensor().getId());
+//                row.setValue(4, sobs.getSemanticEntity().get("id").getAsString());
+//
+//                if (sobs.getType_().getId().equals("occupancy")) {
+//                    row.setValue(3, sobs.getPayload().get("occupancy").getAsInt());
+//                } else if (sobs.getType_().getId().equals("presence")) {
+//                    row.setValue(3, sobs.getPayload().get("location").getAsString());
+//                }
+//                collection.put(row);
+//
+//                if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s S Observations", count));
+//                count ++;
+//            }
+//            gridStore.getCollection("Occupancy").flush();
+//            gridStore.getCollection("Presence").flush();
 
 
         }
