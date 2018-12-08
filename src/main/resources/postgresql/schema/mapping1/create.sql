@@ -132,3 +132,6 @@ CREATE TABLE SEMANTIC_OBSERVATION (
   type_id varchar(255),
   PRIMARY KEY (id)
 ) ;
+
+CREATE INDEX obs_timestamp_idx ON OBSERVATION(timeStamp);
+CREATE INDEX sobs_timestamp_idx ON SEMANTIC_OBSERVATION(timeStamp);
