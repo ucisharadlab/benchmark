@@ -80,8 +80,66 @@ def copySemanticObservationsM2(src, dest):
     occupancyFile.close()
 
 
+def copyObservationsM1(src, dest):
+    observationFile = open("{}observation.csv".format(dest), "w")
+
+    observationCsv = csv.writer(observationFile)
+
+    observationCsv.writerow(["id", "payload", "timeStamp", "sensor_id"])
+
+    count = 0
+    with open(src + "observation.json", "r") as r:
+        for line in r:
+            line = line.strip()
+            line = line.strip(",")
+
+            if not line or line.startswith("[") or line.startswith("]"):
+                continue
+            observation = json.loads(line.strip())
+
+            observationCsv.writerow([observation["id"], json.dumps(observation["payload"]), observation["timeStamp"], observation["sensor"]["id"]])
+
+            if count % 100000 == 0:
+                print ("Observation Modified ", count)
+            count += 1
+
+    observationFile.close()
+
+
+def copySemanticObservationsM1(src, dest):
+    semanticObservationFile = open("{}semanticObservation.csv".format(dest), "w")
+
+    semanticObservationCsv = csv.writer(semanticObservationFile)
+
+    semanticObservationCsv.writerow(["id", "semantic_entity_id", "payload", "timeStamp", "virtual_sensor_id", "type_id"])
+
+    count = 0
+    with open(src + "semanticObservation.json", "r") as r:
+        for line in r:
+            line = line.strip()
+            line = line.strip(",")
+
+            if not line or line.startswith("[") or line.startswith("]"):
+                continue
+            observation = json.loads(line.strip())
+
+            semanticObservationCsv.writerow([observation["id"], observation["semanticEntity"]["id"], json.dumps(observation["payload"]),
+                                      observation["timeStamp"], observation["virtualSensor"]["id"], observation["type_"]["id"]])
+
+
+            if count % 100000 == 0:
+                print ("S Observation Modified ", count)
+            count += 1
+
+    semanticObservationFile.close()
+
+
 if __name__ == "__main__":
 
     mapping = int(sys.argv[1])
-    copyObservationsM2("data/", "data/")
-    copySemanticObservationsM2("data/", "data/")
+    if int(mapping) == 2:
+        copyObservationsM2("/mnt/data/sdb/peeyushg/benchmark/datasets/large/", "/mnt/data/sdb/peeyushg/benchmark/datasets/large/")
+        copySemanticObservationsM2("/mnt/data/sdb/peeyushg/benchmark/datasets/large/", "/mnt/data/sdb/peeyushg/benchmark/datasets/large/")
+    else:
+        copyObservationsM1("/mnt/data/sdb/peeyushg/benchmark/datasets/large/", "/mnt/data/sdb/peeyushg/benchmark/datasets/large/")
+        copySemanticObservationsM1("/mnt/data/sdb/peeyushg/benchmark/datasets/large/", "/mnt/data/sdb/peeyushg/benchmark/datasets/large/")
