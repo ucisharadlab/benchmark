@@ -53,9 +53,9 @@ public class AsterixDBDataUploader extends BaseDataUploader {
         addUserData();
         addDeviceData();
         addSensorData();
-//        addObservationData();
+        addObservationData();
         virtualSensorData();
-//        addSemanticObservationData();
+        addSemanticObservationData();
 
         Instant end = Instant.now();
         return Duration.between(start, end);
@@ -262,30 +262,31 @@ public class AsterixDBDataUploader extends BaseDataUploader {
                 break;
             case 2:
                 connectionManager.sendQuery(prepareInsertQuery("SensorType", DataFiles.SENSOR_TYPE));
-                String values = null;
-                try {
-                    values = new String(Files.readAllBytes(Paths.get(dataDir + DataFiles.SENSOR.getPath())),
-                            StandardCharsets.UTF_8);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    throw new BenchmarkException("Error Reading Data Files");
-                }
-                JSONArray jsonArray = new JSONArray(values);
-                jsonArray.forEach(e-> {
-                    JSONObject docToInsert = (JSONObject)e;
-                    docToInsert.put("infrastructureId", docToInsert.getJSONObject("infrastructure").getString("id"));
-                    docToInsert.remove("infrastructure");
-                    docToInsert.put("ownerId", docToInsert.getJSONObject("owner").getString("id"));
-                    docToInsert.remove("infrastructure");
-
-                    JSONArray entities = docToInsert.getJSONArray("coverage");
-                    JSONArray entityIds = new JSONArray();
-                    entities.forEach(entity->entityIds.put(((JSONObject)entity).getString("id")));
-                    docToInsert.put("coverage", entityIds);
-
-                    String docString = e.toString();
-                    connectionManager.sendQuery(String.format(QUERY_FORMAT, "Sensor", docString));
-                });
+                connectionManager.sendQuery(prepareInsertQuery("Sensor", DataFiles.SENSOR));
+//                String values = null;
+//                try {
+//                    values = new String(Files.readAllBytes(Paths.get(dataDir + DataFiles.SENSOR.getPath())),
+//                            StandardCharsets.UTF_8);
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                    throw new BenchmarkException("Error Reading Data Files");
+//                }
+//                JSONArray jsonArray = new JSONArray(values);
+//                jsonArray.forEach(e-> {
+//                    JSONObject docToInsert = (JSONObject)e;
+//                    docToInsert.put("infrastructureId", docToInsert.getJSONObject("infrastructure").getString("id"));
+//                    docToInsert.remove("infrastructure");
+//                    docToInsert.put("ownerId", docToInsert.getJSONObject("owner").getString("id"));
+//                    docToInsert.remove("infrastructure");
+//
+//                    JSONArray entities = docToInsert.getJSONArray("coverage");
+//                    JSONArray entityIds = new JSONArray();
+//                    entities.forEach(entity->entityIds.put(((JSONObject)entity).getString("id")));
+//                    docToInsert.put("coverage", entityIds);
+//
+//                    String docString = e.toString();
+//                    connectionManager.sendQuery(String.format(QUERY_FORMAT, "Sensor", docString));
+//                });
                 break;
         }
     }
@@ -300,25 +301,26 @@ public class AsterixDBDataUploader extends BaseDataUploader {
                 break;
             case 2:
                 connectionManager.sendQuery(prepareInsertQuery("PlatformType", DataFiles.PLT_TYPE));
-                String values = null;
-                try {
-                    values = new String(Files.readAllBytes(Paths.get(dataDir + DataFiles.PLT.getPath())),
-                            StandardCharsets.UTF_8);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    throw new BenchmarkException("Error Reading Data Files");
-                }
-                JSONArray jsonArray = new JSONArray(values);
-                AsterixDataFeed feed = new AsterixDataFeed("Platform", connectionManager);
-                jsonArray.forEach(e-> {
-                    JSONObject docToInsert = (JSONObject)e;
-                    docToInsert.put("ownerId", docToInsert.getJSONObject("owner").getString("id"));
-                    docToInsert.remove("owner");
-                    String docString = e.toString();
-                    //feed.sendDataToFeed(docToInsert.toString());
-                    connectionManager.sendQuery(String.format(QUERY_FORMAT, "Platform", docString));
-                });
-                feed.stopFeed();
+                connectionManager.sendQuery(prepareInsertQuery("Platform", DataFiles.PLT));
+//                String values = null;
+//                try {
+//                    values = new String(Files.readAllBytes(Paths.get(dataDir + DataFiles.PLT.getPath())),
+//                            StandardCharsets.UTF_8);
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                    throw new BenchmarkException("Error Reading Data Files");
+//                }
+//                JSONArray jsonArray = new JSONArray(values);
+//                AsterixDataFeed feed = new AsterixDataFeed("Platform", connectionManager);
+//                jsonArray.forEach(e-> {
+//                    JSONObject docToInsert = (JSONObject)e;
+//                    docToInsert.put("ownerId", docToInsert.getJSONObject("owner").getString("id"));
+//                    docToInsert.remove("owner");
+//                    String docString = e.toString();
+//                    //feed.sendDataToFeed(docToInsert.toString());
+//                    connectionManager.sendQuery(String.format(QUERY_FORMAT, "Platform", docString));
+//                });
+//                feed.stopFeed();
                 break;
         }
     }
