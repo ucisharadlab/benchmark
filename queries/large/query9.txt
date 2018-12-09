@@ -1,0 +1,4 @@
+# time(s), userId, infraTypeName
+0,81598cdf_14a1_4644_ba4e_9a01721fe80b,Kitchen
+1,861b3dab_a0a8_4896_b367_a784d6bb67ab,Facility Rooms
+2,c67c770e_7442_4e4e_b76a_1bd91f777657,Labs
