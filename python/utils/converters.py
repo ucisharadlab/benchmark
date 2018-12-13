@@ -83,7 +83,7 @@ def copySemanticObservationsM2(src, dest):
 def copyObservationsM1(src, dest):
     observationFile = open("{}observation.csv".format(dest), "w")
 
-    observationCsv = csv.writer(observationFile)
+    observationCsv = csv.writer(observationFile, quotechar="'")
 
     observationCsv.writerow(["id", "payload", "timeStamp", "sensor_id"])
 
@@ -109,7 +109,7 @@ def copyObservationsM1(src, dest):
 def copySemanticObservationsM1(src, dest):
     semanticObservationFile = open("{}semanticObservation.csv".format(dest), "w")
 
-    semanticObservationCsv = csv.writer(semanticObservationFile)
+    semanticObservationCsv = csv.writer(semanticObservationFile, quotechar="'")
 
     semanticObservationCsv.writerow(["id", "semantic_entity_id", "payload", "timeStamp", "virtual_sensor_id", "type_id"])
 
@@ -141,5 +141,5 @@ if __name__ == "__main__":
         copyObservationsM2("/mnt/data/sdb/peeyushg/benchmark/datasets/large/", "/mnt/data/sdb/peeyushg/benchmark/datasets/large/")
         copySemanticObservationsM2("/mnt/data/sdb/peeyushg/benchmark/datasets/large/", "/mnt/data/sdb/peeyushg/benchmark/datasets/large/")
     else:
-        copyObservationsM1("/mnt/data/sdb/peeyushg/benchmark/datasets/large/", "/mnt/data/sdb/peeyushg/benchmark/datasets/large/")
+        #copyObservationsM1("/mnt/data/sdb/peeyushg/benchmark/datasets/large/", "/mnt/data/sdb/peeyushg/benchmark/datasets/large/")
         copySemanticObservationsM1("/mnt/data/sdb/peeyushg/benchmark/datasets/large/", "/mnt/data/sdb/peeyushg/benchmark/datasets/large/")
