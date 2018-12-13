@@ -5,6 +5,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoIterable;
 import edu.uci.ics.tippers.common.Database;
+import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.connection.mongodb.DBManager;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.query.BaseQueryManager;
@@ -380,7 +381,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
 
     @Override
     public Duration runQuery7(String startLocation, String endLocation, Date date) throws BenchmarkException {
-        switch (mapping) {
+        /*switch (mapping) {
             case 1:
                 Instant start = Instant.now();
 
@@ -499,12 +500,13 @@ public class MongoDBQueryManager extends BaseQueryManager{
                 return Duration.between(start, end);
             default:
                 throw new BenchmarkException("No Such Mapping");
-        }
+        }*/
+        return Constants.MAX_DURATION;
     }
 
     @Override
     public Duration runQuery8(String userId, Date date) throws BenchmarkException {
-        switch (mapping) {
+        /*switch (mapping) {
             case 1:
                 Instant start = Instant.now();
 
@@ -627,7 +629,8 @@ public class MongoDBQueryManager extends BaseQueryManager{
                 return Duration.between(start, end);
             default:
                 throw new BenchmarkException("No Such Mapping");
-        }
+        }*/
+        return Constants.MAX_DURATION;
     }
 
     @Override
