@@ -3,16 +3,16 @@ import csv
 import sys
 
 def copyObservationsM2(src, dest):
-    wifiFile = open("{}wifiobservation.csv".format(dest), "w")
-    wemoFile = open("{}wemoobservation.csv".format(dest), "w")
+    #wifiFile = open("{}wifiobservation.csv".format(dest), "w")
+    #wemoFile = open("{}wemoobservation.csv".format(dest), "w")
     thermoFile = open("{}thermometerobservation.csv".format(dest), "w")
 
-    wifiCsv = csv.writer(wifiFile)
-    wemoCsv = csv.writer(wemoFile)
+    #wifiCsv = csv.writer(wifiFile)
+    #wemoCsv = csv.writer(wemoFile)
     thermoCsv = csv.writer(thermoFile)
 
-    wifiCsv.writerow(["id", "clientId", "timeStamp", "sensor_id"])
-    wemoCsv.writerow(["id", "currentMilliWatts", "onTodaySeconds", "timeStamp", "sensor_id"])
+    #wifiCsv.writerow(["id", "clientId", "timeStamp", "sensor_id"])
+    #wemoCsv.writerow(["id", "currentMilliWatts", "onTodaySeconds", "timeStamp", "sensor_id"])
     thermoCsv.writerow(["id", "temperature", "timeStamp", "sensor_id"])
 
     count = 0
@@ -25,22 +25,22 @@ def copyObservationsM2(src, dest):
                 continue
             observation = json.loads(line.strip())
 
-            if observation["sensor"]["type_"]["id"] == "WiFiAP":
-                wifiCsv.writerow([observation["id"], observation["payload"]["clientId"], observation["timeStamp"], observation["sensor"]["id"]])
+            #if observation["sensor"]["type_"]["id"] == "WiFiAP":
+            #    wifiCsv.writerow([observation["id"], observation["payload"]["clientId"], observation["timeStamp"], observation["sensor"]["id"]])
 
-            elif observation["sensor"]["type_"]["id"] == "WeMo":
-                wemoCsv.writerow([observation["id"], observation["payload"]["currentMilliWatts"], observation["payload"]["onTodaySeconds"],
-                                  observation["timeStamp"], observation["sensor"]["id"]])
+            #if observation["sensor"]["type_"]["id"] == "WeMo":
+            #    wemoCsv.writerow([observation["id"], observation["payload"]["currentMilliWatts"], observation["payload"]["onTodaySeconds"],
+            #                      observation["timeStamp"], observation["sensor"]["id"]])
 
-            elif observation["sensor"]["type_"]["id"] == "Thermometer":
-                wemoCsv.writerow([observation["id"], observation["payload"]["temperature"], observation["timeStamp"], observation["sensor"]["id"]])
+            if observation["sensor"]["type_"]["id"] == "Thermometer":
+                thermoCsv.writerow([observation["id"], observation["payload"]["temperature"], observation["timeStamp"], observation["sensor"]["id"]])
 
             if count % 100000 == 0:
                 print ("Observation Modified ", count)
             count += 1
 
-    wifiFile.close()
-    wemoFile.close()
+    #wifiFile.close()
+    #wemoFile.close()
     thermoFile.close()
 
 
@@ -83,5 +83,5 @@ def copySemanticObservationsM2(src, dest):
 if __name__ == "__main__":
 
     mapping = int(sys.argv[1])
-    copyObservationsM2("data/", "data/")
-    copySemanticObservationsM2("data/", "data/")
+    copyObservationsM2("/mnt/data/sdb/peeyushg/benchmark/datasets/large/", "/mnt/data/sdb/peeyushg/benchmark/datasets/large/")
+    #copySemanticObservationsM2("/mnt/data/sdb/peeyushg/benchmark/datasets/large/", "/mnt/data/sdb/peeyushg/benchmark/datasets/large/")
