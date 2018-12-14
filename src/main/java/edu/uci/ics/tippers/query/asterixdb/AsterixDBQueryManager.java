@@ -140,7 +140,7 @@ public class AsterixDBQueryManager extends BaseQueryManager{
             case 2:
                 return runTimedQuery(
                         String.format("SELECT timeStamp, sensorId, payload FROM Observation WHERE sensorId=\"%s\" "
-                                        + "AND timeStamp >= %s AND timeStamp <= %s;",
+                                        + "AND timeStamp >= datetime(\"%s\") AND timeStamp <= datetime(\"%s\");",
                                 sensorId, sdf.format(startTime), sdf.format(endTime)), 3
                 );
             default:
@@ -155,14 +155,14 @@ public class AsterixDBQueryManager extends BaseQueryManager{
                 return runTimedQuery(
                         String.format("SELECT timeStamp, sensor.id, payload FROM Observation WHERE sensor.id IN {{ "
                                         + sensorIds.stream().map(e -> "\"" + e + "\"").collect(Collectors.joining(","))
-                                        + " }} AND timeStamp >= %s AND timeStamp <= %s;",
+                                        + " }} AND timeStamp >= datetime(\"%s\") AND timeStamp <= datetime(\"%s\");",
                                 sdf.format(startTime), sdf.format(endTime)),  4
                 );
             case 2:
                 return runTimedQuery(
                         String.format("SELECT timeStamp, sensorId, payload FROM Observation WHERE sensorId IN {{ "
                                         + sensorIds.stream().map(e -> "\"" + e + "\"").collect(Collectors.joining(","))
-                                        + " }} AND timeStamp >= %s AND timeStamp <= %s;",
+                                        + " }} AND timeStamp >= datetime(\"%s\") AND timeStamp <= datetime(\"%s\");",
                                 sdf.format(startTime), sdf.format(endTime)),  4
                 );
             default:
