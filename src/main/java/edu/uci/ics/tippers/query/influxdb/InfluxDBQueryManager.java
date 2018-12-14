@@ -132,7 +132,8 @@ public class InfluxDBQueryManager extends BaseQueryManager {
 
         HttpResponse response = connectionManager.sendQuery(query);
         try {
-            return new JSONObject(EntityUtils.toString(response.getEntity())).getJSONArray("values");
+		return new JSONObject(EntityUtils.toString(response.getEntity())).getJSONArray("results").getJSONObject(0)
+                    .getJSONArray("series").getJSONObject(0).getJSONArray("values");
         } catch (IOException e) {
             e.printStackTrace();
             throw new BenchmarkException("Error writing output to file");
