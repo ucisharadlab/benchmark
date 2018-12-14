@@ -132,7 +132,8 @@ public class InfluxDBQueryManager extends BaseQueryManager {
 
         HttpResponse response = connectionManager.sendQuery(query);
         try {
-            return new JSONObject(EntityUtils.toString(response.getEntity())).getJSONArray("values");
+            return new JSONObject(EntityUtils.toString(response.getEntity())).getJSONArray("results").getJSONObject(0)
+                    .getJSONArray("series").getJSONObject(0).getJSONArray("values");
         } catch (IOException e) {
             e.printStackTrace();
             throw new BenchmarkException("Error writing output to file");
@@ -321,19 +322,19 @@ public class InfluxDBQueryManager extends BaseQueryManager {
                                 String.format("SELECT * FROM Sensor WHERE id='%s'", sensorId)).get(0).get(4);
 
                         if ("Thermometer".equals(typeId)) {
-                            String query = String.format("SELECT * FROM Thermometer WHERE time > '%s' " +
+                            String query = String.format("SELECT id, time, sensorId FROM Thermometer WHERE time > '%s' " +
                                             "AND time < '%s' AND sensorId = '%s'",
                                     sdf.format(startTime), sdf.format(endTime), sensorId);
                             observations = runQueryWithRows(query);
                         }
                         else if ("WeMo".equals(typeId)){
-                            String query = String.format("SELECT * FROM WeMo WHERE time > '%s' " +
+                            String query = String.format("SELECT id, time, sensorId FROM WeMo WHERE time > '%s' " +
                                             "AND time < '%s' AND sensorId = '%s'",
                                     sdf.format(startTime), sdf.format(endTime), sensorId);
                             observations = runQueryWithRows(query);
                         }
                         else if ("WiFiAP".equals(typeId)){
-                            String query = String.format("SELECT * FROM WiFiAP WHERE time > '%s' " +
+                            String query = String.format("SELECT id, time, sensorId FROM WiFiAP WHERE time > '%s' " +
                                             "AND time < '%s' AND sensorId = '%s'",
                                     sdf.format(startTime), sdf.format(endTime), sensorId);
                             observations = runQueryWithRows(query);
@@ -411,13 +412,13 @@ public class InfluxDBQueryManager extends BaseQueryManager {
 
 
                     JSONArray rows = runQueryWithRows(
-                            String.format("SELECT * FROM presence WHERE time >= '%s' " +
+                            String.format("SELECT id, time, location, virtualSensorId, semanticEntityId FROM presence WHERE time >= '%s' " +
                                             "AND time <= '%s' AND location = '%s'",
                                     sdf.format(startTime), sdf.format(endTime), startLocation));
 
                     for (Object row : rows) {
 
-                        String query = String.format("SELECT * FROM presence WHERE time >= '%s' " +
+                        String query = String.format("SELECT id, time, location, virtualSensorId, semanticEntityId FROM presence WHERE time >= '%s' " +
                                         "AND time <= '%s' AND location = '%s' AND semanticEntityId = '%s'",
                                 sdf.format(((JSONArray)row).getString(1)), sdf.format(endTime), endLocation, ((JSONArray)row).getString(4));
                         JSONArray observations = runQueryWithRows(query);
@@ -479,7 +480,7 @@ public class InfluxDBQueryManager extends BaseQueryManager {
 
                     RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(8));
 
-                    JSONArray results = runQueryWithRows(String.format("SELECT * FROM presence WHERE semanticEntityId = '%s' " +
+                    JSONArray results = runQueryWithRows(String.format("SELECT id, time,  virtualSensorId, location, semanticEntityId FROM presence WHERE semanticEntityId = '%s' " +
                                     "AND time >= '%s' AND time <= '%s'",
                             userId, sdf.format(startTime), sdf.format(endTime)));
                     Iterator<Object> rows = results.iterator();
@@ -488,7 +489,7 @@ public class InfluxDBQueryManager extends BaseQueryManager {
 
                         JSONArray row = (JSONArray) rows.next();
 
-                        String query = String.format("SELECT * FROM presence WHERE time = '%s' " +
+                        String query = String.format("SELECT id, time, virtualSensorId, location, semanticEntityId FROM presence WHERE time = '%s' " +
                                         "AND location='%s' AND semanticEntityId != '%s'", sdf.format(row.getString(1)),
                                 row.getString(3), userId);
                         JSONArray observations = runQueryWithRows(query);
@@ -539,7 +540,7 @@ public class InfluxDBQueryManager extends BaseQueryManager {
                             }).collect(Collectors.toList());
 
                     RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(9));
-                    String query = String.format("SELECT * FROM presence WHERE semanticEntityId='%s'", userId);
+                    String query = String.format("SELECT id, time, virtualSensorId, location, semanticEntityId FROM presence WHERE semanticEntityId='%s'", userId);
                     JSONArray observations = runQueryWithRows(query);
 
                     JSONArray jsonObservations = new JSONArray();
@@ -607,7 +608,7 @@ public class InfluxDBQueryManager extends BaseQueryManager {
                             }));
 
                     RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(10));
-                    String query = String.format("SELECT * FROM occupancy WHERE time >= '%s' " +
+                    String query = String.format("SELECT id, time, virtualSensorId, occupancy, semanticEntityId FROM occupancy WHERE time >= '%s' " +
                                     "AND time <= '%s' ORDER BY semanticEntityId, time ",
                             sdf.format(startTime), sdf.format(endTime));
                     JSONArray observations = runQueryWithRows(query);
