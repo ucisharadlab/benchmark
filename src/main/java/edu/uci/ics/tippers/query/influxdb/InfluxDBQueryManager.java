@@ -34,7 +34,7 @@ public class InfluxDBQueryManager extends BaseQueryManager {
     private InfluxDBConnectionManager connectionManager;
     private static final Logger LOGGER = Logger.getLogger(InfluxDBQueryManager.class);
 
-    private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+    private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-ddTHH:mm:ssZ");
 
 
     public InfluxDBQueryManager(int mapping, String queriesDir, String outputDir, boolean writeOutput, long timeout) {
@@ -205,8 +205,8 @@ public class InfluxDBQueryManager extends BaseQueryManager {
                             String.format("SELECT * FROM Sensor WHERE id='%s'", sensorId));
                     String collectionName = sensorTypes.get(0).get(4) + "Observation";
 
-                    String query = String.format("SELECT * FROM %s WHERE timeStamp > TIMESTAMP('%s') " +
-                                    "AND timeStamp < TIMESTAMP('%s') AND sensorId='%s'",
+                    String query = String.format("SELECT * FROM %s WHERE timeStamp > '%s' " +
+                                    "AND timeStamp < '%s' AND sensorId='%s'",
                             collectionName, sdf.format(startTime), sdf.format(endTime), sensorId);
                     return runTimedQuery(query, 3);
                 } catch (Exception e) {
@@ -242,24 +242,24 @@ public class InfluxDBQueryManager extends BaseQueryManager {
                     }
 
                     if (!thermoSensors.isEmpty()) {
-                        String query = String.format("SELECT * FROM ThermometerObservation WHERE timeStamp > TIMESTAMP('%s') " +
-                                "AND timeStamp < TIMESTAMP('%s') AND ( "
+                        String query = String.format("SELECT * FROM ThermometerObservation WHERE timeStamp > '%s' " +
+                                "AND timeStamp < '%s' AND ( "
                                 + thermoSensors.stream().map(e -> "sensorId = '" + e + "'" ).collect(Collectors.joining(" OR "))
                                 + ");", sdf.format(startTime), sdf.format(endTime));
                         runTimedQuery(query, 4);
 
                     }
                     if (!wemoSensors.isEmpty()) {
-                        String query = String.format("SELECT * FROM WeMoObservation WHERE timeStamp > TIMESTAMP('%s') " +
-                                "AND timeStamp < TIMESTAMP('%s') AND ( "
+                        String query = String.format("SELECT * FROM WeMoObservation WHERE timeStamp > '%s' " +
+                                "AND timeStamp < '%s' AND ( "
                                 + wemoSensors.stream().map(e -> "sensorId = '" + e + "'" ).collect(Collectors.joining(" OR "))
                                 + ");", sdf.format(startTime), sdf.format(endTime));
                         runTimedQuery(query, 4);
 
                     }
                     if (!wifiSensors.isEmpty()) {
-                        String query = String.format("SELECT * FROM WiFiAPObservation WHERE timeStamp > TIMESTAMP('%s') " +
-                                "AND timeStamp < TIMESTAMP('%s') AND ( "
+                        String query = String.format("SELECT * FROM WiFiAPObservation WHERE timeStamp > '%s' " +
+                                "AND timeStamp < '%s' AND ( "
                                 + wifiSensors.stream().map(e -> "sensorId = '" + e + "'" ).collect(Collectors.joining(" OR "))
                                 + ");", sdf.format(startTime), sdf.format(endTime));
                         runTimedQuery(query, 4);
@@ -288,8 +288,8 @@ public class InfluxDBQueryManager extends BaseQueryManager {
 
                     String collectionName = sensorTypeName + "Observation";
 
-                    String query = String.format("SELECT * FROM %s WHERE timeStamp > TIMESTAMP('%s') " +
-                                    "AND timeStamp < TIMESTAMP('%s') AND %s >= %s AND %s <= %s ",
+                    String query = String.format("SELECT * FROM %s WHERE timeStamp > '%s' " +
+                                    "AND timeStamp < '%s' AND %s >= %s AND %s <= %s ",
                             collectionName, sdf.format(startTime), sdf.format(endTime), payloadAttribute, startPayloadValue,
                             payloadAttribute, endPayloadValue);
                     runTimedQuery(query, 5);
@@ -321,20 +321,20 @@ public class InfluxDBQueryManager extends BaseQueryManager {
                                 String.format("SELECT * FROM Sensor WHERE id='%s'", sensorId)).get(0).get(2);
 
                         if ("Thermometer".equals(typeId)) {
-                            String query = String.format("SELECT * FROM ThermometerObservation WHERE timeStamp > TIMESTAMP('%s') " +
-                                            "AND timeStamp < TIMESTAMP('%s') AND sensorId = '%s'",
+                            String query = String.format("SELECT * FROM ThermometerObservation WHERE timeStamp > '%s' " +
+                                            "AND timeStamp < '%s' AND sensorId = '%s'",
                                     sdf.format(startTime), sdf.format(endTime), sensorId);
                             observations = runQueryWithRows(query);
                         }
                         else if ("WeMo".equals(typeId)){
-                            String query = String.format("SELECT * FROM WeMoObservation WHERE timeStamp > TIMESTAMP('%s') " +
-                                            "AND timeStamp < TIMESTAMP('%s') AND sensorId = '%s'",
+                            String query = String.format("SELECT * FROM WeMoObservation WHERE timeStamp > '%s' " +
+                                            "AND timeStamp < '%s' AND sensorId = '%s'",
                                     sdf.format(startTime), sdf.format(endTime), sensorId);
                             observations = runQueryWithRows(query);
                         }
                         else if ("WiFiAP".equals(typeId)){
-                            String query = String.format("SELECT * FROM WiFiAPObservation WHERE timeStamp > TIMESTAMP('%s') " +
-                                            "AND timeStamp < TIMESTAMP('%s') AND sensorId = '%s'",
+                            String query = String.format("SELECT * FROM WiFiAPObservation WHERE timeStamp > '%s' " +
+                                            "AND timeStamp < '%s' AND sensorId = '%s'",
                                     sdf.format(startTime), sdf.format(endTime), sensorId);
                             observations = runQueryWithRows(query);
                         }
@@ -411,14 +411,14 @@ public class InfluxDBQueryManager extends BaseQueryManager {
 
 
                     JSONArray rows = runQueryWithRows(
-                            String.format("SELECT * FROM Presence WHERE timeStamp >= TIMESTAMP('%s') " +
-                                            "AND timeStamp <= TIMESTAMP('%s') AND location = '%s'",
+                            String.format("SELECT * FROM Presence WHERE timeStamp >= '%s' " +
+                                            "AND timeStamp <= '%s' AND location = '%s'",
                                     sdf.format(startTime), sdf.format(endTime), startLocation));
 
                     for (Object row : rows) {
 
-                        String query = String.format("SELECT * FROM Presence WHERE timeStamp >= TIMESTAMP('%s') " +
-                                        "AND timeStamp <= TIMESTAMP('%s') AND location = '%s' AND semanticEntityId = '%s'",
+                        String query = String.format("SELECT * FROM Presence WHERE timeStamp >= '%s' " +
+                                        "AND timeStamp <= '%s' AND location = '%s' AND semanticEntityId = '%s'",
                                 sdf.format(((JSONArray)row).getString(1)), sdf.format(endTime), endLocation, ((JSONArray)row).getString(4));
                         JSONArray observations = runQueryWithRows(query);
 
@@ -480,7 +480,7 @@ public class InfluxDBQueryManager extends BaseQueryManager {
                     RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(8));
 
                     JSONArray results = runQueryWithRows(String.format("SELECT * FROM Presence WHERE semanticEntityId = '%s' " +
-                                    "AND timeStamp >= TIMESTAMP('%s') AND timeStamp <= TIMESTAMP('%s')",
+                                    "AND timeStamp >= '%s' AND timeStamp <= '%s'",
                             userId, sdf.format(startTime), sdf.format(endTime)));
                     Iterator<Object> rows = results.iterator();
 
@@ -488,7 +488,7 @@ public class InfluxDBQueryManager extends BaseQueryManager {
 
                         JSONArray row = (JSONArray) rows.next();
 
-                        String query = String.format("SELECT * FROM Presence WHERE timeStamp = TIMESTAMP('%s') " +
+                        String query = String.format("SELECT * FROM Presence WHERE timeStamp = '%s' " +
                                         "AND location='%s' AND semanticEntityId != '%s'", sdf.format(row.getString(1)),
                                 row.getString(3), userId);
                         JSONArray observations = runQueryWithRows(query);
@@ -528,7 +528,7 @@ public class InfluxDBQueryManager extends BaseQueryManager {
                             String.format("SELECT * FROM Infrastructure_Type WHERE name='%s'", infraTypeName)).get(0).get(0);
 
                     List<String> infras = runMetadataQueryWithRows(
-                            String.format("SELECT * FROM Infrastructure WHERE typeId='%s'", infraTypeId))
+                            String.format("SELECT * FROM Infrastructure WHERE type_Id='%s'", infraTypeId))
                             .stream().map(e -> {
                                 try {
                                     return (String)e.get(0);
@@ -607,8 +607,8 @@ public class InfluxDBQueryManager extends BaseQueryManager {
                             }));
 
                     RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(10));
-                    String query = String.format("SELECT * FROM Occupancy WHERE timeStamp >= TIMESTAMP('%s') " +
-                                    "AND timeStamp <= TIMESTAMP('%s') ORDER BY semanticEntityId, timeStamp ",
+                    String query = String.format("SELECT * FROM Occupancy WHERE timeStamp >= '%s' " +
+                                    "AND timeStamp <= '%s' ORDER BY semanticEntityId, timeStamp ",
                             sdf.format(startTime), sdf.format(endTime));
                     JSONArray observations = runQueryWithRows(query);
 
@@ -682,8 +682,8 @@ public class InfluxDBQueryManager extends BaseQueryManager {
                             String.format("SELECT * FROM Sensor WHERE id='%s'", sensorId));
                     String collectionName = sensorTypes.get(0).get(4) + "Observation";
 
-                    String query = String.format("SELECT * FROM %s WHERE timeStamp > TIMESTAMP('%s') " +
-                                    "AND timeStamp < TIMESTAMP('%s') AND sensorId='%s'",
+                    String query = String.format("SELECT * FROM %s WHERE timeStamp > '%s' " +
+                                    "AND timeStamp < '%s' AND sensorId='%s'",
                             collectionName, sdf.format(startTime), sdf.format(endTime), sensorId);
                     return explainQuery(query, 3);
                 } catch (Exception e) {
@@ -719,24 +719,24 @@ public class InfluxDBQueryManager extends BaseQueryManager {
                     }
 
                     if (!thermoSensors.isEmpty()) {
-                        String query = String.format("SELECT * FROM ThermometerObservation WHERE timeStamp > TIMESTAMP('%s') " +
-                                "AND timeStamp < TIMESTAMP('%s') AND ( "
+                        String query = String.format("SELECT * FROM ThermometerObservation WHERE timeStamp > '%s' " +
+                                "AND timeStamp < '%s' AND ( "
                                 + thermoSensors.stream().map(e -> "sensorId = '" + e + "'" ).collect(Collectors.joining(" OR "))
                                 + ");", sdf.format(startTime), sdf.format(endTime));
                         explainQuery(query, 4);
 
                     }
                     if (!wemoSensors.isEmpty()) {
-                        String query = String.format("SELECT * FROM WeMoObservation WHERE timeStamp > TIMESTAMP('%s') " +
-                                "AND timeStamp < TIMESTAMP('%s') AND ( "
+                        String query = String.format("SELECT * FROM WeMoObservation WHERE timeStamp > '%s' " +
+                                "AND timeStamp < '%s' AND ( "
                                 + wemoSensors.stream().map(e -> "sensorId = '" + e + "'" ).collect(Collectors.joining(" OR "))
                                 + ");", sdf.format(startTime), sdf.format(endTime));
                         explainQuery(query, 4);
 
                     }
                     if (!wifiSensors.isEmpty()) {
-                        String query = String.format("SELECT * FROM WiFiAPObservation WHERE timeStamp > TIMESTAMP('%s') " +
-                                "AND timeStamp < TIMESTAMP('%s') AND ( "
+                        String query = String.format("SELECT * FROM WiFiAPObservation WHERE timeStamp > '%s' " +
+                                "AND timeStamp < '%s' AND ( "
                                 + wifiSensors.stream().map(e -> "sensorId = '" + e + "'" ).collect(Collectors.joining(" OR "))
                                 + ");", sdf.format(startTime), sdf.format(endTime));
                         explainQuery(query, 4);
@@ -765,8 +765,8 @@ public class InfluxDBQueryManager extends BaseQueryManager {
 
                     String collectionName = sensorTypeName + "Observation";
 
-                    String query = String.format("SELECT * FROM %s WHERE timeStamp > TIMESTAMP('%s') " +
-                                    "AND timeStamp < TIMESTAMP('%s') AND %s >= %s AND %s <= %s ",
+                    String query = String.format("SELECT * FROM %s WHERE timeStamp > '%s' " +
+                                    "AND timeStamp < '%s' AND %s >= %s AND %s <= %s ",
                             collectionName, sdf.format(startTime), sdf.format(endTime), payloadAttribute, startPayloadValue,
                             payloadAttribute, endPayloadValue);
                     explainQuery(query, 5);
@@ -798,20 +798,20 @@ public class InfluxDBQueryManager extends BaseQueryManager {
                                 String.format("SELECT * FROM Sensor WHERE id='%s'", sensorId)).get(0).get(2);
 
                         if ("Thermometer".equals(typeId)) {
-                            String query = String.format("SELECT * FROM ThermometerObservation WHERE timeStamp > TIMESTAMP('%s') " +
-                                            "AND timeStamp < TIMESTAMP('%s') AND sensorId = '%s'",
+                            String query = String.format("SELECT * FROM ThermometerObservation WHERE timeStamp > '%s' " +
+                                            "AND timeStamp < '%s' AND sensorId = '%s'",
                                     sdf.format(startTime), sdf.format(endTime), sensorId);
                             explainQuery(query, 6);
                         }
                         else if ("WeMo".equals(typeId)){
-                            String query = String.format("SELECT * FROM WeMoObservation WHERE timeStamp > TIMESTAMP('%s') " +
-                                            "AND timeStamp < TIMESTAMP('%s') AND sensorId = '%s'",
+                            String query = String.format("SELECT * FROM WeMoObservation WHERE timeStamp > '%s' " +
+                                            "AND timeStamp < '%s' AND sensorId = '%s'",
                                     sdf.format(startTime), sdf.format(endTime), sensorId);
                             explainQuery(query, 6);
                         }
                         else if ("WiFiAP".equals(typeId)){
-                            String query = String.format("SELECT * FROM WiFiAPObservation WHERE timeStamp > TIMESTAMP('%s') " +
-                                            "AND timeStamp < TIMESTAMP('%s') AND sensorId = '%s'",
+                            String query = String.format("SELECT * FROM WiFiAPObservation WHERE timeStamp > '%s' " +
+                                            "AND timeStamp < '%s' AND sensorId = '%s'",
                                     sdf.format(startTime), sdf.format(endTime), sensorId);
                             explainQuery(query, 6);
                         }
@@ -864,8 +864,8 @@ public class InfluxDBQueryManager extends BaseQueryManager {
 
 
                     explainQuery(
-                            String.format("SELECT * FROM Presence WHERE timeStamp >= TIMESTAMP('%s') " +
-                                            "AND timeStamp <= TIMESTAMP('%s') AND location = '%s'",
+                            String.format("SELECT * FROM Presence WHERE timeStamp >= '%s' " +
+                                            "AND timeStamp <= '%s' AND location = '%s'",
                                     sdf.format(startTime), sdf.format(endTime), startLocation), 7);
 
                     writer.close();
@@ -914,7 +914,7 @@ public class InfluxDBQueryManager extends BaseQueryManager {
                     RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(8));
 
                     explainQuery(String.format("SELECT * FROM Presence WHERE semanticEntityId = '%s' " +
-                                    "AND timeStamp >= TIMESTAMP('%s') AND timeStamp <= TIMESTAMP('%s')",
+                                    "AND timeStamp >= '%s' AND timeStamp <= '%s'",
                             userId, sdf.format(startTime), sdf.format(endTime)), 8);
 
                     writer.close();
