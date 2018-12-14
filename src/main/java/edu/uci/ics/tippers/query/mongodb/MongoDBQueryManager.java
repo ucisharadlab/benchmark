@@ -734,7 +734,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
                         )
                 );
 
-                MongoIterable<Document> iterable = collection.aggregate(Arrays.asList(match, sort, project));
+                MongoIterable<Document> iterable = collection.aggregate(Arrays.asList(match, sort, project)).allowDiskUse(true);
 
                 getResults(iterable, 10);
 
@@ -770,7 +770,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
                         )
                 );
 
-                iterable = collection.aggregate(Arrays.asList(lookUp1, match, sort, lookUp2, unwind, project));
+                iterable = collection.aggregate(Arrays.asList(lookUp1, match, sort, lookUp2, unwind, project)).allowDiskUse(true);
 
                 getResults(iterable, 10);
 
