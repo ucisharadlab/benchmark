@@ -232,7 +232,7 @@ public class InfluxDBQueryManager extends BaseQueryManager {
 
                     for (String sensorId : sensorIds) {
                         typeId = (String) runMetadataQueryWithRows(
-                                String.format("SELECT * FROM Sensor WHERE id='%s'", sensorId)).get(0).get(2);
+                                String.format("SELECT * FROM Sensor WHERE id='%s'", sensorId)).get(0).get(4);
                         if ("Thermometer".equals(typeId))
                             thermoSensors.add(sensorId);
                         else if ("WeMo".equals(typeId))
@@ -411,13 +411,13 @@ public class InfluxDBQueryManager extends BaseQueryManager {
 
 
                     JSONArray rows = runQueryWithRows(
-                            String.format("SELECT * FROM Presence WHERE time >= '%s' " +
+                            String.format("SELECT * FROM presence WHERE time >= '%s' " +
                                             "AND time <= '%s' AND location = '%s'",
                                     sdf.format(startTime), sdf.format(endTime), startLocation));
 
                     for (Object row : rows) {
 
-                        String query = String.format("SELECT * FROM Presence WHERE time >= '%s' " +
+                        String query = String.format("SELECT * FROM presence WHERE time >= '%s' " +
                                         "AND time <= '%s' AND location = '%s' AND semanticEntityId = '%s'",
                                 sdf.format(((JSONArray)row).getString(1)), sdf.format(endTime), endLocation, ((JSONArray)row).getString(4));
                         JSONArray observations = runQueryWithRows(query);
@@ -479,7 +479,7 @@ public class InfluxDBQueryManager extends BaseQueryManager {
 
                     RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(8));
 
-                    JSONArray results = runQueryWithRows(String.format("SELECT * FROM Presence WHERE semanticEntityId = '%s' " +
+                    JSONArray results = runQueryWithRows(String.format("SELECT * FROM presence WHERE semanticEntityId = '%s' " +
                                     "AND time >= '%s' AND time <= '%s'",
                             userId, sdf.format(startTime), sdf.format(endTime)));
                     Iterator<Object> rows = results.iterator();
@@ -488,7 +488,7 @@ public class InfluxDBQueryManager extends BaseQueryManager {
 
                         JSONArray row = (JSONArray) rows.next();
 
-                        String query = String.format("SELECT * FROM Presence WHERE time = '%s' " +
+                        String query = String.format("SELECT * FROM presence WHERE time = '%s' " +
                                         "AND location='%s' AND semanticEntityId != '%s'", sdf.format(row.getString(1)),
                                 row.getString(3), userId);
                         JSONArray observations = runQueryWithRows(query);
@@ -539,7 +539,7 @@ public class InfluxDBQueryManager extends BaseQueryManager {
                             }).collect(Collectors.toList());
 
                     RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(9));
-                    String query = String.format("SELECT * FROM Presence WHERE semanticEntityId='%s'", userId);
+                    String query = String.format("SELECT * FROM presence WHERE semanticEntityId='%s'", userId);
                     JSONArray observations = runQueryWithRows(query);
 
                     JSONArray jsonObservations = new JSONArray();
@@ -607,7 +607,7 @@ public class InfluxDBQueryManager extends BaseQueryManager {
                             }));
 
                     RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(10));
-                    String query = String.format("SELECT * FROM Occupancy WHERE time >= '%s' " +
+                    String query = String.format("SELECT * FROM occupancy WHERE time >= '%s' " +
                                     "AND time <= '%s' ORDER BY semanticEntityId, time ",
                             sdf.format(startTime), sdf.format(endTime));
                     JSONArray observations = runQueryWithRows(query);
@@ -719,7 +719,7 @@ public class InfluxDBQueryManager extends BaseQueryManager {
                     }
 
                     if (!thermoSensors.isEmpty()) {
-                        String query = String.format("SELECT * FROM ThermometerObservation WHERE time > '%s' " +
+                        String query = String.format("SELECT * FROM Thermometer WHERE time > '%s' " +
                                 "AND time < '%s' AND ( "
                                 + thermoSensors.stream().map(e -> "sensorId = '" + e + "'" ).collect(Collectors.joining(" OR "))
                                 + ");", sdf.format(startTime), sdf.format(endTime));
@@ -727,7 +727,7 @@ public class InfluxDBQueryManager extends BaseQueryManager {
 
                     }
                     if (!wemoSensors.isEmpty()) {
-                        String query = String.format("SELECT * FROM WeMoObservation WHERE time > '%s' " +
+                        String query = String.format("SELECT * FROM WeMo WHERE time > '%s' " +
                                 "AND time < '%s' AND ( "
                                 + wemoSensors.stream().map(e -> "sensorId = '" + e + "'" ).collect(Collectors.joining(" OR "))
                                 + ");", sdf.format(startTime), sdf.format(endTime));
@@ -735,7 +735,7 @@ public class InfluxDBQueryManager extends BaseQueryManager {
 
                     }
                     if (!wifiSensors.isEmpty()) {
-                        String query = String.format("SELECT * FROM WiFiAPObservation WHERE time > '%s' " +
+                        String query = String.format("SELECT * FROM WiFiAP WHERE time > '%s' " +
                                 "AND time < '%s' AND ( "
                                 + wifiSensors.stream().map(e -> "sensorId = '" + e + "'" ).collect(Collectors.joining(" OR "))
                                 + ");", sdf.format(startTime), sdf.format(endTime));
