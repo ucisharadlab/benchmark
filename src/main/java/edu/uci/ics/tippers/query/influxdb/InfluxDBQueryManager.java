@@ -40,6 +40,7 @@ public class InfluxDBQueryManager extends BaseQueryManager {
     public InfluxDBQueryManager(int mapping, String queriesDir, String outputDir, boolean writeOutput, long timeout) {
         super(mapping, queriesDir, outputDir, writeOutput, timeout);
         connectionManager = InfluxDBConnectionManager.getInstance();
+        metadataConnection = null;
         metadataConnection = InfluxDBConnectionManager.getInstance().getMetadataConnection();
     }
 
