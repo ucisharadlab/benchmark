@@ -318,7 +318,7 @@ public class InfluxDBQueryManager extends BaseQueryManager {
 
                     for (String sensorId : sensorIds) {
                         String typeId = (String) runMetadataQueryWithRows(
-                                String.format("SELECT * FROM Sensor WHERE id='%s'", sensorId)).get(0).get(2);
+                                String.format("SELECT * FROM Sensor WHERE id='%s'", sensorId)).get(0).get(4);
 
                         if ("Thermometer".equals(typeId)) {
                             String query = String.format("SELECT * FROM Thermometer WHERE time > '%s' " +
@@ -528,7 +528,7 @@ public class InfluxDBQueryManager extends BaseQueryManager {
                             String.format("SELECT * FROM Infrastructure_Type WHERE name='%s'", infraTypeName)).get(0).get(0);
 
                     List<String> infras = runMetadataQueryWithRows(
-                            String.format("SELECT * FROM Infrastructure WHERE type_Id='%s'", infraTypeId))
+                            String.format("SELECT * FROM Infrastructure WHERE infrastructure_type_id='%s'", infraTypeId))
                             .stream().map(e -> {
                                 try {
                                     return (String)e.get(0);
