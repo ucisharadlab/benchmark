@@ -1726,4 +1726,24 @@ public class GridDBQueryManager extends BaseQueryManager {
                 throw new BenchmarkException("No Such Mapping");
         }
     }
+    
+    public static void main(String args[]) throws GSException {
+        GridDBQueryManager queryManager = new GridDBQueryManager(1, null, null, true, 1);
+        Scanner sc = new Scanner(System.in);
+        String container = sc.nextLine();
+        String query = sc.nextLine();
+        List<Row> rows = queryManager.runQueryWithRows(container, query);
+        for (Row row: rows) {
+            StringBuilder line = new StringBuilder("");
+            ContainerInfo containerInfo = row.getSchema();
+            int columnCount = containerInfo.getColumnCount();
+            for (int i = 0; i < columnCount; i++) {
+                if (containerInfo.getColumnInfo(i).getType().equals(GSType.STRING_ARRAY))
+                    line.append(Arrays.toString(row.getStringArray(i))).append("\t");
+                else
+                    line.append(row.getValue(i)).append("\t");
+            }
+            System.out.println(line.toString());
+        }
+    }
 }
