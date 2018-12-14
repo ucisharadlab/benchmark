@@ -75,57 +75,10 @@ public class SparkSQLQueryManager extends BaseQueryManager {
     public Duration runQuery3(String sensorId, Date startTime, Date endTime) throws BenchmarkException {
         switch (mapping) {
             case 1:
-                String query = "SELECT timeStamp, payload FROM OBSERVATION WHERE timestamp>'?' AND timestamp<'?' " +
-                        "AND SENSOR_ID=?";
-                try {
-                    PreparedStatement stmt = connection.prepareStatement(query);
-                    stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
-                    stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
-                    stmt.setString(3, sensorId);
-
-                    return externalQueryManager.runTimedQuery(stmt, 3);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    throw new BenchmarkException("Error Running Query");
-                }
             case 2:
-                query = "SELECT SENSOR_TYPE_ID FROM SENSOR WHERE ID=?";
-                try {
-                    Instant start = Instant.now();
-                    PreparedStatement stmt = connection.prepareStatement(query);
-                    stmt.setString(1, sensorId);
-                    ResultSet rs = stmt.executeQuery();
-                    String typeId = null;
-                    while(rs.next()) {
-                        typeId = rs.getString(1);
-                    }
-                    rs.close();
-
-                    if ("Thermometer".equals(typeId))
-                        query = "SELECT timeStamp, temperature FROM ThermometerObservation  WHERE timestamp>'?' AND timestamp<'?' " +
-                                "AND SENSOR_ID=?";
-                    else if ("WeMo".equals(typeId))
-                        query = "SELECT timeStamp, currentMilliWatts, onTodaySeconds FROM WeMoObservation  WHERE timestamp>'?' AND timestamp<'?' " +
-                                "AND SENSOR_ID=?";
-                    else if ("WiFiAP".equals(typeId))
-                        query = "SELECT timeStamp, clientId FROM WiFiAPObservation  WHERE timestamp>'?' AND timestamp<'?' " +
-                                "AND SENSOR_ID=?";
-
-                    stmt = connection.prepareStatement(query);
-                    stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
-                    stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
-                    stmt.setString(3, sensorId);
-
-                    externalQueryManager.runTimedQuery(stmt, 3);
-
-                    Instant end = Instant.now();
-                    return Duration.between(start, end);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    throw new BenchmarkException("Error Running Query");
-                }
+                return externalQueryManager.runQuery3(sensorId, startTime, endTime);
             default:
-                throw new BenchmarkException("No Such Mapping");
+                throw new BenchmarkException("Error Running Query 3 on CrateDB");
         }
     }
 
@@ -133,7 +86,7 @@ public class SparkSQLQueryManager extends BaseQueryManager {
     public Duration runQuery4(List<String> sensorIds, Date startTime, Date endTime) throws BenchmarkException {
         switch (mapping) {
             case 1:
-                String query = "SELECT timeStamp, payload FROM OBSERVATION WHERE timestamp>'?' AND timestamp<'?' " +
+                String query = "SELECT timeStamp, payload FROM OBSERVATION WHERE timestamp>? AND timestamp<? " +
                         "AND (" + sensorIds.stream().map(e -> "SENSOR_ID='" + e + "'" ).collect(Collectors.joining(" OR ")) + ")";
                 try {
                     PreparedStatement stmt = connection.prepareStatement(query);
@@ -171,7 +124,7 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                     rs.close();
 
                     if (!thermoSensors.isEmpty()) {
-                        query = "SELECT timeStamp, temperature FROM ThermometerObservation  WHERE timestamp>'?' AND timestamp<'?' " +
+                        query = "SELECT timeStamp, temperature FROM ThermometerObservation  WHERE timestamp>? AND timestamp<? " +
                                 "AND (" + thermoSensors.stream().map(e -> "SENSOR_ID='" + e + "'" ).collect(Collectors.joining(" OR ")) + ")";
                         stmt = connection.prepareStatement(query);
                         stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
@@ -180,7 +133,7 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                         externalQueryManager.runTimedQuery(stmt, 4);
                     }
                     else if (!wemoSensors.isEmpty()) {
-                        query = "SELECT timeStamp, currentMilliWatts, onTodaySeconds FROM WeMoObservation  WHERE timestamp>'?' AND timestamp<'?' " +
+                        query = "SELECT timeStamp, currentMilliWatts, onTodaySeconds FROM WeMoObservation  WHERE timestamp>? AND timestamp<? " +
                                 "AND (" + wemoSensors.stream().map(e -> "SENSOR_ID='" + e + "'" ).collect(Collectors.joining(" OR ")) + ")";
                         stmt = connection.prepareStatement(query);
                         stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
@@ -189,7 +142,7 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                         externalQueryManager.runTimedQuery(stmt, 4);
                     }
                     else if (!wifiSensors.isEmpty()) {
-                        query = "SELECT timeStamp, clientId FROM WiFiAPObservation  WHERE timestamp>'?' AND timestamp<'?' " +
+                        query = "SELECT timeStamp, clientId FROM WiFiAPObservation  WHERE timestamp>? AND timestamp<? " +
                                 "AND (" + wifiSensors.stream().map(e -> "SENSOR_ID='" + e + "'" ).collect(Collectors.joining(" OR ")) + ")";
                         stmt = connection.prepareStatement(query);
                         stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
@@ -217,7 +170,7 @@ public class SparkSQLQueryManager extends BaseQueryManager {
             case 1:
                 String query = String.format("SELECT timeStamp, payload FROM OBSERVATION o, SENSOR s, SENSOR_TYPE st  " +
                                 "WHERE s.id = o.sensor_id AND s.sensor_type_id=st.id AND st.name=? AND " +
-                                "timestamp>'?' AND timestamp<'?' AND payload['%s'] >= ? AND payload['%s'] <= ? ",
+                                "timestamp>? AND timestamp<? AND payload['%s'] >= ? AND payload['%s'] <= ? ",
                         payloadAttribute, payloadAttribute);
                 try {
                     PreparedStatement stmt = connection.prepareStatement(query);
@@ -252,7 +205,7 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                 String query = "SELECT obs.sensor_id, avg(counts) FROM " +
                         "( SELECT sensor_id, date_trunc('day', timestamp), " +
                         "count(*) as counts " +
-                        "FROM OBSERVATION WHERE timestamp>'?' AND timestamp<'?' " +
+                        "FROM OBSERVATION WHERE timestamp>? AND timestamp<? " +
                         "AND (" +
                         sensorIds.stream().map(e -> "ID='" + e + "'" ).collect(Collectors.joining(" OR ")) + ") " +
                         " GROUP BY sensor_id, date_trunc('day', timestamp)) " +
@@ -296,7 +249,7 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                         query = "SELECT obs.sensor_id, avg(counts) FROM " +
                                 "( SELECT sensor_id, date_trunc('day', timestamp), " +
                                 "count(*) as counts " +
-                                "FROM ThermometerObservation WHERE timestamp>'?' AND timestamp<'?' " +
+                                "FROM ThermometerObservation WHERE timestamp>? AND timestamp<? " +
                                 "AND ( " +
                                 thermoSensors.stream().map(e -> "SENSOR_ID='" + e + "'" ).collect(Collectors.joining(" OR ")) + ") " +
                                 " GROUP BY sensor_id, date_trunc('day', timestamp)) " +
@@ -311,7 +264,7 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                         query = "SELECT obs.sensor_id, avg(counts) FROM " +
                                 "( SELECT sensor_id, date_trunc('day', timestamp), " +
                                 "count(*) as counts " +
-                                "FROM WeMoObservation WHERE timestamp>'?' AND timestamp<'?' " +
+                                "FROM WeMoObservation WHERE timestamp>? AND timestamp<? " +
                                 "AND ( " +
                                 thermoSensors.stream().map(e -> "SENSOR_ID='" + e + "'" ).collect(Collectors.joining(" OR ")) + ") " +
                                 " GROUP BY sensor_id, date_trunc('day', timestamp)) " +
@@ -326,7 +279,7 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                         query = "SELECT obs.sensor_id, avg(counts) FROM " +
                                 "(SELECT sensor_id, date_trunc('day', timestamp), " +
                                 "count(*) as counts " +
-                                "FROM WiFiAPObservation WHERE timestamp>'?' AND timestamp<'?' " +
+                                "FROM WiFiAPObservation WHERE timestamp>? AND timestamp<? " +
                                 "AND ( " +
                                 thermoSensors.stream().map(e -> "SENSOR_ID='" + e + "'" ).collect(Collectors.joining(" OR ")) + ") " +
                                 " GROUP BY sensor_id, date_trunc('day', timestamp)) " +
@@ -361,7 +314,7 @@ public class SparkSQLQueryManager extends BaseQueryManager {
 
                 String query = "SELECT u.name " +
                         "FROM SEMANTIC_OBSERVATION s1, SEMANTIC_OBSERVATION s2, SEMANTIC_OBSERVATION_TYPE st, USERS u " +
-                        "WHERE s1.timeStamp >= '?' AND s1.timeStamp <= '?'  AND s2.timeStamp <= '?' " +
+                        "WHERE s1.timeStamp >= ? AND s1.timeStamp <= ?  AND s2.timeStamp <= ? " +
                         "AND st.name = 'presence' AND st.id = s1.type_id AND st.id = s2.type_id " +
                         "AND s1.semantic_entity_id = s2.semantic_entity_id " +
                         "AND s1.payload['location'] = ? AND s2.payload['location'] = ? " +
@@ -388,7 +341,7 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                 endTime = cal.getTime();
                 query = "SELECT u.name " +
                         "FROM PRESENCE s1, PRESENCE s2, USERS u " +
-                        "WHERE s1.timeStamp >= '?' AND s1.timeStamp <= '?'  AND s2.timeStamp <= '?' " +
+                        "WHERE s1.timeStamp >= ? AND s1.timeStamp <= ?  AND s2.timeStamp <= ? " +
                         "AND s1.semantic_entity_id = s2.semantic_entity_id " +
                         "AND s1.location = ? AND s2.location = ? " +
                         "AND s1.timeStamp < s2.timeStamp " +
@@ -423,7 +376,7 @@ public class SparkSQLQueryManager extends BaseQueryManager {
 
                 String query = "SELECT u.name, s1.payload " +
                         "FROM SEMANTIC_OBSERVATION s1, SEMANTIC_OBSERVATION s2, SEMANTIC_OBSERVATION_TYPE st, USERS u " +
-                        "WHERE s1.timeStamp >= '?' AND s1.timeStamp <= '?' " +
+                        "WHERE s1.timeStamp >= ? AND s1.timeStamp <= ? " +
                         "AND s2.timeStamp = s1.timeStamp " +
                         "AND st.name = 'presence' AND s1.type_id = s2.type_id AND st.id = s1.type_id  " +
                         "AND s1.semantic_entity_id = ? AND s1.semantic_entity_id != s2.semantic_entity_id " +
@@ -448,7 +401,7 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                 endTime = cal.getTime();
                 query = "SELECT u.name, s1.location " +
                         "FROM PRESENCE s1, PRESENCE s2, USERS u " +
-                        "WHERE s1.timeStamp >= '?' AND s1.timeStamp <= '?' " +
+                        "WHERE s1.timeStamp >= ? AND s1.timeStamp <= ? " +
                         "AND s2.timeStamp = s1.timeStamp " +
                         "AND s1.semantic_entity_id = ? AND s1.semantic_entity_id != s2.semantic_entity_id " +
                         "AND s2.semantic_entity_id = u.id AND s1.location = s2.location ";
