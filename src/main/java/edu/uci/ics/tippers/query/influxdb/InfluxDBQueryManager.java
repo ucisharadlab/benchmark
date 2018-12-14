@@ -34,7 +34,7 @@ public class InfluxDBQueryManager extends BaseQueryManager {
     private InfluxDBConnectionManager connectionManager;
     private static final Logger LOGGER = Logger.getLogger(InfluxDBQueryManager.class);
 
-    private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-ddTHH:mm:ssZ");
+    private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
 
     public InfluxDBQueryManager(int mapping, String queriesDir, String outputDir, boolean writeOutput, long timeout) {
