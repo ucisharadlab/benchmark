@@ -203,12 +203,12 @@ public class SparkSQLQueryManager extends BaseQueryManager {
         switch (mapping) {
             case 1:
                 String query = "SELECT obs.sensor_id, avg(counts) FROM " +
-                        "( SELECT sensor_id, date_trunc('day', timestamp), " +
+                        "( SELECT sensor_id, date_format( timestamp, 'yyyy-MM-dd'), " +
                         "count(*) as counts " +
                         "FROM OBSERVATION WHERE timestamp>? AND timestamp<? " +
                         "AND (" +
                         sensorIds.stream().map(e -> "ID='" + e + "'" ).collect(Collectors.joining(" OR ")) + ") " +
-                        " GROUP BY sensor_id, date_trunc('day', timestamp)) " +
+                        " GROUP BY sensor_id, date_format( timestamp, 'yyyy-MM-dd')) " +
                         "AS obs GROUP BY sensor_id";
 
                 try {
@@ -247,12 +247,12 @@ public class SparkSQLQueryManager extends BaseQueryManager {
 
                     if (!thermoSensors.isEmpty()) {
                         query = "SELECT obs.sensor_id, avg(counts) FROM " +
-                                "( SELECT sensor_id, date_trunc('day', timestamp), " +
+                                "( SELECT sensor_id, date_format( timestamp, 'yyyy-MM-dd'), " +
                                 "count(*) as counts " +
                                 "FROM ThermometerObservation WHERE timestamp>? AND timestamp<? " +
                                 "AND ( " +
                                 thermoSensors.stream().map(e -> "SENSOR_ID='" + e + "'" ).collect(Collectors.joining(" OR ")) + ") " +
-                                " GROUP BY sensor_id, date_trunc('day', timestamp)) " +
+                                " GROUP BY sensor_id, date_format( timestamp, 'yyyy-MM-dd')) " +
                                 "AS obs GROUP BY sensor_id";
                         stmt = connection.prepareStatement(query);
                         stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
@@ -262,12 +262,12 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                     }
                     else if (!wemoSensors.isEmpty()) {
                         query = "SELECT obs.sensor_id, avg(counts) FROM " +
-                                "( SELECT sensor_id, date_trunc('day', timestamp), " +
+                                "( SELECT sensor_id, date_format( timestamp, 'yyyy-MM-dd'), " +
                                 "count(*) as counts " +
                                 "FROM WeMoObservation WHERE timestamp>? AND timestamp<? " +
                                 "AND ( " +
                                 thermoSensors.stream().map(e -> "SENSOR_ID='" + e + "'" ).collect(Collectors.joining(" OR ")) + ") " +
-                                " GROUP BY sensor_id, date_trunc('day', timestamp)) " +
+                                " GROUP BY sensor_id, date_format( timestamp, 'yyyy-MM-dd')) " +
                                 "AS obs GROUP BY sensor_id";
                         stmt = connection.prepareStatement(query);
                         stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
@@ -277,12 +277,12 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                     }
                     else if (!wifiSensors.isEmpty()) {
                         query = "SELECT obs.sensor_id, avg(counts) FROM " +
-                                "(SELECT sensor_id, date_trunc('day', timestamp), " +
+                                "(SELECT sensor_id, date_format( timestamp, 'yyyy-MM-dd'), " +
                                 "count(*) as counts " +
                                 "FROM WiFiAPObservation WHERE timestamp>? AND timestamp<? " +
                                 "AND ( " +
                                 thermoSensors.stream().map(e -> "SENSOR_ID='" + e + "'" ).collect(Collectors.joining(" OR ")) + ") " +
-                                " GROUP BY sensor_id, date_trunc('day', timestamp)) " +
+                                " GROUP BY sensor_id, date_format( timestamp, 'yyyy-MM-dd')) " +
                                 "AS obs GROUP BY sensor_id";
                         stmt = connection.prepareStatement(query);
                         stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
@@ -426,13 +426,13 @@ public class SparkSQLQueryManager extends BaseQueryManager {
         switch (mapping) {
             case 1:
                 String query = "SELECT Avg(timeSpent) as avgTimeSpent FROM " +
-                        " (SELECT date_trunc('day', so.timeStamp), count(*)*10 as timeSpent " +
+                        " (SELECT date_format( so.timestamp, 'yyyy-MM-dd'), count(*)*10 as timeSpent " +
                         "  FROM SEMANTIC_OBSERVATION so, Infrastructure infra, Infrastructure_Type infraType, SEMANTIC_OBSERVATION_TYPE st " +
                         "  WHERE st.name = 'presence' AND so.type_id = st.id " +
                         "  AND so.payload['location'] = infra.id " +
                         "  AND infra.INFRASTRUCTURE_TYPE_ID = infraType.id AND infraType.name = ? " +
                         "  AND so.semantic_entity_id = ? " +
-                        "  GROUP BY  date_trunc('day', so.timeStamp)) AS timeSpentPerDay";
+                        "  GROUP BY  date_format( so.timestamp, 'yyyy-MM-dd')) AS timeSpentPerDay";
 
                 try {
                     PreparedStatement stmt = connection.prepareStatement(query);
@@ -445,7 +445,24 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                     throw new BenchmarkException("Error Running Query");
                 }
             case 2:
-                return externalQueryManager.runQuery9(userId, infraTypeName);
+            	query = "SELECT Avg(timeSpent) as avgTimeSpent FROM " +
+                        " (SELECT  date_format( so.timestamp, 'yyyy-MM-dd'), count(*)*10 as timeSpent " +
+                        "  FROM PRESENCE so, Infrastructure infra, Infrastructure_Type infraType " +
+                        "  WHERE so.location = infra.id " +
+                        "  AND infra.INFRASTRUCTURE_TYPE_ID = infraType.id AND infraType.name = ? " +
+                        "  AND so.semantic_entity_id = ? " +
+                        "  GROUP BY   date_format( so.timestamp, 'yyyy-MM-dd')) AS timeSpentPerDay";
+
+                try {
+                    PreparedStatement stmt = connection.prepareStatement(query);
+                    stmt.setString (1, infraTypeName);
+                    stmt.setString(2, userId);
+
+                    return externalQueryManager.runTimedQuery(stmt, 9);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
             default:
                 throw new BenchmarkException("No Such Mapping");
         }
