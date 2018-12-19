@@ -103,6 +103,7 @@ public class InfluxDBConnectionManager extends BaseConnectionManager {
 
     public HttpResponse sendQuery(String query) {
         CloseableHttpClient client = HttpClients.createDefault();
+        LOGGER.info(query);
         String url = String.format("http://%s:%s/query?db=%s", SERVER, PORT, DB);
         HttpPost httpPost = new HttpPost(url);
 
