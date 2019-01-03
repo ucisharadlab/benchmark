@@ -2,8 +2,7 @@ import random
 import json
 import datetime
 import uuid
-from parser import Parser
-
+import parser_seed_file
 
 SPEED_SCALED_FILE = "data/speedScaledObservation.json"
 SENSOR_SCALED_FILE = "data/sensorScaledObservation.json"
@@ -98,7 +97,7 @@ class Scale(object):
             print ("IO error")
 
     def speedScale(self):
-        self.seedData = Parser(self.seedFile)
+        self.seedData = parser_seed_file.Parser(self.seedFile)
 
         self.writer = None
         try:
@@ -149,7 +148,7 @@ class Scale(object):
         return self.sensorMap['simSensor_{}_{}'.format(sensor['id'], numCopy)]
 
     def deviceScale(self):
-        self.seedData = Parser(SPEED_SCALED_FILE)
+        self.seedData = parser_seed_file.Parser(SPEED_SCALED_FILE)
 
         self.writer = None
         try:
@@ -178,7 +177,7 @@ class Scale(object):
                 print("IO error")
 
     def timeScale(self):
-        self.seedData = Parser(SENSOR_SCALED_FILE)
+        self.seedData = parser_seed_file.Parser(SENSOR_SCALED_FILE)
 
         self.writer = None
         try:
@@ -211,6 +210,8 @@ class Scale(object):
 class SemanticScale(object):
     def __init__(self, dataDir, seedFile, outputFile, origDays, extendDays, origSpeed, extendSpeed,
                  payloadName, speedScaleNoise, timeScaleNoise, type):
+
+        self.count = 1
         self.outputFile = outputFile
         self.dataDir = dataDir
         self.seedFile = seedFile
@@ -223,6 +224,9 @@ class SemanticScale(object):
         self.speedScaleNoise = speedScaleNoise
         self.timeScaleNoise = timeScaleNoise
         self.writer = open(self.outputFile, "w")
+
+        with open(self.dataDir + 'infrastructure.json') as data_file:
+            self.infra = json.load(data_file)
 
     def getRandAroundPayload(self, payload, scaleNoise):
         if self.type == int:
@@ -254,25 +258,25 @@ class SemanticScale(object):
                 max = payload2 * (1 + scaleNoise)
                 return random.random()*(max - min) + min
 
-    def writeObject(self, timestamp, payload, sensor, entity):
+    def writeObject(self, timestamp, payload, entity):
         try:
             object = {
-                "id": str(uuid.uuid4()),
-                "semanticEntity": entity,
-                "virtualSensor": sensor,
-                "type_": sensor['type_']['semanticObservationType'],
+                "id": self.count,
+                "location": entity,
                 "timeStamp": timestamp.strftime('%Y-%m-%d %H:%M:%S'),
-                "payload": {
-                    self.payloadName: payload
-                }
+                "occupancy":  payload,
+                "green_badges": payload,
+                "yellow_badges": 0,
+                "red_badges": 0
             }
+            self.count += 1
             self.writer.write(json.dumps(object) + '\n')
         except Exception as e:
             print (e)
             print ("IO error")
 
     def speedScale(self):
-        self.seedData = Parser(self.seedFile)
+        self.seedData = parser_seed_file.Parser(self.seedFile)
 
         self.writer = None
         try:
@@ -283,8 +287,8 @@ class SemanticScale(object):
             while prevObservation:
 
                 self.writeObject(datetime.datetime.strptime(prevObservation['timeStamp'], DATE_FORMAT),
-                                 prevObservation['payload'][self.payloadName],
-                                 prevObservation['virtualSensor'], prevObservation['semanticEntity'])
+                                 prevObservation['occupancy'],
+                                 prevObservation['location'])
 
                 currentObservaton = self.seedData.getNext()
 
@@ -298,7 +302,7 @@ class SemanticScale(object):
                     prevObservation = currentObservaton
                     continue
 
-                prevPayload = prevObservation['payload'][self.payloadName]
+                prevPayload = prevObservation['occupancy']
 
                 timestamp = prevTimestamp
                 for i in range(self.extendSpeed / self.origSpeed - 1):
@@ -306,7 +310,7 @@ class SemanticScale(object):
                     payload = self.getRandBetweenPayloads(prevPayload,
                                                           currentObservaton['payload'][self.payloadName],
                                                           self.speedScaleNoise)
-                    self.writeObject(timestamp, payload, prevObservation['virtualSensor'], prevObservation['semanticEntity'])
+                    self.writeObject(timestamp, payload, prevObservation['location'])
                     prevPayload = payload
 
                 prevObservation = currentObservaton
@@ -319,32 +323,64 @@ class SemanticScale(object):
             except Exception as e:
                 print("IO error")
 
-    def timeScale(self):
-        self.seedData = Parser(SPEED_SCALED_FILE)
 
+    def infraScale(self):
+        self.seedData = parser_seed_file.ParserLine(SPEED_SCALED_FILE)
         self.writer = None
         try:
             self.writer = open(self.outputFile, "w")
-
             currentObservation = self.seedData.getNext()
-
+            seedLocation = currentObservation['location']
             while currentObservation:
                 self.writeObject(datetime.datetime.strptime(currentObservation['timeStamp'], DATE_FORMAT),
-                                 currentObservation['payload'][self.payloadName],
-                                 currentObservation['virtualSensor'], currentObservation['semanticEntity'])
-                timestamp = datetime.datetime.strptime(currentObservation['timeStamp'], DATE_FORMAT)
-                for i in range(1, self.extendDays / self.origDays):
-                    payload = self.getRandAroundPayload(currentObservation['payload'][self.payloadName],
-                                                        self.timeScaleNoise)
-                    timestamp += datetime.timedelta(days=i * self.origDays)
-                    self.writeObject(timestamp, payload, currentObservation['virtualSensor'], currentObservation['semanticEntity'])
+                                 currentObservation['occupancy'],
+                                 currentObservation['location'])
+
+                for i in range(len(self.infra)):
+                    if self.infra[i]["name"] == seedLocation:
+                        continue
+
+                    payload = self.getRandAroundPayload(currentObservation['occupancy'],
+                                                          self.speedScaleNoise)
+                    self.writeObject(datetime.datetime.strptime(currentObservation['timeStamp'], DATE_FORMAT), payload,
+                                     self.infra[i]["name"])
 
                 currentObservation = self.seedData.getNext()
 
         except KeyError as e:
-            print("Time IO error", e)
+            print("Device IO error", e)
         finally:
             try:
                 self.writer.close()
             except Exception as e:
                 print("IO error")
+
+    # def timeScale(self):
+    #     self.seedData = Parser(SPEED_SCALED_FILE)
+    #
+    #     self.writer = None
+    #     try:
+    #         self.writer = open(self.outputFile, "w")
+    #
+    #         currentObservation = self.seedData.getNext()
+    #
+    #         while currentObservation:
+    #             self.writeObject(datetime.datetime.strptime(currentObservation['timeStamp'], DATE_FORMAT),
+    #                              currentObservation['payload'][self.payloadName],
+    #                              currentObservation['virtualSensor'], currentObservation['semanticEntity'])
+    #             timestamp = datetime.datetime.strptime(currentObservation['timeStamp'], DATE_FORMAT)
+    #             for i in range(1, self.extendDays / self.origDays):
+    #                 payload = self.getRandAroundPayload(currentObservation['payload'][self.payloadName],
+    #                                                     self.timeScaleNoise)
+    #                 timestamp += datetime.timedelta(days=i * self.origDays)
+    #                 self.writeObject(timestamp, payload, currentObservation['virtualSensor'], currentObservation['semanticEntity'])
+    #
+    #             currentObservation = self.seedData.getNext()
+    #
+    #     except KeyError as e:
+    #         print("Time IO error", e)
+    #     finally:
+    #         try:
+    #             self.writer.close()
+    #         except Exception as e:
+    #             print("IO error")

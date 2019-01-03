@@ -5,29 +5,15 @@ import uuid
 import numpy as np
 
 from utils import helper
+from utils.helper import toUTC
 
-def createPresence(dt, end, step, dataDir):
 
-    with open(dataDir + 'virtualSensor.json') as data_file:
-        vs = json.load(data_file)
-    for v in vs:
-        if v['type_']['id'] == "WiFiToPresence":
-            pickedSensor = v
-            break
+def createPresence(numUsers, avgUsersPerDay, dt, end, dataDir):
 
-    with open(dataDir + 'sensor.json') as data_file:
-        data = json.load(data_file)
-    sensors = []
-    for sensor in data:
-        if sensor['type_']['id'] == "WiFiAP":
-            sensors.append(sensor)
-    numSenors = len(sensors)
-
-    with open(dataDir + 'infrastructure.json') as data_file:
+    with open(dataDir + 'mobileland.json') as data_file:
         rooms = json.load(data_file)
-    with open(dataDir + 'user.json') as data_file:
-        users = json.load(data_file)
 
+    users = list(range(1, numUsers+1))
     numRooms = len(rooms)
     numUsers = len(users)
 
@@ -35,30 +21,29 @@ def createPresence(dt, end, step, dataDir):
 
     print ("Creating Random Presence Data " + str(numUsers))
 
-    type_ = pickedSensor["type_"]["semanticObservationType"]
-    helper.deleteSOTypeAttributes(type_)
-    helper.deleteVirtualSensorAttributes(pickedSensor)
     count = 0
     while dt < end:
-        for j in np.random.choice(numUsers, numUsers/10, replace=False):
-            id = str(uuid.uuid4())
-            helper.deleteUserAttributes(users[j])
-            sobs = {
-                "id": id,
-                "timeStamp": dt.strftime('%Y-%m-%d %H:%M:%S'),
-                "virtualSensor": pickedSensor,
-                "type_": type_,
-                "semanticEntity": users[j],
-                "payload": {
-                    "location": rooms[random.randint(0, numRooms-1)]['id']
+        for j in np.random.choice(numUsers, avgUsersPerDay+np.random.randint(-50, 10), replace=False):
+            startInternal, endInternal = randomTimeRange(dt)
+            while startInternal < endInternal:
+                step = datetime.timedelta(minutes=np.random.randint(15, 80))
+                sobs = {
+                    "id": count+1,
+                    "start_timestamp": toUTC(startInternal)-7*3600,
+                    "end_timestamp": toUTC(startInternal+step)-7*3600,
+                    "user": users[j],
+                    "location": rooms[random.randint(0, numRooms-1)]['name']
                 }
-            }
-            fpObj.write(json.dumps(sobs) + '\n')
-            
-            if count % 200000 == 0:
-                print ("{} Random Presence Observations".format(count))
-            count += 1
+                fpObj.write(json.dumps(sobs) + '\n')
+                count += 1
+                startInternal += step
 
-        dt += step
+        dt += datetime.timedelta(days=1)
 
     fpObj.close()
+
+
+def randomTimeRange(start):
+    t1 = start + datetime.timedelta(minutes=np.random.randint(8*60, 10*60))
+    t2 = t1 + datetime.timedelta(minutes=np.random.randint(6*60, 10*60))
+    return t1, t2

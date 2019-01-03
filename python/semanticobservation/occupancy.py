@@ -6,7 +6,7 @@ import numpy as np
 
 from utils import helper
 
-from extrapolate import Scale, SemanticScale
+from extrapolate import SemanticScale
 
 MAX_OCCUPANCY = 100
 
@@ -72,19 +72,12 @@ def createOccupancy(dt, end, step, dataDir):
 def createIntelligentOccupancy(origDays, extendDays, origSpeed, extendSpeed, speedScaleNoise,
                                timeScaleNoise, dataDir):
 
-    with open(dataDir + 'semanticObservation.json') as data_file:
-        observations = json.load(data_file)
-
-    seedFile = open("data/seedPresence.json", "w")
-    for observation in observations:
-        if observation['type_']['id'] == "occupancy":
-            seedFile.write(json.dumps(observation) + '\n')
-    seedFile.close()
-
-    seedFile = "data/seedPresence.json"
+    seedFile = dataDir + "occupancy.json"
     outputFile = "data/occupancyData.json"
     scale = SemanticScale(dataDir, seedFile, outputFile, origDays, extendDays, origSpeed, extendSpeed,
                           "occupancy", speedScaleNoise, timeScaleNoise, int)
 
     scale.speedScale()
-    scale.timeScale()
+    scale.infraScale()
+
+    return scale.count

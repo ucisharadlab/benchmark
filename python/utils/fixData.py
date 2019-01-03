@@ -189,4 +189,6 @@ def fixSemanticObservations():
         writer.write(json.dumps(observations[-1]) + '\n]')
 
 
-fixSemanticObservations()
+
+
+# fixSemanticObservations()
