@@ -1,3 +1,4 @@
+import time
 
 def deleteSensorAttributes(sensor):
     try:
@@ -49,3 +50,6 @@ def deleteInfraAttributes(infra):
     except:
         pass
     return infra
+
+def toUTC(timestamp):
+    return int(time.mktime(timestamp.timetuple()))*1000
