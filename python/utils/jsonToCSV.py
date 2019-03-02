@@ -107,7 +107,7 @@ def copySemanticObservations(src, dest, mapping):
                                      toUTC(datetime.strptime(observation['timeStamp'], "%Y-%m-%d %H:%M:%S")),
                                      observation['virtualSensor']['id']])
             elif observation["type_"]["id"] == 'occupancy':
-                occupancyWriter.writerow([observation['id'], observation['semanticEntity']['id'], observation['payload']['location'],
+                occupancyWriter.writerow([observation['id'], observation['semanticEntity']['id'], observation['payload']['occupancy'],
                                      toUTC(datetime.strptime(observation['timeStamp'], "%Y-%m-%d %H:%M:%S")),
                                      observation['virtualSensor']['id']])
             if count % 100000 == 0:
