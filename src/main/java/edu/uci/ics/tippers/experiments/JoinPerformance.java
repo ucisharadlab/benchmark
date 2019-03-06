@@ -483,6 +483,86 @@ public class JoinPerformance {
         }
     }
 
+    private Duration runPGBigJoinQuery(String userId, Date startTime, Date endTime){
+
+        String query = "SELECT u.name, s1.location " +
+                "FROM PRESENCE s1, PRESENCE s2, USERS u " +
+                "WHERE s1.timeStamp > ?  and s1.timestamp < ?" +
+                "AND s2.timeStamp = s1.timeStamp " +
+                "AND s1.semantic_entity_id = ? AND s1.semantic_entity_id != s2.semantic_entity_id " +
+                "AND s2.semantic_entity_id = u.id AND s1.location = s2.location ";
+        try {
+            PreparedStatement stmt = pgConnection.prepareStatement(query);
+            stmt.setDate (1, new java.sql.Date(startTime.getTime()));
+            stmt.setDate (2, new java.sql.Date(startTime.getTime()));
+            stmt.setString(3, userId);
+
+            return runPostgreSQLTimedQuery(stmt, 12);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new BenchmarkException("Error Running Query");
+        }
+    }
+
+    private Duration runGridDBBigJoinQuery(String userId, Date startTime, Date endTime){
+        Instant start = Instant.now();
+
+        try {
+            Map<String, String> userMap = runQueryWithRows("User",
+                    "SELECT * FROM User")
+                    .stream().collect(Collectors.toMap(e -> {
+                        try {
+                            return e.getString(0);
+                        } catch (GSException e1) {
+                            e1.printStackTrace();
+                            return null;
+                        }
+                    }, e -> {
+                        try {
+                            return e.getString(2);
+                        } catch (GSException e1) {
+                            e1.printStackTrace();
+                            return null;
+                        }
+                    }));
+
+            RowWriter<String> writer = new RowWriter<>(outputDir, Database.GRIDDB, 3, getFileFromQuery(12));
+
+            Container<String, Row> container = gridStore.getContainer("Presence");
+            Query<Row> gridDBQuery = container.query(String.format("SELECT * FROM Presence WHERE semanticEntityId = '%s' " +
+                            "AND timeStamp >= TIMESTAMP('%s') AND timeStamp <= TIMESTAMP('%s')",
+                    userId, sdf.format(startTime), sdf.format(endTime)));
+            RowSet<Row> rows = gridDBQuery.fetch();
+
+            while (rows.hasNext()) {
+
+                Row row = rows.next();
+
+                String query = String.format("SELECT * FROM Presence WHERE timeStamp = TIMESTAMP('%s') " +
+                                "AND location='%s' AND semanticEntityId != '%s'", sdf.format(row.getTimestamp(1)),
+                        row.getString(3), userId);
+                List<Row> observations = runQueryWithRows("Presence", query);
+
+                observations.forEach(e->{
+                    if (writeOutput) {
+                        try {
+                            writer.writeString(userMap.get(e.getString(4)) + ", " +e.getString(3));
+                        } catch (IOException e1) {
+                            e1.printStackTrace();
+                        }
+
+                    }
+                });
+            }
+            writer.close();
+            Instant end = Instant.now();
+            return Duration.between(start, end);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new BenchmarkException("Error Running Query");
+        }
+    }
+
     private Duration runPGQuery(List<String> sensorNames, Date startTime, Date endTime) throws BenchmarkException {
 
         String query = "SELECT obs.timeStamp, obs.payload FROM OBSERVATION_EXP obs INNER JOIN SENSOR_EXP sen ON sen.id=obs.sensor_Id " +
@@ -614,7 +694,7 @@ public class JoinPerformance {
 
     private List<Duration> runExperiment() {
 
-        System.out.println("Creating Schema And Adding Data");
+//        System.out.println("Creating Schema And Adding Data");
 
 //        dropGridDBSchema();gt
 //        dropPgSchema();
@@ -625,7 +705,7 @@ public class JoinPerformance {
 //        addPgData();
 //        addGridDBData();
 
-        System.out.println("Done Adding Data, Running Queries Now");
+//        System.out.println("Done Adding Data, Running Queries Now");
 
         int numQueries = 0;
         Duration runTime = Duration.ZERO;
