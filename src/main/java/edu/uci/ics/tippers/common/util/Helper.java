@@ -16,6 +16,9 @@ public class Helper {
 		return String.format(Constants.QUERY_FILE_FORMAT, query);
 	}
 
+	public static String getFileFromQueryWithVersion(int query, int version) {
+		return String.format(Constants.QUERY_FILE_VER_FORMAT, query, version);
+	}
 	// Increase timestamp for each observation based on observation speed
 	public String increaseTimestamp(String startTime, int obsSpeed) {
 		Timestamp ts = Timestamp.valueOf(startTime);

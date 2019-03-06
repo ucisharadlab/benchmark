@@ -36,7 +36,9 @@ import java.util.concurrent.*;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
+import static edu.uci.ics.tippers.common.util.Helper.getFileFromQueryWithVersion;
 import static edu.uci.ics.tippers.common.util.Helper.getFileFromQuery;
+
 
 public class JoinPerformance {
 
@@ -430,39 +432,24 @@ public class JoinPerformance {
         }
     }
 
-    private Duration runGridDBTimedQuery(String containerName, String query, int queryNum) throws BenchmarkException {
+    private List<List<Object>> runPGQueryWithRows(PreparedStatement stmt) throws BenchmarkException {
         try {
-            Instant startTime = Instant.now();
-            Container<String, Row> container = gridStore.getContainer(containerName);
-            ContainerInfo containerInfo;
-            Query<Row> gridDBQuery = container.query(query);
-            RowSet<Row> rows = gridDBQuery.fetch();
+            ResultSet rs = stmt.executeQuery();
+            ResultSetMetaData rsmd = rs.getMetaData();
+            int columnsNumber = rsmd.getColumnCount();
+            List<List<Object>> rows = new ArrayList<>();
 
-            Row row;
-            RowWriter<String> writer = new RowWriter<>(outputDir, Database.GRIDDB, 3,
-                    getFileFromQuery(queryNum));
-            while (rows.hasNext()) {
-                row = rows.next();
-                if (writeOutput) {
-                    StringBuilder line = new StringBuilder("");
-                    containerInfo = row.getSchema();
-                    int columnCount = containerInfo.getColumnCount();
-                    for (int i = 0; i < columnCount; i++) {
-                        if (containerInfo.getColumnInfo(i).getType().equals(GSType.STRING_ARRAY))
-                            line.append(Arrays.toString(row.getStringArray(i))).append("\t");
-                        else
-                            line.append(row.getValue(i)).append("\t");
-                    }
-                    writer.writeString(line.toString());
-                }
+            while(rs.next()) {
+                List<Object> row = new ArrayList<>();
+                for(int i = 1; i <= columnsNumber; i++)
+                    row.add(rs.getObject(i));
+                rows.add(row);
             }
-            writer.close();
-            Instant endTime = Instant.now();
-            return Duration.between(startTime, endTime);
-
-        } catch (IOException e) {
+            rs.close();
+            return rows;
+        } catch (SQLException e) {
             e.printStackTrace();
-            throw new BenchmarkException("Error Running Query On GridDB");
+            throw new BenchmarkException("Error Running Query");
         }
     }
 
@@ -499,6 +486,66 @@ public class JoinPerformance {
 
             return runPostgreSQLTimedQuery(stmt, 12);
         } catch (SQLException e) {
+            e.printStackTrace();
+            throw new BenchmarkException("Error Running Query");
+        }
+    }
+
+    private Duration runPGBigAppJoinQuery(String userId, Date startTime, Date endTime){
+
+        Instant start = Instant.now();
+
+        try {
+            String query = "SELECT id, name FROM User";
+            PreparedStatement stmt = pgConnection.prepareStatement(query);
+
+            Map<String, String> userMap = runPGQueryWithRows(stmt)
+                    .stream().collect(Collectors.toMap(e -> {
+                        return (String)e.get(0);
+                    }, e -> {
+                        return (String)e.get(1);
+                    }));
+
+            RowWriter<String> writer = new RowWriter<>(outputDir, Database.POSTGRESQL, 3, getFileFromQuery(12));
+
+            Container<String, Row> container = gridStore.getContainer("Presence");
+            query = String.format("SELECT * FROM Presence WHERE semanticEntityId = '%s' " +
+                            "AND timeStamp >= TIMESTAMP('%s') AND timeStamp <= TIMESTAMP('%s')",
+                    userId, sdf.format(startTime), sdf.format(endTime));
+            stmt = pgConnection.prepareStatement(query);
+            ResultSet rs = stmt.executeQuery();
+            ResultSetMetaData rsmd = rs.getMetaData();
+            int columnsNumber = rsmd.getColumnCount();
+            List<List<Object>> rows = new ArrayList<>();
+
+            while(rs.next()) {
+
+                List<Object> row = new ArrayList<>();
+                for(int i = 1; i <= columnsNumber; i++)
+                    row.add(rs.getObject(i));
+
+                query = String.format("SELECT * FROM Presence WHERE timeStamp = TIMESTAMP('%s') " +
+                                "AND location='%s' AND semanticEntityId != '%s'", sdf.format(row.get(1)),
+                        row.get(3), userId);
+                stmt = pgConnection.prepareStatement(query);
+                List<List<Object>> observations = runPGQueryWithRows(stmt);
+
+                observations.forEach(e->{
+                    if (writeOutput) {
+                        try {
+                            writer.writeString(userMap.get(e.get(4)) + ", " +e.get(3));
+                        } catch (IOException e1) {
+                            e1.printStackTrace();
+                        }
+
+                    }
+                });
+            }
+            rs.close();
+            writer.close();
+            Instant end = Instant.now();
+            return Duration.between(start, end);
+        } catch (Exception e) {
             e.printStackTrace();
             throw new BenchmarkException("Error Running Query");
         }
@@ -692,7 +739,7 @@ public class JoinPerformance {
 
     }
 
-    private List<Duration> runExperiment() {
+    private List<Duration> runExperiment(int selectivity) {
 
 //        System.out.println("Creating Schema And Adding Data");
 
@@ -705,13 +752,15 @@ public class JoinPerformance {
 //        addPgData();
 //        addGridDBData();
 
-//        System.out.println("Done Adding Data, Running Queries Now");
+//        System.out.println("Running Queries Now");
+        System.out.println("Running Queries");
 
+        System.out.println("Running PgSQL Small Join");
         int numQueries = 0;
         Duration runTime = Duration.ZERO;
         String values[];
         List<Duration> queryRunTimes = new ArrayList<>();
-        QueryCSVReader reader = new QueryCSVReader(queriesDir + getFileFromQuery(11));
+        QueryCSVReader reader = new QueryCSVReader(queriesDir + getFileFromQueryWithVersion(11, selectivity));
         try {
 
             while ((values = reader.readNextLine()) != null) {
@@ -729,8 +778,9 @@ public class JoinPerformance {
             queryRunTimes.add(Constants.MAX_DURATION);
         }
 
+        System.out.println("Running GridDB Small App Join");
         numQueries = 0;
-        reader = new QueryCSVReader(queriesDir + getFileFromQuery(11));
+        reader = new QueryCSVReader(queriesDir + getFileFromQueryWithVersion(11, selectivity));
         try {
             while ((values = reader.readNextLine()) != null) {
                 List<String> sensorNames = Arrays.asList(values[1].split(";"));
@@ -748,6 +798,71 @@ public class JoinPerformance {
             queryRunTimes.add(Constants.MAX_DURATION);
         }
 
+        // --------------------------------------------------------------------------
+
+        System.out.println("Running PgSQL Big Join");
+        numQueries = 0;
+        queryRunTimes = new ArrayList<>();
+        reader = new QueryCSVReader(queriesDir + getFileFromQueryWithVersion(12, selectivity));
+        try {
+
+            while ((values = reader.readNextLine()) != null) {
+                String userId = values[1];
+                Date start, end;
+                start = sdf.parse(values[2]);
+                end = sdf.parse(values[3]);
+                runTime = runWithThread(()->runPGBigJoinQuery(userId, start, end));
+                numQueries++;
+                queryRunTimes.add(runTime);
+                System.out.println(String.format("Postgres Count: %s Time: %s", numQueries, runTime.toString()));
+            }
+        } catch (Exception | Error e) {
+            e.printStackTrace();
+            queryRunTimes.add(Constants.MAX_DURATION);
+        }
+
+        System.out.println("Running GridDB Big App Join");
+        numQueries = 0;
+        reader = new QueryCSVReader(queriesDir + getFileFromQueryWithVersion(12, selectivity));
+        try {
+            while ((values = reader.readNextLine()) != null) {
+                String userId = values[1];
+                Date start, end;
+                start = sdf.parse(values[2]);
+                end = sdf.parse(values[3]);
+
+                runTime = runTime.plus(runWithThread(()->runGridDBBigJoinQuery(userId, start, end)));
+                numQueries++;
+                queryRunTimes.add(runTime);
+                System.out.println(String.format("GridDB Count: %s Time: %s", numQueries, runTime.toString()));
+            }
+        } catch (Exception | Error e) {
+            e.printStackTrace();
+            queryRunTimes.add(Constants.MAX_DURATION);
+        }
+
+        System.out.println("Running PgSQL Big App Join");
+        numQueries = 0;
+        queryRunTimes = new ArrayList<>();
+        reader = new QueryCSVReader(queriesDir + getFileFromQueryWithVersion(12, selectivity));
+        try {
+
+            while ((values = reader.readNextLine()) != null) {
+                String userId = values[1];
+                Date start, end;
+                start = sdf.parse(values[2]);
+                end = sdf.parse(values[3]);
+                runTime = runWithThread(()->runPGBigAppJoinQuery(userId, start, end));
+                numQueries++;
+                queryRunTimes.add(runTime);
+                System.out.println(String.format("Postgres Count: %s Time: %s", numQueries, runTime.toString()));
+            }
+        } catch (Exception | Error e) {
+            e.printStackTrace();
+            queryRunTimes.add(Constants.MAX_DURATION);
+        }
+
+//        System.out.println("Removing Data And Schema");
 //        dropGridDBSchmea();
 //        dropPgSchema();
 
@@ -770,9 +885,11 @@ public class JoinPerformance {
 
     public static void main(String args[]) {
         JoinPerformance exp = new JoinPerformance();
-        List<Duration> results = exp.runExperiment();
-        LOGGER.info(results);
-        System.out.print(results);
+        for(int i=1; i<5; i++) {
+            List<Duration> results = exp.runExperiment(i);
+            LOGGER.info(results);
+            System.out.print(results);
+        }
     }
 
 }
