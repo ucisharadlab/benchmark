@@ -572,7 +572,7 @@ public abstract class BaseQueryManager {
     public void runSelectivityExperiment() throws BenchmarkException{
         Map<Integer, Duration> ans = new HashMap<>();
 
-        for(int i=1; i<=5; i++) {
+        for(int i=1; i<=6; i++) {
             Map<Integer, Duration> results = selectivityBasedQuery(i);
             LOGGER.info(i);
             LOGGER.info(results);
