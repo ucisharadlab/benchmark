@@ -19,6 +19,8 @@ public class Constants {
 
     public static String QUERY_FILE_FORMAT = "query%s.txt";
 
+    public static String QUERY_FILE_VER_FORMAT = "query%sv%s.txt";
+
     public static int PGSQL_BATCH_SIZE = 50000;
 
     public static int MONGO_BATCH_SIZE = 50000;

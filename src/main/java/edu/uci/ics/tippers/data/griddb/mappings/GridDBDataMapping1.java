@@ -219,44 +219,44 @@ public class GridDBDataMapping1 extends GridDBBaseDataMapping {
             }
 
             // Adding Observations
-//            BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
-//                    Observation.class);
-//            Observation obs = null;
-//            int count = 0;
-//
-//            while ((obs = reader.readNext()) != null) {
-//                String collectionName = Constants.GRIDDB_OBS_PREFIX + obs.getSensor().getId();
-//
-//                TimeSeries<Row> timeSeries = gridStore.getTimeSeries(collectionName);
-//
-//                row = timeSeries.createRow();
-//                row.setValue(0, obs.getTimeStamp());
-//                row.setValue(1, obs.getId());
-//
-//
-//
-//                if (obs.getSensor().getType_().getId().equals("Thermometer")) {
-//                    row.setValue(2, obs.getPayload().get("temperature").getAsInt());
-//                } else if (obs.getSensor().getType_().getId().equals("WiFiAP")) {
-//                    String query = String.format("SELECT * FROM %s WHERE timeStamp=TIMESTAMP('%s')",
-//                            collectionName, qsdf.format(obs.getTimeStamp()));
-//                    List<Row> rowAdded = runQueryWithRows(collectionName, query);
-//                    if (rowAdded == null || rowAdded.isEmpty()) {
-//                        row.setValue(2, new String[]{obs.getPayload().get("clientId").getAsString()});
-//                    } else {
-//                        String[] arr = rowAdded.get(0).getStringArray(2);
-//                        arr = Arrays.copyOf(arr, arr.length +1);
-//                        arr[arr.length-1] = obs.getPayload().get("clientId").getAsString();
-//                        row.setValue(2, arr);
-//                    }
-//                } else if (obs.getSensor().getType_().getId().equals("WeMo")) {
-//                    row.setValue(2, obs.getPayload().get("currentMilliWatts").getAsInt());
-//                    row.setValue(3, obs.getPayload().get("onTodaySeconds").getAsInt());
-//                }
-//                timeSeries.put(row);
-//                if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s Observations", count));
-//                count ++;
-//            }
+            BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
+                    Observation.class);
+            Observation obs = null;
+            int count = 0;
+
+            while ((obs = reader.readNext()) != null) {
+                String collectionName = Constants.GRIDDB_OBS_PREFIX + obs.getSensor().getId();
+
+                TimeSeries<Row> timeSeries = gridStore.getTimeSeries(collectionName);
+
+                row = timeSeries.createRow();
+                row.setValue(0, obs.getTimeStamp());
+                row.setValue(1, obs.getId());
+
+
+
+                if (obs.getSensor().getType_().getId().equals("Thermometer")) {
+                    row.setValue(2, obs.getPayload().get("temperature").getAsInt());
+                } else if (obs.getSensor().getType_().getId().equals("WiFiAP")) {
+                    String query = String.format("SELECT * FROM %s WHERE timeStamp=TIMESTAMP('%s')",
+                            collectionName, qsdf.format(obs.getTimeStamp()));
+                    List<Row> rowAdded = runQueryWithRows(collectionName, query);
+                    if (rowAdded == null || rowAdded.isEmpty()) {
+                        row.setValue(2, new String[]{obs.getPayload().get("clientId").getAsString()});
+                    } else {
+                        String[] arr = rowAdded.get(0).getStringArray(2);
+                        arr = Arrays.copyOf(arr, arr.length +1);
+                        arr[arr.length-1] = obs.getPayload().get("clientId").getAsString();
+                        row.setValue(2, arr);
+                    }
+                } else if (obs.getSensor().getType_().getId().equals("WeMo")) {
+                    row.setValue(2, obs.getPayload().get("currentMilliWatts").getAsInt());
+                    row.setValue(3, obs.getPayload().get("onTodaySeconds").getAsInt());
+                }
+                timeSeries.put(row);
+                if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s Observations", count));
+                count ++;
+            }
 
         }
         catch(ParseException | IOException e) {
@@ -374,30 +374,30 @@ public class GridDBDataMapping1 extends GridDBBaseDataMapping {
             }
 
             // Adding Semantic Observations
-//            BigJsonReader<SemanticObservation> reader = new BigJsonReader<>(dataDir + DataFiles.SO.getPath(),
-//                    SemanticObservation.class);
-//            SemanticObservation sobs = null;
-//            int count = 0;
-//
-//            while ((sobs = reader.readNext()) != null) {
-//                String collectionName = Constants.GRIDDB_SO_PREFIX + sobs.getSemanticEntity().get("id").getAsString();
-//
-//                TimeSeries<Row> timeSeries = gridStore.getTimeSeries(collectionName);
-//
-//                row = timeSeries.createRow();
-//                row.setValue(1, sobs.getId());
-//                row.setValue(0, sobs.getTimeStamp());
-//                row.setValue(2, sobs.getVirtualSensor().getId());
-//
-//                if (sobs.getType_().getId().equals("occupancy")) {
-//                    row.setValue(3, sobs.getPayload().get("occupancy").getAsInt());
-//                } else if (sobs.getType_().getId().equals("presence")) {
-//                    row.setValue(3, sobs.getPayload().get("location").getAsString());
-//                }
-//                timeSeries.put(row);
-//                if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s S Observations", count));
-//                count ++;
-//            }
+            BigJsonReader<SemanticObservation> reader = new BigJsonReader<>(dataDir + DataFiles.SO.getPath(),
+                    SemanticObservation.class);
+            SemanticObservation sobs = null;
+            int count = 0;
+
+            while ((sobs = reader.readNext()) != null) {
+                String collectionName = Constants.GRIDDB_SO_PREFIX + sobs.getSemanticEntity().get("id").getAsString();
+
+                TimeSeries<Row> timeSeries = gridStore.getTimeSeries(collectionName);
+
+                row = timeSeries.createRow();
+                row.setValue(1, sobs.getId());
+                row.setValue(0, sobs.getTimeStamp());
+                row.setValue(2, sobs.getVirtualSensor().getId());
+
+                if (sobs.getType_().getId().equals("occupancy")) {
+                    row.setValue(3, sobs.getPayload().get("occupancy").getAsInt());
+                } else if (sobs.getType_().getId().equals("presence")) {
+                    row.setValue(3, sobs.getPayload().get("location").getAsString());
+                }
+                timeSeries.put(row);
+                if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s S Observations", count));
+                count ++;
+            }
 
         }
         catch(ParseException | IOException e) {
