@@ -295,6 +295,28 @@ public class AsterixDBQueryManager extends BaseQueryManager{
                 throw new BenchmarkException("No Such Mapping");
         }
     }
+
+    @Override
+    public Duration runQuery8WithSelectivity(String userId, Date startTime, Date endTime) throws BenchmarkException {
+        switch (mapping) {
+            case 1:
+            case 2:
+                return runTimedQuery(
+                        String.format("SELECT se.name, s1.payload.location " +
+                                        " FROM SemanticObservation s1, SemanticObservation s2, User se, SemanticObservationType st" +
+                                        " WHERE s1.timeStamp >= datetime(\"%s\") AND s1.timeStamp <= datetime(\"%s\") AND " +
+                                        " s2.timeStamp = s1.timeStamp AND " +
+                                        " s1.typeId = s2.typeId AND s2.typeId = st.id AND st.name = \"presence\" AND " +
+                                        " s1.payload.location = s2.payload.location " +
+                                        " AND s1.timeStamp = s2.timeStamp AND s1.semanticEntityId = \"%s\" " +
+                                        " AND s2.semanticEntityId = se.id AND s2.semanticEntityId != s1.semanticEntityId",
+                                sdf.format(startTime), sdf.format(endTime), userId), 8
+                );
+            default:
+                throw new BenchmarkException("No Such Mapping");
+        }
+    }
+
     @Override
     public Duration runQuery9(String userId, String infraTypeName) throws BenchmarkException {
         switch (mapping) {
