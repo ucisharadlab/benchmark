@@ -814,6 +814,72 @@ public class GridDBQueryManager extends BaseQueryManager {
     }
 
     @Override
+    public Duration runQuery8WithSelectivity(String userId, Date startTime, Date endTime) throws BenchmarkException {
+        // TODO: Fix Error Due to TimeZone
+        Instant start = Instant.now();
+        switch (mapping) {
+            case 1:
+            case 2:
+                try {
+                    Map<String, String> userMap = runQueryWithRows("User",
+                            "SELECT * FROM User")
+                            .stream().collect(Collectors.toMap(e -> {
+                                try {
+                                    return e.getString(0);
+                                } catch (GSException e1) {
+                                    e1.printStackTrace();
+                                    return null;
+                                }
+                            }, e -> {
+                                try {
+                                    return e.getString(2);
+                                } catch (GSException e1) {
+                                    e1.printStackTrace();
+                                    return null;
+                                }
+                            }));
+
+                    RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(8));
+
+                    Container<String, Row> container = gridStore.getContainer("Presence");
+                    Query<Row> gridDBQuery = container.query(String.format("SELECT * FROM Presence WHERE semanticEntityId = '%s' " +
+                                    "AND timeStamp >= TIMESTAMP('%s') AND timeStamp <= TIMESTAMP('%s')",
+                            userId, sdf.format(startTime), sdf.format(endTime)));
+                    RowSet<Row> rows = gridDBQuery.fetch();
+
+                    while (rows.hasNext()) {
+
+                        Row row = rows.next();
+
+                        String query = String.format("SELECT * FROM Presence WHERE timeStamp = TIMESTAMP('%s') " +
+                                        "AND location='%s' AND semanticEntityId != '%s'", sdf.format(row.getTimestamp(1)),
+                                row.getString(3), userId);
+                        List<Row> observations = runQueryWithRows("Presence", query);
+
+                        observations.forEach(e->{
+                            if (writeOutput) {
+                                try {
+                                    writer.writeString(userMap.get(e.getString(4)) + ", " +e.getString(3));
+                                } catch (IOException e1) {
+                                    e1.printStackTrace();
+                                }
+
+                            }
+                        });
+                    }
+                    writer.close();
+                    Instant end = Instant.now();
+                    return Duration.between(start, end);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
+            default:
+                throw new BenchmarkException("No such mapping");
+        }
+    }
+
+    @Override
     public Duration runQuery9(String userId, String infraTypeName) throws BenchmarkException {
         // TODO: Fix Error Due to TimeZone
         switch (mapping) {
@@ -1726,7 +1792,7 @@ public class GridDBQueryManager extends BaseQueryManager {
                 throw new BenchmarkException("No Such Mapping");
         }
     }
-    
+
     public static void main(String args[]) throws GSException {
         GridDBQueryManager queryManager = new GridDBQueryManager(1, null, null, true, 1);
         Scanner sc = new Scanner(System.in);

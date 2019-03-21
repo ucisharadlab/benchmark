@@ -522,6 +522,70 @@ public class InfluxDBQueryManager extends BaseQueryManager {
     }
 
     @Override
+    public Duration runQuery8WithSelectivity(String userId, Date startTime, Date endTime) throws BenchmarkException {
+        // TODO: Fix Error Due to TimeZone
+        switch (mapping) {
+            case 2:
+                Instant start = Instant.now();
+                try {
+                    Map<String, String> userMap = runMetadataQueryWithRows(
+                            "SELECT * FROM Users")
+                            .stream().collect(Collectors.toMap(e -> {
+                                try {
+                                    return (String)e.get(0);
+                                } catch (Exception e1) {
+                                    e1.printStackTrace();
+                                    return null;
+                                }
+                            }, e -> {
+                                try {
+                                    return (String)e.get(2);
+                                } catch (Exception e1) {
+                                    e1.printStackTrace();
+                                    return null;
+                                }
+                            }));
+
+                    RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(8));
+
+                    JSONArray results = runQueryWithRows(String.format("SELECT id, time,  virtualSensorId, location, semanticEntityId FROM presence WHERE semanticEntityId = '%s' " +
+                                    "AND time >= '%s' AND time <= '%s'",
+                            userId, sdf.format(startTime), sdf.format(endTime)));
+                    Iterator<Object> rows = results.iterator();
+
+                    while (rows.hasNext()) {
+
+                        JSONArray row = (JSONArray) rows.next();
+
+                        String query = String.format("SELECT id, time, virtualSensorId, location, semanticEntityId FROM presence WHERE time = '%s' " +
+                                        "AND location='%s' AND semanticEntityId != '%s'", sdf.format(row.getString(1)),
+                                row.getString(3), userId);
+                        JSONArray observations = runQueryWithRows(query);
+
+                        observations.forEach(e->{
+                            if (writeOutput) {
+                                try {
+                                    writer.writeString(userMap.get(((JSONArray)e).getString(4)) + ", " +((JSONArray)e).getString(3));
+                                } catch (IOException e1) {
+                                    e1.printStackTrace();
+                                }
+
+                            }
+                        });
+                    }
+                    writer.close();
+                    Instant end = Instant.now();
+                    return Duration.between(start, end);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
+            default:
+                throw new BenchmarkException("No such mapping");
+        }
+    }
+
+    @Override
     public Duration runQuery9(String userId, String infraTypeName) throws BenchmarkException {
         // TODO: Fix Error Due to TimeZone
         switch (mapping) {
