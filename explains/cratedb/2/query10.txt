@@ -1,0 +1,14 @@
+== Physical Plan ==
+*Project [name#3621, timeStamp#3619, occupancy#3618]
++- *Sort [semantic_entity_id#3617 ASC NULLS FIRST, timeStamp#3619 ASC NULLS FIRST], true, 0
+   +- Exchange rangepartitioning(semantic_entity_id#3617 ASC NULLS FIRST, timeStamp#3619 ASC NULLS FIRST, 200)
+      +- *Project [name#3621, timeStamp#3619, occupancy#3618, semantic_entity_id#3617]
+         +- *SortMergeJoin [semantic_entity_id#3617], [id#3623], Inner
+            :- *Sort [semantic_entity_id#3617 ASC NULLS FIRST], false, 0
+            :  +- Exchange hashpartitioning(semantic_entity_id#3617, 200)
+            :     +- *Filter (((isnotnull(timeStamp#3619) && (cast(timeStamp#3619 as string) > 2017-11-08 00:00:00.0)) && (cast(timeStamp#3619 as string) < 2017-11-10 00:00:00.0)) && isnotnull(semantic_entity_id#3617))
+            :        +- HiveTableScan [semantic_entity_id#3617, occupancy#3618, timeStamp#3619], HiveTableRelation `tippersdb`.`occupancy`, org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe, [id#3616, semantic_entity_id#3617, occupancy#3618, timeStamp#3619, virtual_sensor_id#3620]
+            +- *Sort [id#3623 ASC NULLS FIRST], false, 0
+               +- Exchange hashpartitioning(id#3623, 200)
+                  +- *Filter isnotnull(id#3623)
+                     +- HiveTableScan [NAME#3621, ID#3623], HiveTableRelation `tippersdb`.`infrastructure`, org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe, [NAME#3621, INFRASTRUCTURE_TYPE_ID#3622, ID#3623, FLOOR#3624]	

@@ -50,9 +50,9 @@ public class SparkSQLConnectionManager {
         try {
             Properties properties = new Properties();
             properties.put("user", USER);
-//            connection = DriverManager.getConnection(
-//                    String.format("jdbc:hive2://%s:%s/", SERVER, PORT), properties);
-//            connection.setSchema(DATABASE);
+            connection = DriverManager.getConnection(
+                    String.format("jdbc:hive2://%s:%s/", SERVER, PORT), properties);
+            connection.setSchema(DATABASE);
 
             return connection;
         } catch (Exception e) {

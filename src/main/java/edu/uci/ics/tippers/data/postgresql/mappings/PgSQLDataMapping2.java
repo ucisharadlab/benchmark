@@ -239,68 +239,71 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
             }
 
             // Adding Observations
-            String wifiInsert = "INSERT INTO WiFiAPObservation " +
-                    "(ID, TIMESTAMP, SENSOR_ID, clientId) VALUES (?, ?, ?, ?)";
-
-            String wemoInsert = "INSERT INTO WeMoObservation " +
-                    "(ID, TIMESTAMP, SENSOR_ID, currentMilliWatts, onTodaySeconds) VALUES (?, ?, ?, ?, ?)";
-
-            String temperatureInsert = "INSERT INTO ThermometerObservation " +
-                    "(ID, TIMESTAMP, SENSOR_ID, temperature) VALUES (?, ?, ?, ?)";
-
-            BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
-                    Observation.class);
-            Observation obs = null;
-
-            PreparedStatement wifiStmt = connection.prepareStatement(wifiInsert);
-            PreparedStatement wemoStmt = connection.prepareStatement(wemoInsert);
-            PreparedStatement temStmt = connection.prepareStatement(temperatureInsert);
-
-            int wifiCount = 0, wemoCount = 0, thermoCount = 0, count = 0;
-            while ((obs = reader.readNext()) != null) {
-
-                if (obs.getSensor().getType_().getId().equals("Thermometer")) {
-                    temStmt.setInt(4, obs.getPayload().get("temperature").getAsInt());
-                    temStmt.setString(3, obs.getSensor().getId());
-                    temStmt.setTimestamp(2, new Timestamp(obs.getTimeStamp().getTime()));
-                    temStmt.setString(1, obs.getId());
-                    temStmt.addBatch();
-                    thermoCount ++;
-                } else if (obs.getSensor().getType_().getId().equals("WiFiAP")) {
-                    wifiStmt.setString(4, obs.getPayload().get("clientId").getAsString());
-                    wifiStmt.setString(3, obs.getSensor().getId());
-                    wifiStmt.setTimestamp(2, new Timestamp(obs.getTimeStamp().getTime()));
-                    wifiStmt.setString(1, obs.getId());
-                    wifiStmt.addBatch();
-                    wifiCount ++;
-                } else if (obs.getSensor().getType_().getId().equals("WeMo")) {
-                    wemoStmt.setInt(4, obs.getPayload().get("currentMilliWatts").getAsInt());
-                    wemoStmt.setInt(5, obs.getPayload().get("onTodaySeconds").getAsInt());
-                    wemoStmt.setString(3, obs.getSensor().getId());
-                    wemoStmt.setTimestamp(2, new Timestamp(obs.getTimeStamp().getTime()));
-                    wemoStmt.setString(1, obs.getId());
-                    wemoStmt.addBatch();
-                    wemoCount ++;
-                }
-
-                if (wemoCount % Constants.PGSQL_BATCH_SIZE == 0)
-                    wemoStmt.executeBatch();
-                if (wifiCount % Constants.PGSQL_BATCH_SIZE == 0)
-                    wifiStmt.executeBatch();
-                if (thermoCount % Constants.PGSQL_BATCH_SIZE == 0)
-                    temStmt.executeBatch();
-
-                if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s Observations", count));
-                count ++;
-            }
-            wemoStmt.executeBatch();
-            wifiStmt.executeBatch();
-            temStmt.executeBatch();
+//            String wifiInsert = "INSERT INTO WiFiAPObservation " +
+//                    "(ID, TIMESTAMP, SENSOR_ID, clientId) VALUES (?, ?, ?, ?)";
+//
+//            String wemoInsert = "INSERT INTO WeMoObservation " +
+//                    "(ID, TIMESTAMP, SENSOR_ID, currentMilliWatts, onTodaySeconds) VALUES (?, ?, ?, ?, ?)";
+//
+//            String temperatureInsert = "INSERT INTO ThermometerObservation " +
+//                    "(ID, TIMESTAMP, SENSOR_ID, temperature) VALUES (?, ?, ?, ?)";
+//
+//            BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
+//                    Observation.class);
+//            Observation obs = null;
+//
+//            PreparedStatement wifiStmt = connection.prepareStatement(wifiInsert);
+//            PreparedStatement wemoStmt = connection.prepareStatement(wemoInsert);
+//            PreparedStatement temStmt = connection.prepareStatement(temperatureInsert);
+//
+//            int wifiCount = 0, wemoCount = 0, thermoCount = 0, count = 0;
+//            while ((obs = reader.readNext()) != null) {
+//
+//                if (obs.getSensor().getType_().getId().equals("Thermometer")) {
+//                    temStmt.setInt(4, obs.getPayload().get("temperature").getAsInt());
+//                    temStmt.setString(3, obs.getSensor().getId());
+//                    temStmt.setTimestamp(2, new Timestamp(obs.getTimeStamp().getTime()));
+//                    temStmt.setString(1, obs.getId());
+//                    temStmt.addBatch();
+//                    thermoCount ++;
+//                } else if (obs.getSensor().getType_().getId().equals("WiFiAP")) {
+//                    wifiStmt.setString(4, obs.getPayload().get("clientId").getAsString());
+//                    wifiStmt.setString(3, obs.getSensor().getId());
+//                    wifiStmt.setTimestamp(2, new Timestamp(obs.getTimeStamp().getTime()));
+//                    wifiStmt.setString(1, obs.getId());
+//                    wifiStmt.addBatch();
+//                    wifiCount ++;
+//                } else if (obs.getSensor().getType_().getId().equals("WeMo")) {
+//                    wemoStmt.setInt(4, obs.getPayload().get("currentMilliWatts").getAsInt());
+//                    wemoStmt.setInt(5, obs.getPayload().get("onTodaySeconds").getAsInt());
+//                    wemoStmt.setString(3, obs.getSensor().getId());
+//                    wemoStmt.setTimestamp(2, new Timestamp(obs.getTimeStamp().getTime()));
+//                    wemoStmt.setString(1, obs.getId());
+//                    wemoStmt.addBatch();
+//                    wemoCount ++;
+//                }
+//
+//                if (wemoCount % Constants.PGSQL_BATCH_SIZE == 0)
+//                    wemoStmt.executeBatch();
+//                if (wifiCount % Constants.PGSQL_BATCH_SIZE == 0)
+//                    wifiStmt.executeBatch();
+//                if (thermoCount % Constants.PGSQL_BATCH_SIZE == 0)
+//                    temStmt.executeBatch();
+//
+//                if (count % Constants.LOG_LIM == 0) {
+//                    LOGGER.info(String.format("%s Observations", count));
+//                    connection.commit();
+//                }
+//                count ++;
+//            }
+//            wemoStmt.executeBatch();
+//            wifiStmt.executeBatch();
+//            temStmt.executeBatch();
 
 
 
         }
-        catch(ParseException | SQLException | IOException e) {
+        catch(Exception e) {
             e.printStackTrace();
         }
 
@@ -415,56 +418,66 @@ public class PgSQLDataMapping2 extends PgSQLBaseDataMapping {
             }
 
             // Adding Semantic Observations
-            BigJsonReader<SemanticObservation> reader = new BigJsonReader<>(dataDir + DataFiles.SO.getPath(),
-                    SemanticObservation.class);
-            SemanticObservation sobs = null;
-
-            String presenceInsert = "INSERT INTO PRESENCE " +
-                    "(ID, SEMANTIC_ENTITY_ID, LOCATION, TIMESTAMP, VIRTUAL_SENSOR_ID) VALUES (?, ?, ?, ?, ?)";
-
-            String occupancyInsert = "INSERT INTO OCCUPANCY " +
-                    "(ID, SEMANTIC_ENTITY_ID, OCCUPANCY, TIMESTAMP, VIRTUAL_SENSOR_ID) VALUES (?, ?, ?, ?, ?)";
-
-
-            PreparedStatement presenceStmt = connection.prepareStatement(presenceInsert);
-            PreparedStatement occupancyStmt = connection.prepareStatement(occupancyInsert);
-
-            int presenceCount = 0, occupancyCount = 0, count = 0;
-            while ((sobs = reader.readNext()) != null) {
-
-                if (sobs.getType_().getId().equals("presence")) {
-                    presenceStmt.setString(3, sobs.getPayload().get("location").getAsString());
-                    presenceStmt.setString(5, sobs.getVirtualSensor().getId());
-                    presenceStmt.setTimestamp(4, new Timestamp(sobs.getTimeStamp().getTime()));
-                    presenceStmt.setString(1, sobs.getId());
-                    presenceStmt.setString(2, sobs.getSemanticEntity().get("id").getAsString());
-                    presenceStmt.addBatch();
-                    presenceCount ++;
-                } else if (sobs.getType_().getId().equals("occupancy")) {
-                    stmt = occupancyStmt;
-                    occupancyStmt.setInt(3, sobs.getPayload().get("occupancy").getAsInt());
-                    occupancyStmt.setString(5, sobs.getVirtualSensor().getId());
-                    occupancyStmt.setTimestamp(4, new Timestamp(sobs.getTimeStamp().getTime()));
-                    occupancyStmt.setString(1, sobs.getId());
-                    occupancyStmt.setString(2, sobs.getSemanticEntity().get("id").getAsString());
-                    occupancyStmt.addBatch();
-                    occupancyCount ++;
-                }
-
-                if (presenceCount % Constants.PGSQL_BATCH_SIZE == 0)
-                    presenceStmt.executeBatch();
-                if (occupancyCount % Constants.PGSQL_BATCH_SIZE == 0)
-                    occupancyStmt.executeBatch();
-
-                if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s S Observations", count));
-                count ++;
-            }
-            presenceStmt.executeBatch();
-            occupancyStmt.executeBatch();
-
+//            BigJsonReader<SemanticObservation> reader = new BigJsonReader<>(dataDir + DataFiles.SO.getPath(),
+//                    SemanticObservation.class);
+//            SemanticObservation sobs = null;
+//
+//            String presenceInsert = "INSERT INTO PRESENCE " +
+//                    "(ID, SEMANTIC_ENTITY_ID, LOCATION, TIMESTAMP, VIRTUAL_SENSOR_ID) VALUES (?, ?, ?, ?, ?)";
+//
+//            String occupancyInsert = "INSERT INTO OCCUPANCY " +
+//                    "(ID, SEMANTIC_ENTITY_ID, OCCUPANCY, TIMESTAMP, VIRTUAL_SENSOR_ID) VALUES (?, ?, ?, ?, ?)";
+//
+//
+//            PreparedStatement presenceStmt = connection.prepareStatement(presenceInsert);
+//            PreparedStatement occupancyStmt = connection.prepareStatement(occupancyInsert);
+//
+//            int presenceCount = 0, occupancyCount = 0, count = 0;
+//            while ((sobs = reader.readNext()) != null) {
+//                count ++;
+//
+//                if (count % Constants.LOG_LIM == 0) {
+//                    LOGGER.info(String.format("%s S Observations", count));
+//                }
+//
+//                if (count <= 12600000) continue;
+//
+//                if (sobs.getType_().getId().equals("presence")) {
+//                    presenceStmt.setString(3, sobs.getPayload().get("location").getAsString());
+//                    presenceStmt.setString(5, sobs.getVirtualSensor().getId());
+//                    presenceStmt.setTimestamp(4, new Timestamp(sobs.getTimeStamp().getTime()));
+//                    presenceStmt.setString(1, sobs.getId());
+//                    presenceStmt.setString(2, sobs.getSemanticEntity().get("id").getAsString());
+//                    presenceStmt.addBatch();
+//                    presenceCount ++;
+//                } else if (sobs.getType_().getId().equals("occupancy")) {
+//                    stmt = occupancyStmt;
+//                    occupancyStmt.setInt(3, sobs.getPayload().get("occupancy").getAsInt());
+//                    occupancyStmt.setString(5, sobs.getVirtualSensor().getId());
+//                    occupancyStmt.setTimestamp(4, new Timestamp(sobs.getTimeStamp().getTime()));
+//                    occupancyStmt.setString(1, sobs.getId());
+//                    occupancyStmt.setString(2, sobs.getSemanticEntity().get("id").getAsString());
+//                    occupancyStmt.addBatch();
+//                    occupancyCount ++;
+//                }
+//
+//                if (presenceCount % Constants.PGSQL_BATCH_SIZE == 0)
+//                    presenceStmt.executeBatch();
+//                if (occupancyCount % Constants.PGSQL_BATCH_SIZE == 0)
+//                    occupancyStmt.executeBatch();
+//
+//                if (count % Constants.LOG_LIM == 0) {
+//                    LOGGER.info(String.format("%s S Observations", count));
+//                    connection.commit();
+//                }
+////                count ++;
+//            }
+//            presenceStmt.executeBatch();
+//            occupancyStmt.executeBatch();
+//
 
         }
-        catch(ParseException | IOException | SQLException e) {
+        catch(Exception e) {
             e.printStackTrace();
         }
 

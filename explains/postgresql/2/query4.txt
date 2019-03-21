@@ -1,0 +1,3 @@
+Index Scan using temp_timestamp_idx on thermometerobservation  (cost=0.43..8.45 rows=1 width=12)	
+  Index Cond: (("timestamp" > '2017-11-07 11:12:59'::timestamp without time zone) AND ("timestamp" < '2017-11-07 15:15:59'::timestamp without time zone))	
+  Filter: ((sensor_id)::text = ANY ('{thermometer2,thermometer3,thermometer7}'::text[]))	

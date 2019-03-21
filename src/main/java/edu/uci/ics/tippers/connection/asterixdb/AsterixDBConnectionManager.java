@@ -79,7 +79,7 @@ public class AsterixDBConnectionManager extends BaseConnectionManager {
         CloseableHttpResponse response = null;
         try {
             response = client.execute(httpPost);
-            //System.out.println(EntityUtils.toString(response.getEntity()));
+            System.out.println(EntityUtils.toString(response.getEntity()));
         } catch (IOException e) {
             e.printStackTrace();
         }

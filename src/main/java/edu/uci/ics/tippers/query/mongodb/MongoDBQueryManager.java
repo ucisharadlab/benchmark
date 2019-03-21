@@ -1,14 +1,21 @@
 package edu.uci.ics.tippers.query.mongodb;
 
+import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoIterable;
 import edu.uci.ics.tippers.common.Database;
+import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.connection.mongodb.DBManager;
 import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.query.BaseQueryManager;
 import edu.uci.ics.tippers.writer.RowWriter;
-import org.bson.Document;
+import org.bson.*;
+import org.bson.codecs.BsonValueCodecProvider;
+import org.bson.codecs.UuidCodec;
+import org.bson.codecs.ValueCodecProvider;
+import org.bson.codecs.configuration.CodecRegistries;
+import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.conversions.Bson;
 
 import java.io.IOException;
@@ -68,6 +75,38 @@ public class MongoDBQueryManager extends BaseQueryManager{
         }
     }
 
+    private void getExplainResults(MongoIterable<Document> iterable, int queryNum ) {
+        try {
+            RowWriter<String> writer = new RowWriter<>(outputDir+"/explains/", getDatabase(), mapping, getFileFromQuery(queryNum));
+            iterable.forEach((Consumer<? super Document>) e -> {
+                try {
+                    writer.writeString(e.toJson());
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            });
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new BenchmarkException("Error Writing Output To File");
+        }
+    }
+
+    private void writeDocumentToFile(Document document, int queryNum ) {
+        try {
+            RowWriter<String> writer = new RowWriter<>(outputDir+"/explains/", getDatabase(), mapping, getFileFromQuery(queryNum));
+                try {
+                    writer.writeString(document.toJson());
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new BenchmarkException("Error Writing Output To File");
+        }
+    }
+
     @Override
     public Duration runQuery1(String sensorId) throws BenchmarkException {
         switch (mapping) {
@@ -86,6 +125,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
                 throw new BenchmarkException("No Such Mapping");
         }
     }
+
     @Override
     public Duration runQuery2(String sensorTypeName, List<String> locationIds) throws BenchmarkException {
         switch (mapping) {
@@ -341,7 +381,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
 
     @Override
     public Duration runQuery7(String startLocation, String endLocation, Date date) throws BenchmarkException {
-        switch (mapping) {
+        /*switch (mapping) {
             case 1:
                 Instant start = Instant.now();
 
@@ -460,12 +500,13 @@ public class MongoDBQueryManager extends BaseQueryManager{
                 return Duration.between(start, end);
             default:
                 throw new BenchmarkException("No Such Mapping");
-        }
+        }*/
+        return Constants.MAX_DURATION;
     }
 
     @Override
     public Duration runQuery8(String userId, Date date) throws BenchmarkException {
-        switch (mapping) {
+        /*switch (mapping) {
             case 1:
                 Instant start = Instant.now();
 
@@ -588,7 +629,13 @@ public class MongoDBQueryManager extends BaseQueryManager{
                 return Duration.between(start, end);
             default:
                 throw new BenchmarkException("No Such Mapping");
-        }
+        }*/
+        return Constants.MAX_DURATION;
+    }
+
+    @Override
+    public Duration runQuery8WithSelectivity(String userId, Date startTime, Date endTime) throws BenchmarkException {
+        return null;
     }
 
     @Override
@@ -692,7 +739,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
                         )
                 );
 
-                MongoIterable<Document> iterable = collection.aggregate(Arrays.asList(match, sort, project));
+                MongoIterable<Document> iterable = collection.aggregate(Arrays.asList(match, sort, project)).allowDiskUse(true);
 
                 getResults(iterable, 10);
 
@@ -728,7 +775,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
                         )
                 );
 
-                iterable = collection.aggregate(Arrays.asList(lookUp1, match, sort, lookUp2, unwind, project));
+                iterable = collection.aggregate(Arrays.asList(lookUp1, match, sort, lookUp2, unwind, project)).allowDiskUse(true);
 
                 getResults(iterable, 10);
 
@@ -738,6 +785,8 @@ public class MongoDBQueryManager extends BaseQueryManager{
                 throw new BenchmarkException("No Such Mapping");
         }
     }
+
+
 
     @Override
     public Duration explainQuery1(String sensorId) throws BenchmarkException {
@@ -750,7 +799,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
                 MongoIterable<Document> iterable = collection.find(eq("_id", sensorId))
                         .projection(new Document("name", 1).append("_id", 0)).modifiers(new Document("$explain", true));
 
-                getResults(iterable, 1);
+                getExplainResults(iterable, 1);
                 Instant end = Instant.now();
                 return Duration.between(start, end);
             default:
@@ -771,7 +820,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
                         .projection(new Document("name", 1)
                                 .append("_id", 1)).modifiers(new Document("$explain", true));
 
-                getResults(iterable, 2);
+                getExplainResults(iterable, 2);
 
                 Instant end = Instant.now();
                 return Duration.between(start, end);
@@ -785,7 +834,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
                         .projection(new Document("name", 1)
                                 .append("_id", 1)).modifiers(new Document("$explain", true));
 
-                getResults(iterable, 2);
+                getExplainResults(iterable, 2);
 
                 end = Instant.now();
                 return Duration.between(start, end);
@@ -811,7 +860,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
                                 .append("payload", 1)
                                 .append("sensor.id", 1)).modifiers(new Document("$explain", true));
 
-                getResults(iterable, 3);
+                getExplainResults(iterable, 3);
 
                 Instant end = Instant.now();
                 return Duration.between(start, end);
@@ -829,7 +878,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
                                 .append("payload", 1)
                                 .append("sensorId", 1)).modifiers(new Document("$explain", true));
 
-                getResults(iterable, 3);
+                getExplainResults(iterable, 3);
 
                 end = Instant.now();
                 return Duration.between(start, end);
@@ -855,7 +904,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
                                 .append("sensor.id", 1)
                                 .append("payload.temperature", 1)).modifiers(new Document("$explain", true));
 
-                getResults(iterable, 4);
+                getExplainResults(iterable, 4);
 
                 Instant end = Instant.now();
                 return Duration.between(start, end);
@@ -873,7 +922,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
                                 .append("sensorId", 1)
                                 .append("payload", 1)).modifiers(new Document("$explain", true));
 
-                getResults(iterable, 4);
+                getExplainResults(iterable, 4);
 
                 end = Instant.now();
                 return Duration.between(start, end);
@@ -902,14 +951,12 @@ public class MongoDBQueryManager extends BaseQueryManager{
                                 .append("sensor.id", 1)
                                 .append("payload", 1)).modifiers(new Document("$explain", true));
 
-                getResults(iterable, 5);
+                getExplainResults(iterable, 5);
 
                 Instant end = Instant.now();
                 return Duration.between(start, end);
             case 2:
                 start = Instant.now();
-
-                collection = database.getCollection("Observation");
 
                 Bson lookUp = lookup("Sensor", "sensorId", "_id", "sensors");
 
@@ -928,9 +975,15 @@ public class MongoDBQueryManager extends BaseQueryManager{
                         )
                 );
 
-                iterable = collection.aggregate(Arrays.asList(lookUp, match, project));
+                writeDocumentToFile(database.runCommand(
+                        new BsonDocument("aggregate", new BsonString("Observation"))
+                                .append("pipeline", new BsonArray(
+                                        Arrays.asList(
+                                                lookUp.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider())),
+                                                match.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                project.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider())))))
+                                .append("explain", new BsonBoolean(true))), 5);
 
-                getResults(iterable, 5);
 
                 end = Instant.now();
                 return Duration.between(start, end);
@@ -958,26 +1011,30 @@ public class MongoDBQueryManager extends BaseQueryManager{
                                 include("sensor.id"),
                                 computed(
                                         "date",
-                                        new Document("$dateToString", new Document("format", "%Y-%m-%d")
-                                                .append("date", "$timeStamp"))
+                                        new BsonDocument("$dateToString", new BsonDocument("format", new BsonString("%Y-%m-%d"))
+                                                .append("date", new BsonString("$timeStamp")))
                                 )
                         )
                 );
 
-                Bson group1 = group(new Document("sensorId", "$sensor.id").append("date", "$date"),
+                Bson group1 = group(new BsonDocument("sensorId", new BsonString("$sensor.id")).append("date", new BsonString("$date")),
                         sum("count", 1));
-                Bson group2 = group(new Document("sensorId", "$_id.sensorId"), avg("averagePerDay", "$count"));
+                Bson group2 = group(new BsonDocument("sensorId", new BsonString("$_id.sensorId")), avg("averagePerDay", "$count"));
 
-                MongoIterable<Document> iterable = collection.aggregate(Arrays.asList(match, project, group1, group2));
-
-                getResults(iterable, 6);
+                writeDocumentToFile(database.runCommand(
+                        new BsonDocument("aggregate", new BsonString("Observation"))
+                                .append("pipeline", new BsonArray(
+                                        Arrays.asList(
+                                                match.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                project.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                group1.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                group2.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())))))
+                                .append("explain", new BsonBoolean(true))), 6);
 
                 Instant end = Instant.now();
                 return Duration.between(start, end);
             case 2:
                 start = Instant.now();
-
-                collection = database.getCollection("Observation");
 
                 match = match(and(
                         in("sensorId", sensorIds),
@@ -990,19 +1047,25 @@ public class MongoDBQueryManager extends BaseQueryManager{
                                 include("sensorId"),
                                 computed(
                                         "date",
-                                        new Document("$dateToString", new Document("format", "%Y-%m-%d")
-                                                .append("date", "$timeStamp"))
+                                        new BsonDocument("$dateToString", new BsonDocument("format", new BsonString("%Y-%m-%d"))
+                                                .append("date", new BsonString("$timeStamp")))
                                 )
                         )
                 );
 
-                group1 = group(new Document("sensorId", "$sensorId").append("date", "$date"),
+                group1 = group(new BsonDocument("sensorId", new BsonString("$sensorId")).append("date", new BsonString("$date")),
                         sum("count", 1));
-                group2 = group(new Document("sensorId", "$_id.sensorId"), avg("averagePerDay", "$count"));
+                group2 = group(new BsonDocument("sensorId", new BsonString("$_id.sensorId")), avg("averagePerDay", "$count"));
 
-                iterable = collection.aggregate(Arrays.asList(match, project, group1, group2));
-
-                getResults(iterable, 6);
+                writeDocumentToFile(database.runCommand(
+                        new BsonDocument("aggregate", new BsonString("Observation"))
+                                .append("pipeline", new BsonArray(
+                                        Arrays.asList(
+                                                match.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                project.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                group1.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                group2.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())))))
+                                .append("explain", new BsonBoolean(true))), 6);
 
                 end = Instant.now();
                 return Duration.between(start, end);
@@ -1017,7 +1080,6 @@ public class MongoDBQueryManager extends BaseQueryManager{
             case 1:
                 Instant start = Instant.now();
 
-                MongoCollection collection = database.getCollection("SemanticObservation");
                 Date startTime = date;
                 Calendar cal = Calendar.getInstance();
                 cal.setTime(date);
@@ -1044,7 +1106,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
                                 include("semanticEntity"),
                                 include("payload"),
                                 computed("timeCheck",
-                                        new Document("$gt", Arrays.asList("$semantics.timeStamp", "$timeStamp")))
+                                        new BsonDocument("$gt", new BsonArray(Arrays.asList(new BsonString("$semantics.timeStamp"), new BsonString("$timeStamp")))))
                         )
                 );
 
@@ -1061,16 +1123,24 @@ public class MongoDBQueryManager extends BaseQueryManager{
                         )
                 );
 
-                MongoIterable iterable = collection.aggregate(Arrays.asList(match1, lookUp, unwind, project1, match2, project2));
-
-                getResults(iterable, 7);
+                writeDocumentToFile(database.runCommand(
+                        new BsonDocument("aggregate", new BsonString("SemanticObservation"))
+                                .append("pipeline", new BsonArray(
+                                        Arrays.asList(
+                                                match1.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                lookUp.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                unwind.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                project1.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                match2.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                project2.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())))))
+                                .append("explain", new BsonBoolean(true))), 7);
 
                 Instant end = Instant.now();
                 return Duration.between(start, end);
+
             case 2:
                 start = Instant.now();
 
-                collection = database.getCollection("SemanticObservation");
                 startTime = date;
                 cal = Calendar.getInstance();
                 cal.setTime(date);
@@ -1099,9 +1169,9 @@ public class MongoDBQueryManager extends BaseQueryManager{
                                 include("semanticEntityId"),
                                 include("payload"),
                                 computed("timeCheck",
-                                        new Document("$gt", Arrays.asList("$semantics.timeStamp", "$timeStamp"))),
+                                        new BsonDocument("$gt", new BsonArray(Arrays.asList(new BsonString("$semantics.timeStamp"), new BsonString("$timeStamp"))))),
                                 computed("typeCheck",
-                                        new Document("$eq", Arrays.asList("$semantics.typeId", "$typeId")))
+                                        new BsonDocument("$eq", new BsonArray(Arrays.asList(new BsonString("$semantics.typeId"), new BsonString("$typeId")))))
                         )
                 );
 
@@ -1123,10 +1193,20 @@ public class MongoDBQueryManager extends BaseQueryManager{
                         )
                 );
 
-                iterable = collection.aggregate(Arrays.asList(lookUp1, match1, lookUp2, unwind, project1,
-                        match2, lookUp3, unwind2, project2));
-
-                getResults(iterable, 7);
+                writeDocumentToFile(database.runCommand(
+                        new BsonDocument("aggregate", new BsonString("SemanticObservation"))
+                                .append("pipeline", new BsonArray(
+                                        Arrays.asList(
+                                                lookUp1.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                match1.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                lookUp2.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                unwind.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                project1.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                match2.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                lookUp3.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                unwind2.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                project2.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())))))
+                                .append("explain", new BsonBoolean(true))), 7);
 
                 end = Instant.now();
                 return Duration.between(start, end);
@@ -1168,9 +1248,9 @@ public class MongoDBQueryManager extends BaseQueryManager{
                                 include("semanticEntity"),
                                 include("payload"),
                                 computed("timeCheck",
-                                        new Document("$eq", Arrays.asList("$semantics.timeStamp", "$timeStamp"))),
+                                        new BsonDocument("$eq", new BsonArray(Arrays.asList(new BsonString("$semantics.timeStamp"), new BsonString("$timeStamp"))))),
                                 computed("placeCheck",
-                                        new Document("$eq", Arrays.asList("$semantics.payload.location", "$payload.location")))
+                                        new BsonDocument("$eq", new BsonArray(Arrays.asList(new BsonString("$semantics.payload.location"), new BsonString("$payload.location")))))
                         )
                 );
 
@@ -1188,16 +1268,24 @@ public class MongoDBQueryManager extends BaseQueryManager{
                         )
                 );
 
-                MongoIterable iterable = collection.aggregate(Arrays.asList(match1, lookUp, unwind, project1, match2, project2));
-
-                getResults(iterable, 7);
+                writeDocumentToFile(database.runCommand(
+                        new BsonDocument("aggregate", new BsonString("SemanticObservation"))
+                                .append("pipeline", new BsonArray(
+                                        Arrays.asList(
+                                                match1.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                lookUp.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                unwind.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                project1.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                match2.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                project2.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())))))
+                                .append("explain", new BsonBoolean(true))), 8);
 
                 Instant end = Instant.now();
                 return Duration.between(start, end);
+
             case 2:
                 start = Instant.now();
 
-                collection = database.getCollection("SemanticObservation");
                 startTime = date;
                 cal = Calendar.getInstance();
                 cal.setTime(date);
@@ -1226,9 +1314,9 @@ public class MongoDBQueryManager extends BaseQueryManager{
                                 include("semanticEntityId"),
                                 include("payload"),
                                 computed("timeCheck",
-                                        new Document("$eq", Arrays.asList("$semantics.timeStamp", "$timeStamp"))),
+                                        new BsonDocument("$eq", new BsonArray(Arrays.asList(new BsonString("$semantics.timeStamp"), new BsonString("$timeStamp"))))),
                                 computed("typeCheck",
-                                        new Document("$eq", Arrays.asList("$semantics.typeId", "$typeId")))
+                                        new BsonDocument("$eq", new BsonArray(Arrays.asList(new BsonString("$semantics.typeId"), new BsonString("$typeId")))))
                         )
                 );
 
@@ -1251,10 +1339,20 @@ public class MongoDBQueryManager extends BaseQueryManager{
                         )
                 );
 
-                iterable = collection.aggregate(Arrays.asList(lookUp1, match1, lookUp2, unwind, project1,
-                        match2, lookUp3, unwind2, project2));
-
-                getResults(iterable, 8);
+                writeDocumentToFile(database.runCommand(
+                        new BsonDocument("aggregate", new BsonString("SemanticObservation"))
+                                .append("pipeline", new BsonArray(
+                                        Arrays.asList(
+                                                lookUp1.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                match1.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                lookUp2.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                unwind.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                project1.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                match2.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                lookUp3.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                unwind2.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                project2.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())))))
+                                .append("explain", new BsonBoolean(true))), 8);
 
                 end = Instant.now();
                 return Duration.between(start, end);
@@ -1284,26 +1382,32 @@ public class MongoDBQueryManager extends BaseQueryManager{
                                 excludeId(),
                                 computed(
                                         "date",
-                                        new Document("$dateToString", new Document("format", "%Y-%m-%d")
-                                                .append("date", "$timeStamp"))
+                                        new BsonDocument("$dateToString", new BsonDocument("format", new BsonString("%Y-%m-%d"))
+                                                .append("date", new BsonString("$timeStamp")))
                                 )
                         )
                 );
 
-                Bson group1 = group(new Document("date", "$date"), sum("count", 1));
+                Bson group1 = group(new BsonDocument("date", new BsonString("$date")), sum("count", new BsonInt32(1)));
                 Bson group2 = group(null, avg("averageMinsPerDay", "$count"));
 
-                MongoIterable<Document> iterable = collection.aggregate(Arrays.asList(lookUp1, unwind, match, project,
-                        group1, group2));
-
-                getResults(iterable, 9);
+                writeDocumentToFile(database.runCommand(
+                        new BsonDocument("aggregate", new BsonString("SemanticObservation"))
+                                .append("pipeline", new BsonArray(
+                                        Arrays.asList(
+                                                lookUp1.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                unwind.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                match.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                project.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                group1.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                group2.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())))))
+                                .append("explain", new BsonBoolean(true))), 9);
 
                 Instant end = Instant.now();
                 return Duration.between(start, end);
+
             case 2:
                 start = Instant.now();
-
-                collection = database.getCollection("SemanticObservation");
 
                 lookUp1 = lookup("Infrastructure", "payload.location", "_id", "infra");
 
@@ -1318,19 +1422,27 @@ public class MongoDBQueryManager extends BaseQueryManager{
                                 excludeId(),
                                 computed(
                                         "date",
-                                        new Document("$dateToString", new Document("format", "%Y-%m-%d")
-                                                .append("date", "$timeStamp"))
+                                        new BsonDocument("$dateToString", new BsonDocument("format", new BsonString("%Y-%m-%d"))
+                                                .append("date", new BsonString("$timeStamp")))
                                 )
                         )
                 );
 
-                group1 = group(new Document("date", "$date"), sum("count", 10));
+                group1 = group(new BsonDocument("date", new BsonString("$date")), sum("count", new BsonInt32(10)));
 
                 group2 = group(null, avg("averageMinsPerDay", "$count"));
 
-                iterable = collection.aggregate(Arrays.asList(lookUp1, unwind, match, project, group1, group2));
-
-                getResults(iterable, 9);
+                writeDocumentToFile(database.runCommand(
+                        new BsonDocument("aggregate", new BsonString("SemanticObservation"))
+                                .append("pipeline", new BsonArray(
+                                        Arrays.asList(
+                                                lookUp1.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                unwind.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                match.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                project.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                group1.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                group2.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())))))
+                                .append("explain", new BsonBoolean(true))), 9);
 
                 end = Instant.now();
                 return Duration.between(start, end);
@@ -1353,7 +1465,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
                         eq("type_.name", "occupancy")
                 ));
 
-                Bson sort = sort(new Document("semanticEntity.id", 1).append("timeStamp", 1));
+                Bson sort = sort(new BsonDocument("semanticEntity.id", new BsonInt32(1)).append("timeStamp", new BsonInt32(1)));
 
                 Bson project = project(
                         fields(
@@ -1364,9 +1476,14 @@ public class MongoDBQueryManager extends BaseQueryManager{
                         )
                 );
 
-                MongoIterable<Document> iterable = collection.aggregate(Arrays.asList(match, sort, project));
-
-                getResults(iterable, 10);
+                writeDocumentToFile(database.runCommand(
+                        new BsonDocument("aggregate", new BsonString("SemanticObservation"))
+                                .append("pipeline", new BsonArray(
+                                        Arrays.asList(
+                                                match.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                sort.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                project.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())))))
+                                .append("explain", new BsonBoolean(true))), 10);
 
                 Instant end = Instant.now();
                 return Duration.between(start, end);
@@ -1385,7 +1502,7 @@ public class MongoDBQueryManager extends BaseQueryManager{
 
 
 
-                sort = sort(new Document("semanticEntityId", 1).append("timeStamp", 1));
+                sort = sort(new BsonDocument("semanticEntityId", new BsonInt32(1)).append("timeStamp", new BsonInt32(1)));
 
                 Bson lookUp2 = lookup("Infrastructure", "semanticEntityId", "_id", "infra");
 
@@ -1400,9 +1517,17 @@ public class MongoDBQueryManager extends BaseQueryManager{
                         )
                 );
 
-                iterable = collection.aggregate(Arrays.asList(lookUp1, match, sort, lookUp2, unwind, project));
-
-                getResults(iterable, 10);
+                writeDocumentToFile(database.runCommand(
+                        new BsonDocument("aggregate", new BsonString("SemanticObservation"))
+                                .append("pipeline", new BsonArray(
+                                        Arrays.asList(
+                                                lookUp1.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                match.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                sort.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                lookUp2.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                unwind.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())),
+                                                project.toBsonDocument(BsonDocument.class, CodecRegistries.fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())))))
+                                .append("explain", new BsonBoolean(true))), 10);
 
                 end = Instant.now();
                 return Duration.between(start, end);

@@ -22,7 +22,8 @@ public class CrateDBQueryManager extends BaseQueryManager {
     public CrateDBQueryManager(int mapping, String queriesDir, String outputDir, boolean writeOutput, long timeout) {
         super(mapping, queriesDir, outputDir, writeOutput, timeout);
         connection = CrateDBConnectionManager.getInstance().getConnection();
-        externalQueryManager = new PgSQLQueryManager(mapping, queriesDir, outputDir, writeOutput, timeout, connection);
+        externalQueryManager = new PgSQLQueryManager(mapping, queriesDir, outputDir, writeOutput, timeout, connection,
+                Database.CRATEDB);
     }
 
     @Override
@@ -430,6 +431,33 @@ public class CrateDBQueryManager extends BaseQueryManager {
     }
 
     @Override
+    public Duration runQuery8WithSelectivity(String userId, Date startTime, Date endTime) throws BenchmarkException {
+        switch (mapping) {
+            case 1:
+            case 2:
+                String query = "SELECT u.name, s1.location " +
+                        "FROM PRESENCE s1, PRESENCE s2, USERS u " +
+                        "WHERE s1.timeStamp >= ? AND s1.timeStamp <= ? " +
+                        "AND s2.timeStamp = s1.timeStamp " +
+                        "AND s1.semantic_entity_id = ? AND s1.semantic_entity_id != s2.semantic_entity_id " +
+                        "AND s2.semantic_entity_id = u.id AND s1.location = s2.location ";
+                try {
+                    PreparedStatement stmt = connection.prepareStatement(query);
+                    stmt.setTimestamp (1, new Timestamp(startTime.getTime()));
+                    stmt.setTimestamp (2, new Timestamp(endTime.getTime()));
+                    stmt.setString(3, userId);
+
+                    return externalQueryManager.runTimedQuery(stmt, 8);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
+            default:
+                throw new BenchmarkException("No Such Mapping");
+        }
+    }
+
+    @Override
     public Duration runQuery9(String userId, String infraTypeName) throws BenchmarkException {
         switch (mapping) {
             case 1:
@@ -536,7 +564,7 @@ public class CrateDBQueryManager extends BaseQueryManager {
                     throw new BenchmarkException("Error Running Query");
                 }
             case 2:
-                query = "EXPLAIN SELECT ID, SENSOR_TYPE_ID FROM SENSOR WHERE ID=ANY(?)";
+                query = "SELECT ID, SENSOR_TYPE_ID FROM SENSOR WHERE ID=ANY(?)";
                 try {
                     Instant start = Instant.now();
                     PreparedStatement stmt = connection.prepareStatement(query);
@@ -664,7 +692,7 @@ public class CrateDBQueryManager extends BaseQueryManager {
                     throw new BenchmarkException("Error Running Query");
                 }
             case 2:
-                query = "EXPLAIN SELECT ID, SENSOR_TYPE_ID FROM SENSOR WHERE ID=ANY(?)";
+                query = " SELECT ID, SENSOR_TYPE_ID FROM SENSOR WHERE ID=ANY(?)";
                 try {
                     Instant start = Instant.now();
                     PreparedStatement stmt = connection.prepareStatement(query);

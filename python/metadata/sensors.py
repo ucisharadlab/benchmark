@@ -11,6 +11,9 @@ def createSensors(numWifi, numWemo, numTemperature, src, dest):
     with open(src+'user.json') as data_file:
         users = json.load(data_file)
 
+    with open(src+'infrastructure.json') as data_file:
+        rooms = json.load(data_file)
+
     wifiSensors = []
     wemoSensors = []
     temperatureSensors = []
@@ -28,6 +31,7 @@ def createSensors(numWifi, numWemo, numTemperature, src, dest):
     for i in range(numWifi-len(wifiSensors)):
         id = str(uuid.uuid4())
         copiedSensor = wifiSensors[random.randint(0, len(wifiSensors)-1)]
+        copiedRoom = rooms[random.randint(0, len(rooms) - 1)]
         sensor = {
             "id": id.replace('-', '_'),
             "name": "simSensor{}".format(i),
@@ -35,7 +39,7 @@ def createSensors(numWifi, numWemo, numTemperature, src, dest):
             "sensorConfig": copiedSensor['sensorConfig'],
             "type_": copiedSensor['type_'],
             "owner": copiedSensor['owner'],
-            "infrastructure": copiedSensor['infrastructure']
+            "infrastructure": copiedRoom
         }
         sensors.append(sensor)
 
@@ -43,6 +47,7 @@ def createSensors(numWifi, numWemo, numTemperature, src, dest):
         id = str(uuid.uuid4())
         copiedSensor = wemoSensors[random.randint(0, len(wemoSensors)-1)]
         owner = users[random.randint(0, len(users)-1)]
+        copiedRoom = rooms[random.randint(0, len(rooms) - 1)]
         sensor = {
             "id": id.replace('-', '_'),
             "name": "simSensor{}".format(i),
@@ -50,7 +55,7 @@ def createSensors(numWifi, numWemo, numTemperature, src, dest):
             "sensorConfig": copiedSensor['sensorConfig'],
             "type_": copiedSensor['type_'],
             "owner": owner,
-            "infrastructure": copiedSensor['infrastructure']
+            "infrastructure": copiedRoom
         }
         sensors.append(sensor)
 
@@ -58,6 +63,7 @@ def createSensors(numWifi, numWemo, numTemperature, src, dest):
         id = str(uuid.uuid4())
         copiedSensor = temperatureSensors[random.randint(0, len(temperatureSensors)-1)]
         owner = users[random.randint(0, len(users)-1)]
+        copiedRoom = rooms[random.randint(0, len(rooms) - 1)]
         sensor = {
             "id": id.replace('-', '_'),
             "name": "simSensor{}".format(i),
@@ -65,7 +71,7 @@ def createSensors(numWifi, numWemo, numTemperature, src, dest):
             "sensorConfig": copiedSensor['sensorConfig'],
             "type_": copiedSensor['type_'],
             "owner": owner,
-            "infrastructure": copiedSensor['infrastructure']
+            "infrastructure": copiedRoom
         }
         sensors.append(sensor)
 

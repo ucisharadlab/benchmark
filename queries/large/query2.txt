@@ -1,0 +1,2 @@
+# time(s), sensorTypeName, locationIds(List)
+0,WeMo,2234;5058;70d09224_1202_4095_9a3b_52f8348e7bf7;4211;2202;2222;4082;2099;3100_8;a2f9d564_39af_4c65_ae0d_cc8ec0db2f14

@@ -77,7 +77,7 @@ public class AsterixDBQueryManager extends BaseQueryManager{
         Instant endTime = Instant.now();
 
         try {
-            RowWriter<String> writer = new RowWriter<>(outputDir+"/explain/", getDatabase(), mapping,
+            RowWriter<String> writer = new RowWriter<>(outputDir+"/explains/", getDatabase(), mapping,
                     Helper.getFileFromQuery(queryNum));
             writer.writeString(EntityUtils.toString(response.getEntity()));
             writer.close();
@@ -140,8 +140,8 @@ public class AsterixDBQueryManager extends BaseQueryManager{
             case 2:
                 return runTimedQuery(
                         String.format("SELECT timeStamp, sensorId, payload FROM Observation WHERE sensorId=\"%s\" "
-                                        + "AND timeStamp >= %s AND timeStamp <= %s;",
-                                sensorId, startTime.getTime()*1000, endTime.getTime()*1000), 3
+                                        + "AND timeStamp >= datetime(\"%s\") AND timeStamp <= datetime(\"%s\");",
+                                sensorId, sdf.format(startTime), sdf.format(endTime)), 3
                 );
             default:
                 throw new BenchmarkException("No Such Mapping");
@@ -155,15 +155,15 @@ public class AsterixDBQueryManager extends BaseQueryManager{
                 return runTimedQuery(
                         String.format("SELECT timeStamp, sensor.id, payload FROM Observation WHERE sensor.id IN {{ "
                                         + sensorIds.stream().map(e -> "\"" + e + "\"").collect(Collectors.joining(","))
-                                        + " }} AND timeStamp >= %s AND timeStamp <= %s;",
-                                startTime.getTime()*1000, endTime.getTime()*1000),  4
+                                        + " }} AND timeStamp >= datetime(\"%s\") AND timeStamp <= datetime(\"%s\");",
+                                sdf.format(startTime), sdf.format(endTime)),  4
                 );
             case 2:
                 return runTimedQuery(
                         String.format("SELECT timeStamp, sensorId, payload FROM Observation WHERE sensorId IN {{ "
                                         + sensorIds.stream().map(e -> "\"" + e + "\"").collect(Collectors.joining(","))
-                                        + " }} AND timeStamp >= %s AND timeStamp <= %s;",
-                                startTime.getTime()*1000, endTime.getTime()*1000),  4
+                                        + " }} AND timeStamp >= datetime(\"%s\") AND timeStamp <= datetime(\"%s\");",
+                                sdf.format(startTime), sdf.format(endTime)),  4
                 );
             default:
                 throw new BenchmarkException("No Such Mapping");
@@ -295,6 +295,28 @@ public class AsterixDBQueryManager extends BaseQueryManager{
                 throw new BenchmarkException("No Such Mapping");
         }
     }
+
+    @Override
+    public Duration runQuery8WithSelectivity(String userId, Date startTime, Date endTime) throws BenchmarkException {
+        switch (mapping) {
+            case 1:
+            case 2:
+                return runTimedQuery(
+                        String.format("SELECT se.name, s1.payload.location " +
+                                        " FROM SemanticObservation s1, SemanticObservation s2, User se, SemanticObservationType st" +
+                                        " WHERE s1.timeStamp >= datetime(\"%s\") AND s1.timeStamp <= datetime(\"%s\") AND " +
+                                        " s2.timeStamp = s1.timeStamp AND " +
+                                        " s1.typeId = s2.typeId AND s2.typeId = st.id AND st.name = \"presence\" AND " +
+                                        " s1.payload.location = s2.payload.location " +
+                                        " AND s1.timeStamp = s2.timeStamp AND s1.semanticEntityId = \"%s\" " +
+                                        " AND s2.semanticEntityId = se.id AND s2.semanticEntityId != s1.semanticEntityId",
+                                sdf.format(startTime), sdf.format(endTime), userId), 8
+                );
+            default:
+                throw new BenchmarkException("No Such Mapping");
+        }
+    }
+
     @Override
     public Duration runQuery9(String userId, String infraTypeName) throws BenchmarkException {
         switch (mapping) {

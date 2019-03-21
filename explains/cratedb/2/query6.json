@@ -1,0 +1,69 @@
+{
+  "planType": "Merge",
+  "subPlan": {
+    "planType": "Collect",
+    "collectPhase": {
+      "phaseType": "COLLECT",
+      "id": 0,
+      "executionNodes": [
+        "NdL8k7eoQ0eUgH5sRw_QnQ"
+      ],
+      "distribution": {
+        "distributedByColumn": 0,
+        "type": "BROADCAST"
+      },
+      "toCollect": [
+        "tippersdb.thermometerobservation.sensor_id",
+        "date_trunc('day', tippersdb.thermometerobservation.timestamp)"
+      ],
+      "projections": [
+        {
+          "type": "HashAggregation",
+          "keys": "IC{0, string}, IC{1, timestamp}",
+          "aggregations": "Aggregation{count, args=[]}"
+        }
+      ],
+      "routing": {
+        "NdL8k7eoQ0eUgH5sRw_QnQ": {
+          "tippersdb.thermometerobservation": [
+            0,
+            1,
+            2,
+            3
+          ]
+        }
+      }
+    }
+  },
+  "mergePhase": {
+    "phaseType": "MERGE",
+    "id": 1,
+    "executionNodes": [
+      "NdL8k7eoQ0eUgH5sRw_QnQ"
+    ],
+    "distribution": {
+      "distributedByColumn": 0,
+      "type": "SAME_NODE"
+    },
+    "projections": [
+      {
+        "type": "HashAggregation",
+        "keys": "IC{0, string}, IC{1, timestamp}",
+        "aggregations": "Aggregation{count, args=[IC{2, long}]}"
+      },
+      {
+        "type": "Eval",
+        "outputs": "IC{0, string}, IC{1, timestamp}, IC{2, long}"
+      },
+      {
+        "type": "HashAggregation",
+        "keys": "IC{0, string}",
+        "aggregations": "Aggregation{avg, args=[IC{2, long}]}"
+      },
+      {
+        "type": "Eval",
+        "outputs": "IC{0, string}, IC{1, double}"
+      }
+    ]
+  }
+}

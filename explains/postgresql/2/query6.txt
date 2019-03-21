@@ -1,0 +1,9 @@
+GroupAggregate  (cost=8.47..8.52 rows=1 width=68)	
+  Group Key: thermometerobservation.sensor_id	
+  ->  GroupAggregate  (cost=8.47..8.49 rows=1 width=52)	
+        Group Key: thermometerobservation.sensor_id, (date_trunc('day'::text, thermometerobservation."timestamp"))	
+        ->  Sort  (cost=8.47..8.47 rows=1 width=44)	
+              Sort Key: thermometerobservation.sensor_id, (date_trunc('day'::text, thermometerobservation."timestamp"))	
+              ->  Index Scan using temp_timestamp_idx on thermometerobservation  (cost=0.43..8.46 rows=1 width=44)	
+                    Index Cond: (("timestamp" > '2017-11-01 00:00:00'::timestamp without time zone) AND ("timestamp" < '2017-11-07 05:10:10'::timestamp without time zone))	
+                    Filter: ((sensor_id)::text = ANY ('{thermometer1,thermometer5,thermometer7}'::text[]))	

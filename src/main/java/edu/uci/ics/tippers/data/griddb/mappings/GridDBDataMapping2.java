@@ -353,7 +353,7 @@ public class GridDBDataMapping2 extends GridDBBaseDataMapping {
             // Adding Semantic Observations
             BigJsonReader<SemanticObservation> reader = new BigJsonReader<>(dataDir + DataFiles.SO.getPath(),
                     SemanticObservation.class);
-            SemanticObservation sobs = null;
+           SemanticObservation sobs = null;
             int count = 0;
             while ((sobs = reader.readNext()) != null) {
                 String collectionName = null;
@@ -382,6 +382,7 @@ public class GridDBDataMapping2 extends GridDBBaseDataMapping {
                 count ++;
             }
             gridStore.getCollection("Occupancy").flush();
+            gridStore.getCollection("Presence").flush();
 
 
         }

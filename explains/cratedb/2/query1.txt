@@ -1,0 +1,4 @@
+== Physical Plan ==
+*Project [name#3279]
++- *Filter (isnotnull(id#3278) && (id#3278 = thermometer2))
+   +- HiveTableScan [name#3279, id#3278], HiveTableRelation `tippersdb`.`sensor`, org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe, [ID#3278, NAME#3279, INFRASTRUCTURE_ID#3280, USER_ID#3281, SENSOR_TYPE_ID#3282, SENSOR_CONFIG#3283]	

@@ -1,0 +1,204 @@
+{
+  "stages": [
+    {
+      "$cursor": {
+        "query": {
+          "$and": [
+            {
+              "timeStamp": {
+                "$gt": {
+                  "$date": 1510128000000
+                }
+              }
+            },
+            {
+              "timeStamp": {
+                "$lt": {
+                  "$date": 1510214400000
+                }
+              }
+            },
+            {
+              "semanticEntityId": {
+                "$eq": "user1"
+              }
+            }
+          ]
+        },
+        "fields": {
+          "payload": 1,
+          "semanticEntityId": 1,
+          "semantics": 1,
+          "timeStamp": 1,
+          "typeId": 1,
+          "type_.name": 1,
+          "_id": 0
+        },
+        "queryPlanner": {
+          "plannerVersion": 1,
+          "namespace": "TippersDB.SemanticObservation",
+          "indexFilterSet": false,
+          "parsedQuery": {
+            "$and": [
+              {
+                "semanticEntityId": {
+                  "$eq": "user1"
+                }
+              },
+              {
+                "timeStamp": {
+                  "$lt": {
+                    "$date": 1510214400000
+                  }
+                }
+              },
+              {
+                "timeStamp": {
+                  "$gt": {
+                    "$date": 1510128000000
+                  }
+                }
+              }
+            ]
+          },
+          "winningPlan": {
+            "stage": "FETCH",
+            "filter": {
+              "semanticEntityId": {
+                "$eq": "user1"
+              }
+            },
+            "inputStage": {
+              "stage": "IXSCAN",
+              "keyPattern": {
+                "timeStamp": 1
+              },
+              "indexName": "timeStamp_1",
+              "isMultiKey": false,
+              "multiKeyPaths": {
+                "timeStamp": []
+              },
+              "isUnique": false,
+              "isSparse": false,
+              "isPartial": false,
+              "indexVersion": 2,
+              "direction": "forward",
+              "indexBounds": {
+                "timeStamp": [
+                  "(new Date(1510128000000), new Date(1510214400000))"
+                ]
+              }
+            }
+          },
+          "rejectedPlans": []
+        }
+      }
+    },
+    {
+      "$lookup": {
+        "from": "SemanticObservationType",
+        "as": "type_",
+        "localField": "typeId",
+        "foreignField": "_id"
+      }
+    },
+    {
+      "$match": {
+        "type_.name": {
+          "$eq": "presence"
+        }
+      }
+    },
+    {
+      "$lookup": {
+        "from": "SemanticObservation",
+        "as": "semantics",
+        "localField": "payload.location",
+        "foreignField": "payload.location",
+        "unwinding": {
+          "preserveNullAndEmptyArrays": false
+        },
+        "matching": {
+          "$and": [
+            {
+              "$nor": [
+                {
+                  "semanticEntityId": {
+                    "$eq": "user1"
+                  }
+                }
+              ]
+            },
+            {
+              "timeStamp": {
+                "$lt": {
+                  "$date": 1510214400000
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "$project": {
+        "_id": false,
+        "semanticEntityId": true,
+        "semantics": true,
+        "payload": true,
+        "timeStamp": true,
+        "timeCheck": {
+          "$eq": [
+            "$semantics.timeStamp",
+            "$timeStamp"
+          ]
+        },
+        "typeCheck": {
+          "$eq": [
+            "$semantics.typeId",
+            "$typeId"
+          ]
+        }
+      }
+    },
+    {
+      "$match": {
+        "$and": [
+          {
+            "timeCheck": {
+              "$eq": true
+            }
+          },
+          {
+            "typeCheck": {
+              "$eq": true
+            }
+          }
+        ]
+      }
+    },
+    {
+      "$lookup": {
+        "from": "User",
+        "as": "semanticEntity",
+        "localField": "semantics.semanticEntityId",
+        "foreignField": "_id",
+        "unwinding": {
+          "preserveNullAndEmptyArrays": false
+        }
+      }
+    },
+    {
+      "$project": {
+        "_id": true,
+        "semanticEntity": {
+          "name": true
+        },
+        "payload": {
+          "location": true
+        }
+      }
+    }
+  ],
+  "ok": 1.0
+}
