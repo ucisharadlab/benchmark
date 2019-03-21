@@ -25,6 +25,8 @@ import java.time.Instant;
 import java.util.*;
 import java.util.Date;
 import java.util.stream.Collectors;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import static edu.uci.ics.tippers.common.util.Helper.getFileFromQuery;
 
@@ -133,9 +135,10 @@ public class InfluxDBQueryManager extends BaseQueryManager {
         HttpResponse response = connectionManager.sendQuery(query);
         try {
             return new JSONObject(EntityUtils.toString(response.getEntity())).getJSONArray("results").getJSONObject(0).getJSONArray("series").getJSONObject(0).getJSONArray("values");
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new BenchmarkException("Error writing output to file");
+        } catch (Exception e) {
+            //e.printStackTrace();
+            //throw new BenchmarkException("Error writing output to file");
+            return new JSONArray();
         }
     }
 
@@ -345,7 +348,9 @@ public class InfluxDBQueryManager extends BaseQueryManager {
                         observations.forEach(e -> {
                             JSONObject object = new JSONObject();
                             try {
-                                object.put("date", dateFormat.format(((JSONArray)e).getString(1)));
+                                String s = ((JSONArray)e).getString(0).split("T")[0];
+                                object.put("date", s);
+
                                 jsonObservations.put(object);
                             } catch (Exception e1) {
                                 e1.printStackTrace();
@@ -393,7 +398,7 @@ public class InfluxDBQueryManager extends BaseQueryManager {
                     Map<String, String> userMap = runMetadataQueryWithRows("SELECT * FROM Users")
                             .stream().collect(Collectors.toMap(e -> {
                                 try {
-                                    return (String)e.get(0);
+                                    return (String)e.get(3);
                                 } catch (Exception e1) {
                                     e1.printStackTrace();
                                     return null;
@@ -419,7 +424,7 @@ public class InfluxDBQueryManager extends BaseQueryManager {
 
                         String query = String.format("SELECT id, time, location, virtualSensorId, semanticEntityId FROM presence WHERE time >= '%s' " +
                                         "AND time <= '%s' AND location = '%s' AND semanticEntityId = '%s'",
-                                sdf.format(((JSONArray)row).getString(1)), sdf.format(endTime), endLocation, ((JSONArray)row).getString(4));
+                                ((JSONArray)row).getString(0), sdf.format(endTime), endLocation, ((JSONArray)row).getString(4));
                         JSONArray observations = runQueryWithRows(query);
 
                         observations.forEach(e->{
@@ -489,7 +494,7 @@ public class InfluxDBQueryManager extends BaseQueryManager {
                         JSONArray row = (JSONArray) rows.next();
 
                         String query = String.format("SELECT id, time, virtualSensorId, location, semanticEntityId FROM presence WHERE time = '%s' " +
-                                        "AND location='%s' AND semanticEntityId != '%s'", sdf.format(row.getString(1)),
+                                        "AND location='%s' AND semanticEntityId != '%s'", row.getString(0),
                                 row.getString(3), userId);
                         JSONArray observations = runQueryWithRows(query);
 
@@ -549,7 +554,8 @@ public class InfluxDBQueryManager extends BaseQueryManager {
                         JSONObject object = new JSONObject();
                         try {
                             if (infras.contains(((JSONArray)e).getString(3))) {
-                                object.put("date", dateFormat.format(((JSONArray)e).getString(1)));
+                                String s = ((JSONArray)e).getString(0).split("T")[0];
+                                object.put("date", s);
                                 jsonObservations.put(object);
                             }
                         } catch (Exception e1) {
@@ -592,14 +598,14 @@ public class InfluxDBQueryManager extends BaseQueryManager {
                     Map<String, String> infraMap = runMetadataQueryWithRows("SELECT * FROM Infrastructure")
                             .stream().collect(Collectors.toMap(e -> {
                                 try {
-                                    return (String)e.get(0);
+                                    return (String)e.get(2);
                                 } catch (Exception e1) {
                                     e1.printStackTrace();
                                     return null;
                                 }
                             }, e -> {
                                 try {
-                                    return (String)e.get(1);
+                                    return (String)e.get(0);
                                 } catch (Exception e1) {
                                     e1.printStackTrace();
                                     return null;
@@ -608,17 +614,30 @@ public class InfluxDBQueryManager extends BaseQueryManager {
 
                     RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(10));
                     String query = String.format("SELECT id, time, virtualSensorId, occupancy, semanticEntityId FROM occupancy WHERE time >= '%s' " +
-                                    "AND time <= '%s' ORDER BY semanticEntityId, time ",
+                                    "AND time <= '%s' ",
                             sdf.format(startTime), sdf.format(endTime));
                     JSONArray observations = runQueryWithRows(query);
+                    List<JSONArray> sortedObservations = new ArrayList<>();
+                    observations.forEach(e -> {sortedObservations.add((JSONArray)e);});
 
-                    observations.forEach(e -> {
+                    sortedObservations.sort((a, b) -> {
+                        String timeA, timeB;
+                        String sidA, sidB;
+                        timeA = a.getString(0);
+                        timeB = b.getString(0);
+                        sidA = a.getString(4);
+                        sidB = b.getString(4);
+                        if (timeA.compareTo(timeB) != 0) return timeA.compareTo(timeB);
+                        else return sidA.compareTo(sidB);
+                    });
+                    sortedObservations.forEach(e -> {
                         if (writeOutput) {
                             try {
                                 StringBuilder line = new StringBuilder("");
                                 int columnCount = ((JSONArray)e).length();
                                 for (int i = 0; i < columnCount; i++) {
                                     if (i==4) line.append(infraMap.get(((JSONArray)e).getString(i))).append("\t");
+                                    else if (i==3) line.append(((JSONArray)e).getInt(i)).append("\t");
                                     else line.append(((JSONArray)e).getString(i)).append("\t");
                                 }
                                 writer.writeString(line.toString());
