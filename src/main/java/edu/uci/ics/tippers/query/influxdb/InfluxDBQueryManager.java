@@ -558,7 +558,7 @@ public class InfluxDBQueryManager extends BaseQueryManager {
                         JSONArray row = (JSONArray) rows.next();
 
                         String query = String.format("SELECT id, time, virtualSensorId, location, semanticEntityId FROM presence WHERE time = '%s' " +
-                                        "AND location='%s' AND semanticEntityId != '%s'", sdf.format(row.getString(1)),
+                                        "AND location='%s' AND semanticEntityId != '%s'", row.getString(0),
                                 row.getString(3), userId);
                         JSONArray observations = runQueryWithRows(query);
 
