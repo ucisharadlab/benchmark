@@ -504,6 +504,77 @@ public class MongoDBQueryManager extends BaseQueryManager{
         return Constants.MAX_DURATION;
     }
 
+    public Duration runQuery7AppJoin(String startLocation, String endLocation, Date date) throws BenchmarkException {
+        switch (mapping) {
+            case 1:
+            case 2:
+                Instant start = Instant.now();
+
+                MongoCollection collection = database.getCollection("SemanticObservation");
+                Date startTime = date;
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(date);
+                cal.add(Calendar.DATE, 1);
+                Date endTime = cal.getTime();
+
+                Bson lookUp1 = lookup("SemanticObservationType", "typeId", "_id", "type_");
+
+                Bson match1 = match(and(
+                        eq("type_.name", "presence"),
+                        gt("timeStamp", startTime),
+                        lt("timeStamp", endTime),
+                        eq("payload.location", startLocation)
+                ));
+
+                Bson lookUp2 = lookup("SemanticObservation", "semanticEntityId",
+                        "semanticEntityId", "semantics");
+
+                Bson unwind = unwind("$semantics");
+
+                Bson project1 = project(
+                        fields(
+                                excludeId(),
+                                include("timeStamp"),
+                                include("semantics"),
+                                include("semanticEntityId"),
+                                include("payload"),
+                                computed("timeCheck",
+                                        new Document("$gt", Arrays.asList("$semantics.timeStamp", "$timeStamp"))),
+                                computed("typeCheck",
+                                        new Document("$eq", Arrays.asList("$semantics.typeId", "$typeId")))
+                        )
+                );
+
+                Bson match2 = match(and(
+                        lt("semantics.timeStamp", endTime),
+                        eq("semantics.payload.location", endLocation),
+                        eq("timeCheck", true),
+                        eq("typeCheck", true)
+                ));
+
+                Bson lookUp3 = lookup("User", "semanticEntityId",
+                        "_id", "semanticEntity");
+
+                Bson unwind2 = unwind("$semanticEntity");
+
+                Bson project2 = project(
+                        fields(
+                                include("semanticEntity.name")
+                        )
+                );
+
+                MongoIterable iterable = collection.aggregate(Arrays.asList(lookUp1, match1, lookUp2, unwind, project1,
+                        match2, lookUp3, unwind2, project2));
+
+                getResults(iterable, 7);
+
+                Instant end = Instant.now();
+                return Duration.between(start, end);
+            default:
+                throw new BenchmarkException("No Such Mapping");
+        }
+    }
+
     @Override
     public Duration runQuery8(String userId, Date date) throws BenchmarkException {
         /*switch (mapping) {
@@ -631,6 +702,79 @@ public class MongoDBQueryManager extends BaseQueryManager{
                 throw new BenchmarkException("No Such Mapping");
         }*/
         return Constants.MAX_DURATION;
+    }
+
+    public Duration runQuery8AppJoin(String userId, Date date) throws BenchmarkException {
+        switch (mapping) {
+            case 1:
+            case 2:
+                Instant start = Instant.now();
+
+                MongoCollection collection = database.getCollection("SemanticObservation");
+                Date startTime = date;
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(date);
+                cal.add(Calendar.DATE, 1);
+                Date endTime = cal.getTime();
+
+
+                Bson lookUp1 = lookup("SemanticObservationType", "typeId", "_id", "type_");
+
+                Bson match1 = match(and(
+                        eq("type_.name", "presence"),
+                        gt("timeStamp", startTime),
+                        lt("timeStamp", endTime),
+                        eq("semanticEntityId", userId)
+                ));
+
+                Bson lookUp2 = lookup("SemanticObservation", "payload.location",
+                        "payload.location", "semantics");
+
+                Bson unwind = unwind("$semantics");
+
+                Bson project1 = project(
+                        fields(
+                                excludeId(),
+                                include("timeStamp"),
+                                include("semantics"),
+                                include("semanticEntityId"),
+                                include("payload"),
+                                computed("timeCheck",
+                                        new Document("$eq", Arrays.asList("$semantics.timeStamp", "$timeStamp"))),
+                                computed("typeCheck",
+                                        new Document("$eq", Arrays.asList("$semantics.typeId", "$typeId")))
+                        )
+                );
+
+                Bson match2 = match(and(
+                        ne("semantics.semanticEntityId", userId),
+                        lt("semantics.timeStamp", endTime),
+                        eq("timeCheck", true),
+                        eq("typeCheck", true)
+                ));
+
+                Bson lookUp3 = lookup("User", "semantics.semanticEntityId",
+                        "_id", "semanticEntity");
+
+                Bson unwind2 = unwind("$semanticEntity");
+
+                Bson project2 = project(
+                        fields(
+                                include("semanticEntity.name"),
+                                include("payload.location")
+                        )
+                );
+
+                MongoIterable iterable = collection.aggregate(Arrays.asList(lookUp1, match1, lookUp2, unwind, project1,
+                        match2, lookUp3, unwind2, project2));
+
+                getResults(iterable, 8);
+
+                Instant end = Instant.now();
+                return Duration.between(start, end);
+            default:
+                throw new BenchmarkException("No Such Mapping");
+        }
     }
 
     @Override
