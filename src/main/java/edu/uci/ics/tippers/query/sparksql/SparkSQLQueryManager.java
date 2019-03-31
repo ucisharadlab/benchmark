@@ -7,6 +7,7 @@ import edu.uci.ics.tippers.query.BaseQueryManager;
 import edu.uci.ics.tippers.query.postgresql.PgSQLQueryManager;
 
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -19,6 +20,8 @@ public class SparkSQLQueryManager extends BaseQueryManager {
 
     private PgSQLQueryManager externalQueryManager;
     private Connection connection;
+    private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
 
     public SparkSQLQueryManager(int mapping, String queriesDir, String outputDir, boolean writeOutput, long timeout) {
         super(mapping, queriesDir, outputDir, writeOutput, timeout);
@@ -102,19 +105,19 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                     rs.close();
 
                     if ("Thermometer".equals(typeId))
-                        query = "SELECT timeStamp, temperature FROM ThermometerObservation  WHERE timestamp>'?' AND timestamp<'?' " +
-                                "AND SENSOR_ID=?";
+                        query = String.format("SELECT timeStamp, temperature FROM ThermometerObservation  WHERE timestamp>'%s' AND timestamp<'%s' " +
+                                "AND SENSOR_ID=?", sdf.format(startTime), sdf.format(endTime));
                     else if ("WeMo".equals(typeId))
-                        query = "SELECT timeStamp, currentMilliWatts, onTodaySeconds FROM WeMoObservation  WHERE timestamp>'?' AND timestamp<'?' " +
-                                "AND SENSOR_ID=?";
+                        query = String.format("SELECT timeStamp, currentMilliWatts, onTodaySeconds FROM WeMoObservation  WHERE timestamp>'%s' AND timestamp<'%s' " +
+                                "AND SENSOR_ID=?", sdf.format(startTime), sdf.format(endTime));
                     else if ("WiFiAP".equals(typeId))
-                        query = "SELECT timeStamp, clientId FROM WiFiAPObservation  WHERE timestamp>'?' AND timestamp<'?' " +
-                                "AND SENSOR_ID=?";
+                        query = String.format("SELECT timeStamp, clientId FROM WiFiAPObservation  WHERE timestamp>'%s' AND timestamp<'%s' " +
+                                "AND SENSOR_ID=?", sdf.format(startTime), sdf.format(endTime));
 
                     stmt = connection.prepareStatement(query);
-                    stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
-                    stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
-                    stmt.setString(3, sensorId);
+//                    stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
+//                    stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
+                    stmt.setString(1, sensorId);
 
                     externalQueryManager.runTimedQuery(stmt, 3);
 
@@ -171,29 +174,32 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                     rs.close();
 
                     if (!thermoSensors.isEmpty()) {
-                        query = "SELECT timeStamp, temperature FROM ThermometerObservation  WHERE timestamp>'?' AND timestamp<'?' " +
-                                "AND (" + thermoSensors.stream().map(e -> "SENSOR_ID='" + e + "'" ).collect(Collectors.joining(" OR ")) + ")";
+                        query = String.format("SELECT timeStamp, temperature FROM ThermometerObservation  WHERE timestamp>'%s' AND timestamp<'%s' " +
+                                "AND (" + thermoSensors.stream().map(e -> "SENSOR_ID='" + e + "'" ).collect(Collectors.joining(" OR ")) + ")",
+                                sdf.format(startTime), sdf.format(endTime));
                         stmt = connection.prepareStatement(query);
-                        stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
-                        stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
+//                        stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
+//                        stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
 
                         externalQueryManager.runTimedQuery(stmt, 4);
                     }
                     else if (!wemoSensors.isEmpty()) {
-                        query = "SELECT timeStamp, currentMilliWatts, onTodaySeconds FROM WeMoObservation  WHERE timestamp>'?' AND timestamp<'?' " +
-                                "AND (" + wemoSensors.stream().map(e -> "SENSOR_ID='" + e + "'" ).collect(Collectors.joining(" OR ")) + ")";
+                        query = String.format("SELECT timeStamp, currentMilliWatts, onTodaySeconds FROM WeMoObservation  WHERE timestamp>'%s' AND timestamp<'%s' " +
+                                "AND (" + wemoSensors.stream().map(e -> "SENSOR_ID='" + e + "'" ).collect(Collectors.joining(" OR ")) + ")",
+                                sdf.format(startTime), sdf.format(endTime));
                         stmt = connection.prepareStatement(query);
-                        stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
-                        stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
+//                        stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
+//                        stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
 
                         externalQueryManager.runTimedQuery(stmt, 4);
                     }
                     else if (!wifiSensors.isEmpty()) {
-                        query = "SELECT timeStamp, clientId FROM WiFiAPObservation  WHERE timestamp>'?' AND timestamp<'?' " +
-                                "AND (" + wifiSensors.stream().map(e -> "SENSOR_ID='" + e + "'" ).collect(Collectors.joining(" OR ")) + ")";
+                        query = String.format("SELECT timeStamp, clientId FROM WiFiAPObservation  WHERE timestamp>'%s' AND timestamp<'%s' " +
+                                "AND (" + wifiSensors.stream().map(e -> "SENSOR_ID='" + e + "'" ).collect(Collectors.joining(" OR ")) + ")",
+                                sdf.format(startTime), sdf.format(endTime));
                         stmt = connection.prepareStatement(query);
-                        stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
-                        stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
+//                        stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
+//                        stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
 
                         externalQueryManager.runTimedQuery(stmt, 4);
                     }
@@ -239,19 +245,19 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                 }
             case 2:
                 query = String.format("SELECT * FROM %sOBSERVATION o " +
-                                "WHERE timestamp>? AND timestamp<'?' AND %s>=? AND %s<=?", sensorTypeName,
-                        payloadAttribute, payloadAttribute);
+                                "WHERE timestamp>'%s' AND timestamp<'%s' AND %s>=? AND %s<=?", sensorTypeName,
+                        sdf.format(startTime), sdf.format(endTime), payloadAttribute, payloadAttribute);
                 try {
                     PreparedStatement stmt = connection.prepareStatement(query);
 
-                    stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
-                    stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
+//                    stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
+//                    stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
                     if (startPayloadValue instanceof  Integer) {
-                        stmt.setInt(3, (Integer) startPayloadValue);
-                        stmt.setInt(4, (Integer) endPayloadValue);
+                        stmt.setInt(1, (Integer) startPayloadValue);
+                        stmt.setInt(2, (Integer) endPayloadValue);
                     } else if (startPayloadValue instanceof  Double) {
-                        stmt.setDouble(3, (Double) startPayloadValue);
-                        stmt.setDouble(4, (Double) endPayloadValue);
+                        stmt.setDouble(1, (Double) startPayloadValue);
+                        stmt.setDouble(2, (Double) endPayloadValue);
                     }
                     return externalQueryManager.runTimedQuery(stmt, 5);
                 } catch (SQLException  e) {
@@ -311,14 +317,15 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                     rs.close();
 
                     if (!thermoSensors.isEmpty()) {
-                        query = "SELECT obs.sensor_id, avg(counts) FROM " +
+                        query = String.format("SELECT obs.sensor_id, avg(counts) FROM " +
                                 "( SELECT sensor_id, date_format( timestamp, 'yyyy-MM-dd'), " +
                                 "count(*) as counts " +
-                                "FROM ThermometerObservation WHERE timestamp>'?' AND timestamp<'?' " +
+                                "FROM ThermometerObservation WHERE timestamp>'%s' AND timestamp<'%s' " +
                                 "AND ( " +
                                 thermoSensors.stream().map(e -> "SENSOR_ID='" + e + "'" ).collect(Collectors.joining(" OR ")) + ") " +
                                 " GROUP BY sensor_id, date_format( timestamp, 'yyyy-MM-dd')) " +
-                                "AS obs GROUP BY sensor_id";
+                                "AS obs GROUP BY sensor_id",
+                                sdf.format(startTime), sdf.format(endTime));
                         stmt = connection.prepareStatement(query);
                         stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
                         stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
@@ -326,17 +333,18 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                         externalQueryManager.runTimedQuery(stmt, 6);
                     }
                     else if (!wemoSensors.isEmpty()) {
-                        query = "SELECT obs.sensor_id, avg(counts) FROM " +
+                        query = String.format(String.format("SELECT obs.sensor_id, avg(counts) FROM " +
                                 "( SELECT sensor_id, date_format( timestamp, 'yyyy-MM-dd'), " +
                                 "count(*) as counts " +
-                                "FROM WeMoObservation WHERE timestamp>'?' AND timestamp<'?' " +
+                                "FROM WeMoObservation WHERE timestamp>'%s' AND timestamp<'%s' " +
                                 "AND ( " +
                                 thermoSensors.stream().map(e -> "SENSOR_ID='" + e + "'" ).collect(Collectors.joining(" OR ")) + ") " +
                                 " GROUP BY sensor_id, date_format( timestamp, 'yyyy-MM-dd')) " +
-                                "AS obs GROUP BY sensor_id";
+                                "AS obs GROUP BY sensor_id",
+                                sdf.format(startTime), sdf.format(endTime));
                         stmt = connection.prepareStatement(query);
-                        stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
-                        stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
+//                        stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
+//                        stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
 
                         externalQueryManager.runTimedQuery(stmt, 6);
                     }
@@ -344,11 +352,12 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                         query = "SELECT obs.sensor_id, avg(counts) FROM " +
                                 "(SELECT sensor_id, date_format( timestamp, 'yyyy-MM-dd'), " +
                                 "count(*) as counts " +
-                                "FROM WiFiAPObservation WHERE timestamp>'?' AND timestamp<'?' " +
+                                "FROM WiFiAPObservation WHERE timestamp>'%s' AND timestamp<'%s' " +
                                 "AND ( " +
                                 thermoSensors.stream().map(e -> "SENSOR_ID='" + e + "'" ).collect(Collectors.joining(" OR ")) + ") " +
                                 " GROUP BY sensor_id, date_format( timestamp, 'yyyy-MM-dd')) " +
-                                "AS obs GROUP BY sensor_id";
+                                "AS obs GROUP BY sensor_id",
+                                sdf.format(startTime), sdf.format(endTime));
                         stmt = connection.prepareStatement(query);
                         stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
                         stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
