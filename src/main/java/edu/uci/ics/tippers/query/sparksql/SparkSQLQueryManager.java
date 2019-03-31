@@ -327,8 +327,8 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                                 "AS obs GROUP BY sensor_id",
                                 sdf.format(startTime), sdf.format(endTime));
                         stmt = connection.prepareStatement(query);
-                        stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
-                        stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
+//                        stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
+//                        stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
 
                         externalQueryManager.runTimedQuery(stmt, 6);
                     }
@@ -359,8 +359,8 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                                 "AS obs GROUP BY sensor_id",
                                 sdf.format(startTime), sdf.format(endTime));
                         stmt = connection.prepareStatement(query);
-                        stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
-                        stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
+//                        stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
+//                        stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
 
                         externalQueryManager.runTimedQuery(stmt, 6);
                     }
@@ -413,20 +413,21 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                 cal.setTime(date);
                 cal.add(Calendar.DATE, 1);
                 endTime = cal.getTime();
-                query = "SELECT u.name " +
+                query = String.format("SELECT u.name " +
                         "FROM PRESENCE s1, PRESENCE s2, USERS u " +
-                        "WHERE s1.timeStamp >= ? AND s1.timeStamp <= ?  AND s2.timeStamp <= ? " +
+                        "WHERE s1.timeStamp >= '%s' AND s1.timeStamp <= '%s'  AND s2.timeStamp <= '%s' " +
                         "AND s1.semantic_entity_id = s2.semantic_entity_id " +
                         "AND s1.location = ? AND s2.location = ? " +
                         "AND s1.timeStamp < s2.timeStamp " +
-                        "AND s1.semantic_entity_id = u.id ";
+                        "AND s1.semantic_entity_id = u.id ",
+                        sdf.format(startTime), sdf.format(endTime), sdf.format(endTime));
                 try {
                     PreparedStatement stmt = connection.prepareStatement(query);
-                    stmt.setTimestamp (1, new Timestamp(startTime.getTime()));
-                    stmt.setTimestamp (2, new Timestamp(endTime.getTime()));
-                    stmt.setTimestamp (3, new Timestamp(endTime.getTime()));
-                    stmt.setString(4, startLocation);
-                    stmt.setString(5, endLocation);
+//                    stmt.setTimestamp (1, new Timestamp(startTime.getTime()));
+//                    stmt.setTimestamp (2, new Timestamp(endTime.getTime()));
+//                    stmt.setTimestamp (3, new Timestamp(endTime.getTime()));
+                    stmt.setString(1, startLocation);
+                    stmt.setString(2, endLocation);
 
                     return externalQueryManager.runTimedQuery(stmt, 7);
                 } catch (SQLException e) {
@@ -448,18 +449,19 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                 cal.add(Calendar.DATE, 1);
                 Date endTime = cal.getTime();
 
-                String query = "SELECT u.name, s1.payload " +
+                String query = String.format("SELECT u.name, s1.payload " +
                         "FROM SEMANTIC_OBSERVATION s1, SEMANTIC_OBSERVATION s2, SEMANTIC_OBSERVATION_TYPE st, USERS u " +
-                        "WHERE s1.timeStamp >= '?' AND s1.timeStamp <= '?' " +
+                        "WHERE s1.timeStamp >= '%s' AND s1.timeStamp <= '%s' " +
                         "AND s2.timeStamp = s1.timeStamp " +
                         "AND st.name = 'presence' AND s1.type_id = s2.type_id AND st.id = s1.type_id  " +
                         "AND s1.semantic_entity_id = ? AND s1.semantic_entity_id != s2.semantic_entity_id " +
-                        "AND s1.payload['location'] = s2.payload['location'] AND s2.semantic_entity_id = u.id ";
+                        "AND s1.payload['location'] = s2.payload['location'] AND s2.semantic_entity_id = u.id ",
+                sdf.format(startTime), sdf.format(endTime));
                 try {
                     PreparedStatement stmt = connection.prepareStatement(query);
-                    stmt.setTimestamp (1, new Timestamp(startTime.getTime()));
-                    stmt.setTimestamp (2, new Timestamp(endTime.getTime()));
-                    stmt.setString(3, userId);
+//                    stmt.setTimestamp (1, new Timestamp(startTime.getTime()));
+//                    stmt.setTimestamp (2, new Timestamp(endTime.getTime()));
+                    stmt.setString(1, userId);
 
                     return externalQueryManager.runTimedQuery(stmt, 8);
                 } catch (SQLException e) {
@@ -473,16 +475,17 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                 cal.setTime(date);
                 cal.add(Calendar.DATE, 1);
                 endTime = cal.getTime();
-                query = "SELECT u.name, s1.location " +
+                query = String.format("SELECT u.name, s1.location " +
                         "FROM PRESENCE s1, PRESENCE s2, USERS u " +
-                        "WHERE s1.timeStamp >= '?' AND s1.timeStamp <= '?' " +
+                        "WHERE s1.timeStamp >= '%s' AND s1.timeStamp <= '%s' " +
                         "AND s2.timeStamp = s1.timeStamp " +
                         "AND s1.semantic_entity_id = ? AND s1.semantic_entity_id != s2.semantic_entity_id " +
-                        "AND s2.semantic_entity_id = u.id AND s1.location = s2.location ";
+                        "AND s2.semantic_entity_id = u.id AND s1.location = s2.location ",
+                        sdf.format(startTime), sdf.format(endTime));
                 try {
                     PreparedStatement stmt = connection.prepareStatement(query);
-                    stmt.setTimestamp (1, new Timestamp(startTime.getTime()));
-                    stmt.setTimestamp (2, new Timestamp(endTime.getTime()));
+//                    stmt.setTimestamp (1, new Timestamp(startTime.getTime()));
+//                    stmt.setTimestamp (2, new Timestamp(endTime.getTime()));
                     stmt.setString(3, userId);
 
                     return externalQueryManager.runTimedQuery(stmt, 8);
@@ -589,16 +592,17 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                     throw new BenchmarkException("Error Running Query");
                 }
             case 2:
-                query = "SELECT infra.name, so.timeStamp, so.occupancy " +
+                query = String.format("SELECT infra.name, so.timeStamp, so.occupancy " +
                         "FROM OCCUPANCY so, INFRASTRUCTURE infra " +
-                        "WHERE so.timeStamp > '?' AND so.timeStamp < '?' " +
+                        "WHERE so.timeStamp > '%s' AND so.timeStamp < '%s' " +
                         "AND so.semantic_entity_id = infra.id " +
-                        "ORDER BY so.semantic_entity_id, so.timeStamp";
+                        "ORDER BY so.semantic_entity_id, so.timeStamp",
+                        sdf.format(startTime), sdf.format(endTime));
 
                 try {
                     PreparedStatement stmt = connection.prepareStatement(query);
-                    stmt.setTimestamp (1, new Timestamp(startTime.getTime()));
-                    stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
+//                    stmt.setTimestamp (1, new Timestamp(startTime.getTime()));
+//                    stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
                     return externalQueryManager.runTimedQuery(stmt, 10);
                 } catch (SQLException e) {
                     e.printStackTrace();
