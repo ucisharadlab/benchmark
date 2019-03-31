@@ -486,7 +486,7 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                     PreparedStatement stmt = connection.prepareStatement(query);
 //                    stmt.setTimestamp (1, new Timestamp(startTime.getTime()));
 //                    stmt.setTimestamp (2, new Timestamp(endTime.getTime()));
-                    stmt.setString(3, userId);
+                    stmt.setString(1, userId);
 
                     return externalQueryManager.runTimedQuery(stmt, 8);
                 } catch (SQLException e) {
