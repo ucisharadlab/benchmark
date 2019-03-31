@@ -333,7 +333,7 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                         externalQueryManager.runTimedQuery(stmt, 6);
                     }
                     else if (!wemoSensors.isEmpty()) {
-                        query = String.format(String.format("SELECT obs.sensor_id, avg(counts) FROM " +
+                        query = String.format("SELECT obs.sensor_id, avg(counts) FROM " +
                                 "( SELECT sensor_id, date_format( timestamp, 'yyyy-MM-dd'), " +
                                 "count(*) as counts " +
                                 "FROM WeMoObservation WHERE timestamp>'%s' AND timestamp<'%s' " +
@@ -349,7 +349,7 @@ public class SparkSQLQueryManager extends BaseQueryManager {
                         externalQueryManager.runTimedQuery(stmt, 6);
                     }
                     else if (!wifiSensors.isEmpty()) {
-                        query = "SELECT obs.sensor_id, avg(counts) FROM " +
+                        query = String.format("SELECT obs.sensor_id, avg(counts) FROM " +
                                 "(SELECT sensor_id, date_format( timestamp, 'yyyy-MM-dd'), " +
                                 "count(*) as counts " +
                                 "FROM WiFiAPObservation WHERE timestamp>'%s' AND timestamp<'%s' " +
