@@ -1,0 +1,60 @@
+[
+    {
+        "id": "BO_Smartphone",
+        "label": "Smartphone",
+        "subtype_of": "TIP_Platform_Type",
+        "description": "Smartphones are a class of mobile phones and of multi-purpose mobile computing devices",
+        "properties": [
+            {
+                "id": "BO_WiFi_MACAddress",
+                "label:": "MAC Address of WiFi on Smartphone",
+                "subtype_of": "TIP_Static_Property",
+                "value": "string"
+            },
+            {
+                "id": "BO_Bluetooth_MACAddress",
+                "label": "MAC Address of Bluetooth on Smartphone",
+                "subtype_of": "TIP_Static_Property",
+                "value": "string"
+            }
+        ],
+        "sensors": [
+            "BO_Accelerometer",
+            "BO_Gyroscope",
+            "BO_GPS",
+            "BO_Fall_Detection"
+        ]
+    },
+    {
+        "id": "BO_Smartwatch",
+        "label": "Smartwatch",
+        "subtype_of": "TIP_Platform_Type",
+        "description": "A smartwatch is a wearable computer in the form of a wristwatch; modern smartwatches provide a local touchscreen interface for daily use, while an associated smartphone app provides for management and telemetry (such as long-term biomonitoring)",
+        "sensors": [
+            "BO_Accelerometer",
+            "BO_Gyroscope",
+            "BO_Linear_Acceleration",
+            "BO_HeartRate",
+            "BO_Steps",
+            "BO_Gravity",
+            "BO_Magnetic_Field"
+        ]
+    },
+    {
+        "id": "BO_HVAC",
+        "label": "Smartwatch",
+        "subtype_of": "TIP_Platform_Type",
+        "description": "Heating, ventilation, and air conditioning (HVAC[1]) is the technology of indoor and vehicular environmental comfort.",
+        "sensors": [
+            "BO_HVAC_VAV",
+            "BO_HVAC_AIR_VOLUME",
+            "BO_HVAC_AUX_TEMP",
+            "BO_HVAC_AIR_FLOW_MAX",
+            "BO_HVAC_AIR_FLOW_MIN",
+            "BO_HVAC_LOOP_OUT",
+            "BO_HVAC_TEMPERATURE",
+            "BO_HVAC_HEATER",
+            "BO_HVAC_COOLER"
+        ]
+    }
+]

@@ -1,178 +1,178 @@
 [
-  {
-    "groups": [],
-    "name": "Admin",
-    "googleAuthToken": "a9a41d99-1557-45a0-aed0-3aca3e0fd36a",
-    "id": "admin",
-    "emailId": "admin@uci.edu"
-  },
-  {
-    "groups": [
-      {
-        "description": "Information Systems Group",
-        "name": "ISG",
-        "id": "ISG"
-      }
-    ],
-    "name": "Peeyush Gupta",
-    "googleAuthToken": "b9a41d99-1557-45a0-aed0-3aca3e0fd36a",
-    "id": "user1",
-    "emailId": "peeyush@uci.edu"
-  },
-  {
-    "groups": [
-      {
-        "description": "Information Systems Group",
-        "name": "ISG",
-        "id": "ISG"
-      }
-    ],
-    "name": "Dhrub",
-    "googleAuthToken": "81ba6c8b-4f7d-4e7b-9a27-fcc052a1a868",
-    "id": "user2",
-    "emailId": "dhrub@uci.edu"
-  },
-  {
-    "groups": [
-      {
-        "description": "Information Systems Group",
-        "name": "ISG",
-        "id": "ISG"
-      }
-    ],
-    "name": "Primal",
-    "googleAuthToken": "53682347-f287-4666-9c19-d3d9f804fd39",
-    "id": "user3",
-    "emailId": "primal@uci.edu"
-  },
-  {
-    "groups": [
-      {
-        "description": "Information Systems Group",
-        "name": "ISG",
-        "id": "ISG"
-      }
-    ],
-    "name": "Roberto",
-    "googleAuthToken": "b1ba6c8b-4f7d-4e7b-9a27-fcc052a1a868",
-    "id": "user4",
-    "emailId": "roberto@uci.edu"
-  },
-  {
-    "groups": [
-      {
-        "description": "Information Systems Group",
-        "name": "ISG",
-        "id": "ISG"
-      }
-    ],
-    "name": "Joyce",
-    "googleAuthToken": "a1ba6c8b-4f7d-4e7b-9a27-fcc052a1a868",
-    "id": "user5",
-    "emailId": "joyce@uci.edu"
-  },
-  {
-    "groups": [
-      {
-        "description": "Information Systems Group",
-        "name": "ISG",
-        "id": "ISG"
-      }
-    ],
-    "name": "Sameera",
-    "googleAuthToken": "11ba6c8b-4f7d-4e7b-9a27-fcc052a1a868",
-    "id": "user6",
-    "emailId": "sameera@uci.edu"
-  },
-  {
-    "groups": [
-      {
-        "description": "Information Systems Group",
-        "name": "ISG",
-        "id": "ISG"
-      }
-    ],
-    "name": "Sumaya",
-    "googleAuthToken": "21ba6c8b-4f7d-4e7b-9a27-fcc052a1a868",
-    "id": "user7",
-    "emailId": "sumaya@uci.edu"
-  },
-  {
-    "groups": [
-      {
-        "description": "Information Systems Group",
-        "name": "ISG",
-        "id": "ISG"
-      }
-    ],
-    "name": "Sharad",
-    "googleAuthToken": "31ba6c8b-4f7d-4e7b-9a27-fcc052a1a868",
-    "id": "user8",
-    "emailId": "sharad@uci.edu"
-  },
-  {
-    "groups": [
-      {
-        "description": "Information Systems Group",
-        "name": "ISG",
-        "id": "ISG"
-      }
-    ],
-    "name": "Nalini",
-    "googleAuthToken": "41ba6c8b-4f7d-4e7b-9a27-fcc052a1a868",
-    "id": "user9",
-    "emailId": "nalini@uci.edu"
-  },
-  {
-    "groups": [
-      {
-        "description": "Information Systems Group",
-        "name": "ISG",
-        "id": "ISG"
-      }
-    ],
-    "name": "Alfred",
-    "googleAuthToken": "51ba6c8b-4f7d-4e7b-9a27-fcc052a1a868",
-    "id": "user10",
-    "emailId": "alfred@uci.edu"
-  },
-  {
-    "groups": [
-      {
-        "description": "Information Systems Group",
-        "name": "ISG",
-        "id": "ISG"
-      }
-    ],
-    "name": "abdul",
-    "googleAuthToken": "61ba6c8b-4f7d-4e7b-9a27-fcc052a1a868",
-    "id": "user11",
-    "emailId": "abdul@uci.edu"
-  },
-  {
-    "groups": [
-      {
-        "description": "Information Systems Group",
-        "name": "ISG",
-        "id": "ISG"
-      }
-    ],
-    "name": "Shantanu",
-    "googleAuthToken": "71ba6c8b-4f7d-4e7b-9a27-fcc052a1a868",
-    "id": "user12",
-    "emailId": "shantanu@uci.edu"
-  },
-  {
-    "groups": [
-      {
-        "description": "Information Systems Group",
-        "name": "ISG",
-        "id": "ISG"
-      }
-    ],
-    "name": "Nisha",
-    "googleAuthToken": "91ba6c8b-4f7d-4e7b-9a27-fcc052a1a868",
-    "id": "user13",
-    "emailId": "nisha@uci.edu"
-  }
-]
+    {
+      "groups": [],
+      "name": "Admin",
+      "googleAuthToken": "a9a41d99-1557-45a0-aed0-3aca3e0fd36a",
+      "id": "admin",
+      "emailId": "admin@uci.edu"
+    },
+    {
+      "groups": [
+        {
+          "description": "Information Systems Group",
+          "name": "ISG",
+          "id": "ISG"
+        }
+      ],
+      "name": "Peeyush Gupta",
+      "googleAuthToken": "b9a41d99-1557-45a0-aed0-3aca3e0fd36a",
+      "id": "user1",
+      "emailId": "peeyush@uci.edu"
+    },
+    {
+      "groups": [
+        {
+          "description": "Information Systems Group",
+          "name": "ISG",
+          "id": "ISG"
+        }
+      ],
+      "name": "Dhrub",
+      "googleAuthToken": "81ba6c8b-4f7d-4e7b-9a27-fcc052a1a868",
+      "id": "user2",
+      "emailId": "dhrub@uci.edu"
+    },
+    {
+      "groups": [
+        {
+          "description": "Information Systems Group",
+          "name": "ISG",
+          "id": "ISG"
+        }
+      ],
+      "name": "Primal",
+      "googleAuthToken": "53682347-f287-4666-9c19-d3d9f804fd39",
+      "id": "user3",
+      "emailId": "primal@uci.edu"
+    },
+    {
+      "groups": [
+        {
+          "description": "Information Systems Group",
+          "name": "ISG",
+          "id": "ISG"
+        }
+      ],
+      "name": "Roberto",
+      "googleAuthToken": "b1ba6c8b-4f7d-4e7b-9a27-fcc052a1a868",
+      "id": "user4",
+      "emailId": "roberto@uci.edu"
+    },
+    {
+      "groups": [
+        {
+          "description": "Information Systems Group",
+          "name": "ISG",
+          "id": "ISG"
+        }
+      ],
+      "name": "Joyce",
+      "googleAuthToken": "a1ba6c8b-4f7d-4e7b-9a27-fcc052a1a868",
+      "id": "user5",
+      "emailId": "joyce@uci.edu"
+    },
+    {
+      "groups": [
+        {
+          "description": "Information Systems Group",
+          "name": "ISG",
+          "id": "ISG"
+        }
+      ],
+      "name": "Sameera",
+      "googleAuthToken": "11ba6c8b-4f7d-4e7b-9a27-fcc052a1a868",
+      "id": "user6",
+      "emailId": "sameera@uci.edu"
+    },
+    {
+      "groups": [
+        {
+          "description": "Information Systems Group",
+          "name": "ISG",
+          "id": "ISG"
+        }
+      ],
+      "name": "Sumaya",
+      "googleAuthToken": "21ba6c8b-4f7d-4e7b-9a27-fcc052a1a868",
+      "id": "user7",
+      "emailId": "sumaya@uci.edu"
+    },
+    {
+      "groups": [
+        {
+          "description": "Information Systems Group",
+          "name": "ISG",
+          "id": "ISG"
+        }
+      ],
+      "name": "Sharad",
+      "googleAuthToken": "31ba6c8b-4f7d-4e7b-9a27-fcc052a1a868",
+      "id": "user8",
+      "emailId": "sharad@uci.edu"
+    },
+    {
+      "groups": [
+        {
+          "description": "Information Systems Group",
+          "name": "ISG",
+          "id": "ISG"
+        }
+      ],
+      "name": "Nalini",
+      "googleAuthToken": "41ba6c8b-4f7d-4e7b-9a27-fcc052a1a868",
+      "id": "user9",
+      "emailId": "nalini@uci.edu"
+    },
+    {
+      "groups": [
+        {
+          "description": "Information Systems Group",
+          "name": "ISG",
+          "id": "ISG"
+        }
+      ],
+      "name": "Alfred",
+      "googleAuthToken": "51ba6c8b-4f7d-4e7b-9a27-fcc052a1a868",
+      "id": "user10",
+      "emailId": "alfred@uci.edu"
+    },
+    {
+      "groups": [
+        {
+          "description": "Information Systems Group",
+          "name": "ISG",
+          "id": "ISG"
+        }
+      ],
+      "name": "abdul",
+      "googleAuthToken": "61ba6c8b-4f7d-4e7b-9a27-fcc052a1a868",
+      "id": "user11",
+      "emailId": "abdul@uci.edu"
+    },
+    {
+      "groups": [
+        {
+          "description": "Information Systems Group",
+          "name": "ISG",
+          "id": "ISG"
+        }
+      ],
+      "name": "Shantanu",
+      "googleAuthToken": "71ba6c8b-4f7d-4e7b-9a27-fcc052a1a868",
+      "id": "user12",
+      "emailId": "shantanu@uci.edu"
+    },
+    {
+      "groups": [
+        {
+          "description": "Information Systems Group",
+          "name": "ISG",
+          "id": "ISG"
+        }
+      ],
+      "name": "Nisha",
+      "googleAuthToken": "91ba6c8b-4f7d-4e7b-9a27-fcc052a1a868",
+      "id": "user13",
+      "emailId": "nisha@uci.edu"
+    }
+  ]

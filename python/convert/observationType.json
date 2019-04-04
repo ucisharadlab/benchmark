@@ -1,0 +1,49 @@
+[
+    {
+        "id": "BO_Presence",
+        "label": "Presence", 
+        "description": "Real time location of people in a building", 
+        "subtypeOf" : "TIP_Semantic_Observation", 
+        "payload_schema": 
+        [{
+            "name": "location", 
+            "value_type": "TIP_Space" 
+        },{
+            "name": "timestamp", 
+            "value_type": "timestamp" 
+        }]
+    },
+    {
+        "id": "BO_Occupancy",
+        "label": "Occupancy", 
+        "description": "Indicates whether the space is occupied or not, if occupied, how many people are occupying the space"
+    },
+    {
+        "id": "BO_Occupancy_Count",
+        "label": "Occupancy count", 
+        "description": "The number of people in a building that in use",
+        "subtypeOf" : "TIP_Semantic_Observation", 
+        "payload_schema": 
+        [{
+            "name": "occupied",
+            "value_type": "integer"
+        },{
+            "name": "timestamp", 
+            "value_type": "timestamp" 
+        }]
+    },
+    {
+        "id": "BO_WiFiConnection",
+        "label": "WiFi connection", 
+        "description": "Connection log for WiFi AP.", 
+        "subtypeOf" : "TIP_Raw_Observation",
+        "payload_schema": 
+        [{
+            "name": "clientMAC", 
+            "value_type": "string" 
+        },{
+            "name": "timestamp", 
+            "value_type": "timestamp" 
+        }]
+    }
+]

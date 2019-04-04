@@ -1,0 +1,40 @@
+
+[
+    {
+      "label": "TIPPERS group",
+      "description": "The TIPPERS Group",
+      "owner": "sharad@ics.uci.edu",
+      "members": [
+        {
+          "user": "ryuspeir@uci.edu",
+          "profile": "TIP_Group_Admin"
+        },
+        {
+          "user": "cbdavison@bsu.edu",
+          "profile": "TIP_Group_Member"
+        }
+      ],
+      "visibility": "private/members"
+    },
+    {
+       "label": "CS222 Study Group",
+      "description": "We meet regularly to study CS222 subject together",
+      "owner": "ejshin1@uci.edu",
+      "members": [
+        {
+          "user": "dhrubajg@uci.edu",
+          "profile": "TIP_Group_Admin"
+        },
+        {
+          "user": "peeyush@uci.edu",
+          "profile": "TIP_Group_Member"
+        },
+        {
+          "user": "primal@uci.edu",
+          "profile": "TIP_Group_Member"
+        }
+      ],
+      "visibility": "private/members"
+    }
+]
+  

@@ -1,0 +1,181 @@
+[
+    {
+      "id": "BO_Building",
+      "label": "Building",
+      "description": "a structure with a roof and walls standing more or less permanently in one place, such as a house or factory",
+      "subtype_of": "TIP_Space"
+    },
+    {
+      "id": "BO_Floor",
+      "label": "Floor",
+      "description": "A floor is the bottom surface of a room or vehicle",
+      "subtype_of": "BO_Building"
+    },
+    {
+      "id": "BO_Room",
+      "label": "Room",
+      "description": "Any distinguishable space within a structure",
+      "subtype_of": "TIP_Space",
+      "properties": [
+        {
+          "id": "BO_Room_Occupancy",
+          "label": "Occupancy",
+          "observation_type": "BO_Occupancy"
+        },
+        {
+          "id": "BO_Room_Temperature",
+          "label": "Temperature",
+          "observation_type": "BO_Temperature"
+        }
+      ]
+    },
+    {
+      "id": "BO_Conference_Room",
+      "label": "Conference Room",
+      "description": "A room provided for singular events such as business conferences and meetings",
+      "subtype_of": "BO_Room",
+      "properties": [
+        {
+          "id": "BO_Conference_Room_Occupancy",
+          "label": "Occupancy",
+          "observation_type": "BO_Occupancy"
+        },
+        {
+          "id": "BO_Room_Temperature",
+          "label": "Temperature",
+          "observation_type": "BO_Temperature"
+        }
+      ]
+    },
+    {
+      "id": "BO_Classroom",
+      "label": "Classroom",
+      "description": "Learning space, a room in which university students learn",
+      "subtype_of": "BO_Room",
+      "properties": [
+        {
+          "id": "BO_Classroom_Occupancy",
+          "label": "Occupancy",
+          "observation_type": "BO_Occupancy"
+        }
+      ]
+    },
+    {
+      "id": "BO_Office",
+      "label": "Office",
+      "description": "Office",
+      "subtype_of": "BO_Room",
+      "properties": [
+        {
+          "id": "BO_Office_Occupancy",
+          "label": "Occupancy",
+          "observation_type": "BO_Occupancy"
+        }
+      ]
+    },
+    {
+      "id": "BO_Utility",
+      "description": "Utility room",
+      "subtype_of": "BO_Room",
+      "properties": [
+        {
+          "id": "BO_Utility_Occupancy",
+          "label": "Occupancy",
+          "observation_type": "BO_Occupancy"
+        }
+      ]
+    },
+    {
+      "id": "BO_Corridor",
+      "description": "Corridor",
+      "subtype_of": "BO_Room"
+    },
+    {
+      "id": "BO_Seminar_Room",
+      "description": "Seminar Room",
+      "subtype_of": "BO_Room",
+      "properties": [
+        {
+          "id": "BO_SeminarRoom_Occupancy",
+          "label": "Occupancy",
+          "observation_type": "BO_Occupancy"
+        }
+      ]
+    },
+    {
+      "id": "BO_Labs",
+      "description": "Labs",
+      "subtype_of": "BO_Labs",
+      "properties": [
+        {
+          "id": "BO_Labs_Occupancy",
+          "label": "Occupancy",
+          "observation_type": "BO_Occupancy"
+        }
+      ]
+    },
+    {
+      "id": "BO_Reception",
+      "description": "Reception",
+      "subtype_of": "BO_Reception"
+    },
+    {
+      "id": "BO_Mail_Room",
+      "description": "Mail room",
+      "subtype_of": "BO_Room"
+    },
+    {
+      "id": "BO_Work_Room",
+      "description": "Work room",
+      "subtype_of": "BO_Room"
+    },
+    {
+      "id": "BO_Conference_Room",
+      "description": "Conference room",
+      "subtype_of": "BO_Room"
+    },
+    {
+      "id": "BO_Meeting_Room",
+      "description": "Meeting room",
+      "subtype_of": "BO_Room"
+    },
+    {
+      "id": "BO_Male_Restroom",
+      "description": "Male restroom",
+      "subtype_of": "BO_Room",
+      "properties": [
+        {
+          "id": "BO_Male_Restroom_Occupancy",
+          "label": "Occupancy",
+          "observation_type": "BO_Occupancy"
+        }
+      ]
+    },
+    {
+      "id": "BO_Female_Restroom",
+      "description": "Female restroom",
+      "subtype_of": "BO_Room",
+      "properties": [
+        {
+          "id": "BO_Female_Restroom_Occupancy",
+          "label": "Occupancy",
+          "observation_type": "BO_Occupancy"
+        }
+      ]
+    },
+    {
+      "id": "BO_Facility_Room",
+      "description": "Facility",
+      "subtype_of": "BO_Room"
+    },
+    {
+      "id": "BO_Elevator",
+      "description": "Elevator",
+      "subtype_of": "BO_Room"
+    },
+    {
+      "id": "BO_Kitchen",
+      "description": "Kitchen",
+      "subtype_of": "BO_Room"
+    }
+  ]

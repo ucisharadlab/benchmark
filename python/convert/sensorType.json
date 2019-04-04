@@ -1,0 +1,107 @@
+[
+    {
+      "id": "BO_Presence_Detector",
+      "label": "PresenceDetector",
+      "subtype_of": "TIP_Virtual_Sensor",
+      "description": "It converts WiFi reading to a person’s presence in region level",
+      "coverage_function": "sensoria.ics.uci.edu:8001/WiFiToPresenceCoverage.java",
+      "observes": [
+        "BO_Presence"
+      ]
+    },
+    {
+      "id": "BO_Enlighted_Smart_Sensor",
+      "label": "EnlightedSmartSensor",
+      "subtype_of": "TIP_Physical_Sensor",
+      "description": "Indoor motion detecting devices used to detect the presence of a person to automatically control lights or temperature or ventilation systems",
+      "coverage_function": "sensoria.ics.uci.edu:8001/OccupancyCoverage.java",
+      "wrapper": "sensoria.ics.uci.edu:8001/EnlightedWrapper.java",
+      "observes": [
+        "BO_Occupancy_Count",
+        "BO_Light_Level"
+      ]
+    },
+    {
+        "id": "BO_WeMo",
+        "label": "WeMo Smart Energy Meter",
+        "subtype_of": "TIP_Physical_Sensor",
+        "description": "Smart energy meter",
+        "coverage_function": "",
+        "wrapper": "sensoria.ics.uci.edu:8001/WeMoWrapper.java",
+        "observes": [
+          "BO_Energy_Consumption",
+          "BO_Occupancy_Count"
+        ]
+      },
+    {
+      "id": "BO_Thermometer",
+      "label": "Thermometer",
+      "subtype_of": "TIP_Physical_Sensor",
+      "description": "Device that measures temperature or a temperature gradient",
+      "coverage_function": "",
+      "observes": [
+        "BO_Temperature"
+      ]
+    },
+    {
+        "id": "BO_Beacon",
+        "label": "Beacon",
+        "subtype_of": "TIP_Physical_Sensor",
+        "description": "A beacon is a small Bluetooth radio transmitter, powered by batteries",
+        "coverage_function": "",
+        "observes": [
+          "BO_Presence",
+          "BO_Occupancy_Count"
+        ]
+    },
+    {
+        "id": "BO_Camera",
+        "label": "Camera",
+        "subtype_of": "TIP_Physical_Sensor",
+        "description": "Wireless security cameras are closed-circuit television (CCTV) cameras that transmit a video and audio signal to a wireless receiver through a radio band. ",
+        "coverage_function": "",
+        "observes": [
+          "BO_Presence",
+          "BO_Occupancy_Count"
+        ]
+    },
+    {
+      "id": "BO_WiFiAP",
+      "label": "WiFiAP",
+      "subtype_of": "TIP_Physical_Sensor",
+      "description": "AP connects directly to a wired local area network, typically Ethernet, and the AP then provides wireless connections using wireless LAN technology, typically Wi-Fi, for other devices to utilize that wired connection",
+      "coverage_function": "sensoria.ics.uci.edu:8001/WiFiCoverage.java",
+      "wrapper": "sensoria.ics.uci.edu:8001/WiFiWrapper.java",
+      "observes": [
+        "BO_WiFiConnection"
+      ]
+    },
+    {
+      "id": "BO_Occupancy_Calculator",
+      "label": "OccupancyCalculator",
+      "subtype_of": "TIP_Virtual_Sensor",
+      "description": "It converts WiFi readings to a space’s occupancy",
+      "coverage_function": "sensoria.ics.uci.edu:8001/WiFiToOccupancyCoverage.java",
+      "observes": [
+        "BO_Occupancy_Count"
+      ]
+    },
+    {
+      "id": "BO_Smartphone_WiFi",
+      "label": "Smartphone WiFi",
+      "subtype_of": "TIP_Physical_Sensor",
+      "description": "A handheld personal computer with a mobile operating system and an integrated mobile broadband cellular network connection for voice, SMS, and Internet data communication",
+      "observes": [
+        "BO_WiFiConnection"
+      ]
+    },
+    {
+      "id": "BO_HVAC_VAV1",
+      "label": "HVAC Variable Air Volume Box",
+      "subtype_of": "TIP_Physical_Sensor",
+      "description": "Variable air volume (VAV) is a type of heating, ventilating, and/or air-conditioning (HVAC) system. VAV systems vary the airflow at a constant temperature.",
+      "observes": [
+        "BO_VAV_AIRVOLUME"
+      ]
+    }
+  ]

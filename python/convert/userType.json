@@ -1,0 +1,63 @@
+[
+    {
+      "id": "TIP_Group_Member",
+      "label": "Group member",
+      "description": "A member of a group",
+      "subtype_of": "TIP_User_Type"
+    },
+    {
+      "id": "TIP_Group_Admin",
+      "label": "Group admin",
+      "description": "An admin of a group",
+      "subtype_of": "TIP_User_Type"
+    },
+    {
+      "id": "UO_Person",
+      "label": "Person",
+      "description": "A being that has certain capacities or attributes such as reason, morality, consciousness or self-consciousness",
+      "subtype_of": "TIP_User_Type",
+      "properties": [
+        {
+          "id": "UO_Presence_Property",
+          "subtype_of": "TIP_Dynamic_Property",
+          "observation_type": "BO_Presence"
+        },
+        {
+          "id": "UO_PhoneNumber_Property",
+          "label": "Mobile phone number of a person",
+          "subtype_of": "TIP_Static_Property",
+          "value": "string"
+        }
+      ]
+    },
+    {
+      "id": "TIP_Admin",
+      "label": "Admin of TIP",
+      "description": "User who administers the TIP instantiation.",
+      "subtype_of": "TIP_User_Type"
+    },
+    {
+      "id": "UO_Undergraduate_Student",
+      "subtype_of": "UO_Person",
+      "label": "Undergraduate Student",
+      "description": "Student who is a pursuing a Bachelor's degree"
+    },
+    {
+      "id": "UO_Graduate_Student",
+      "subtype_of": "UO_Person",
+      "label": "Graduate Student",
+      "description": "Student who is a pursuing a Master’s or Ph.D. degree"
+    },
+    {
+      "id": "UO_Full_Professor",
+      "label": "Full Professor",
+      "subtype_of": "UO_Person",
+      "description": "The highest academic rank at universities and other institutions of higher education in parts of the world"
+    },
+    {
+      "id": "UO_Administrator",
+      "label": "Building administrator",
+      "description": "Building Administrator is a full-time staff member residing in that building that has the authority to make decisions and carry out duties which affect comfort, convenience, safety and energy conservation.",
+      "subtype_of": "UO_Person"
+    }
+  ]

@@ -5,7 +5,7 @@ import uuid
 
 def createRooms(numRooms, src, dest):
 
-    with open(src+'infrastructure.json') as data_file:
+    with open(src+'space.json') as data_file:
         rooms = json.load(data_file)
 
     print ("Creating Rooms")
@@ -17,14 +17,15 @@ def createRooms(numRooms, src, dest):
         copiedRoom = rooms[random.randint(0, len(rooms) - 1)]
         room = {
             "id": id.replace('-', '_'),
-            "name": "simRoom{}".format(i),
-            "floor": copiedRoom['floor'],
-            "geometry": copiedRoom['geometry'],
-            "type_": copiedRoom['type_'],
+            "label": "simRoom{}".format(i),
+            "type": copiedRoom['type'],
+            "description": copiedRoom['description'],
+            #"floor": copiedRoom['floor'],
+            "geoobject": copiedRoom['geoobject'],           
         }
         newRooms.append(room)
 
     newRooms.extend(rooms)
 
-    with open(dest + 'infrastructure.json', 'w') as writer:
+    with open(dest + 'space.json', 'w') as writer:
         json.dump(newRooms, writer, indent=4)
