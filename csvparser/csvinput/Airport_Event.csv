@@ -1,0 +1,26 @@
+name,id,type,spaces,startTime,endTime,isPeriodic,periodDays,Passenger,lo,hi,Airline Representatives,lo,hi,TSA Staff,lo,hi,Restaurant Staff,lo,hi,Store Staff,lo,hi
+Ticketing Flight A,1,ticketing,Airlines booth,09:00,11:00,True,UMTWHFS,Passenger,0,100,Airline Representatives,0,4,TSA Staff,0,0,Restaurant Staff,0,0,Store Staff,0,0
+Security check Flight A,2,security check,Security screening area,09:15,11:15,True,UMTWHFS,Passenger,0,100,Airline Representatives,0,0,TSA Staff,0,4,Restaurant Staff,0,0,Store Staff,0,0
+Boarding Flight A,3,Boarding,Gate 7,10:00,11:30,True,UMTWHFS,Passenger,0,100,Airline Representatives,0,4,TSA Staff,0,0,Restaurant Staff,0,0,Store Staff,0,0
+Shopping,4,Shopping,All green boxes,09:00,18:00,True,UMTWHFS,Passenger,0,50,Airline Representatives,0,0,TSA Staff,0,0,Restaurant Staff,0,0,Store Staff,0,2
+Having lunch,5,Dinning,All yellow boxes,11:00,12:00,True,UMTWHFS,Passenger,0,75,Airline Representatives,0,0,TSA Staff,0,0,Restaurant Staff,0,10,Store Staff,0,0
+Having dinner,6,Dinning,All yellow boxes,17:00,18:00,True,UMTWHFS,Passenger,0,75,Airline Representatives,0,0,TSA Staff,0,0,Restaurant Staff,0,12,Store Staff,0,0
+Ticketing Flight B,7,ticketing,Airlines booth,14:00,16:00,True,UMTWHFS,Passenger,0,150,Airline Representatives,0,5,TSA Staff,0,0,Restaurant Staff,0,0,Store Staff,0,0
+Security check Flight B,8,security check,Security screening area,14:15,16:15,True,UMTWHFS,Passenger,0,150,Airline Representatives,0,0,TSA Staff,0,5,Restaurant Staff,0,0,Store Staff,0,0
+Boarding Flight B,9,Boarding,Gate 9,15:00,16:30,True,UMTWHFS,Passenger,0,150,Airline Representatives,0,5,TSA Staff,0,0,Restaurant Staff,0,0,Store Staff,0,0
+Ticketing Regular,10,ticketing,Airlines booth,09:00,20:00,True,UMTWHFS,Passenger,0,30,Airline Representatives,0,1,TSA Staff,0,0,Restaurant Staff,0,0,Store Staff,0,0
+Dinning Regular,11,Dinning,all yellow boxes,09:00,20:00,True,UMTWHFS,Passenger,0,40,Airline Representatives,0,0,TSA Staff,0,0,Restaurant Staff,0,8,Store Staff,0,0
+Having lunch 1,12,Dinning,All yellow boxes,12:00,13:00,True,UMTWHFS,Passenger,0,75,Airline Representatives,0,0,TSA Staff,0,0,Restaurant Staff,0,10,Store Staff,0,0
+Having dinner 1,13,Dinning,All yellow boxes,18:00,19:00,True,UMTWHFS,Passenger,0,75,Airline Representatives,0,0,TSA Staff,0,0,Restaurant Staff,0,12,Store Staff,0,0
+Having dinner 2,14,Dinning,All yellow boxes,19:00,20:00,True,UMTWHFS,Passenger,0,75,Airline Representatives,0,0,TSA Staff,0,0,Restaurant Staff,0,12,Store Staff,0,0
+Ticketing Regular,15,ticketing,Airlines booth,09:00,10:00,True,UMTWHFS,Passenger,0,30,Airline Representatives,0,1,TSA Staff,0,0,Restaurant Staff,0,0,Store Staff,0,0
+Ticketing Regular,16,ticketing,Airlines booth,10:00,11:00,True,UMTWHFS,Passenger,0,30,Airline Representatives,0,1,TSA Staff,0,0,Restaurant Staff,0,0,Store Staff,0,0
+Ticketing Regular,17,ticketing,Airlines booth,11:00,12:00,True,UMTWHFS,Passenger,0,30,Airline Representatives,0,1,TSA Staff,0,0,Restaurant Staff,0,0,Store Staff,0,0
+Ticketing Regular,18,ticketing,Airlines booth,12:00,13:00,True,UMTWHFS,Passenger,0,30,Airline Representatives,0,1,TSA Staff,0,0,Restaurant Staff,0,0,Store Staff,0,0
+Ticketing Regular,19,ticketing,Airlines booth,13:00,14:00,True,UMTWHFS,Passenger,0,30,Airline Representatives,0,1,TSA Staff,0,0,Restaurant Staff,0,0,Store Staff,0,0
+Ticketing Regular,20,ticketing,Airlines booth,14:00,15:00,True,UMTWHFS,Passenger,0,30,Airline Representatives,0,1,TSA Staff,0,0,Restaurant Staff,0,0,Store Staff,0,0
+Ticketing Regular,21,ticketing,Airlines booth,15:00,16:00,True,UMTWHFS,Passenger,0,30,Airline Representatives,0,1,TSA Staff,0,0,Restaurant Staff,0,0,Store Staff,0,0
+Ticketing Regular,22,ticketing,Airlines booth,16:00,17:00,True,UMTWHFS,Passenger,0,30,Airline Representatives,0,1,TSA Staff,0,0,Restaurant Staff,0,0,Store Staff,0,0
+Ticketing Regular,23,ticketing,Airlines booth,17:00,18:00,True,UMTWHFS,Passenger,0,30,Airline Representatives,0,1,TSA Staff,0,0,Restaurant Staff,0,0,Store Staff,0,0
+Ticketing Regular,24,ticketing,Airlines booth,18:00,19:00,True,UMTWHFS,Passenger,0,30,Airline Representatives,0,1,TSA Staff,0,0,Restaurant Staff,0,0,Store Staff,0,0
+Ticketing Regular,25,ticketing,Airlines booth,19:00,20:00,True,UMTWHFS,Passenger,0,30,Airline Representatives,0,1,TSA Staff,0,0,Restaurant Staff,0,0,Store Staff,0,0

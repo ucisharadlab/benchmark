@@ -1,0 +1,127 @@
+[
+    {
+        "name": "ticketing",
+        "probabilities": [
+            {
+                "type": "Passenger",
+                "prob": "0.1"
+            },
+            {
+                "type": "Airline Representatives",
+                "prob": "0.4"
+            },
+            {
+                "type": "TSA Staff",
+                "prob": "0"
+            },
+            {
+                "type": "Restaurant Staff",
+                "prob": "0"
+            },
+            {
+                "type": "Store Staff",
+                "prob": "0"
+            }
+        ]
+    },
+    {
+        "name": "security check",
+        "probabilities": [
+            {
+                "type": "Passenger",
+                "prob": "0.25"
+            },
+            {
+                "type": "Airline Representatives",
+                "prob": "0"
+            },
+            {
+                "type": "TSA Staff",
+                "prob": "1"
+            },
+            {
+                "type": "Restaurant Staff",
+                "prob": "0"
+            },
+            {
+                "type": "Store Staff",
+                "prob": "0"
+            }
+        ]
+    },
+    {
+        "name": "Boarding",
+        "probabilities": [
+            {
+                "type": "Passenger",
+                "prob": "0.4"
+            },
+            {
+                "type": "Airline Representatives",
+                "prob": "0.4"
+            },
+            {
+                "type": "TSA Staff",
+                "prob": "0"
+            },
+            {
+                "type": "Restaurant Staff",
+                "prob": "0"
+            },
+            {
+                "type": "Store Staff",
+                "prob": "0"
+            }
+        ]
+    },
+    {
+        "name": "Shopping",
+        "probabilities": [
+            {
+                "type": "Passenger",
+                "prob": "0.1"
+            },
+            {
+                "type": "Airline Representatives",
+                "prob": "0.1"
+            },
+            {
+                "type": "TSA Staff",
+                "prob": "0"
+            },
+            {
+                "type": "Restaurant Staff",
+                "prob": "0"
+            },
+            {
+                "type": "Store Staff",
+                "prob": "0"
+            }
+        ]
+    },
+    {
+        "name": "Dining",
+        "probabilities": [
+            {
+                "type": "Passenger",
+                "prob": "0.15"
+            },
+            {
+                "type": "Airline Representatives",
+                "prob": "0.1"
+            },
+            {
+                "type": "TSA Staff",
+                "prob": "0"
+            },
+            {
+                "type": "Restaurant Staff",
+                "prob": "0"
+            },
+            {
+                "type": "Store Staff",
+                "prob": "0"
+            }
+        ]
+    }
+]

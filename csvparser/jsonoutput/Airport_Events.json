@@ -1,0 +1,977 @@
+[
+    {
+        "name": "Ticketing Flight A",
+        "id": 1,
+        "type": "ticketing",
+        "spaces": [
+            "Airlines booth"
+        ],
+        "startTime": "09:00:00",
+        "endTime": "11:00:00",
+        "isPeriodic": "True",
+        "periodDays": "UMTWHFS",
+        "capacity": [
+            {
+                "type": "Passenger",
+                "lo": "0",
+                "hi": "100"
+            },
+            {
+                "type": "Airline Representatives",
+                "lo": "0",
+                "hi": "4"
+            },
+            {
+                "type": "TSA Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Restaurant Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Store Staff",
+                "lo": "0",
+                "hi": "0"
+            }
+        ]
+    },
+    {
+        "name": "Security check Flight A",
+        "id": 2,
+        "type": "security check",
+        "spaces": [
+            "Security screening area"
+        ],
+        "startTime": "09:15:00",
+        "endTime": "11:15:00",
+        "isPeriodic": "True",
+        "periodDays": "UMTWHFS",
+        "capacity": [
+            {
+                "type": "Passenger",
+                "lo": "0",
+                "hi": "100"
+            },
+            {
+                "type": "Airline Representatives",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "TSA Staff",
+                "lo": "0",
+                "hi": "4"
+            },
+            {
+                "type": "Restaurant Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Store Staff",
+                "lo": "0",
+                "hi": "0"
+            }
+        ]
+    },
+    {
+        "name": "Boarding Flight A",
+        "id": 3,
+        "type": "Boarding",
+        "spaces": [
+            "Gate 7"
+        ],
+        "startTime": "10:00:00",
+        "endTime": "11:30:00",
+        "isPeriodic": "True",
+        "periodDays": "UMTWHFS",
+        "capacity": [
+            {
+                "type": "Passenger",
+                "lo": "0",
+                "hi": "100"
+            },
+            {
+                "type": "Airline Representatives",
+                "lo": "0",
+                "hi": "4"
+            },
+            {
+                "type": "TSA Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Restaurant Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Store Staff",
+                "lo": "0",
+                "hi": "0"
+            }
+        ]
+    },
+    {
+        "name": "Shopping",
+        "id": 4,
+        "type": "Shopping",
+        "spaces": [
+            "All green boxes"
+        ],
+        "startTime": "09:00:00",
+        "endTime": "18:00:00",
+        "isPeriodic": "True",
+        "periodDays": "UMTWHFS",
+        "capacity": [
+            {
+                "type": "Passenger",
+                "lo": "0",
+                "hi": "50"
+            },
+            {
+                "type": "Airline Representatives",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "TSA Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Restaurant Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Store Staff",
+                "lo": "0",
+                "hi": "2"
+            }
+        ]
+    },
+    {
+        "name": "Having lunch",
+        "id": 5,
+        "type": "Dinning",
+        "spaces": [
+            "All yellow boxes"
+        ],
+        "startTime": "11:00:00",
+        "endTime": "12:00:00",
+        "isPeriodic": "True",
+        "periodDays": "UMTWHFS",
+        "capacity": [
+            {
+                "type": "Passenger",
+                "lo": "0",
+                "hi": "75"
+            },
+            {
+                "type": "Airline Representatives",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "TSA Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Restaurant Staff",
+                "lo": "0",
+                "hi": "10"
+            },
+            {
+                "type": "Store Staff",
+                "lo": "0",
+                "hi": "0"
+            }
+        ]
+    },
+    {
+        "name": "Having dinner",
+        "id": 6,
+        "type": "Dinning",
+        "spaces": [
+            "All yellow boxes"
+        ],
+        "startTime": "17:00:00",
+        "endTime": "18:00:00",
+        "isPeriodic": "True",
+        "periodDays": "UMTWHFS",
+        "capacity": [
+            {
+                "type": "Passenger",
+                "lo": "0",
+                "hi": "75"
+            },
+            {
+                "type": "Airline Representatives",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "TSA Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Restaurant Staff",
+                "lo": "0",
+                "hi": "12"
+            },
+            {
+                "type": "Store Staff",
+                "lo": "0",
+                "hi": "0"
+            }
+        ]
+    },
+    {
+        "name": "Ticketing Flight B",
+        "id": 7,
+        "type": "ticketing",
+        "spaces": [
+            "Airlines booth"
+        ],
+        "startTime": "14:00:00",
+        "endTime": "16:00:00",
+        "isPeriodic": "True",
+        "periodDays": "UMTWHFS",
+        "capacity": [
+            {
+                "type": "Passenger",
+                "lo": "0",
+                "hi": "150"
+            },
+            {
+                "type": "Airline Representatives",
+                "lo": "0",
+                "hi": "5"
+            },
+            {
+                "type": "TSA Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Restaurant Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Store Staff",
+                "lo": "0",
+                "hi": "0"
+            }
+        ]
+    },
+    {
+        "name": "Security check Flight B",
+        "id": 8,
+        "type": "security check",
+        "spaces": [
+            "Security screening area"
+        ],
+        "startTime": "14:15:00",
+        "endTime": "16:15:00",
+        "isPeriodic": "True",
+        "periodDays": "UMTWHFS",
+        "capacity": [
+            {
+                "type": "Passenger",
+                "lo": "0",
+                "hi": "150"
+            },
+            {
+                "type": "Airline Representatives",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "TSA Staff",
+                "lo": "0",
+                "hi": "5"
+            },
+            {
+                "type": "Restaurant Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Store Staff",
+                "lo": "0",
+                "hi": "0"
+            }
+        ]
+    },
+    {
+        "name": "Boarding Flight B",
+        "id": 9,
+        "type": "Boarding",
+        "spaces": [
+            "Gate 9"
+        ],
+        "startTime": "15:00:00",
+        "endTime": "16:30:00",
+        "isPeriodic": "True",
+        "periodDays": "UMTWHFS",
+        "capacity": [
+            {
+                "type": "Passenger",
+                "lo": "0",
+                "hi": "150"
+            },
+            {
+                "type": "Airline Representatives",
+                "lo": "0",
+                "hi": "5"
+            },
+            {
+                "type": "TSA Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Restaurant Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Store Staff",
+                "lo": "0",
+                "hi": "0"
+            }
+        ]
+    },
+    {
+        "name": "Ticketing Regular",
+        "id": 10,
+        "type": "ticketing",
+        "spaces": [
+            "Airlines booth"
+        ],
+        "startTime": "09:00:00",
+        "endTime": "20:00:00",
+        "isPeriodic": "True",
+        "periodDays": "UMTWHFS",
+        "capacity": [
+            {
+                "type": "Passenger",
+                "lo": "0",
+                "hi": "30"
+            },
+            {
+                "type": "Airline Representatives",
+                "lo": "0",
+                "hi": "1"
+            },
+            {
+                "type": "TSA Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Restaurant Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Store Staff",
+                "lo": "0",
+                "hi": "0"
+            }
+        ]
+    },
+    {
+        "name": "Dinning Regular",
+        "id": 11,
+        "type": "Dinning",
+        "spaces": [
+            "all yellow boxes"
+        ],
+        "startTime": "09:00:00",
+        "endTime": "20:00:00",
+        "isPeriodic": "True",
+        "periodDays": "UMTWHFS",
+        "capacity": [
+            {
+                "type": "Passenger",
+                "lo": "0",
+                "hi": "40"
+            },
+            {
+                "type": "Airline Representatives",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "TSA Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Restaurant Staff",
+                "lo": "0",
+                "hi": "8"
+            },
+            {
+                "type": "Store Staff",
+                "lo": "0",
+                "hi": "0"
+            }
+        ]
+    },
+    {
+        "name": "Having lunch 1",
+        "id": 12,
+        "type": "Dinning",
+        "spaces": [
+            "All yellow boxes"
+        ],
+        "startTime": "12:00:00",
+        "endTime": "13:00:00",
+        "isPeriodic": "True",
+        "periodDays": "UMTWHFS",
+        "capacity": [
+            {
+                "type": "Passenger",
+                "lo": "0",
+                "hi": "75"
+            },
+            {
+                "type": "Airline Representatives",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "TSA Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Restaurant Staff",
+                "lo": "0",
+                "hi": "10"
+            },
+            {
+                "type": "Store Staff",
+                "lo": "0",
+                "hi": "0"
+            }
+        ]
+    },
+    {
+        "name": "Having dinner 1",
+        "id": 13,
+        "type": "Dinning",
+        "spaces": [
+            "All yellow boxes"
+        ],
+        "startTime": "18:00:00",
+        "endTime": "19:00:00",
+        "isPeriodic": "True",
+        "periodDays": "UMTWHFS",
+        "capacity": [
+            {
+                "type": "Passenger",
+                "lo": "0",
+                "hi": "75"
+            },
+            {
+                "type": "Airline Representatives",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "TSA Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Restaurant Staff",
+                "lo": "0",
+                "hi": "12"
+            },
+            {
+                "type": "Store Staff",
+                "lo": "0",
+                "hi": "0"
+            }
+        ]
+    },
+    {
+        "name": "Having dinner 2",
+        "id": 14,
+        "type": "Dinning",
+        "spaces": [
+            "All yellow boxes"
+        ],
+        "startTime": "19:00:00",
+        "endTime": "20:00:00",
+        "isPeriodic": "True",
+        "periodDays": "UMTWHFS",
+        "capacity": [
+            {
+                "type": "Passenger",
+                "lo": "0",
+                "hi": "75"
+            },
+            {
+                "type": "Airline Representatives",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "TSA Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Restaurant Staff",
+                "lo": "0",
+                "hi": "12"
+            },
+            {
+                "type": "Store Staff",
+                "lo": "0",
+                "hi": "0"
+            }
+        ]
+    },
+    {
+        "name": "Ticketing Regular",
+        "id": 15,
+        "type": "ticketing",
+        "spaces": [
+            "Airlines booth"
+        ],
+        "startTime": "09:00:00",
+        "endTime": "10:00:00",
+        "isPeriodic": "True",
+        "periodDays": "UMTWHFS",
+        "capacity": [
+            {
+                "type": "Passenger",
+                "lo": "0",
+                "hi": "30"
+            },
+            {
+                "type": "Airline Representatives",
+                "lo": "0",
+                "hi": "1"
+            },
+            {
+                "type": "TSA Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Restaurant Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Store Staff",
+                "lo": "0",
+                "hi": "0"
+            }
+        ]
+    },
+    {
+        "name": "Ticketing Regular",
+        "id": 16,
+        "type": "ticketing",
+        "spaces": [
+            "Airlines booth"
+        ],
+        "startTime": "10:00:00",
+        "endTime": "11:00:00",
+        "isPeriodic": "True",
+        "periodDays": "UMTWHFS",
+        "capacity": [
+            {
+                "type": "Passenger",
+                "lo": "0",
+                "hi": "30"
+            },
+            {
+                "type": "Airline Representatives",
+                "lo": "0",
+                "hi": "1"
+            },
+            {
+                "type": "TSA Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Restaurant Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Store Staff",
+                "lo": "0",
+                "hi": "0"
+            }
+        ]
+    },
+    {
+        "name": "Ticketing Regular",
+        "id": 17,
+        "type": "ticketing",
+        "spaces": [
+            "Airlines booth"
+        ],
+        "startTime": "11:00:00",
+        "endTime": "12:00:00",
+        "isPeriodic": "True",
+        "periodDays": "UMTWHFS",
+        "capacity": [
+            {
+                "type": "Passenger",
+                "lo": "0",
+                "hi": "30"
+            },
+            {
+                "type": "Airline Representatives",
+                "lo": "0",
+                "hi": "1"
+            },
+            {
+                "type": "TSA Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Restaurant Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Store Staff",
+                "lo": "0",
+                "hi": "0"
+            }
+        ]
+    },
+    {
+        "name": "Ticketing Regular",
+        "id": 18,
+        "type": "ticketing",
+        "spaces": [
+            "Airlines booth"
+        ],
+        "startTime": "12:00:00",
+        "endTime": "13:00:00",
+        "isPeriodic": "True",
+        "periodDays": "UMTWHFS",
+        "capacity": [
+            {
+                "type": "Passenger",
+                "lo": "0",
+                "hi": "30"
+            },
+            {
+                "type": "Airline Representatives",
+                "lo": "0",
+                "hi": "1"
+            },
+            {
+                "type": "TSA Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Restaurant Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Store Staff",
+                "lo": "0",
+                "hi": "0"
+            }
+        ]
+    },
+    {
+        "name": "Ticketing Regular",
+        "id": 19,
+        "type": "ticketing",
+        "spaces": [
+            "Airlines booth"
+        ],
+        "startTime": "13:00:00",
+        "endTime": "14:00:00",
+        "isPeriodic": "True",
+        "periodDays": "UMTWHFS",
+        "capacity": [
+            {
+                "type": "Passenger",
+                "lo": "0",
+                "hi": "30"
+            },
+            {
+                "type": "Airline Representatives",
+                "lo": "0",
+                "hi": "1"
+            },
+            {
+                "type": "TSA Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Restaurant Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Store Staff",
+                "lo": "0",
+                "hi": "0"
+            }
+        ]
+    },
+    {
+        "name": "Ticketing Regular",
+        "id": 20,
+        "type": "ticketing",
+        "spaces": [
+            "Airlines booth"
+        ],
+        "startTime": "14:00:00",
+        "endTime": "15:00:00",
+        "isPeriodic": "True",
+        "periodDays": "UMTWHFS",
+        "capacity": [
+            {
+                "type": "Passenger",
+                "lo": "0",
+                "hi": "30"
+            },
+            {
+                "type": "Airline Representatives",
+                "lo": "0",
+                "hi": "1"
+            },
+            {
+                "type": "TSA Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Restaurant Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Store Staff",
+                "lo": "0",
+                "hi": "0"
+            }
+        ]
+    },
+    {
+        "name": "Ticketing Regular",
+        "id": 21,
+        "type": "ticketing",
+        "spaces": [
+            "Airlines booth"
+        ],
+        "startTime": "15:00:00",
+        "endTime": "16:00:00",
+        "isPeriodic": "True",
+        "periodDays": "UMTWHFS",
+        "capacity": [
+            {
+                "type": "Passenger",
+                "lo": "0",
+                "hi": "30"
+            },
+            {
+                "type": "Airline Representatives",
+                "lo": "0",
+                "hi": "1"
+            },
+            {
+                "type": "TSA Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Restaurant Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Store Staff",
+                "lo": "0",
+                "hi": "0"
+            }
+        ]
+    },
+    {
+        "name": "Ticketing Regular",
+        "id": 22,
+        "type": "ticketing",
+        "spaces": [
+            "Airlines booth"
+        ],
+        "startTime": "16:00:00",
+        "endTime": "17:00:00",
+        "isPeriodic": "True",
+        "periodDays": "UMTWHFS",
+        "capacity": [
+            {
+                "type": "Passenger",
+                "lo": "0",
+                "hi": "30"
+            },
+            {
+                "type": "Airline Representatives",
+                "lo": "0",
+                "hi": "1"
+            },
+            {
+                "type": "TSA Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Restaurant Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Store Staff",
+                "lo": "0",
+                "hi": "0"
+            }
+        ]
+    },
+    {
+        "name": "Ticketing Regular",
+        "id": 23,
+        "type": "ticketing",
+        "spaces": [
+            "Airlines booth"
+        ],
+        "startTime": "17:00:00",
+        "endTime": "18:00:00",
+        "isPeriodic": "True",
+        "periodDays": "UMTWHFS",
+        "capacity": [
+            {
+                "type": "Passenger",
+                "lo": "0",
+                "hi": "30"
+            },
+            {
+                "type": "Airline Representatives",
+                "lo": "0",
+                "hi": "1"
+            },
+            {
+                "type": "TSA Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Restaurant Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Store Staff",
+                "lo": "0",
+                "hi": "0"
+            }
+        ]
+    },
+    {
+        "name": "Ticketing Regular",
+        "id": 24,
+        "type": "ticketing",
+        "spaces": [
+            "Airlines booth"
+        ],
+        "startTime": "18:00:00",
+        "endTime": "19:00:00",
+        "isPeriodic": "True",
+        "periodDays": "UMTWHFS",
+        "capacity": [
+            {
+                "type": "Passenger",
+                "lo": "0",
+                "hi": "30"
+            },
+            {
+                "type": "Airline Representatives",
+                "lo": "0",
+                "hi": "1"
+            },
+            {
+                "type": "TSA Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Restaurant Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Store Staff",
+                "lo": "0",
+                "hi": "0"
+            }
+        ]
+    },
+    {
+        "name": "Ticketing Regular",
+        "id": 25,
+        "type": "ticketing",
+        "spaces": [
+            "Airlines booth"
+        ],
+        "startTime": "19:00:00",
+        "endTime": "20:00:00",
+        "isPeriodic": "True",
+        "periodDays": "UMTWHFS",
+        "capacity": [
+            {
+                "type": "Passenger",
+                "lo": "0",
+                "hi": "30"
+            },
+            {
+                "type": "Airline Representatives",
+                "lo": "0",
+                "hi": "1"
+            },
+            {
+                "type": "TSA Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Restaurant Staff",
+                "lo": "0",
+                "hi": "0"
+            },
+            {
+                "type": "Store Staff",
+                "lo": "0",
+                "hi": "0"
+            }
+        ]
+    }
+]

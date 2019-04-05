@@ -1,0 +1,6 @@
+,,probability,,probability,,probability,,probability,,probability
+ticketing,Passenger,0.1,Airline Representatives,0.4,TSA Staff,0,Restaurant Staff,0,Store Staff,0
+security check,Passenger,0.25,Airline Representatives,0,TSA Staff,1,Restaurant Staff,0,Store Staff,0
+Boarding,Passenger,0.4,Airline Representatives,0.4,TSA Staff,0,Restaurant Staff,0,Store Staff,0
+Shopping,Passenger,0.1,Airline Representatives,0.1,TSA Staff,0,Restaurant Staff,0,Store Staff,0
+Dining,Passenger,0.15,Airline Representatives,0.1,TSA Staff,0,Restaurant Staff,0,Store Staff,0
