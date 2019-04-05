@@ -1,4 +1,6 @@
+import json
 import time
+import datetime
 
 def deleteSensorAttributes(sensor):
     try:
@@ -53,3 +55,15 @@ def deleteInfraAttributes(infra):
 
 def toUTC(timestamp):
     return int(time.mktime(timestamp.timetuple()))*1000
+
+def loadJSON(filename):
+    with open(filename, 'r') as dataFile:
+        return json.load(dataFile)
+
+def dumpJSON(filename, data):
+    with open(filename, 'w') as writer:
+        json.dump(data, writer, indent=4)
+
+def toDatetime(datetimeStr):
+    return datetime.datetime.strptime(datetimeStr, '%Y-%m-%d %H:%M:%S')
+

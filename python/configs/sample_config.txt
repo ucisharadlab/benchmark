@@ -1,0 +1,13 @@
+[observation]
+start-timestamp = 2017-11-08 00:00:00
+days = 1
+
+[counts]
+users = 500
+spaces = 30
+events = 20
+
+[others]
+specification-dir = /home/achio/Project_for_IoT_Developers/benchmark/src/main/resources/data/
+input-dir = /home/achio/Project_for_IoT_Developers/benchmark/src/main/resources/data/
+output-dir = /home/achio/Project_for_IoT_Developers/benchmark/data/

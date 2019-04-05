@@ -1,50 +1,57 @@
 import random
 import json
-import uuid
+import numpy as np
+import datetime
 
+from utils.helper import loadJSON, dumpJSON, toDatetime, toUTC
 
-def createUsers(numUsers, src, dest):
-
-    with open(src+'user.json') as data_file:
-        users = json.load(data_file)
-
-    with open(src+'group.json') as data_file:
-        groups = json.load(data_file)
-
-    with open(src+'platform.json') as data_file:
-        platforms = json.load(data_file)
-
-    with open(src+'platformType.json') as data_file:
-        platformsTypes = json.load(data_file)
-
-    numGroups = len(groups)
-
-    print ("Creating Users And Platforms")
-
-    for i in range(numUsers-len(users)):
-        id = str(uuid.uuid4())
-        groupList = [groups[random.randint(0, numGroups-1)]]
-        user = {
-            "id": id.replace('-', '_'),
-            "googleAuthToken": id,
-            "name": "simUser{}".format(i),
-            "emailId": "simUser{}@uci.edu".format(i) ,
-            "groups": groupList
+def updateUsers(users, userid, type, numEvents, expStartTime, expEndTime):
+    users.append(
+        {
+            "id": userid,
+            "type": type['name'],
+            "numEvents": numEvents, 
+            "startTime": str(expStartTime), 
+            "endTime": str(expEndTime)
         }
-        users.append(user)
+    )
 
-        id = str(uuid.uuid4())
-        platform = {
-            "id": id.replace('-', '_'),
-            "name": "simPlatform{}".format(i),
-            "owner": user,
-            "type_": platformsTypes[random.randint(1, len(platformsTypes) - 1)],
-            "hashedMac": id
-        }
-        platforms.append(platform)
+def _selectUserType(userTypes):
+    distr = [float(utype['distribution']) for utype in userTypes]
+    index = np.random.choice(len(userTypes), p=distr)
+    return userTypes[index]
 
-    with open(dest + 'user.json', 'w') as writer:
-        json.dump(users, writer, indent=4)
+def _selectNumEvents(type, duration):
+    avg, stddev = type['avg'], type['stddev']
+    numEvents = abs(np.random.normal(avg, stddev))
+    numEventsTimedelta = datetime.timedelta(
+            hours=int(type['timedelta']['hours']), 
+            minutes=int(type['timedelta']['minutes'])).seconds
+    return int(round(duration.seconds * numEvents / numEventsTimedelta))
 
-    with open(dest + 'platform.json', 'w') as writer:
-        json.dump(platforms, writer, indent=4)
+def _selectTimes(type):
+    startStddev = int(type['expStartStddev']) # TODO: in minutes for now; change later?
+    startTimeDelta = int(round(np.random.exponential(startStddev))) * np.random.choice([-1, 1])
+    startTime = toDatetime(type['expStartTime']) + datetime.timedelta(minutes=startTimeDelta)
+
+    endStddev = int(type['expEndStddev']) # TODO: in minutes for now; change later?
+    endTimeDelta = int(round(np.random.exponential(endStddev))) * np.random.choice([-1, 1])
+    endTime = toDatetime(type['expEndTime']) + datetime.timedelta(minutes=endTimeDelta)
+
+    return startTime, endTime
+
+
+def createUsers(numUsers, startTime, endTime, src, dest):
+    print('Creating Users')
+
+    userTypes = loadJSON(src+'UserTypes.json')
+
+    users = []
+    for i in range(numUsers):
+        type = _selectUserType(userTypes)
+        numEvents = _selectNumEvents(type, endTime - startTime)
+        expStartTime, expEndTime = _selectTimes(type)
+        updateUsers(users, i+1, type, numEvents, expStartTime, expEndTime)
+    
+    dumpJSON(dest + 'Users.json', users)
+
