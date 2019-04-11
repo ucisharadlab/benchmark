@@ -67,3 +67,32 @@ def dumpJSON(filename, data):
 def toDatetime(datetimeStr):
     return datetime.datetime.strptime(datetimeStr, '%Y-%m-%d %H:%M:%S')
 
+def toTime(timeStr):
+    return datetime.datetime.strptime(timeStr, '%H:%M:%S')
+
+def dumpTXT(filename, data):
+    if 'G' in data:
+        with open(filename+'_GroundTruth.txt', 'w') as writer:
+            for i, g in enumerate(data['G']):
+                writer.write(g)
+                writer.write('\n')
+                writer.write(str(data['G'][g]['wifiAP']))
+                writer.write('\n')
+                writer.write(str(data['G'][g]['location']))
+                writer.write('\n')
+                writer.write(str(data['G'][g]['time']))
+                writer.write('\n')
+                writer.write(str(data['G'][g]['user']))
+                writer.write('\n')
+
+    elif 'O' in data:
+        with open(filename+'_Observations.txt', 'w') as writer:
+            for i, o in enumerate(data['O']):
+                writer.write(o)
+                writer.write('\n')
+                writer.write(str(data['O'][o]['wifiAP']))
+                writer.write('\n')
+                writer.write(str(data['O'][o]['time']))
+                writer.write('\n')
+                writer.write(str(data['O'][o]['user']))
+                writer.write('\n')

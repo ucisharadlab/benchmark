@@ -1,0 +1,11 @@
+[observation]
+start-timestamp = 2017-11-08 00:00:00
+days = 15
+
+[counts]
+users = 265
+
+[others]
+specification-dir = /home/achio/Project_for_IoT_Developers/benchmark/csvparser/jsonoutput/airport/
+input-dir = /home/achio/Project_for_IoT_Developers/benchmark/csvparser/jsonoutput/airport/
+output-dir = /home/achio/Project_for_IoT_Developers/benchmark/data/airport/

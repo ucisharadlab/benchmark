@@ -3,16 +3,20 @@ import json
 import numpy as np
 import datetime
 
-from utils.helper import loadJSON, dumpJSON, toDatetime, toUTC
+from utils.helper import loadJSON, dumpJSON, toDatetime, toUTC, toTime
 
-def updateUsers(users, userid, type, numEvents, expStartTime, expEndTime):
+def updateUsers(users, userid, type, 
+        expStartTime, expEndTime, expStartStddev, expEndStddev, preferredSpaces):
     users.append(
         {
             "id": userid,
             "type": type['name'],
-            "numEvents": numEvents, 
+            # "numEvents": numEvents, 
             "startTime": str(expStartTime), 
-            "endTime": str(expEndTime)
+            "endTime": str(expEndTime),
+            "startTimeStddev": int(expStartStddev), 
+            "endTimeStddev": int(expEndStddev),
+            "preferredSpaces": preferredSpaces
         }
     )
 
@@ -32,11 +36,11 @@ def _selectNumEvents(type, duration):
 def _selectTimes(type):
     startStddev = int(type['expStartStddev']) # TODO: in minutes for now; change later?
     startTimeDelta = int(round(np.random.exponential(startStddev))) * np.random.choice([-1, 1])
-    startTime = toDatetime(type['expStartTime']) + datetime.timedelta(minutes=startTimeDelta)
+    startTime = toTime(type['expStartTime']) + datetime.timedelta(minutes=startTimeDelta)
 
     endStddev = int(type['expEndStddev']) # TODO: in minutes for now; change later?
     endTimeDelta = int(round(np.random.exponential(endStddev))) * np.random.choice([-1, 1])
-    endTime = toDatetime(type['expEndTime']) + datetime.timedelta(minutes=endTimeDelta)
+    endTime = toTime(type['expEndTime']) + datetime.timedelta(minutes=endTimeDelta)
 
     return startTime, endTime
 
@@ -49,9 +53,10 @@ def createUsers(numUsers, startTime, endTime, src, dest):
     users = []
     for i in range(numUsers):
         type = _selectUserType(userTypes)
-        numEvents = _selectNumEvents(type, endTime - startTime)
-        expStartTime, expEndTime = _selectTimes(type)
-        updateUsers(users, i+1, type, numEvents, expStartTime, expEndTime)
+        updateUsers(users, i+1, type, \
+                type['expStartTime'], type['expEndTime'], \
+                type['expStartStddev'], type['expEndStddev'], \
+                type['preferredSpaces'])
     
     dumpJSON(dest + 'Users.json', users)
 

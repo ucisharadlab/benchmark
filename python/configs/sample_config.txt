@@ -1,10 +1,10 @@
 [observation]
 start-timestamp = 2017-11-08 00:00:00
-days = 1
+days = 15
 
 [counts]
 users = 500
-spaces = 30
+space = 30
 events = 20
 
 [others]

@@ -78,5 +78,5 @@ if __name__ == '__main__':
 
     createUsers(configDict)
     # createSpaces(configDict) # Not yet implemented
-    createEvents(configDict) 
+    # createEvents(configDict) 
     createTrajectoryData(configDict)

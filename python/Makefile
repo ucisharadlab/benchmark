@@ -1,5 +1,8 @@
 all:
-	python generate.py configs/sample_config.txt
+	# python generate.py configs/airport_config.txt
+	# python generate.py configs/mall_config.txt 
+	python generate.py configs/university_config.txt 
+	python generate.py configs/office_config.txt 
 
 viewUsers:
 	vim data/simulator_input/Users.json
