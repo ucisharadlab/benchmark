@@ -1,7 +1,7 @@
 # IoT Database Benchmark v0.1
 
 <h3> Resources </h3>
-[Benchmark Paper (Long Version)](https://github.com/ucisharadlab/benchmark/blob/master/smarBench-longVersion.pdf) 
+[Benchmark Paper - Long Version](https://github.com/ucisharadlab/benchmark/blob/master/smarBench-longVersion.pdf) 
 
 At present the Benchmark compares the following databases:
 
