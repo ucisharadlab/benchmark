@@ -1,7 +1,7 @@
 # IoT Database Benchmark v0.1
 
 <h3> Resources </h3>
-Benchmark overview can be seen at https://docs.google.com/presentation/d/1h9OSWiqfvZumuT9OkEtUiJ5WohPddMXvBfIYo9HgW_Y/edit#slide=id.p
+[Benchmark Paper - Long Version](https://github.com/ucisharadlab/benchmark/blob/master/smarBench-longVersion.pdf) 
 
 At present the Benchmark compares the following databases:
 
@@ -62,12 +62,14 @@ mvn exec:java
 
 <h3>Data Generation</h3>
 Benchmark data can be generated for a given number of days, users and devices.
-in order to generate data change parameters in one of the configuration files provided in python/config or create a new configuration file. The tool can also generate query parameters and separate insert test data.
+in order to generate data change parameters in one of the configuration files provided in python/config or create a new configuration file. The tool can also generate query parameters and separate insert test data. 
+Requires Python 2.
 
 <h3>Runnign Data Generation</h3>
 
 ``` 
-python python/generate.py <path to config file>
+cd python
+python generate.py <path to config file>
 ```
 
 <h3>Example Configuration file</h3>
