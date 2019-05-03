@@ -1,0 +1,15 @@
+{
+	"requestID": "8da2e379-fc2e-4e0b-9f1d-7c47fe9590ee",
+	"signature": "*",
+	"results": [ "distribute result [$$14]\n-- DISTRIBUTE_RESULT  |PARTITIONED|\n  exchange\n  -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|\n    project ([$$14])\n    -- STREAM_PROJECT  |PARTITIONED|\n      assign [$$14] <- [{\"timeStamp\": $$15, \"sensorId\": $$16, \"payload\": $$Observation.getField(2)}]\n      -- ASSIGN  |PARTITIONED|\n        select (and(ge($$15, 1509519600000000), le($$15, 1510078210000000), eq($$16, \"thermometer4\")))\n        -- STREAM_SELECT  |PARTITIONED|\n          assign [$$16, $$15] <- [$$Observation.getField(1), $$Observation.getField(3)]\n          -- ASSIGN  |PARTITIONED|\n            project ([$$Observation])\n            -- STREAM_PROJECT  |PARTITIONED|\n              exchange\n              -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|\n                data-scan []<-[$$17, $$Observation] <- TippersDB.Observation\n                -- DATASOURCE_SCAN  |PARTITIONED|\n                  exchange\n                  -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|\n                    empty-tuple-source\n                    -- EMPTY_TUPLE_SOURCE  |PARTITIONED|\n" ]
+	,
+	"status": "success",
+	"metrics": {
+		"elapsedTime": "61.566868ms",
+		"executionTime": "60.051152ms",
+		"resultCount": 0,
+		"resultSize": 0,
+		"processedObjects": 0
+		}
+}
+

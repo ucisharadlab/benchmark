@@ -273,6 +273,12 @@ public class CouchbaseQueryManager extends BaseQueryManager {
                 throw new BenchmarkException("No Such Mapping");
         }
     }
+
+    @Override
+    public Duration runQuery8WithSelectivity(String userId, Date startTime, Date endTime) throws BenchmarkException {
+        return null;
+    }
+
     @Override
     public Duration runQuery9(String userId, String infraTypeName) throws BenchmarkException {
         switch (mapping) {

@@ -4,6 +4,7 @@ import json
 import uuid
 import numpy as np
 
+from utils import helper
 from extrapolate import Scale, SemanticScale
 
 MAX_OCCUPANCY = 100
@@ -36,18 +37,20 @@ def createOccupancy(dt, end, step, dataDir):
     fpObj = open('data/occupancyData.json', 'w')
 
     print ("Creating Random Occupancy Data" + str(numRooms))
-
+    type_ = pickedSensor["type_"]["semanticObservationType"]
+    type_ = helper.deleteSOTypeAttributes(type_)
+    pickedSensor = helper.deleteVirtualSensorAttributes(pickedSensor)
     count = 0
     while dt < end:
 
-        for j in np.random.choice(numRooms, numRooms, replace=False):
+        for j in np.random.choice(numRooms, numRooms/2, replace=False):
             id = str(uuid.uuid4())
             sobs = {
                 "id": id,
                 "timeStamp": dt.strftime('%Y-%m-%d %H:%M:%S'),
                 "virtualSensor": pickedSensor,
-                "type_": pickedSensor["type_"]["semanticObservationType"],
-                "semanticEntity": rooms[j],
+                "type_": type_,
+                "semanticEntity": helper.deleteInfraAttributes(rooms[j]),
                 "payload": {
                     "occupancy": random.randint(0, MAX_OCCUPANCY)
                 }

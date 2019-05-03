@@ -1,0 +1,8 @@
+Sort  (cost=31684.08..32158.32 rows=189694 width=22)	
+  Sort Key: so.semantic_entity_id, so."timestamp"	
+  ->  Hash Join  (cost=11.09..11162.26 rows=189694 width=22)	
+        Hash Cond: ((so.semantic_entity_id)::text = (infra.id)::text)	
+        ->  Index Scan using occupancy_timestamp_idx on occupancy so  (cost=0.44..8543.32 rows=189694 width=17)	
+              Index Cond: (("timestamp" > '2017-11-08 00:00:00'::timestamp without time zone) AND ("timestamp" < '2017-11-10 00:00:00'::timestamp without time zone))	
+        ->  Hash  (cost=6.40..6.40 rows=340 width=10)	
+              ->  Seq Scan on infrastructure infra  (cost=0.00..6.40 rows=340 width=10)	

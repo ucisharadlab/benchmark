@@ -3,6 +3,8 @@ package edu.uci.ics.tippers.query;
 import edu.uci.ics.tippers.common.Database;
 import edu.uci.ics.tippers.common.constants.Constants;
 import edu.uci.ics.tippers.exception.BenchmarkException;
+import edu.uci.ics.tippers.execution.Benchmark;
+import org.apache.log4j.Logger;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -11,6 +13,7 @@ import java.util.*;
 import java.util.concurrent.*;
 
 import static edu.uci.ics.tippers.common.util.Helper.getFileFromQuery;
+import static edu.uci.ics.tippers.common.util.Helper.getFileFromQueryWithVersion;
 
 public abstract class BaseQueryManager {
 
@@ -20,6 +23,8 @@ public abstract class BaseQueryManager {
     protected String outputDir;
     protected long timeout;
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+    private static final Logger LOGGER = Logger.getLogger(Benchmark.class);
+
 
     public BaseQueryManager(int mapping, String queriesDir, String outputDir, boolean writeOutput, long timeout) {
         this.mapping = mapping;
@@ -564,6 +569,82 @@ public abstract class BaseQueryManager {
         return queryRunTimes;
     }
 
+    public void runSelectivityExperiment() throws BenchmarkException{
+        Map<Integer, Duration> ans = new HashMap<>();
+
+        for(int i=1; i<=6; i++) {
+            Map<Integer, Duration> results = selectivityBasedQuery(i);
+            LOGGER.info(i);
+            LOGGER.info(results);
+            System.out.print(i + " " + results);
+        }
+
+    }
+
+    private Map<Integer, Duration> selectivityBasedQuery(int selectivity) throws BenchmarkException{
+
+        // Warming up the database by running certain queries
+        warmingUp();
+
+        Map<Integer, Duration> queryRunTimes = new HashMap<>();
+
+        QueryCSVReader reader;
+        String[] values;
+        int numQueries = 0;
+        Duration runTime = Duration.ofSeconds(0);
+
+        // Query 13
+//        numQueries = 0;
+//        runTime = Duration.ZERO;
+//        reader = new QueryCSVReader(queriesDir + getFileFromQueryWithVersion(13, selectivity));
+//        try {
+//            while ((values = reader.readNextLine()) != null) {
+//                List<String> sensorIds = Arrays.asList(values[1].split(";"));
+//                Date start, end;
+//                try {
+//                    start = sdf.parse(values[2]);
+//                    end = sdf.parse(values[3]);
+//                    runTime = runTime.plus(runWithThread(() -> runQuery6(sensorIds, start, end)));
+//                    numQueries++;
+//                } catch (ParseException e) {
+//                    e.printStackTrace();
+//                    throw new BenchmarkException("Error Running Queries, Incorrect Date Format");
+//                }
+//            }
+//            queryRunTimes.put(13, runTime.dividedBy(numQueries));
+//        } catch (Exception | Error e) {
+//            e.printStackTrace();
+//            queryRunTimes.put(13, Constants.MAX_DURATION);
+//        }
+
+        // Query 14
+        numQueries = 0;
+        runTime = Duration.ZERO;
+        reader = new QueryCSVReader(queriesDir + getFileFromQueryWithVersion(14, selectivity));
+        try {
+            while ((values = reader.readNextLine()) != null) {
+                String userId = values[1];
+                Date start, end;
+                try {
+                    start = sdf.parse(values[2]);
+                    end = sdf.parse(values[3]);
+                    runTime = runTime.plus(runWithThread(() -> runQuery8WithSelectivity(userId, start, end)));
+                    numQueries++;
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Queries, Incorrect Date Format");
+                }
+            }
+            queryRunTimes.put(8, runTime.dividedBy(numQueries));
+        } catch (Exception | Error e) {
+            e.printStackTrace();
+            queryRunTimes.put(8, Constants.MAX_DURATION);
+        }
+
+        return queryRunTimes;
+    }
+
+
     public abstract void cleanUp();
 
     public abstract Duration runQuery1(String sensorId) throws BenchmarkException;
@@ -582,6 +663,8 @@ public abstract class BaseQueryManager {
     public abstract Duration runQuery7(String startLocation, String endLocation, Date date) throws BenchmarkException;
 
     public abstract Duration runQuery8(String userId, Date date) throws BenchmarkException;
+
+    public abstract Duration runQuery8WithSelectivity(String userId, Date startTime, Date endTime) throws BenchmarkException;
 
     public abstract Duration runQuery9(String userId, String infraTypeName) throws BenchmarkException;
 

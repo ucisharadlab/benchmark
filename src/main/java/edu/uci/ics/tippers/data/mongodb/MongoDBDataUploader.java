@@ -52,12 +52,12 @@ public class MongoDBDataUploader extends BaseDataUploader{
     public Duration addAllData() throws BenchmarkException {
         Instant start = Instant.now();
 
-        addInfrastructureData();
-        addUserData();
-        addDeviceData();
-        addSensorData();
+//        addInfrastructureData();
+//        addUserData();
+//        addDeviceData();
+//        addSensorData();
         addObservationData();
-        virtualSensorData();
+//        virtualSensorData();
         addSemanticObservationData();
 
         Instant end = Instant.now();
@@ -122,7 +122,7 @@ public class MongoDBDataUploader extends BaseDataUploader{
                 documents = new ArrayList<>();
             }
 
-            if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s S Observations", count));
+            if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s Observations", count));
             count ++;
         }
 

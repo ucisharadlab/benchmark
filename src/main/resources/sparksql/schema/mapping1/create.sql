@@ -1,143 +1,141 @@
 
+CREATE TABLE LOCATION (
+  ID varchar(255) ,
+  X float ,
+  Y float ,
+  Z float
+) ;
 
+CREATE TABLE INFRASTRUCTURE_TYPE (
+  ID varchar(255) ,
+  DESCRIPTION varchar(255) ,
+  NAME varchar(255)
+) ;
 
-CREATE TABLE IF NOT EXISTS LOCATION (
-  ID string NOT NULL,
-  X float NOT NULL,
-  Y float NOT NULL,
-  Z float NOT NULL,
-  PRIMARY KEY (ID)
-) CLUSTERED INTO 1 shards WITH ( number_of_replicas = 0 );
+CREATE TABLE INFRASTRUCTURE (
+  NAME varchar(255) ,
+  INFRASTRUCTURE_TYPE_ID varchar(255) ,
+  ID varchar(255) ,
+  FLOOR integer
+) ;
 
 CREATE TABLE INFRASTRUCTURE_LOCATION (
-  LOCATION_ID string NOT NULL,
-  INFRASTRUCTURE_ID string NOT NULL,
-   PRIMARY KEY(LOCATION_ID, INFRASTRUCTURE_ID)
-) CLUSTERED INTO 1 shards WITH ( number_of_replicas = 0 );
-
-CREATE TABLE IF NOT EXISTS INFRASTRUCTURE_TYPE (
-  ID string NOT NULL,
-  DESCRIPTION string ,
-  NAME string,
-  PRIMARY KEY (ID)
-) CLUSTERED INTO 1 shards WITH ( number_of_replicas = 0 );
-
-CREATE TABLE IF NOT EXISTS INFRASTRUCTURE (
-  NAME string ,
-  INFRASTRUCTURE_TYPE_ID string ,
-  ID string NOT NULL,
-  FLOOR integer ,
-  PRIMARY KEY (ID)
-) CLUSTERED INTO 1 shards WITH ( number_of_replicas = 0 );
-
-CREATE TABLE IF NOT EXISTS PLATFORM_TYPE (
-  ID string NOT NULL,
-  DESCRIPTION string ,
-  NAME string,
-  PRIMARY KEY (ID)
-) CLUSTERED INTO 1 shards WITH ( number_of_replicas = 0 );
-
-CREATE TABLE IF NOT EXISTS USERS (
-  EMAIL string,
-  GOOGLE_AUTH_TOKEN string ,
-  NAME string ,
-  ID string NOT NULL,
-  PRIMARY KEY (ID)
- ) CLUSTERED INTO 1 shards WITH ( number_of_replicas = 0);
-
-CREATE TABLE IF NOT EXISTS USER_GROUP (
-  ID string NOT NULL,
-  DESCRIPTION string ,
-  NAME string ,
-  PRIMARY KEY (ID)
-) CLUSTERED INTO 1 shards WITH ( number_of_replicas = 0 );
-
-CREATE TABLE IF NOT EXISTS USER_GROUP_MEMBERSHIP (
-  USER_ID string NOT NULL,
-  USER_GROUP_ID string NOT NULL,
-  PRIMARY KEY (USER_GROUP_ID, USER_ID)
-) CLUSTERED INTO 1 shards WITH ( number_of_replicas = 0 );
-
-CREATE TABLE IF NOT EXISTS PLATFORM (
-  ID string NOT NULL,
-  NAME string ,
-  USER_ID string ,
-  PLATFORM_TYPE_ID string ,
-  PRIMARY KEY (ID)
-) CLUSTERED INTO 1 shards WITH ( number_of_replicas = 0 );
-
-CREATE TABLE IF NOT EXISTS SENSOR_TYPE (
-  ID string NOT NULL,
-  DESCRIPTION string ,
-  MOBILITY string ,
-  NAME string ,
-  CAPTURE_FUNCTIONALITY string ,
-  PAYLOAD_SCHEMA string,
-  PRIMARY KEY (ID)
-) CLUSTERED INTO 1 shards WITH ( number_of_replicas = 0 );
-
-CREATE TABLE IF NOT EXISTS SENSOR (
-  ID string NOT NULL,
-  NAME string ,
-  INFRASTRUCTURE_ID string ,
-  USER_ID string ,
-  SENSOR_TYPE_ID string ,
-  SENSOR_CONFIG string,
-  PRIMARY KEY (ID)
-) CLUSTERED INTO 1 shards WITH ( number_of_replicas = 0 );
-
-CREATE TABLE IF NOT EXISTS COVERAGE_INFRASTRUCTURE (
-  SENSOR_ID string NOT NULL,
-  INFRASTRUCTURE_ID string NOT NULL,
-  PRIMARY KEY (INFRASTRUCTURE_ID, SENSOR_ID)
-) CLUSTERED INTO 1 shards WITH ( number_of_replicas = 0 );
-
-CREATE TABLE IF NOT EXISTS OBSERVATION (
-  id string NOT NULL,
-  payload object ,
-  timeStamp timestamp NOT NULL INDEX using plain,
-  sensor_id string ,
-  PRIMARY KEY (id)
-) CLUSTERED INTO 1 shards WITH ( number_of_replicas = 0 );
-
-CREATE TABLE IF NOT EXISTS SEMANTIC_OBSERVATION_TYPE (
-  ID string NOT NULL,
-  DESCRIPTION string ,
-  NAME string,
-  PRIMARY KEY (ID)
+  LOCATION_ID varchar(255) ,
+  INFRASTRUCTURE_ID varchar(255)
 ) ;
 
-CREATE TABLE IF NOT EXISTS VIRTUAL_SENSOR_TYPE (
-  ID string NOT NULL,
-  NAME string,
-  DESCRIPTION string,
-  INPUT_TYPE_ID string,
-  SEMANTIC_OBSERVATION_TYPE_ID string,
-  PRIMARY KEY (ID)
+CREATE TABLE PLATFORM_TYPE (
+  ID varchar(255) ,
+  DESCRIPTION varchar(255) ,
+  NAME varchar(255)
 ) ;
 
-CREATE TABLE IF NOT EXISTS VIRTUAL_SENSOR (
-  ID string NOT NULL,
-  NAME string,
-  DESCRIPTION string,
-  LANGUAGE string,
-  PROJECT_NAME string,
-  TYPE_ID string,
-  PRIMARY KEY (ID)
+CREATE TABLE USERS (
+  EMAIL varchar(255),
+  GOOGLE_AUTH_TOKEN varchar(255) ,
+  NAME varchar(255) ,
+  ID varchar(255)
+ ) ;
+
+CREATE TABLE USER_GROUP (
+  ID varchar(255) ,
+  DESCRIPTION varchar(255) ,
+  NAME varchar(255)
 ) ;
 
-CREATE TABLE IF NOT EXISTS SEMANTIC_OBSERVATION (
-  id string NOT NULL,
-  semantic_entity_id string NOT NULL,
-  payload object,
-  timeStamp timestamp NOT NULL INDEX using plain,
-  virtual_sensor_id string,
-  type_id string,
-  PRIMARY KEY (id)
-) CLUSTERED INTO 1 shards WITH (number_of_replicas = 0); 
+CREATE TABLE USER_GROUP_MEMBERSHIP (
+  USER_ID varchar(255) ,
+  USER_GROUP_ID varchar(255)
+) ;
 
+CREATE TABLE PLATFORM (
+  ID varchar(255) ,
+  NAME varchar(255) ,
+  USER_ID varchar(255) ,
+  PLATFORM_TYPE_ID varchar(255) ,
+  HASHED_MAC varchar(255)
+) ;
 
-ALTER TABLE OBSERVATION SET (refresh_interval = 0);
-ALTER TABLE SEMANTIC_OBSERVATION SET (refresh_interval = 0);
+CREATE TABLE SENSOR_TYPE (
+  ID varchar(255) ,
+  DESCRIPTION varchar(255) ,
+  MOBILITY varchar(255) ,
+  NAME varchar(255) ,
+  CAPTURE_FUNCTIONALITY varchar(255) ,
+  PAYLOAD_SCHEMA varchar(255)
+) ;
 
-SET GLOBAL TRANSIENT indices.store.throttle.type = 'none';
+CREATE TABLE SENSOR (
+  ID varchar(255) ,
+  NAME varchar(255) ,
+  INFRASTRUCTURE_ID varchar(255) ,
+  USER_ID varchar(255) ,
+  SENSOR_TYPE_ID varchar(255) ,
+  SENSOR_CONFIG varchar(255)
+) ;
+
+CREATE TABLE COVERAGE_INFRASTRUCTURE (
+  SENSOR_ID varchar(255) ,
+  INFRASTRUCTURE_ID varchar(255)
+) ;
+
+CREATE TABLE WeMoObservation (
+  id varchar(255) ,
+  currentMilliWatts integer ,
+  onTodaySeconds integer ,
+  timeStamp timestamp ,
+  sensor_id varchar(255)
+) ;
+
+CREATE TABLE WiFiAPObservation (
+  id varchar(255) ,
+  clientId varchar(255) ,
+  timeStamp timestamp ,
+  sensor_id varchar(255)
+) ;
+
+CREATE TABLE ThermometerObservation (
+  id varchar(255) ,
+  temperature integer ,
+  timeStamp timestamp ,
+  sensor_id varchar(255)
+) ;
+
+CREATE TABLE SEMANTIC_OBSERVATION_TYPE (
+  ID varchar(255) ,
+  DESCRIPTION varchar(255) ,
+  NAME varchar(255)
+) ;
+
+CREATE TABLE VIRTUAL_SENSOR_TYPE (
+  ID varchar(255) ,
+  NAME varchar(255) ,
+  DESCRIPTION varchar(255) ,
+  INPUT_TYPE_ID varchar(255) ,
+  SEMANTIC_OBSERVATION_TYPE_ID varchar(255)
+) ;
+
+CREATE TABLE VIRTUAL_SENSOR (
+  ID varchar(255) ,
+  NAME varchar(255) ,
+  DESCRIPTION varchar(255) ,
+  LANGUAGE varchar(255) ,
+  PROJECT_NAME varchar(255) ,
+  TYPE_ID varchar(255)
+) ;
+
+CREATE TABLE OCCUPANCY (
+  id varchar(255) ,
+  semantic_entity_id varchar(255) ,
+  occupancy integer ,
+  timeStamp timestamp ,
+  virtual_sensor_id varchar(255)
+) ;
+
+CREATE TABLE PRESENCE (
+  id varchar(255) ,
+  semantic_entity_id varchar(255) ,
+  location varchar(255) ,
+  timeStamp timestamp ,
+  virtual_sensor_id varchar(255)
+) ;

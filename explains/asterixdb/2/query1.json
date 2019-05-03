@@ -1,0 +1,16 @@
+{
+  "requestID": "dff04d40-e3ce-4953-b211-29bc447c845a",
+  "signature": "*",
+  "results": [
+    "distribute result [$$7]\n-- DISTRIBUTE_RESULT  |PARTITIONED|\n  exchange\n  -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|\n    project ([$$7])\n    -- STREAM_PROJECT  |PARTITIONED|\n      assign [$$7] <- [{\"name\": $$Sensor.getField(1)}]\n      -- ASSIGN  |PARTITIONED|\n        project ([$$Sensor])\n        -- STREAM_PROJECT  |PARTITIONED|\n          exchange\n          -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|\n            unnest-map [$$8, $$Sensor] <- index-search(\"Sensor\", 0, \"TippersDB\", \"Sensor\", FALSE, FALSE, 1, $$11, 1, $$12, TRUE, TRUE, TRUE)\n            -- BTREE_SEARCH  |PARTITIONED|\n              exchange\n              -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|\n                assign [$$11, $$12] <- [\"thermometer2\", \"thermometer2\"]\n                -- ASSIGN  |PARTITIONED|\n                  empty-tuple-source\n                  -- EMPTY_TUPLE_SOURCE  |PARTITIONED|\n"
+  ],
+  "status": "success",
+  "metrics": {
+    "elapsedTime": "21.583673ms",
+    "executionTime": "20.235472ms",
+    "resultCount": 0,
+    "resultSize": 0,
+    "processedObjects": 0
+  }
+}
+

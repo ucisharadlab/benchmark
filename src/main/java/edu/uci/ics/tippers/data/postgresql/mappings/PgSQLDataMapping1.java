@@ -240,33 +240,45 @@ public class PgSQLDataMapping1 extends PgSQLBaseDataMapping {
             }
 
             // Adding Observations
-            insert = "INSERT INTO OBSERVATION " +
-                    "(ID, PAYLOAD, TIMESTAMP, SENSOR_ID) VALUES (?, ?::JSON, ?, ?)";
-
-            BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
-                    Observation.class);
-            Observation obs = null;
-
-            stmt = connection.prepareStatement(insert);
-            int count = 0;
-            while ((obs = reader.readNext()) != null) {
-
-                stmt.setString(4, obs.getSensor().getId());
-                stmt.setTimestamp(3, new Timestamp(obs.getTimeStamp().getTime()));
-                stmt.setString(1, obs.getId());
-                stmt.setObject(2, obs.getPayload().toString());
-                stmt.addBatch();
-
-                count ++;
-                if (count % Constants.PGSQL_BATCH_SIZE == 0)
-                    stmt.executeBatch();
-
-                if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s Observations", count));
-            }
-            stmt.executeBatch();
+//            insert = "INSERT INTO OBSERVATION " +
+//                    "(ID, PAYLOAD, TIMESTAMP, SENSOR_ID) VALUES (?, ?::JSON, ?, ?)";
+//
+//            BigJsonReader<Observation> reader = new BigJsonReader<>(dataDir + DataFiles.OBS.getPath(),
+//                    Observation.class);
+//            Observation obs = null;
+//
+//            stmt = connection.prepareStatement(insert);
+//            int count = 0;
+//            while ((obs = reader.readNext()) != null) {
+//
+//                count ++;
+//
+//                if (count % Constants.LOG_LIM == 0) {
+//                    LOGGER.info(String.format("%s Observations", count));
+//                }
+//
+//                if (count <= 27400000) continue;
+//
+//
+//                stmt.setString(4, obs.getSensor().getId());
+//                stmt.setTimestamp(3, new Timestamp(obs.getTimeStamp().getTime()));
+//                stmt.setString(1, obs.getId());
+//                stmt.setObject(2, obs.getPayload().toString());
+//                stmt.addBatch();
+//
+//
+//                if (count % Constants.PGSQL_BATCH_SIZE == 0)
+//                    stmt.executeBatch();
+//
+//                if (count % Constants.LOG_LIM == 0) {
+//                    LOGGER.info(String.format("%s Observations", count));
+//                    connection.commit();
+//                }
+//            }
+//            stmt.executeBatch();
 
         }
-        catch(ParseException | SQLException | IOException e) {
+        catch(Exception e) {
             e.printStackTrace();
         }
 
@@ -381,38 +393,39 @@ public class PgSQLDataMapping1 extends PgSQLBaseDataMapping {
             }
 
             // Adding Semantic Observations
-            BigJsonReader<SemanticObservation> reader = new BigJsonReader<>(dataDir + DataFiles.SO.getPath(),
-                    SemanticObservation.class);
-            SemanticObservation sobs = null;
-
-            insert = "INSERT INTO SEMANTIC_OBSERVATION " +
-                    "(ID, SEMANTIC_ENTITY_ID, PAYLOAD, TIMESTAMP, VIRTUAL_SENSOR_ID, TYPE_ID) VALUES (?, ?, ?::JSON, ?, ?, ?)";
-            stmt = connection.prepareStatement(insert);
-            int count = 0;
-            while ((sobs = reader.readNext()) != null) {
-
-                stmt.setString(6, sobs.getType_().getId());
-                stmt.setString(5, sobs.getVirtualSensor().getId());
-                stmt.setTimestamp(4, new Timestamp(sobs.getTimeStamp().getTime()));
-                stmt.setString(1, sobs.getId());
-                stmt.setString(2, sobs.getSemanticEntity().get("id").getAsString());
-                stmt.setObject(3, sobs.getPayload().toString());
-
-                stmt.addBatch();
-
-                count ++;
-                if (count % Constants.PGSQL_BATCH_SIZE == 0)
-                    stmt.executeBatch();
-
-                if (count % Constants.LOG_LIM == 0) LOGGER.info(String.format("%s S Observations", count));
-
-            }
-            stmt.executeBatch();
+//            BigJsonReader<SemanticObservation> reader = new BigJsonReader<>(dataDir + DataFiles.SO.getPath(),
+//                    SemanticObservation.class);
+//            SemanticObservation sobs = null;
+//
+//            insert = "INSERT INTO SEMANTIC_OBSERVATION " +
+//                    "(ID, SEMANTIC_ENTITY_ID, PAYLOAD, TIMESTAMP, VIRTUAL_SENSOR_ID, TYPE_ID) VALUES (?, ?, ?::JSON, ?, ?, ?)";
+//            stmt = connection.prepareStatement(insert);
+//            int count = 0;
+//            while ((sobs = reader.readNext()) != null) {
+//
+//                stmt.setString(6, sobs.getType_().getId());
+//                stmt.setString(5, sobs.getVirtualSensor().getId());
+//                stmt.setTimestamp(4, new Timestamp(sobs.getTimeStamp().getTime()));
+//                stmt.setString(1, sobs.getId());
+//                stmt.setString(2, sobs.getSemanticEntity().get("id").getAsString());
+//                stmt.setObject(3, sobs.getPayload().toString());
+//
+//                stmt.addBatch();
+//
+//                count ++;
+//                if (count % Constants.PGSQL_BATCH_SIZE == 0)
+//                    stmt.executeBatch();
+//
+//                if (count % Constants.LOG_LIM == 0) {
+//                    LOGGER.info(String.format("%s S Observations", count));
+//                    connection.commit();
+//                }
+//
+//            }
+//            stmt.executeBatch();
 
         }
-        catch(ParseException | IOException e) {
-            e.printStackTrace();
-        } catch (SQLException e) {
+        catch(Exception e) {
             e.printStackTrace();
         }
 

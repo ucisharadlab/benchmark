@@ -1,0 +1,61 @@
+== Parsed Logical Plan ==
+'Project ['sen.name]
++- 'Filter ((('sen.SENSOR_TYPE_ID = 'st.id) && ('st.name = WiFiAP)) && (('sen.id = 'ci.SENSOR_ID) && (('ci.INFRASTRUCTURE_ID = 5011) || ('ci.INFRASTRUCTURE_ID = 3059))))
+   +- 'Join Inner
+      :- 'Join Inner
+      :  :- 'SubqueryAlias sen
+      :  :  +- 'UnresolvedRelation `SENSOR`
+      :  +- 'SubqueryAlias st
+      :     +- 'UnresolvedRelation `SENSOR_TYPE`
+      +- 'SubqueryAlias ci
+         +- 'UnresolvedRelation `COVERAGE_INFRASTRUCTURE`
+
+== Analyzed Logical Plan ==
+name: string
+Project [name#3356]
++- Filter (((SENSOR_TYPE_ID#3359 = id#3361) && (name#3364 = WiFiAP)) && ((id#3355 = SENSOR_ID#3367) && ((INFRASTRUCTURE_ID#3368 = 5011) || (INFRASTRUCTURE_ID#3368 = 3059))))
+   +- Join Inner
+      :- Join Inner
+      :  :- SubqueryAlias sen
+      :  :  +- SubqueryAlias sensor
+      :  :     +- HiveTableRelation `tippersdb`.`sensor`, org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe, [ID#3355, NAME#3356, INFRASTRUCTURE_ID#3357, USER_ID#3358, SENSOR_TYPE_ID#3359, SENSOR_CONFIG#3360]
+      :  +- SubqueryAlias st
+      :     +- SubqueryAlias sensor_type
+      :        +- HiveTableRelation `tippersdb`.`sensor_type`, org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe, [ID#3361, DESCRIPTION#3362, MOBILITY#3363, NAME#3364, CAPTURE_FUNCTIONALITY#3365, PAYLOAD_SCHEMA#3366]
+      +- SubqueryAlias ci
+         +- SubqueryAlias coverage_infrastructure
+            +- HiveTableRelation `tippersdb`.`coverage_infrastructure`, org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe, [SENSOR_ID#3367, INFRASTRUCTURE_ID#3368]
+
+== Optimized Logical Plan ==
+Project [name#3356]
++- Join Inner, (id#3355 = SENSOR_ID#3367)
+   :- Project [ID#3355, NAME#3356]
+   :  +- Join Inner, (SENSOR_TYPE_ID#3359 = id#3361)
+   :     :- Project [ID#3355, NAME#3356, SENSOR_TYPE_ID#3359]
+   :     :  +- Filter (isnotnull(SENSOR_TYPE_ID#3359) && isnotnull(id#3355))
+   :     :     +- HiveTableRelation `tippersdb`.`sensor`, org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe, [ID#3355, NAME#3356, INFRASTRUCTURE_ID#3357, USER_ID#3358, SENSOR_TYPE_ID#3359, SENSOR_CONFIG#3360]
+   :     +- Project [ID#3361]
+   :        +- Filter ((isnotnull(name#3364) && (name#3364 = WiFiAP)) && isnotnull(id#3361))
+   :           +- HiveTableRelation `tippersdb`.`sensor_type`, org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe, [ID#3361, DESCRIPTION#3362, MOBILITY#3363, NAME#3364, CAPTURE_FUNCTIONALITY#3365, PAYLOAD_SCHEMA#3366]
+   +- Project [SENSOR_ID#3367]
+      +- Filter (((INFRASTRUCTURE_ID#3368 = 5011) || (INFRASTRUCTURE_ID#3368 = 3059)) && isnotnull(SENSOR_ID#3367))
+         +- HiveTableRelation `tippersdb`.`coverage_infrastructure`, org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe, [SENSOR_ID#3367, INFRASTRUCTURE_ID#3368]
+
+== Physical Plan ==
+*Project [name#3356]
++- *SortMergeJoin [id#3355], [SENSOR_ID#3367], Inner
+   :- *Sort [id#3355 ASC NULLS FIRST], false, 0
+   :  +- Exchange hashpartitioning(id#3355, 200)
+   :     +- *Project [ID#3355, NAME#3356]
+   :        +- *BroadcastHashJoin [SENSOR_TYPE_ID#3359], [id#3361], Inner, BuildRight
+   :           :- *Filter (isnotnull(SENSOR_TYPE_ID#3359) && isnotnull(id#3355))
+   :           :  +- HiveTableScan [ID#3355, NAME#3356, SENSOR_TYPE_ID#3359], HiveTableRelation `tippersdb`.`sensor`, org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe, [ID#3355, NAME#3356, INFRASTRUCTURE_ID#3357, USER_ID#3358, SENSOR_TYPE_ID#3359, SENSOR_CONFIG#3360]
+   :           +- BroadcastExchange HashedRelationBroadcastMode(List(input[0, string, true]))
+   :              +- *Project [ID#3361]
+   :                 +- *Filter ((isnotnull(name#3364) && (name#3364 = WiFiAP)) && isnotnull(id#3361))
+   :                    +- HiveTableScan [ID#3361, name#3364], HiveTableRelation `tippersdb`.`sensor_type`, org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe, [ID#3361, DESCRIPTION#3362, MOBILITY#3363, NAME#3364, CAPTURE_FUNCTIONALITY#3365, PAYLOAD_SCHEMA#3366]
+   +- *Sort [SENSOR_ID#3367 ASC NULLS FIRST], false, 0
+      +- Exchange hashpartitioning(SENSOR_ID#3367, 200)
+         +- *Project [SENSOR_ID#3367]
+            +- *Filter (((INFRASTRUCTURE_ID#3368 = 5011) || (INFRASTRUCTURE_ID#3368 = 3059)) && isnotnull(SENSOR_ID#3367))
+               +- HiveTableScan [SENSOR_ID#3367, INFRASTRUCTURE_ID#3368], HiveTableRelation `tippersdb`.`coverage_infrastructure`, org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe, [SENSOR_ID#3367, INFRASTRUCTURE_ID#3368]	

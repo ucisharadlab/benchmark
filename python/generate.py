@@ -3,7 +3,7 @@ import datetime
 import shutil
 import sys
 
-from metadata import sensors, users
+from metadata import sensors, users, rooms
 from observations import observations
 from semanticobservation import semanticobservations
 from queries import Queries
@@ -41,6 +41,10 @@ def copyFiles(files, src, dest):
 
 def createUsers(config):
     users.createUsers(int(config['others']['users']), config['others']["data-dir"], config['others']["output-dir"])
+
+
+def createRooms(config):
+    rooms.createRooms(int(config['others']['rooms']), config['others']["data-dir"], config['others']["output-dir"])
 
 
 def createSensors(config, pattern):
@@ -105,10 +109,11 @@ if __name__ == "__main__":
     copyFiles(common, configDict['others']["data-dir"], configDict['others']["output-dir"])
 
     createUsers(configDict)
-
+    createRooms(configDict)
     createSensors(configDict, pattern)
 
-    createObservations(configDict, pattern)
-    createSemanticObservations(configDict, pattern)
-    createQueries(configDict)
-    dataSeparator.separateData(int(configDict['others']["insert-test-data"]), configDict['others']['output-dir'])
+    # createObservations(configDict, pattern)
+    # createSemanticObservations(configDict, pattern)
+    #
+    # createQueries(configDict)
+    # dataSeparator.separateData(int(configDict['others']["insert-test-data"]), configDict['others']['output-dir'])

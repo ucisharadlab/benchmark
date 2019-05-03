@@ -1,0 +1,6 @@
+# time(s), sensorIds(List), startTime, endTime
+1,thermometer4;thermometer6;thermometer7,2017-11-07T11:15:59Z,2017-11-07T18:15:59Z
+1,thermometer1;thermometer6;thermometer7,2017-11-07T11:16:59Z,2017-11-07T19:15:59Z
+1,thermometer4;thermometer3;thermometer7,2017-11-07T11:14:59Z,2017-11-07T17:15:59Z
+1,thermometer4;thermometer1;thermometer7,2017-11-07T11:11:59Z,2017-11-07T14:15:59Z
+1,thermometer3;thermometer2;thermometer7,2017-11-07T11:12:59Z,2017-11-07T15:15:59Z
