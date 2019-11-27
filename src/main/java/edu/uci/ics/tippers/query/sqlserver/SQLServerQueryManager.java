@@ -7,6 +7,8 @@ import edu.uci.ics.tippers.exception.BenchmarkException;
 import edu.uci.ics.tippers.query.BaseQueryManager;
 import edu.uci.ics.tippers.writer.RowWriter;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.sql.*;
 import java.time.Duration;
@@ -17,7 +19,7 @@ import java.util.List;
 
 import static edu.uci.ics.tippers.common.util.Helper.getFileFromQuery;
 
-public class SQLServerQueryManager extends BaseQueryManager{
+public class SQLServerQueryManager extends BaseQueryManager {
 
     private Connection connection;
 
@@ -30,8 +32,8 @@ public class SQLServerQueryManager extends BaseQueryManager{
     }
 
     // For External Database (CrateDB) Usage
-    public SQLServerQueryManager( int mapping, String queriesDir, String outputDir, boolean writeOutput, long timeout,
-                              Connection connection) {
+    public SQLServerQueryManager(int mapping, String queriesDir, String outputDir, boolean writeOutput, long timeout,
+                                 Connection connection) {
         super(mapping, queriesDir, outputDir, writeOutput, timeout);
         this.connection = connection;
         this.database = Database.CRATEDB;
@@ -43,12 +45,12 @@ public class SQLServerQueryManager extends BaseQueryManager{
             ResultSet rs = stmt.executeQuery();
             ResultSetMetaData rsmd = rs.getMetaData();
             int columnsNumber = rsmd.getColumnCount();
-            
+
             RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(queryNum));
-            while(rs.next()) {
-		    if (writeOutput) {
+            while (rs.next()) {
+                if (writeOutput) {
                     StringBuilder line = new StringBuilder("");
-                    for(int i = 1; i <= columnsNumber; i++)
+                    for (int i = 1; i <= columnsNumber; i++)
                         line.append(rs.getString(i)).append("\t");
                     writer.writeString(line.toString());
                 }
@@ -82,7 +84,7 @@ public class SQLServerQueryManager extends BaseQueryManager{
                 String query = "select * from LINEITEM_QUANTITY where ID=?";
                 try {
                     PreparedStatement stmt = connection.prepareStatement(query);
-		    stmt.setInt(1, 1240);
+                    stmt.setInt(1, 1240);
                     return runTimedQuery(stmt, 1);
                 } catch (SQLException e) {
                     e.printStackTrace();
@@ -101,7 +103,7 @@ public class SQLServerQueryManager extends BaseQueryManager{
                 String query = "select * from LINEITEM_ORDER_KEY where L_ORDERKEY =?";
                 try {
                     PreparedStatement stmt = connection.prepareStatement(query);
-		    stmt.setInt(1, 1248);
+                    stmt.setInt(1, 1248);
                     return runTimedQuery(stmt, 2);
                 } catch (SQLException e) {
                     e.printStackTrace();
@@ -121,10 +123,10 @@ public class SQLServerQueryManager extends BaseQueryManager{
                 try {
                     Instant start = Instant.now();
                     PreparedStatement stmt = connection.prepareStatement(query);
-		    stmt.setInt(1, 1240);
+                    stmt.setInt(1, 1240);
                     ResultSet rs = stmt.executeQuery();
                     String typeId = null;
-                    while(rs.next()) {
+                    while (rs.next()) {
                         typeId = rs.getString(1);
                     }
                     rs.close();
@@ -141,158 +143,108 @@ public class SQLServerQueryManager extends BaseQueryManager{
 
     @Override
     public Duration runQuery4(List<String> sensorIds, Date startTime, Date endTime) throws BenchmarkException {
-    	Instant start = Instant.now();
-	List<Integer> ids = new ArrayList<>();
-	
-	List<Integer> oids = new ArrayList<>();
-	List<Integer> sids = new ArrayList<>();
-	List<Integer> qids = new ArrayList<>();
-	
-	List<Integer> orderKeys = new ArrayList<>();
-	List<String> lineStatuses = new ArrayList<>();
-	List<Double> quantities = new ArrayList<>();
+        Instant start = Instant.now();
+        List<Integer> ids = new ArrayList<>();
 
-	/*for (int i=1; i<=2790; i++) {
-	       String query = "select * from LINEITEM_ORDER_KEY where L_ORDERKEY =?";
-               try {
-                    PreparedStatement stmt = connection.prepareStatement(query);
-                    stmt.setInt(1, i);
-                    ResultSet rs = stmt.executeQuery();
-		    int id;
-		    while(rs.next()) {
-                        id = rs.getInt(1);
-			ids.add(id);
-			orderKeys.add(rs.getInt(2));
-                    }
-		    rs.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    throw new BenchmarkException("Error Running Query");
-                }
-	}
-	for (Integer id: ids) {
-		String query = "select * from LINEITEM_LINESTATUS where ID =?";
-		try {
-                    PreparedStatement stmt = connection.prepareStatement(query);
-                    stmt.setInt(1, id);
-                    ResultSet rs = stmt.executeQuery();
-                    while(rs.next()) {
-                        lineStatuses.add(rs.getString(2));
-                    }
-		    rs.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    throw new BenchmarkException("Error Running Query");
-                }
+        List<Integer> oids = new ArrayList<>();
+        List<Integer> sids = new ArrayList<>();
+        List<Integer> qids = new ArrayList<>();
+        List<Integer> rids = new ArrayList<>();
 
-	}
+        List<Integer> orderKeys = new ArrayList<>();
+        List<String> lineStatuses = new ArrayList<>();
+        List<Double> quantities = new ArrayList<>();
+        List<String> restRow = new ArrayList<>();
 
-	for (Integer id: ids) {
-                String query = "select * from LINEITEM_QUANTITY where ID =?";
-                try {
-                    PreparedStatement stmt = connection.prepareStatement(query);
-                    stmt.setInt(1, id);
-                    ResultSet rs = stmt.executeQuery();
-                    while(rs.next()) {
-                        quantities.add(rs.getDouble(2));
-                    }
-		    rs.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    throw new BenchmarkException("Error Running Query");
-                }
-
-        }*/
-
-	       String query = "select * from LINEITEM_ORDER_KEY where BUCKET =?";
-               try {
-                    PreparedStatement stmt = connection.prepareStatement(query);
-                    stmt.setInt(1, 1);
-                    ResultSet rs = stmt.executeQuery();
-                    int id;
-                    while(rs.next()) {
-                        id = rs.getInt(1);
-                        oids.add(id);
-                        orderKeys.add(rs.getInt(2));
-                    }
-                    rs.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    throw new BenchmarkException("Error Running Query");
-                }
+        String query = "select * from LINEITEM_ORDER_KEY where BUCKET =?";
+        try {
+            PreparedStatement stmt = connection.prepareStatement(query);
+            stmt.setInt(1, 1);
+            ResultSet rs = stmt.executeQuery();
+            int id;
+            while (rs.next()) {
+                id = rs.getInt(1);
+                oids.add(id);
+                orderKeys.add(rs.getInt(2));
+            }
+            rs.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new BenchmarkException("Error Running Query");
+        }
 
 
-	        query = "select * from LINEITEM_LINESTATUS where BUCKET =?";
-                try {
-                    PreparedStatement stmt = connection.prepareStatement(query);
-                    stmt.setInt(1, 1);
-                    ResultSet rs = stmt.executeQuery();
-                    while(rs.next()) {
-			sids.add(rs.getInt(1));
-                        lineStatuses.add(rs.getString(2));
-                    }
-                    rs.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    throw new BenchmarkException("Error Running Query");
-                }
+        query = "select * from LINEITEM_LINESTATUS where BUCKET =?";
+        try {
+            PreparedStatement stmt = connection.prepareStatement(query);
+            stmt.setInt(1, 1);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                sids.add(rs.getInt(1));
+                lineStatuses.add(rs.getString(2));
+            }
+            rs.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new BenchmarkException("Error Running Query");
+        }
 
-		query = "select * from LINEITEM_QUANTITY where BUCKET =?";
-                try {
-                    PreparedStatement stmt = connection.prepareStatement(query);
-                    stmt.setInt(1, 1);
-                    ResultSet rs = stmt.executeQuery();
-                    while(rs.next()) {
-			qids.add(rs.getInt(1));
-                        quantities.add(rs.getDouble(2));
-                    }
-                    rs.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    throw new BenchmarkException("Error Running Query");
-                }
+        query = "select * from LINEITEM_QUANTITY where BUCKET =?";
+        try {
+            PreparedStatement stmt = connection.prepareStatement(query);
+            stmt.setInt(1, 1);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                qids.add(rs.getInt(1));
+                quantities.add(rs.getDouble(2));
+            }
+            rs.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new BenchmarkException("Error Running Query");
+        }
 
         try {
-          RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(4));
-	  for(int i=0; i<oids.size(); i++) {
-		if (orderKeys.get(i)==1) {
-			StringBuilder line = new StringBuilder("");
-			line.append(oids.get(i)).append("\t");
-			line.append(orderKeys.get(i)).append("\t");
-			for (int j=0; j<sids.size();j++) {
-				if (sids.get(j) == oids.get(i)) line.append(lineStatuses.get(j)).append("\t");
-			}
-			for (int j=0; j<qids.size();j++) {
-                                if (qids.get(j) == oids.get(i)) line.append(quantities.get(j)).append("\t");
-                        }
-			writer.writeString(line.toString());
-		}
-	  }
-	  writer.close();
+            BufferedReader reader = new BufferedReader(new FileReader("/mnt/bucket_2m_1.csv"));
+            String line = reader.readLine();
+            while (line != null) {
+                String data[] = line.split(",", 2);
+                rids.add(Integer.parseInt(data[0]));
+                restRow.add(data[1]);
+                line = reader.readLine();
+            }
         } catch (Exception e) {
-                e.printStackTrace();
+            e.printStackTrace();
+            throw new BenchmarkException("Error Running Query");
         }
 
 
-	/*
-	try {
-	RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(4));
-        for(int i=0; i<ids.size(); i++) {
-             if (writeOutput) {
-                StringBuilder line = new StringBuilder("");
-                line.append(ids.get(i)).append("\t")
-			.append(orderKeys.get(i)).append("\t")
-			.append(lineStatuses.get(i)).append("\t")
-			.append(quantities.get(i));
-                writer.writeString(line.toString());
+        try {
+            RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(4));
+            for (int i = 0; i < oids.size(); i++) {
+                if (orderKeys.get(i) == 1) {
+                    StringBuilder line = new StringBuilder("");
+                    line.append(oids.get(i)).append("\t");
+                    line.append(orderKeys.get(i)).append("\t");
+                    for (int j = 0; j < sids.size(); j++) {
+                        if (sids.get(j) == oids.get(i)) line.append(lineStatuses.get(j)).append("\t");
+                    }
+                    for (int j = 0; j < qids.size(); j++) {
+                        if (qids.get(j) == oids.get(i)) line.append(quantities.get(j)).append("\t");
+                    }
+                    for (int j = 0; j < rids.size(); j++) {
+                        if (rids.get(j) == oids.get(i)) line.append(restRow.get(j)).append("\t");
+                    }
+                    writer.writeString(line.toString());
                 }
+            }
+            writer.close();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        writer.close();
-	} catch (Exception e) {
-		e.printStackTrace();
-	}*/
 
-	Instant end = Instant.now();
+
+        Instant end = Instant.now();
         return Duration.between(start, end);
 
     }
@@ -300,347 +252,235 @@ public class SQLServerQueryManager extends BaseQueryManager{
     @Override
     public Duration runQuery5(String sensorTypeName, Date startTime, Date endTime, String payloadAttribute,
                               Object startPayloadValue, Object endPayloadValue) throws BenchmarkException {
-    	Instant start = Instant.now();
-	List<Integer> ids = new ArrayList<>();
-	
-	List<Integer> oids = new ArrayList<>();
-	List<Integer> sids = new ArrayList<>();
-	List<Integer> qids = new ArrayList<>();
-	
-	List<Integer> orderKeys = new ArrayList<>();
-	List<String> lineStatuses = new ArrayList<>();
-	List<Double> quantities = new ArrayList<>();
+        Instant start = Instant.now();
+        List<Integer> ids = new ArrayList<>();
 
-	/*for (int i=1; i<=2790; i++) {
-	       String query = "select * from LINEITEM_ORDER_KEY where L_ORDERKEY =?";
-               try {
-                    PreparedStatement stmt = connection.prepareStatement(query);
-                    stmt.setInt(1, i);
-                    ResultSet rs = stmt.executeQuery();
-		    int id;
-		    while(rs.next()) {
-                        id = rs.getInt(1);
-			ids.add(id);
-			orderKeys.add(rs.getInt(2));
-                    }
-		    rs.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    throw new BenchmarkException("Error Running Query");
-                }
-	}
-	for (Integer id: ids) {
-		String query = "select * from LINEITEM_LINESTATUS where ID =?";
-		try {
-                    PreparedStatement stmt = connection.prepareStatement(query);
-                    stmt.setInt(1, id);
-                    ResultSet rs = stmt.executeQuery();
-                    while(rs.next()) {
-                        lineStatuses.add(rs.getString(2));
-                    }
-		    rs.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    throw new BenchmarkException("Error Running Query");
-                }
+        List<Integer> oids = new ArrayList<>();
+        List<Integer> sids = new ArrayList<>();
+        List<Integer> qids = new ArrayList<>();
+        List<Integer> rids = new ArrayList<>();
 
-	}
+        List<Integer> orderKeys = new ArrayList<>();
+        List<String> lineStatuses = new ArrayList<>();
+        List<Double> quantities = new ArrayList<>();
+        List<String> restRow = new ArrayList<>();
 
-	for (Integer id: ids) {
-                String query = "select * from LINEITEM_QUANTITY where ID =?";
-                try {
-                    PreparedStatement stmt = connection.prepareStatement(query);
-                    stmt.setInt(1, id);
-                    ResultSet rs = stmt.executeQuery();
-                    while(rs.next()) {
-                        quantities.add(rs.getDouble(2));
-                    }
-		    rs.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    throw new BenchmarkException("Error Running Query");
-                }
-
-        }*/
-
-	       String query = "select * from LINEITEM_ORDER_KEY where BUCKET =?";
-               try {
-                    PreparedStatement stmt = connection.prepareStatement(query);
-                    stmt.setInt(1, 1);
-                    ResultSet rs = stmt.executeQuery();
-                    int id;
-                    while(rs.next()) {
-                        id = rs.getInt(1);
-                        oids.add(id);
-                        orderKeys.add(rs.getInt(2));
-                    }
-                    rs.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    throw new BenchmarkException("Error Running Query");
-                }
+        String query = "select * from LINEITEM_ORDER_KEY where BUCKET =?";
+        try {
+            PreparedStatement stmt = connection.prepareStatement(query);
+            stmt.setInt(1, 1);
+            ResultSet rs = stmt.executeQuery();
+            int id;
+            while (rs.next()) {
+                id = rs.getInt(1);
+                oids.add(id);
+                orderKeys.add(rs.getInt(2));
+            }
+            rs.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new BenchmarkException("Error Running Query");
+        }
 
 
-	        query = "select * from LINEITEM_LINESTATUS where BUCKET =?";
-                try {
-                    PreparedStatement stmt = connection.prepareStatement(query);
-                    stmt.setInt(1, 1);
-                    ResultSet rs = stmt.executeQuery();
-                    while(rs.next()) {
-			sids.add(rs.getInt(1));
-                        lineStatuses.add(rs.getString(2));
-                    }
-                    rs.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    throw new BenchmarkException("Error Running Query");
-                }
+        query = "select * from LINEITEM_LINESTATUS where BUCKET =?";
+        try {
+            PreparedStatement stmt = connection.prepareStatement(query);
+            stmt.setInt(1, 1);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                sids.add(rs.getInt(1));
+                lineStatuses.add(rs.getString(2));
+            }
+            rs.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new BenchmarkException("Error Running Query");
+        }
 
-		query = "select * from LINEITEM_QUANTITY where BUCKET =?";
-                try {
-                    PreparedStatement stmt = connection.prepareStatement(query);
-                    stmt.setInt(1, 1);
-                    ResultSet rs = stmt.executeQuery();
-                    while(rs.next()) {
-			qids.add(rs.getInt(1));
-                        quantities.add(rs.getDouble(2));
-                    }
-                    rs.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    throw new BenchmarkException("Error Running Query");
-                }
+        query = "select * from LINEITEM_QUANTITY where BUCKET =?";
+        try {
+            PreparedStatement stmt = connection.prepareStatement(query);
+            stmt.setInt(1, 1);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                qids.add(rs.getInt(1));
+                quantities.add(rs.getDouble(2));
+            }
+            rs.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new BenchmarkException("Error Running Query");
+        }
 
         try {
-          RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(5));
-	  for(int i=0; i<oids.size(); i++) {
-		if (orderKeys.get(i)==1) {
-			StringBuilder line = new StringBuilder("");
-			line.append(oids.get(i)).append("\t");
-			line.append(orderKeys.get(i)).append("\t");
-			for (int j=0; j<qids.size();j++) {
-                                if (qids.get(j) == oids.get(i) && quantities.get(j) == 36.0) {
-					line.append(quantities.get(j)).append("\t");
-					for (int k=0; j<sids.size();j++) {
-                                		if (sids.get(j) == oids.get(i)) line.append(lineStatuses.get(j)).append("\t");
-                        		}
-                        		writer.writeString(line.toString());
-				}
-                        }
-
-		}
-	  }
-	  writer.close();
+            BufferedReader reader = new BufferedReader(new FileReader("/mnt/bucket_2m_1.csv"));
+            String line = reader.readLine();
+            while (line != null) {
+                String data[] = line.split(",", 2);
+                rids.add(Integer.parseInt(data[0]));
+                restRow.add(data[1]);
+                line = reader.readLine();
+            }
         } catch (Exception e) {
-                e.printStackTrace();
+            e.printStackTrace();
+            throw new BenchmarkException("Error Running Query");
         }
 
+        try {
+            RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(5));
+            for (int i = 0; i < oids.size(); i++) {
+                if (orderKeys.get(i) == 1) {
+                    StringBuilder line = new StringBuilder("");
+                    line.append(oids.get(i)).append("\t");
+                    line.append(orderKeys.get(i)).append("\t");
+                    for (int j = 0; j < qids.size(); j++) {
+                        if (qids.get(j) == oids.get(i) && quantities.get(j) == 36.0) {
+                            line.append(quantities.get(j)).append("\t");
+                            for (int k = 0; k < sids.size(); k++) {
+                                if (sids.get(k) == oids.get(i)) line.append(lineStatuses.get(k)).append("\t");
+                            }
+                            for (int k = 0; k < rids.size(); k++) {
+                                if (rids.get(k) == oids.get(i)) line.append(restRow.get(k)).append("\t");
+                            }
+                            writer.writeString(line.toString());
+                        }
+                    }
 
-	/*
-	try {
-	RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(4));
-        for(int i=0; i<ids.size(); i++) {
-             if (writeOutput) {
-                StringBuilder line = new StringBuilder("");
-                line.append(ids.get(i)).append("\t")
-			.append(orderKeys.get(i)).append("\t")
-			.append(lineStatuses.get(i)).append("\t")
-			.append(quantities.get(i));
-                writer.writeString(line.toString());
                 }
+            }
+            writer.close();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        writer.close();
-	} catch (Exception e) {
-		e.printStackTrace();
-	}*/
 
-	Instant end = Instant.now();
+        Instant end = Instant.now();
         return Duration.between(start, end);
 
     }
 
     @Override
     public Duration runQuery6(List<String> sensorIds, Date startTime, Date endTime) throws BenchmarkException {
-    	   	Instant start = Instant.now();
-	List<Integer> ids = new ArrayList<>();
-	
-	List<Integer> oids = new ArrayList<>();
-	List<Integer> sids = new ArrayList<>();
-	List<Integer> qids = new ArrayList<>();
-	
-	List<Integer> orderKeys = new ArrayList<>();
-	List<String> lineStatuses = new ArrayList<>();
-	List<Double> quantities = new ArrayList<>();
+        Instant start = Instant.now();
+        List<Integer> ids = new ArrayList<>();
 
-	/*for (int i=1; i<=2790; i++) {
-	       String query = "select * from LINEITEM_ORDER_KEY where L_ORDERKEY =?";
-               try {
-                    PreparedStatement stmt = connection.prepareStatement(query);
-                    stmt.setInt(1, i);
-                    ResultSet rs = stmt.executeQuery();
-		    int id;
-		    while(rs.next()) {
-                        id = rs.getInt(1);
-			ids.add(id);
-			orderKeys.add(rs.getInt(2));
-                    }
-		    rs.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    throw new BenchmarkException("Error Running Query");
-                }
-	}
-	for (Integer id: ids) {
-		String query = "select * from LINEITEM_LINESTATUS where ID =?";
-		try {
-                    PreparedStatement stmt = connection.prepareStatement(query);
-                    stmt.setInt(1, id);
-                    ResultSet rs = stmt.executeQuery();
-                    while(rs.next()) {
-                        lineStatuses.add(rs.getString(2));
-                    }
-		    rs.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    throw new BenchmarkException("Error Running Query");
-                }
+        List<Integer> oids = new ArrayList<>();
+        List<Integer> sids = new ArrayList<>();
+        List<Integer> qids = new ArrayList<>();
+        List<Integer> rids = new ArrayList<>();
 
-	}
-
-	for (Integer id: ids) {
-                String query = "select * from LINEITEM_QUANTITY where ID =?";
-                try {
-                    PreparedStatement stmt = connection.prepareStatement(query);
-                    stmt.setInt(1, id);
-                    ResultSet rs = stmt.executeQuery();
-                    while(rs.next()) {
-                        quantities.add(rs.getDouble(2));
-                    }
-		    rs.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    throw new BenchmarkException("Error Running Query");
-                }
-
-        }*/
-
-	       String query = "select * from LINEITEM_ORDER_KEY where BUCKET =?";
-               try {
-                    PreparedStatement stmt = connection.prepareStatement(query);
-                    stmt.setInt(1, 1);
-                    ResultSet rs = stmt.executeQuery();
-                    int id;
-                    while(rs.next()) {
-                        id = rs.getInt(1);
-                        oids.add(id);
-                        orderKeys.add(rs.getInt(2));
-                    }
-                    rs.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    throw new BenchmarkException("Error Running Query");
-                }
+        List<Integer> orderKeys = new ArrayList<>();
+        List<String> lineStatuses = new ArrayList<>();
+        List<Double> quantities = new ArrayList<>();
+        List<Integer> partKeys = new ArrayList<>();
+        List<String> restRow = new ArrayList<>();
 
 
-	        query = "select * from LINEITEM_LINESTATUS where BUCKET =?";
-                try {
-                    PreparedStatement stmt = connection.prepareStatement(query);
-                    stmt.setInt(1, 1);
-                    ResultSet rs = stmt.executeQuery();
-                    while(rs.next()) {
-			sids.add(rs.getInt(1));
-                        lineStatuses.add(rs.getString(2));
-                    }
-                    rs.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    throw new BenchmarkException("Error Running Query");
-                }
-
-		query = "select * from LINEITEM_QUANTITY where BUCKET =?";
-                try {
-                    PreparedStatement stmt = connection.prepareStatement(query);
-                    stmt.setInt(1, 1);
-                    ResultSet rs = stmt.executeQuery();
-                    while(rs.next()) {
-			qids.add(rs.getInt(1));
-                        quantities.add(rs.getDouble(2));
-                    }
-                    rs.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    throw new BenchmarkException("Error Running Query");
-                }
-
-		reader = new BufferedReader(new FileReader("/mnt/bucket_2m_1.csv"));
-                count = 1;
-                bucket = 1;
-                line = reader.readLine();
-                while(line!=null){
-                	line = reader.readLine();
-                	if (line==null) break;
-                stmt.setInt(1, count);
-                stmt.setDouble(2, Float.parseFloat(line));
-                stmt.setInt(3, bucket);
-                stmt.executeUpdate();
-                count += 1;
-                if (count%BUCKET_SIZE == 0) bucket += 1;
+        String query = "select * from LINEITEM_ORDER_KEY where BUCKET =?";
+        try {
+            PreparedStatement stmt = connection.prepareStatement(query);
+            stmt.setInt(1, 1);
+            ResultSet rs = stmt.executeQuery();
+            int id;
+            while (rs.next()) {
+                id = rs.getInt(1);
+                oids.add(id);
+                orderKeys.add(rs.getInt(2));
             }
+            rs.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new BenchmarkException("Error Running Query");
+        }
 
 
+        query = "select * from LINEITEM_LINESTATUS where BUCKET =?";
+        try {
+            PreparedStatement stmt = connection.prepareStatement(query);
+            stmt.setInt(1, 1);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                sids.add(rs.getInt(1));
+                lineStatuses.add(rs.getString(2));
+            }
+            rs.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new BenchmarkException("Error Running Query");
+        }
+
+        query = "select * from LINEITEM_QUANTITY where BUCKET =?";
+        try {
+            PreparedStatement stmt = connection.prepareStatement(query);
+            stmt.setInt(1, 1);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                qids.add(rs.getInt(1));
+                quantities.add(rs.getDouble(2));
+            }
+            rs.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new BenchmarkException("Error Running Query");
+        }
 
         try {
-          RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(6));
-	  for(int i=0; i<oids.size(); i++) {
-		if (orderKeys.get(i)==1) {
-			StringBuilder line = new StringBuilder("");
-			line.append(oids.get(i)).append("\t");
-			line.append(orderKeys.get(i)).append("\t");
-			for (int j=0; j<qids.size();j++) {
-                                if (qids.get(j) == oids.get(i) && quantities.get(j) == 36.0) {
-					line.append(quantities.get(j)).append("\t");
-					for (int k=0; j<sids.size();j++) {
-                                		if (sids.get(j) == oids.get(i) && lineStatuses.get(j).equals("O")) 
-							line.append(lineStatuses.get(j)).append("\t");
-                        		}
-                        		writer.writeString(line.toString());
-				}
-                        }
-
-		}
-	  }
-	  writer.close();
+            BufferedReader reader = new BufferedReader(new FileReader("/mnt/bucket_2m_1.csv"));
+            String line = reader.readLine();
+            while (line != null) {
+                String data[] = line.split(",", 3);
+                rids.add(Integer.parseInt(data[0]));
+                partKeys.add(Integer.parseInt(data[1]));
+                restRow.add(data[2]);
+                line = reader.readLine();
+            }
         } catch (Exception e) {
-                e.printStackTrace();
+            e.printStackTrace();
+            throw new BenchmarkException("Error Running Query");
         }
 
+        try {
+            RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(6));
+            for (int i = 0; i < oids.size(); i++) {
+                if (orderKeys.get(i) == 1) {
+                    StringBuilder line = new StringBuilder("");
+                    line.append(oids.get(i)).append("\t");
+                    line.append(orderKeys.get(i)).append("\t");
+                    for (int j = 0; j < qids.size(); j++) {
+                        if (qids.get(j) == oids.get(i) && quantities.get(j) == 36.0) {
+                            line.append(quantities.get(j)).append("\t");
+                            for (int k = 0; k < rids.size(); k++) {
+                                if (rids.get(k) == oids.get(i) && partKeys.get(k) == 673091) {
+                                    line.append(partKeys.get(k)).append("\t")
+                                            .append(restRow.get(k)).append("\t");
+                                    for (int l = 0; l < sids.size(); l++) {
+                                        if (sids.get(l) == oids.get(i)) {
+                                            line.append(lineStatuses.get(l)).append("\t");
+                                            writer.writeString(line.toString());
+                                        }
+                                    }
+                                }
 
-	/*
-	try {
-	RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(4));
-        for(int i=0; i<ids.size(); i++) {
-             if (writeOutput) {
-                StringBuilder line = new StringBuilder("");
-                line.append(ids.get(i)).append("\t")
-			.append(orderKeys.get(i)).append("\t")
-			.append(lineStatuses.get(i)).append("\t")
-			.append(quantities.get(i));
-                writer.writeString(line.toString());
+                            }
+
+                        }
+                    }
+
                 }
+            }
+            writer.close();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        writer.close();
-	} catch (Exception e) {
-		e.printStackTrace();
-	}*/
 
-	Instant end = Instant.now();
+        Instant end = Instant.now();
         return Duration.between(start, end);
 
     }
 
     @Override
     public Duration runQuery7(String startLocation, String endLocation, Date date) throws BenchmarkException {
-    	    	Instant start = Instant.now();
+        Instant start = Instant.now();
      /*	List<Integer> ids = new ArrayList<>();
 	
 	List<Integer> oids = new ArrayList<>();
@@ -706,25 +546,24 @@ public class SQLServerQueryManager extends BaseQueryManager{
         }*/
 
 
-
-	Instant end = Instant.now();
+        Instant end = Instant.now();
         return Duration.between(start, end);
 
     }
 
     @Override
     public Duration runQuery8(String userId, Date date) throws BenchmarkException {
-	return Duration.ZERO;
+        return Duration.ZERO;
     }
 
     @Override
     public Duration runQuery9(String userId, String infraTypeName) throws BenchmarkException {
-	return Duration.ZERO;
+        return Duration.ZERO;
     }
 
     @Override
     public Duration runQuery10(Date startTime, Date endTime) throws BenchmarkException {
-    	return Duration.ZERO;
+        return Duration.ZERO;
     }
 
     @Override
