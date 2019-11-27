@@ -184,8 +184,8 @@
                         </goals>
                     </execution>
                 </executions>
-                <configuration>
-                    <mainClass>edu.uci.ics.tippers.execution.Benchmark</mainClass>
+		<configuration>
+			<mainClass>edu.uci.ics.tippers.execution.Benchmark</mainClass>
 
                 </configuration>
             </plugin>

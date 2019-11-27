@@ -94,7 +94,7 @@ public class SQLServerConnectionManager extends BaseConnectionManager {
             connection = DriverManager.getConnection(
                     String.format("jdbc:sqlserver://%s:%s;databaseName=%s;columnEncryptionSetting=Enabled;" +
                                     "keyStoreAuthentication=JavaKeyStorePassword;" +
-                                    "keyStoreLocation=/opt/mssql-tools/bin/keystore.jks;keyStoreSecret=mypassword;",
+                                    "keyStoreLocation=/home/sgx_admin/keystore.jks;keyStoreSecret=mypassword;",
                             SERVER, PORT, DATABASE), USER, PASSWORD);
 
             return connection;

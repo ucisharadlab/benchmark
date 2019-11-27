@@ -26,7 +26,7 @@ public class SQLServerQueryManager extends BaseQueryManager{
 
     public SQLServerQueryManager(int mapping, String queriesDir, String outputDir, boolean writeOutput, long timeout) {
         super(mapping, queriesDir, outputDir, writeOutput, timeout);
-        connection = SQLServerConnectionManager.getInstance().getConnection();
+        connection = SQLServerConnectionManager.getInstance().getEncryptedConnection();
     }
 
     // For External Database (CrateDB) Usage
@@ -43,10 +43,10 @@ public class SQLServerQueryManager extends BaseQueryManager{
             ResultSet rs = stmt.executeQuery();
             ResultSetMetaData rsmd = rs.getMetaData();
             int columnsNumber = rsmd.getColumnCount();
-
+            
             RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(queryNum));
             while(rs.next()) {
-                if (writeOutput) {
+		    if (writeOutput) {
                     StringBuilder line = new StringBuilder("");
                     for(int i = 1; i <= columnsNumber; i++)
                         line.append(rs.getString(i)).append("\t");
@@ -78,11 +78,11 @@ public class SQLServerQueryManager extends BaseQueryManager{
     public Duration runQuery1(String sensorId) throws BenchmarkException {
         switch (mapping) {
             case 1:
-            case 2:
-                String query = "SELECT name FROM SENSOR WHERE id=?";
+            case 3:
+                String query = "select * from LINEITEM_QUANTITY where ID=?";
                 try {
                     PreparedStatement stmt = connection.prepareStatement(query);
-                    stmt.setString(1, sensorId);
+		    stmt.setInt(1, 1240);
                     return runTimedQuery(stmt, 1);
                 } catch (SQLException e) {
                     e.printStackTrace();
@@ -97,16 +97,11 @@ public class SQLServerQueryManager extends BaseQueryManager{
     public Duration runQuery2(String sensorTypeName, List<String> locationIds) throws BenchmarkException {
         switch (mapping) {
             case 1:
-            case 2:
-                String query = "SELECT sen.name FROM SENSOR sen, SENSOR_TYPE st, " +
-                        "COVERAGE_INFRASTRUCTURE ci WHERE sen.SENSOR_TYPE_ID=st.id AND st.name=? " +
-                        "AND sen.id=ci.SENSOR_ID AND ci.INFRASTRUCTURE_ID=ANY(?)";
+            case 3:
+                String query = "select * from LINEITEM_ORDER_KEY where L_ORDERKEY =?";
                 try {
                     PreparedStatement stmt = connection.prepareStatement(query);
-                    stmt.setString(1, sensorTypeName);
-
-                    Array locationsArray = connection.createArrayOf("VARCHAR", locationIds.toArray());
-                    stmt.setArray(2, locationsArray);
+		    stmt.setInt(1, 1248);
                     return runTimedQuery(stmt, 2);
                 } catch (SQLException e) {
                     e.printStackTrace();
@@ -121,49 +116,18 @@ public class SQLServerQueryManager extends BaseQueryManager{
     public Duration runQuery3(String sensorId, Date startTime, Date endTime) throws BenchmarkException {
         switch (mapping) {
             case 1:
-                String query = "SELECT timeStamp, payload FROM OBSERVATION WHERE timestamp>? AND timestamp<? " +
-                        "AND SENSOR_ID=?";
-                try {
-                    PreparedStatement stmt = connection.prepareStatement(query);
-                    stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
-                    stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
-                    stmt.setString(3, sensorId);
-
-                    return runTimedQuery(stmt, 3);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    throw new BenchmarkException("Error Running Query");
-                }
-            case 2:
-                query = "SELECT SENSOR_TYPE_ID FROM SENSOR WHERE ID=?";
+            case 3:
+                String query = "select * from LINEITEM_LINESTATUS where ID =?";
                 try {
                     Instant start = Instant.now();
                     PreparedStatement stmt = connection.prepareStatement(query);
-                    stmt.setString(1, sensorId);
+		    stmt.setInt(1, 1240);
                     ResultSet rs = stmt.executeQuery();
                     String typeId = null;
                     while(rs.next()) {
                         typeId = rs.getString(1);
                     }
                     rs.close();
-
-                    if ("Thermometer".equals(typeId))
-                        query = "SELECT timeStamp, temperature FROM ThermometerObservation  WHERE timestamp>? AND timestamp<? " +
-                                "AND SENSOR_ID=?";
-                    else if ("WeMo".equals(typeId))
-                        query = "SELECT timeStamp, currentMilliWatts, onTodaySeconds FROM WeMoObservation  WHERE timestamp>? AND timestamp<? " +
-                                "AND SENSOR_ID=?";
-                    else if ("WiFiAP".equals(typeId))
-                        query = "SELECT timeStamp, clientId FROM WiFiAPObservation  WHERE timestamp>? AND timestamp<? " +
-                                "AND SENSOR_ID=?";
-
-                    stmt = connection.prepareStatement(query);
-                    stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
-                    stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
-                    stmt.setString(3, sensorId);
-
-                    runTimedQuery(stmt, 3);
-
                     Instant end = Instant.now();
                     return Duration.between(start, end);
                 } catch (SQLException e) {
@@ -177,433 +141,590 @@ public class SQLServerQueryManager extends BaseQueryManager{
 
     @Override
     public Duration runQuery4(List<String> sensorIds, Date startTime, Date endTime) throws BenchmarkException {
-        switch (mapping) {
-            case 1:
-                String query = "SELECT timeStamp, payload FROM OBSERVATION WHERE timestamp>? AND timestamp<? " +
-                        "AND SENSOR_ID = ANY(?)";
-                try {
+    	Instant start = Instant.now();
+	List<Integer> ids = new ArrayList<>();
+	
+	List<Integer> oids = new ArrayList<>();
+	List<Integer> sids = new ArrayList<>();
+	List<Integer> qids = new ArrayList<>();
+	
+	List<Integer> orderKeys = new ArrayList<>();
+	List<String> lineStatuses = new ArrayList<>();
+	List<Double> quantities = new ArrayList<>();
+
+	/*for (int i=1; i<=2790; i++) {
+	       String query = "select * from LINEITEM_ORDER_KEY where L_ORDERKEY =?";
+               try {
                     PreparedStatement stmt = connection.prepareStatement(query);
-                    stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
-                    stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
-
-                    Array sensorIdArray = connection.createArrayOf("VARCHAR", sensorIds.toArray());
-                    stmt.setArray(3, sensorIdArray);
-
-                    return runTimedQuery(stmt, 4);
+                    stmt.setInt(1, i);
+                    ResultSet rs = stmt.executeQuery();
+		    int id;
+		    while(rs.next()) {
+                        id = rs.getInt(1);
+			ids.add(id);
+			orderKeys.add(rs.getInt(2));
+                    }
+		    rs.close();
                 } catch (SQLException e) {
                     e.printStackTrace();
                     throw new BenchmarkException("Error Running Query");
                 }
-            case 2:
-                query = "SELECT ID, SENSOR_TYPE_ID FROM SENSOR WHERE ID=ANY(?)";
-                try {
-                    Instant start = Instant.now();
+	}
+	for (Integer id: ids) {
+		String query = "select * from LINEITEM_LINESTATUS where ID =?";
+		try {
                     PreparedStatement stmt = connection.prepareStatement(query);
-                    Array sensorIdArray = connection.createArrayOf("VARCHAR", sensorIds.toArray());
-                    stmt.setArray(1, sensorIdArray);
-
+                    stmt.setInt(1, id);
                     ResultSet rs = stmt.executeQuery();
-                    String typeId = null;
-                    List<String> wifiSensors = new ArrayList<>();
-                    List<String> wemoSensors = new ArrayList<>();
-                    List<String> thermoSensors = new ArrayList<>();
-
                     while(rs.next()) {
-                        typeId = rs.getString(2);
-                        if ("Thermometer".equals(typeId))
-                            thermoSensors.add(rs.getString(1));
-                        else if ("WeMo".equals(typeId))
-                            wemoSensors.add(rs.getString(1));
-                        else if ("WiFiAP".equals(typeId))
-                            wifiSensors.add(rs.getString(1));
+                        lineStatuses.add(rs.getString(2));
+                    }
+		    rs.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
+
+	}
+
+	for (Integer id: ids) {
+                String query = "select * from LINEITEM_QUANTITY where ID =?";
+                try {
+                    PreparedStatement stmt = connection.prepareStatement(query);
+                    stmt.setInt(1, id);
+                    ResultSet rs = stmt.executeQuery();
+                    while(rs.next()) {
+                        quantities.add(rs.getDouble(2));
+                    }
+		    rs.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
+
+        }*/
+
+	       String query = "select * from LINEITEM_ORDER_KEY where BUCKET =?";
+               try {
+                    PreparedStatement stmt = connection.prepareStatement(query);
+                    stmt.setInt(1, 1);
+                    ResultSet rs = stmt.executeQuery();
+                    int id;
+                    while(rs.next()) {
+                        id = rs.getInt(1);
+                        oids.add(id);
+                        orderKeys.add(rs.getInt(2));
                     }
                     rs.close();
-
-                    if (!thermoSensors.isEmpty()) {
-                        query = "SELECT timeStamp, temperature FROM ThermometerObservation  WHERE timestamp>? AND timestamp<? " +
-                                "AND SENSOR_ID=ANY(?)";
-                        stmt = connection.prepareStatement(query);
-                        stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
-                        stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
-
-                        sensorIdArray = connection.createArrayOf("VARCHAR", thermoSensors.toArray());
-                        stmt.setArray(3, sensorIdArray);
-                        runTimedQuery(stmt, 4);
-                    }
-                    if (!wemoSensors.isEmpty()) {
-                        query = "SELECT timeStamp, currentMilliWatts, onTodaySeconds FROM WeMoObservation  WHERE timestamp>? AND timestamp<? " +
-                                "AND SENSOR_ID=ANY(?)";
-                        stmt = connection.prepareStatement(query);
-                        stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
-                        stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
-
-                        sensorIdArray = connection.createArrayOf("VARCHAR", wemoSensors.toArray());
-                        stmt.setArray(3, sensorIdArray);
-                        runTimedQuery(stmt, 4);
-                    }
-                    if (!wifiSensors.isEmpty()) {
-                        query = "SELECT timeStamp, clientId FROM WiFiAPObservation  WHERE timestamp>? AND timestamp<? " +
-                                "AND SENSOR_ID=ANY(?)";
-                        stmt = connection.prepareStatement(query);
-                        stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
-                        stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
-
-                        sensorIdArray = connection.createArrayOf("VARCHAR", wifiSensors.toArray());
-                        stmt.setArray(3, sensorIdArray);
-                        runTimedQuery(stmt, 4);
-                    }
-
-                    Instant end = Instant.now();
-                    return Duration.between(start, end);
                 } catch (SQLException e) {
                     e.printStackTrace();
                     throw new BenchmarkException("Error Running Query");
                 }
-            default:
-                throw new BenchmarkException("No Such Mapping");
+
+
+	        query = "select * from LINEITEM_LINESTATUS where BUCKET =?";
+                try {
+                    PreparedStatement stmt = connection.prepareStatement(query);
+                    stmt.setInt(1, 1);
+                    ResultSet rs = stmt.executeQuery();
+                    while(rs.next()) {
+			sids.add(rs.getInt(1));
+                        lineStatuses.add(rs.getString(2));
+                    }
+                    rs.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
+
+		query = "select * from LINEITEM_QUANTITY where BUCKET =?";
+                try {
+                    PreparedStatement stmt = connection.prepareStatement(query);
+                    stmt.setInt(1, 1);
+                    ResultSet rs = stmt.executeQuery();
+                    while(rs.next()) {
+			qids.add(rs.getInt(1));
+                        quantities.add(rs.getDouble(2));
+                    }
+                    rs.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
+
+        try {
+          RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(4));
+	  for(int i=0; i<oids.size(); i++) {
+		if (orderKeys.get(i)==1) {
+			StringBuilder line = new StringBuilder("");
+			line.append(oids.get(i)).append("\t");
+			line.append(orderKeys.get(i)).append("\t");
+			for (int j=0; j<sids.size();j++) {
+				if (sids.get(j) == oids.get(i)) line.append(lineStatuses.get(j)).append("\t");
+			}
+			for (int j=0; j<qids.size();j++) {
+                                if (qids.get(j) == oids.get(i)) line.append(quantities.get(j)).append("\t");
+                        }
+			writer.writeString(line.toString());
+		}
+	  }
+	  writer.close();
+        } catch (Exception e) {
+                e.printStackTrace();
         }
+
+
+	/*
+	try {
+	RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(4));
+        for(int i=0; i<ids.size(); i++) {
+             if (writeOutput) {
+                StringBuilder line = new StringBuilder("");
+                line.append(ids.get(i)).append("\t")
+			.append(orderKeys.get(i)).append("\t")
+			.append(lineStatuses.get(i)).append("\t")
+			.append(quantities.get(i));
+                writer.writeString(line.toString());
+                }
+        }
+        writer.close();
+	} catch (Exception e) {
+		e.printStackTrace();
+	}*/
+
+	Instant end = Instant.now();
+        return Duration.between(start, end);
+
     }
 
     @Override
     public Duration runQuery5(String sensorTypeName, Date startTime, Date endTime, String payloadAttribute,
                               Object startPayloadValue, Object endPayloadValue) throws BenchmarkException {
-        switch (mapping) {
-            case 1:
-                String query = String.format("SELECT timeStamp, payload FROM OBSERVATION o, SENSOR s, SENSOR_TYPE st  " +
-                                "WHERE s.id = o.sensor_id AND s.sensor_type_id=st.id AND st.name=? AND " +
-                                "timestamp>? AND timestamp<? AND (payload::json ->> '%s')::int >= ? AND (payload::json ->> '%s')::int <= ? ",
-                        payloadAttribute, payloadAttribute);
-                try {
-                    PreparedStatement stmt = connection.prepareStatement(query);
+    	Instant start = Instant.now();
+	List<Integer> ids = new ArrayList<>();
+	
+	List<Integer> oids = new ArrayList<>();
+	List<Integer> sids = new ArrayList<>();
+	List<Integer> qids = new ArrayList<>();
+	
+	List<Integer> orderKeys = new ArrayList<>();
+	List<String> lineStatuses = new ArrayList<>();
+	List<Double> quantities = new ArrayList<>();
 
-                    stmt.setString(1, sensorTypeName);
-                    stmt.setTimestamp(2, new Timestamp(startTime.getTime()));
-                    stmt.setTimestamp(3, new Timestamp(endTime.getTime()));
-                    if (startPayloadValue instanceof  Integer) {
-                        stmt.setInt(4, (Integer) startPayloadValue);
-                        stmt.setInt(5, (Integer) endPayloadValue);
-                    } else if (startPayloadValue instanceof  Double) {
-                        stmt.setDouble(4, (Double) startPayloadValue);
-                        stmt.setDouble(5, (Double) endPayloadValue);
+	/*for (int i=1; i<=2790; i++) {
+	       String query = "select * from LINEITEM_ORDER_KEY where L_ORDERKEY =?";
+               try {
+                    PreparedStatement stmt = connection.prepareStatement(query);
+                    stmt.setInt(1, i);
+                    ResultSet rs = stmt.executeQuery();
+		    int id;
+		    while(rs.next()) {
+                        id = rs.getInt(1);
+			ids.add(id);
+			orderKeys.add(rs.getInt(2));
                     }
-                    return runTimedQuery(stmt, 5);
+		    rs.close();
                 } catch (SQLException e) {
                     e.printStackTrace();
                     throw new BenchmarkException("Error Running Query");
                 }
-            case 2:
-                query = String.format("SELECT * FROM %sOBSERVATION o " +
-                                "WHERE timestamp>? AND timestamp<? AND %s>=? AND %s<=?", sensorTypeName,
-                        payloadAttribute, payloadAttribute);
-                try {
+	}
+	for (Integer id: ids) {
+		String query = "select * from LINEITEM_LINESTATUS where ID =?";
+		try {
                     PreparedStatement stmt = connection.prepareStatement(query);
-
-                    stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
-                    stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
-                    if (startPayloadValue instanceof  Integer) {
-                        stmt.setInt(3, (Integer) startPayloadValue);
-                        stmt.setInt(4, (Integer) endPayloadValue);
-                    } else if (startPayloadValue instanceof  Double) {
-                        stmt.setDouble(3, (Double) startPayloadValue);
-                        stmt.setDouble(4, (Double) endPayloadValue);
+                    stmt.setInt(1, id);
+                    ResultSet rs = stmt.executeQuery();
+                    while(rs.next()) {
+                        lineStatuses.add(rs.getString(2));
                     }
-                    return runTimedQuery(stmt, 5);
-                } catch (SQLException  e) {
+		    rs.close();
+                } catch (SQLException e) {
                     e.printStackTrace();
                     throw new BenchmarkException("Error Running Query");
                 }
-            default:
-                throw new BenchmarkException("No Such Mapping");
+
+	}
+
+	for (Integer id: ids) {
+                String query = "select * from LINEITEM_QUANTITY where ID =?";
+                try {
+                    PreparedStatement stmt = connection.prepareStatement(query);
+                    stmt.setInt(1, id);
+                    ResultSet rs = stmt.executeQuery();
+                    while(rs.next()) {
+                        quantities.add(rs.getDouble(2));
+                    }
+		    rs.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
+
+        }*/
+
+	       String query = "select * from LINEITEM_ORDER_KEY where BUCKET =?";
+               try {
+                    PreparedStatement stmt = connection.prepareStatement(query);
+                    stmt.setInt(1, 1);
+                    ResultSet rs = stmt.executeQuery();
+                    int id;
+                    while(rs.next()) {
+                        id = rs.getInt(1);
+                        oids.add(id);
+                        orderKeys.add(rs.getInt(2));
+                    }
+                    rs.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
+
+
+	        query = "select * from LINEITEM_LINESTATUS where BUCKET =?";
+                try {
+                    PreparedStatement stmt = connection.prepareStatement(query);
+                    stmt.setInt(1, 1);
+                    ResultSet rs = stmt.executeQuery();
+                    while(rs.next()) {
+			sids.add(rs.getInt(1));
+                        lineStatuses.add(rs.getString(2));
+                    }
+                    rs.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
+
+		query = "select * from LINEITEM_QUANTITY where BUCKET =?";
+                try {
+                    PreparedStatement stmt = connection.prepareStatement(query);
+                    stmt.setInt(1, 1);
+                    ResultSet rs = stmt.executeQuery();
+                    while(rs.next()) {
+			qids.add(rs.getInt(1));
+                        quantities.add(rs.getDouble(2));
+                    }
+                    rs.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
+
+        try {
+          RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(5));
+	  for(int i=0; i<oids.size(); i++) {
+		if (orderKeys.get(i)==1) {
+			StringBuilder line = new StringBuilder("");
+			line.append(oids.get(i)).append("\t");
+			line.append(orderKeys.get(i)).append("\t");
+			for (int j=0; j<qids.size();j++) {
+                                if (qids.get(j) == oids.get(i) && quantities.get(j) == 36.0) {
+					line.append(quantities.get(j)).append("\t");
+					for (int k=0; j<sids.size();j++) {
+                                		if (sids.get(j) == oids.get(i)) line.append(lineStatuses.get(j)).append("\t");
+                        		}
+                        		writer.writeString(line.toString());
+				}
+                        }
+
+		}
+	  }
+	  writer.close();
+        } catch (Exception e) {
+                e.printStackTrace();
         }
+
+
+	/*
+	try {
+	RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(4));
+        for(int i=0; i<ids.size(); i++) {
+             if (writeOutput) {
+                StringBuilder line = new StringBuilder("");
+                line.append(ids.get(i)).append("\t")
+			.append(orderKeys.get(i)).append("\t")
+			.append(lineStatuses.get(i)).append("\t")
+			.append(quantities.get(i));
+                writer.writeString(line.toString());
+                }
+        }
+        writer.close();
+	} catch (Exception e) {
+		e.printStackTrace();
+	}*/
+
+	Instant end = Instant.now();
+        return Duration.between(start, end);
+
     }
 
     @Override
     public Duration runQuery6(List<String> sensorIds, Date startTime, Date endTime) throws BenchmarkException {
-        switch (mapping) {
-            case 1:
-                String query = "SELECT obs.sensor_id, avg(counts) FROM " +
-                        "(SELECT sensor_id, date_trunc('day', timestamp), " +
-                        "count(*) as counts " +
-                        "FROM OBSERVATION WHERE timestamp>? AND timestamp<? " +
-                        "AND SENSOR_ID = ANY(?) GROUP BY sensor_id, date_trunc('day', timestamp)) " +
-                        "AS obs GROUP BY sensor_id";
-                try {
+    	   	Instant start = Instant.now();
+	List<Integer> ids = new ArrayList<>();
+	
+	List<Integer> oids = new ArrayList<>();
+	List<Integer> sids = new ArrayList<>();
+	List<Integer> qids = new ArrayList<>();
+	
+	List<Integer> orderKeys = new ArrayList<>();
+	List<String> lineStatuses = new ArrayList<>();
+	List<Double> quantities = new ArrayList<>();
+
+	/*for (int i=1; i<=2790; i++) {
+	       String query = "select * from LINEITEM_ORDER_KEY where L_ORDERKEY =?";
+               try {
                     PreparedStatement stmt = connection.prepareStatement(query);
-                    stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
-                    stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
-
-                    Array sensorIdArray = connection.createArrayOf("VARCHAR", sensorIds.toArray());
-                    stmt.setArray(3, sensorIdArray);
-
-                    return runTimedQuery(stmt, 6);
+                    stmt.setInt(1, i);
+                    ResultSet rs = stmt.executeQuery();
+		    int id;
+		    while(rs.next()) {
+                        id = rs.getInt(1);
+			ids.add(id);
+			orderKeys.add(rs.getInt(2));
+                    }
+		    rs.close();
                 } catch (SQLException e) {
                     e.printStackTrace();
                     throw new BenchmarkException("Error Running Query");
                 }
-            case 2:
-                query = "SELECT ID, SENSOR_TYPE_ID FROM SENSOR WHERE ID=ANY(?)";
-                try {
-                    Instant start = Instant.now();
+	}
+	for (Integer id: ids) {
+		String query = "select * from LINEITEM_LINESTATUS where ID =?";
+		try {
                     PreparedStatement stmt = connection.prepareStatement(query);
-                    Array sensorIdArray = connection.createArrayOf("VARCHAR", sensorIds.toArray());
-                    stmt.setArray(1, sensorIdArray);
-
+                    stmt.setInt(1, id);
                     ResultSet rs = stmt.executeQuery();
-                    String typeId = null;
-                    List<String> wifiSensors = new ArrayList<>();
-                    List<String> wemoSensors = new ArrayList<>();
-                    List<String> thermoSensors = new ArrayList<>();
-
                     while(rs.next()) {
-                        typeId = rs.getString(2);
-                        if ("Thermometer".equals(typeId))
-                            thermoSensors.add(rs.getString(1));
-                        else if ("WeMo".equals(typeId))
-                            wemoSensors.add(rs.getString(1));
-                        else if ("WiFiAP".equals(typeId))
-                            wifiSensors.add(rs.getString(1));
+                        lineStatuses.add(rs.getString(2));
+                    }
+		    rs.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
+
+	}
+
+	for (Integer id: ids) {
+                String query = "select * from LINEITEM_QUANTITY where ID =?";
+                try {
+                    PreparedStatement stmt = connection.prepareStatement(query);
+                    stmt.setInt(1, id);
+                    ResultSet rs = stmt.executeQuery();
+                    while(rs.next()) {
+                        quantities.add(rs.getDouble(2));
+                    }
+		    rs.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
+
+        }*/
+
+	       String query = "select * from LINEITEM_ORDER_KEY where BUCKET =?";
+               try {
+                    PreparedStatement stmt = connection.prepareStatement(query);
+                    stmt.setInt(1, 1);
+                    ResultSet rs = stmt.executeQuery();
+                    int id;
+                    while(rs.next()) {
+                        id = rs.getInt(1);
+                        oids.add(id);
+                        orderKeys.add(rs.getInt(2));
                     }
                     rs.close();
-
-                    if (!thermoSensors.isEmpty()) {
-                        query = "SELECT obs.sensor_id, avg(counts) FROM " +
-                                "(SELECT sensor_id, date_trunc('day', timestamp), " +
-                                "count(*) as counts " +
-                                "FROM ThermometerObservation WHERE timestamp>? AND timestamp<? " +
-                                "AND SENSOR_ID = ANY(?) GROUP BY sensor_id, date_trunc('day', timestamp)) " +
-                                "AS obs GROUP BY sensor_id";
-                        stmt = connection.prepareStatement(query);
-                        stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
-                        stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
-
-                        sensorIdArray = connection.createArrayOf("VARCHAR", thermoSensors.toArray());
-                        stmt.setArray(3, sensorIdArray);
-                        runTimedQuery(stmt, 6);
-                    }
-                    if (!wemoSensors.isEmpty()) {
-                        query = "SELECT obs.sensor_id, avg(counts) FROM " +
-                                "(SELECT sensor_id, date_trunc('day', timestamp), " +
-                                "count(*) as counts " +
-                                "FROM WeMoObservation WHERE timestamp>? AND timestamp<? " +
-                                "AND SENSOR_ID = ANY(?) GROUP BY sensor_id, date_trunc('day', timestamp)) " +
-                                "AS obs GROUP BY sensor_id";
-                        stmt = connection.prepareStatement(query);
-                        stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
-                        stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
-
-                        sensorIdArray = connection.createArrayOf("VARCHAR", wemoSensors.toArray());
-                        stmt.setArray(3, sensorIdArray);
-                        runTimedQuery(stmt, 6);
-                    }
-                    if (!wifiSensors.isEmpty()) {
-                        query = "SELECT obs.sensor_id, avg(counts) FROM " +
-                                "(SELECT sensor_id, date_trunc('day', timestamp), " +
-                                "count(*) as counts " +
-                                "FROM WiFiAPObservation WHERE timestamp>? AND timestamp<? " +
-                                "AND SENSOR_ID = ANY(?) GROUP BY sensor_id, date_trunc('day', timestamp)) " +
-                                "AS obs GROUP BY sensor_id";
-                        stmt = connection.prepareStatement(query);
-                        stmt.setTimestamp(1, new Timestamp(startTime.getTime()));
-                        stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
-
-                        sensorIdArray = connection.createArrayOf("VARCHAR", wifiSensors.toArray());
-                        stmt.setArray(3, sensorIdArray);
-                        runTimedQuery(stmt, 6);
-                    }
-
-                    Instant end = Instant.now();
-                    return Duration.between(start, end);
                 } catch (SQLException e) {
                     e.printStackTrace();
                     throw new BenchmarkException("Error Running Query");
                 }
-            default:
-                throw new BenchmarkException("No Such Mapping");
+
+
+	        query = "select * from LINEITEM_LINESTATUS where BUCKET =?";
+                try {
+                    PreparedStatement stmt = connection.prepareStatement(query);
+                    stmt.setInt(1, 1);
+                    ResultSet rs = stmt.executeQuery();
+                    while(rs.next()) {
+			sids.add(rs.getInt(1));
+                        lineStatuses.add(rs.getString(2));
+                    }
+                    rs.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
+
+		query = "select * from LINEITEM_QUANTITY where BUCKET =?";
+                try {
+                    PreparedStatement stmt = connection.prepareStatement(query);
+                    stmt.setInt(1, 1);
+                    ResultSet rs = stmt.executeQuery();
+                    while(rs.next()) {
+			qids.add(rs.getInt(1));
+                        quantities.add(rs.getDouble(2));
+                    }
+                    rs.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    throw new BenchmarkException("Error Running Query");
+                }
+
+		reader = new BufferedReader(new FileReader("/mnt/bucket_2m_1.csv"));
+                count = 1;
+                bucket = 1;
+                line = reader.readLine();
+                while(line!=null){
+                	line = reader.readLine();
+                	if (line==null) break;
+                stmt.setInt(1, count);
+                stmt.setDouble(2, Float.parseFloat(line));
+                stmt.setInt(3, bucket);
+                stmt.executeUpdate();
+                count += 1;
+                if (count%BUCKET_SIZE == 0) bucket += 1;
+            }
+
+
+
+        try {
+          RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(6));
+	  for(int i=0; i<oids.size(); i++) {
+		if (orderKeys.get(i)==1) {
+			StringBuilder line = new StringBuilder("");
+			line.append(oids.get(i)).append("\t");
+			line.append(orderKeys.get(i)).append("\t");
+			for (int j=0; j<qids.size();j++) {
+                                if (qids.get(j) == oids.get(i) && quantities.get(j) == 36.0) {
+					line.append(quantities.get(j)).append("\t");
+					for (int k=0; j<sids.size();j++) {
+                                		if (sids.get(j) == oids.get(i) && lineStatuses.get(j).equals("O")) 
+							line.append(lineStatuses.get(j)).append("\t");
+                        		}
+                        		writer.writeString(line.toString());
+				}
+                        }
+
+		}
+	  }
+	  writer.close();
+        } catch (Exception e) {
+                e.printStackTrace();
         }
+
+
+	/*
+	try {
+	RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(4));
+        for(int i=0; i<ids.size(); i++) {
+             if (writeOutput) {
+                StringBuilder line = new StringBuilder("");
+                line.append(ids.get(i)).append("\t")
+			.append(orderKeys.get(i)).append("\t")
+			.append(lineStatuses.get(i)).append("\t")
+			.append(quantities.get(i));
+                writer.writeString(line.toString());
+                }
+        }
+        writer.close();
+	} catch (Exception e) {
+		e.printStackTrace();
+	}*/
+
+	Instant end = Instant.now();
+        return Duration.between(start, end);
+
     }
 
     @Override
     public Duration runQuery7(String startLocation, String endLocation, Date date) throws BenchmarkException {
-        switch(mapping){
-            case 1:
-                String query = "SELECT u.name " +
-                        "FROM SEMANTIC_OBSERVATION s1, SEMANTIC_OBSERVATION s2, SEMANTIC_OBSERVATION_TYPE st, USERS u " +
-                        "WHERE date_trunc('day', s1.timeStamp) = ? AND date_trunc('day', s2.timeStamp) = ? " +
-                        "AND st.name = 'presence' AND st.id = s1.type_id AND st.id = s2.type_id " +
-                        "AND s1.semantic_entity_id = s2.semantic_entity_id " +
-                        "AND s1.payload::json->>'location' = ? AND s2.payload::json->>'location' = ? " +
-                        "AND s1.timeStamp < s2.timeStamp " +
-                        "AND s1.semantic_entity_id = u.id ";
-                try {
-                    PreparedStatement stmt = connection.prepareStatement(query);
-                    stmt.setDate (1, new java.sql.Date(date.getTime()));
-                    stmt.setDate (2, new java.sql.Date(date.getTime()));
-                    stmt.setString(3, startLocation);
-                    stmt.setString(4, endLocation);
+    	    	Instant start = Instant.now();
+     /*	List<Integer> ids = new ArrayList<>();
+	
+	List<Integer> oids = new ArrayList<>();
+	List<Integer> sids = new ArrayList<>();
+	List<Integer> qids = new ArrayList<>();
+	
+	List<Integer> orderKeys = new ArrayList<>();
+	List<String> lineStatuses = new ArrayList<>();
+	List<Double> quantities = new ArrayList<>();
 
-                    return runTimedQuery(stmt, 7);
+
+	       String query = "select * from LINEITEM_ORDER_KEY where BUCKET =?";
+               try {
+                    PreparedStatement stmt = connection.prepareStatement(query);
+                    stmt.setInt(1, 1);
+                    ResultSet rs = stmt.executeQuery();
+                    int id;
+                    while(rs.next()) {
+                        id = rs.getInt(1);
+                        oids.add(id);
+                        orderKeys.add(rs.getInt(2));
+                    }
+                    rs.close();
                 } catch (SQLException e) {
                     e.printStackTrace();
                     throw new BenchmarkException("Error Running Query");
                 }
-            case 2:
-                query = "SELECT u.name " +
-                        "FROM PRESENCE s1, PRESENCE s2, USERS u " +
-                        "WHERE date_trunc('day', s1.timeStamp) = ? AND date_trunc('day', s2.timeStamp) = ? " +
-                        "AND s1.semantic_entity_id = s2.semantic_entity_id " +
-                        "AND s1.location = ? AND s2.location = ? " +
-                        "AND s1.timeStamp < s2.timeStamp " +
-                        "AND s1.semantic_entity_id = u.id ";
+
+
+		query = "select * from LINEITEM_QUANTITY where BUCKET =?";
                 try {
                     PreparedStatement stmt = connection.prepareStatement(query);
-                    stmt.setDate (1, new java.sql.Date(date.getTime()));
-                    stmt.setDate (2, new java.sql.Date(date.getTime()));
-                    stmt.setString(3, startLocation);
-                    stmt.setString(4, endLocation);
-
-                    return runTimedQuery(stmt, 7);
+                    stmt.setInt(1, 1);
+                    ResultSet rs = stmt.executeQuery();
+                    while(rs.next()) {
+			qids.add(rs.getInt(1));
+                        quantities.add(rs.getDouble(2));
+                    }
+                    rs.close();
                 } catch (SQLException e) {
                     e.printStackTrace();
                     throw new BenchmarkException("Error Running Query");
                 }
-            default:
-                throw new BenchmarkException("No Such Mapping");
-        }
+
+        try {
+          RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(7));
+	  for(int i=0; i<oids.size(); i++) {
+		if (orderKeys.get(i)==1) {
+			StringBuilder line = new StringBuilder("");
+			line.append(oids.get(i)).append("\t");
+			line.append(orderKeys.get(i)).append("\t");
+			for (int j=0; j<qids.size();j++) {
+                                if (qids.get(j) == oids.get(i)) {
+					line.append(quantities.get(j)).append("\t");
+                        
+				}
+			writer.writeString(line.toString());
+		}
+	  }
+	  writer.close();
+        } catch (Exception e) {
+                e.printStackTrace();
+        }*/
+
+
+
+	Instant end = Instant.now();
+        return Duration.between(start, end);
+
     }
+
     @Override
     public Duration runQuery8(String userId, Date date) throws BenchmarkException {
-        switch(mapping){
-            case 1:
-                String query = "SELECT u.name, s1.payload " +
-                        "FROM SEMANTIC_OBSERVATION s1, SEMANTIC_OBSERVATION s2, SEMANTIC_OBSERVATION_TYPE st, USERS u " +
-                        "WHERE date_trunc('day', s1.timeStamp) = ? " +
-                        "AND s2.timeStamp = s1.timeStamp " +
-                        "AND st.name = 'presence' AND s1.type_id = s2.type_id AND st.id = s1.type_id  " +
-                        "AND s1.semantic_entity_id = ? AND s1.semantic_entity_id != s2.semantic_entity_id " +
-                        "AND s1.payload::json->>'location' = s2.payload::json->>'location' AND s2.semantic_entity_id = u.id ";
-                try {
-                    PreparedStatement stmt = connection.prepareStatement(query);
-                    stmt.setDate (1, new java.sql.Date(date.getTime()));
-                    stmt.setString(2, userId);
-
-                    return runTimedQuery(stmt, 8);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    throw new BenchmarkException("Error Running Query");
-                }
-
-            case 2:
-                query = "SELECT u.name, s1.location " +
-                        "FROM PRESENCE s1, PRESENCE s2, USERS u " +
-                        "WHERE date_trunc('day', s1.timeStamp) = ? " +
-                        "AND s2.timeStamp = s1.timeStamp " +
-                        "AND s1.semantic_entity_id = ? AND s1.semantic_entity_id != s2.semantic_entity_id " +
-                        "AND s2.semantic_entity_id = u.id AND s1.location = s2.location ";
-                try {
-                    PreparedStatement stmt = connection.prepareStatement(query);
-                    stmt.setDate (1, new java.sql.Date(date.getTime()));
-                    stmt.setString(2, userId);
-
-                    return runTimedQuery(stmt, 8);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    throw new BenchmarkException("Error Running Query");
-                }
-            default:
-                throw new BenchmarkException("No Such Mapping");
-        }
-
+	return Duration.ZERO;
     }
 
     @Override
     public Duration runQuery9(String userId, String infraTypeName) throws BenchmarkException {
-        switch(mapping){
-            case 1:
-                String query = "SELECT Avg(timeSpent) as avgTimeSpent FROM " +
-                        " (SELECT date_trunc('day', so.timeStamp), count(*)*10 as timeSpent " +
-                        "  FROM SEMANTIC_OBSERVATION so, Infrastructure infra, Infrastructure_Type infraType, SEMANTIC_OBSERVATION_TYPE st " +
-                        "  WHERE st.name = 'presence' AND so.type_id = st.id " +
-                        "  AND so.payload::json->>'location' = infra.id " +
-                        "  AND infra.INFRASTRUCTURE_TYPE_ID = infraType.id AND infraType.name = ? " +
-                        "  AND so.semantic_entity_id = ? " +
-                        "  GROUP BY  date_trunc('day', so.timeStamp)) AS timeSpentPerDay";
-
-                try {
-                    PreparedStatement stmt = connection.prepareStatement(query);
-                    stmt.setString (1, infraTypeName);
-                    stmt.setString(2, userId);
-
-                    return runTimedQuery(stmt, 9);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    throw new BenchmarkException("Error Running Query");
-                }
-            case 2:
-                query = "SELECT Avg(timeSpent) as avgTimeSpent FROM " +
-                        " (SELECT date_trunc('day', so.timeStamp), count(*)*10 as timeSpent " +
-                        "  FROM PRESENCE so, Infrastructure infra, Infrastructure_Type infraType " +
-                        "  WHERE so.location = infra.id " +
-                        "  AND infra.INFRASTRUCTURE_TYPE_ID = infraType.id AND infraType.name = ? " +
-                        "  AND so.semantic_entity_id = ? " +
-                        "  GROUP BY  date_trunc('day', so.timeStamp)) AS timeSpentPerDay";
-
-                try {
-                    PreparedStatement stmt = connection.prepareStatement(query);
-                    stmt.setString (1, infraTypeName);
-                    stmt.setString(2, userId);
-
-                    return runTimedQuery(stmt, 9);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    throw new BenchmarkException("Error Running Query");
-                }
-            default:
-                throw new BenchmarkException("No Such Mapping");
-
-        }
-
+	return Duration.ZERO;
     }
 
     @Override
     public Duration runQuery10(Date startTime, Date endTime) throws BenchmarkException {
-        switch(mapping){
-            case 1:
-                String query = "SELECT infra.name, so.timeStamp, so.payload " +
-                        "FROM SEMANTIC_OBSERVATION so, INFRASTRUCTURE infra, SEMANTIC_OBSERVATION_TYPE st " +
-                        "WHERE so.timeStamp > ? AND so.timeStamp < ? " +
-                        "AND so.type_id = 'occupancy' AND so.type_id = st.id AND so.semantic_entity_id = infra.id " +
-                        "ORDER BY so.semantic_entity_id, so.timeStamp";
-
-                try {
-                    PreparedStatement stmt = connection.prepareStatement(query);
-                    stmt.setTimestamp (1, new Timestamp(startTime.getTime()));
-                    stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
-                    return runTimedQuery(stmt, 10);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    throw new BenchmarkException("Error Running Query");
-                }
-            case 2:
-                query = "SELECT infra.name, so.timeStamp, so.occupancy " +
-                        "FROM OCCUPANCY so, INFRASTRUCTURE infra " +
-                        "WHERE so.timeStamp > ? AND so.timeStamp < ? " +
-                        "AND so.semantic_entity_id = infra.id " +
-                        "ORDER BY so.semantic_entity_id, so.timeStamp";
-
-                try {
-                    PreparedStatement stmt = connection.prepareStatement(query);
-                    stmt.setTimestamp (1, new Timestamp(startTime.getTime()));
-                    stmt.setTimestamp(2, new Timestamp(endTime.getTime()));
-                    return runTimedQuery(stmt, 10);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    throw new BenchmarkException("Error Running Query");
-                }
-            default:
-                throw new BenchmarkException("No Such Mapping");
-
-
-        }
+    	return Duration.ZERO;
     }
 
     @Override

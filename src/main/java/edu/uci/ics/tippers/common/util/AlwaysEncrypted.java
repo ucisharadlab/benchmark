@@ -8,7 +8,16 @@ import com.microsoft.sqlserver.jdbc.SQLServerException;
 
 /**
  * This program demonstrates how to create a column encryption key programmatically for the Java Key Store.
- */
+ * Run the following command before executing main method of this class 
+ * keytool -genkeypair -keyalg RSA -alias AlwaysEncryptedKey -keystore keystore.jks -storepass mypassword -validity 360 -keysize 2048 -storetype jks
+ * Create Column Master Key 
+CREATE COLUMN MASTER KEY [JDBCCMK]
+WITH
+(
+    KEY_STORE_PROVIDER_NAME = N'MSSQL_JAVA_KEYSTORE',
+    KEY_PATH = N'AlwaysEncryptedKey'
+)
+*/
 public class AlwaysEncrypted
 {
     // Alias of the key stored in the keystore.
@@ -21,7 +30,7 @@ public class AlwaysEncrypted
     private static String columnEncryptionKey = "JDBCCEK";
 
     // The location of the keystore.
-    private static String keyStoreLocation = "/opt/mssql-tools/bin/keystore.jks";
+    private static String keyStoreLocation = "/home/sgx_admin/keystore.jks";
 
     // The password of the keystore and the key.
     private static char[] keyStoreSecret = "mypassword".toCharArray();
@@ -91,7 +100,7 @@ public class AlwaysEncrypted
     {
         // Create a variable for the connection string.
         String connectionUrl = "jdbc:sqlserver://localhost:1433;" +
-                "databaseName=encrypted_tippersdb;user=sa;password=Peeyush@123;";
+                "databaseName=mediation;user=sa;password=123Peeyush123;";
 
         return connectionUrl;
     }
