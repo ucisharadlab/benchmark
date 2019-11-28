@@ -883,24 +883,24 @@ public class SQLServerQueryManager extends BaseQueryManager {
 
 
         try {
-            RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(4));
+            RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(7));
+            StringBuilder line = new StringBuilder("");
+            double max_ = 0;
             for (int i = 0; i < oids.size(); i++) {
                 if (orderKeys.get(i) == 1) {
-                    StringBuilder line = new StringBuilder("");
-                    line.append(oids.get(i)).append("\t");
-                    line.append(orderKeys.get(i)).append("\t");
-                    double max_ = 0;
+
                     for (int j = 0; j < qids.size(); j++) {
                         if (qids.get(j) == oids.get(i)) {
                             if (quantities.get(j) > max_) {
                                 max_ = quantities.get(j);
                             }
-                            line.append(max_).append("\t");
+
                         }
                     }
-                    writer.writeString(line.toString());
                 }
             }
+            line.append(max_).append("\t");
+            writer.writeString(line.toString());
             writer.close();
         } catch (Exception e) {
             e.printStackTrace();
@@ -977,28 +977,27 @@ public class SQLServerQueryManager extends BaseQueryManager {
 
 
         try {
-            RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(5));
+            RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(7));
+            StringBuilder line = new StringBuilder("");
+            double max_ = 0;
             for (int i = 0; i < oids.size(); i++) {
                 if (orderKeys.get(i) == 1) {
-                    StringBuilder line = new StringBuilder("");
-                    line.append(oids.get(i)).append("\t");
-                    line.append(orderKeys.get(i)).append("\t");
                     for (int k = 0; k < sids.size(); k++) {
                         if (sids.get(k) == oids.get(i) && lineStatuses.get(k).equals("O")) {
-                            double max_ = 10000;
                             for (int j = 0; j < qids.size(); j++) {
                                 if (qids.get(j) == oids.get(i)) {
                                     if (quantities.get(j) > max_) {
                                         max_ = quantities.get(j);
                                     }
-                                    line.append(max_).append("\t");
+
                                 }
                             }
-                            writer.writeString(line.toString());
                         }
                     }
                 }
             }
+            line.append(max_).append("\t");
+            writer.writeString(line.toString());
             writer.close();
         } catch (Exception e) {
             e.printStackTrace();
@@ -1090,24 +1089,23 @@ public class SQLServerQueryManager extends BaseQueryManager {
         }
 
         try {
-            RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(6));
+            RowWriter<String> writer = new RowWriter<>(outputDir, getDatabase(), mapping, getFileFromQuery(7));
+            StringBuilder line = new StringBuilder("");
+            double max_ = 0;
             for (int i = 0; i < oids.size(); i++) {
                 if (orderKeys.get(i) == 1) {
-                    StringBuilder line = new StringBuilder("");
                     for (int j = 0; j < sids.size(); j++) {
                         if (sids.get(j) == oids.get(i) && lineStatuses.get(j).equals("O")) {
                             for (int k = 0; k < rids.size(); k++) {
                                 if (rids.get(k) == oids.get(i) && partKeys.get(k) == 673091) {
-                                    double max_ = 10000;
                                     for (int l = 0; l < qids.size(); l++) {
                                         if (qids.get(l) == oids.get(i)) {
                                             if (quantities.get(l) > max_) {
                                                 max_ = quantities.get(l);
                                             }
-                                            line.append(max_).append("\t");
+
                                         }
                                     }
-                                    writer.writeString(line.toString());
                                 }
 
                             }
@@ -1117,6 +1115,8 @@ public class SQLServerQueryManager extends BaseQueryManager {
 
                 }
             }
+            line.append(max_).append("\t");
+            writer.writeString(line.toString());
             writer.close();
         } catch (Exception e) {
             e.printStackTrace();
