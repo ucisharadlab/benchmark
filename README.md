@@ -21,7 +21,9 @@ data upload and query translation.
 
 Benchmark can be configured to compare a certain set of databases and mappings and other features such as report generation,
 through a configuration file `benchmark.ini` situated at `<$basedir/src/main/resources/`. For each database to be benchmarked 
-update the connection information present at `<$basedir/src/main/resources/$database/$database.properties` file.
+update the connection information present at `<$basedir/src/main/resources/$database/$database.properties` file. To finetune 
+the benchmark further check [this file](https://github.com/ucisharadlab/benchmark/blob/master/src/main/java/edu/uci/ics/tippers/execution/Benchmark.java) and make changes accordingly.
+
 
 
 <h3>Example Configuration file</h3>
