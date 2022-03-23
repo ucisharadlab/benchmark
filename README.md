@@ -20,7 +20,8 @@ For each database we use different mappings to store TIPPERS data. For each such
 data upload and query translation.
 
 Benchmark can be configured to compare a certain set of databases and mappings and other features such as report generation,
-through a configuration file `benchmark.ini` situated at `<$basedir/src/main/resources/`
+through a configuration file `benchmark.ini` situated at `<$basedir/src/main/resources/`. For each database to be benchmarked 
+update the connection information present at `<$basedir/src/main/resources/$database/$database.properties` file.
 
 
 <h3>Example Configuration file</h3>

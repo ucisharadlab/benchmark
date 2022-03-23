@@ -93,15 +93,15 @@ public class Benchmark {
 //            LOGGER.info(Arrays.toString(runTimePerMapping.entrySet().toArray()));
 
             // Running benchmark queries and gathering query runtimes
-//            System.out.println("Running Queries ...");
-//            runTimePerMapping.putAll(queryManager.explainQueries());
-//            LOGGER.info(Arrays.toString(runTimePerMapping.entrySet().toArray()));
+            System.out.println("Running Queries ...");
+            runTimePerMapping.putAll(queryManager.explainQueries());
+            LOGGER.info(Arrays.toString(runTimePerMapping.entrySet().toArray()));
 
             runTimes.put(new ImmutablePair<>(queryManager.getDatabase(), queryManager.getMapping()), runTimePerMapping);
 
             // Cleaning up inserted data and dropping created schema
             System.out.println("Cleaning Up Database, Removing Data And Schema ...\n");
-            //schemaCreator.dropSchema();
+            schemaCreator.dropSchema();
 
             System.out.println("---------------------------------------------------------------\n");
 
